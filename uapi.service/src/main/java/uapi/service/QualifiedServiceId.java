@@ -9,6 +9,7 @@
 
 package uapi.service;
 
+import uapi.GeneralException;
 import uapi.InvalidArgumentException;
 import uapi.common.ArgumentChecker;
 import uapi.common.Pair;
@@ -23,7 +24,7 @@ public class QualifiedServiceId extends Pair<String, String> {
      * The separator used to separate service id and service from
      * Like service@location
      */
-    static final String LOCATION     = "@";
+    public static final String LOCATION     = "@";
 
     /**
      * Indicate the service can be matched any location, normally
@@ -45,6 +46,8 @@ public class QualifiedServiceId extends Pair<String, String> {
         ArgumentChecker.notEmpty(separator, "separator");
         String[] split = combined.split(separator);
         if (split.length == 2) {
+            ArgumentChecker.required(split[0], "id");
+            ArgumentChecker.required(split[1], "from");
             return new QualifiedServiceId(split[0], split[1]);
         } else {
             throw new InvalidArgumentException(
@@ -77,6 +80,7 @@ public class QualifiedServiceId extends Pair<String, String> {
      *
      * @param   qsId
      *          The specific qualified service id
+     * @return  True means it can assign to the qualified service otherwise it can't
      */
     public boolean isAssignTo(QualifiedServiceId qsId) {
         ArgumentChecker.notNull(qsId, "qsId");
@@ -89,11 +93,19 @@ public class QualifiedServiceId extends Pair<String, String> {
         return qsId.getFrom().equals(FROM_ANY);
     }
 
+    /**
+     * Check this qualified service id can be loaded from specific location or not
+     *
+     * @param   from
+     *          The location which can load service
+     * @return  True means the location can load service otherwise it can't
+     */
     public boolean canFrom(final String from) {
         ArgumentChecker.notEmpty(from, "from");
+        if (from.equals(FROM_ANY)) {
+            throw new GeneralException("The location can't be {} - {}", FROM_ANY, from);
+        }
         if (getFrom().equals(FROM_ANY)) {
-            return true;
-        } else if (getFrom().equals(FROM_ANY)) {
             return true;
         } else if (getFrom().equals(from)) {
             return true;
