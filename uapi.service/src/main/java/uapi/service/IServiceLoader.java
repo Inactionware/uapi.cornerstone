@@ -40,13 +40,6 @@ public interface IServiceLoader extends Comparable<IServiceLoader>, IIdentifiabl
      */
     int getPriority();
 
-//    /**
-//     * The name of service loader
-//     *
-//     * @return  The service name
-//     */
-//    String getName();
-
     /**
      * Load service by id and type
      *
