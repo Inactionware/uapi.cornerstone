@@ -23,6 +23,8 @@ allprojects {
         mavenCentral()
         jcenter()
         maven { url "http://dl.bintray.com/typesafe/maven-releases" }
+        maven { url "http://dl.bintray.com/inactionware/maven-snapshot" }
+        maven { url "http://dl.bintray.com/inactionware/maven-release" }
     }
 }
 
