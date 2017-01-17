@@ -55,8 +55,6 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         this._orderedSvcLoaders = new TreeSet<>();
     }
 
-    private volatile boolean _started = false;
-
     @Override
     public String[] getIds() {
         return new String[] { IRegistry.class.getCanonicalName() };
@@ -218,7 +216,6 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             // If the unresolved service is optional then try to load it, if it can't be loaded no error
             loadExternalServices(unsetSvcs);
 
-            this._started = true;
         } catch (Exception ex) {
             this._logger.error(ex);
         }
