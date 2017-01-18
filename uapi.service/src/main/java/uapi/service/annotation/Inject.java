@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
  * Indicate the annotated field can be injected into
  */
 @Target(ElementType.FIELD)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Inject {
 
     /**
