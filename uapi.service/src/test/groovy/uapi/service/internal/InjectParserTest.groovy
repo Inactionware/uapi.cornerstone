@@ -229,6 +229,178 @@ class InjectParserTest extends Specification {
         fieldName   | fieldType | isCollection  | isMap
         'test'      | 'String'  | false         | true
     }
+
+    def 'Test parse on map field element does not implement IIdentifiable'() {
+        given:
+        def collectionTypeElement = Mock(TypeElement)
+        def mapTypeElement = Mock(TypeElement)
+        def collectionType = Mock(DeclaredType)
+        def mapType = Mock(DeclaredType)
+        def classBuilder = Mock(ClassMeta.Builder)
+        classBuilder.findSetterBuilders() >> [Mock(SetterMeta.Builder) {
+            getInjectId() >> 'test'
+            getInjectFrom() >> 'Local'
+            getIsSingle() >> true
+            getName() >> 'name'
+            getInjectType() >> 'String'
+        }]
+        classBuilder.addImplement(_) >> classBuilder
+        classBuilder.addMethodBuilder(_) >> classBuilder
+        def builderCtx = Mock(IBuilderContext) {
+            getElementUtils() >> Mock(Elements) {
+                getTypeElement(Collection.canonicalName) >> collectionTypeElement
+                getTypeElement(Map.canonicalName) >> mapTypeElement
+            }
+            getTypeUtils() >> Mock(Types) {
+                getwildcardType(_, _) >> Mock(WildcardType)
+                getDeclaredType(collectionTypeElement, _) >> collectionType
+                getDeclaredType(mapTypeElement, _, _) >> mapType
+                isAssignable(_, collectionType) >> isCollection
+                isAssignable(_, mapType) >> isMap
+            }
+            findClassBuilder(_) >> classBuilder
+            getBuilders() >> [classBuilder]
+            loadTemplate(_) >> Mock(Template)
+        }
+        def fieldElement = Mock(Element) {
+            getKind() >> ElementKind.FIELD
+            getEnclosingElement() >> Mock(Element) {
+                getSimpleName() >> Mock(Name) {
+                    toString() >> 'className'
+                }
+            }
+            getSimpleName() >> Mock(Name) {
+                toString() >> fieldName
+            }
+            asType() >> Mock(DeclaredType) {
+                toString() >> fieldType
+                getTypeArguments() >> [Mock(TypeMirror) {
+                    toString() >> keyType
+                }, Mock(TypeMirror) {
+                    toString() >> genericType
+                }]
+            }
+            getAnnotation(_) >> {
+                return Test.class.getField('t').getAnnotation(Inject.class)
+            }
+        }
+        def parser = new InjectParser()
+
+        when:
+        parser.parse(builderCtx, [fieldElement] as Set)
+
+        then:
+        thrown(GeneralException)
+
+        where:
+        fieldName   | fieldType | isCollection  | isMap | genericType   | keyType
+        'test'      | 'String'  | false         | true  | 'Integer'     | 'String'
+    }
+
+    def 'Test parse on map field element'() {
+        given:
+        def collectionTypeElement = Mock(TypeElement)
+        def mapTypeElement = Mock(TypeElement)
+        def collectionType = Mock(DeclaredType)
+        def mapType = Mock(DeclaredType)
+        def classBuilder = Mock(ClassMeta.Builder)
+        def keyType = Mock(DeclaredType) {
+            toString() >> kt
+        }
+        def valueType = Mock(DeclaredType) {
+            toString() >> vt
+        }
+        classBuilder.findSetterBuilders() >> [Mock(SetterMeta.Builder) {
+            getInjectId() >> 'test'
+            getInjectFrom() >> 'Local'
+            getIsSingle() >> true
+            getName() >> 'name'
+            getInjectType() >> 'String'
+        }]
+        classBuilder.addImplement(_) >> classBuilder
+        classBuilder.addMethodBuilder(_) >> classBuilder
+        def builderCtx = Mock(IBuilderContext) {
+            getElementUtils() >> Mock(Elements) {
+                getTypeElement(Collection.canonicalName) >> collectionTypeElement
+                getTypeElement(Map.canonicalName) >> mapTypeElement
+            }
+            getTypeUtils() >> Mock(Types) {
+                getwildcardType(_, _) >> Mock(WildcardType)
+                getDeclaredType(collectionTypeElement, _) >> collectionType
+                getDeclaredType(mapTypeElement, _, _) >> mapType
+                isAssignable(_, collectionType) >> isCollection
+                isAssignable(_, mapType) >> isMap
+                isAssignable(valueType, _) >> true
+            }
+            findClassBuilder(_) >> classBuilder
+            getBuilders() >> [classBuilder]
+            loadTemplate(_) >> Mock(Template)
+        }
+        def fieldElement = Mock(Element) {
+            getKind() >> ElementKind.FIELD
+            getEnclosingElement() >> Mock(Element) {
+                getSimpleName() >> Mock(Name) {
+                    toString() >> 'className'
+                }
+            }
+            getSimpleName() >> Mock(Name) {
+                toString() >> fieldName
+            }
+            asType() >> Mock(DeclaredType) {
+                toString() >> fieldType
+                getTypeArguments() >> [keyType, valueType]
+            }
+            getAnnotation(_) >> {
+                return Test.class.getField('t').getAnnotation(Inject.class)
+            }
+        }
+        def parser = new InjectParser()
+
+        when:
+        parser.parse(builderCtx, [fieldElement] as Set)
+
+        then:
+        noExceptionThrown()
+
+        where:
+        fieldName   | fieldType | isCollection  | isMap | vt        | kt
+        'test'      | 'String'  | false         | true  | 'Integer' | 'String'
+    }
+
+    def 'Test add dependency'() {
+        given:
+        def classBuilder = Mock(ClassMeta.Builder)
+        classBuilder.findSetterBuilders() >> [Mock(SetterMeta.Builder) {
+            getInjectId() >> 'test'
+            getInjectFrom() >> 'Local'
+            getIsSingle() >> true
+            getName() >> 'name'
+            getInjectType() >> 'String'
+        }]
+        classBuilder.addImplement(_) >> classBuilder
+        classBuilder.addMethodBuilder(_) >> classBuilder
+        def builderCtx = Mock(IBuilderContext) {
+            loadTemplate() >> Mock(Template)
+            findClassBuilder(_) >> classBuilder
+            getBuilders() >> [classBuilder]
+            loadTemplate(_) >> Mock(Template)
+        }
+        def parser = new InjectParser()
+        def helper = parser.getHelper()
+
+        when:
+        helper.addDependency(builderCtx, classBuilder,
+                fieldName, fieldType,
+                injectId, injectFrom,
+                isCollection, isMap,mapKeyType)
+
+        then:
+        noExceptionThrown()
+
+        where:
+        fieldName   | fieldType | injectId  | injectFrom    | isCollection  | isMap | mapKeyType
+        'name'      | 'String'  | 'id'      | 'Local'       | true          | false | 'Int'
+    }
 }
 
 class Test {
