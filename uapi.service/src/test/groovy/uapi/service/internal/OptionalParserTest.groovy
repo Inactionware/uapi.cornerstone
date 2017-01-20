@@ -9,15 +9,19 @@
 
 package uapi.service.internal
 
+import freemarker.template.Template
 import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.GeneralException
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.LogSupport
+import uapi.codegen.MethodMeta
+import uapi.service.SetterMeta
 
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
+import javax.lang.model.element.Modifier
 import javax.lang.model.element.Name
 
 /**
@@ -25,61 +29,141 @@ import javax.lang.model.element.Name
  */
 class OptionalParserTest extends Specification {
 
-    def 'Test parse non-field element'() {
-        setup:
+    def 'Test create instance'() {
+        when:
+        def parser = new OptionalParser()
+
+        then:
+        noExceptionThrown()
+    }
+
+    def 'Test parse on incorrect element kind'() {
+        given:
         def budrCtx = Mock(IBuilderContext) {
             getLogger() >> Mock(LogSupport)
         }
-        def fieldElmt = Mock(Element) {
-            getKind() >> elementType
+        def element = Mock(Element) {
+            getKind() >> elemKind
             getSimpleName() >> Mock(Name) {
-                toString() >> fieldName
+                toString() >> elemName
             }
         }
-        def elmts = [fieldElmt] as Set
-        OptionalParser parser = new OptionalParser()
+        def parser = new OptionalParser()
 
         when:
-        parser.parse(budrCtx, elmts)
+        parser.parse(budrCtx, [element] as Set)
 
         then:
         thrown(GeneralException)
 
         where:
-        elementType        | fieldName
-        ElementKind.METHOD | 'fieldName'
+        elemKind            | elemName
+        ElementKind.PACKAGE | 'name'
+        ElementKind.CLASS   | 'name'
+        ElementKind.METHOD  | 'name'
+        ElementKind.ENUM    | 'name'
     }
 
-    @Ignore
-    def 'Test parse element'() {
-        setup:
+    def 'Test parse with no setter'() {
+        given:
+        def classBudr = Mock(ClassMeta.Builder) {
+            findSetterBuilders() >> []
+        }
         def budrCtx = Mock(IBuilderContext) {
             getLogger() >> Mock(LogSupport)
-            findClassBuilder(_) >> Mock(ClassMeta.Builder) {
-
-            }
+            findClassBuilder(_) >> classBudr
+            getBuilders() >> [classBudr]
+            loadTemplate(_) >> Mock(Template)
         }
-        def clsElmt = Mock(Element) {
-
-        }
-        def fieldElmt = Mock(Element) {
-            getKind() >> elementType
+        def element = Mock(Element) {
+            getKind() >> ElementKind.FIELD
             getSimpleName() >> Mock(Name) {
-                toString() >> fieldName
+                toString() >> elemName
             }
-            getEnclosingElement() >> clsElmt
+            getModifiers() >> modifiers
+            getEnclosingElement() >> Mock(Element) {
+                getModifiers() >> modifiers
+            }
         }
-        def elmts = [fieldElmt] as Set
-        OptionalParser parser = new OptionalParser()
+        def parser = new OptionalParser()
 
         when:
-        parser.parse(budrCtx, elmts)
+        parser.parse(budrCtx, [element] as Set)
 
         then:
-        thrown(KernelException)
+        noExceptionThrown()
 
         where:
-        elementType         | fieldName
-        ElementKind.FIELD   | 'fieldName'
+        elemName    | modifiers
+        'name'      | [Modifier.PUBLIC] as Set
+    }
+
+    def 'Test parse'() {
+        given:
+        def classBudr = Mock(ClassMeta.Builder)
+        classBudr.findSetterBuilders() >> [Mock(SetterMeta.Builder) {
+            getIsOptional() >> isOptional
+            getInjectId() >> injectId
+            getFieldName() >> elemName
+        }]
+        classBudr.addMethodBuilder(_) >> classBudr
+        classBudr.addAnnotationBuilder(_) >> classBudr
+        def budrCtx = Mock(IBuilderContext) {
+            getLogger() >> Mock(LogSupport)
+            findClassBuilder(_) >> classBudr
+            getBuilders() >> [classBudr]
+            loadTemplate(_) >> Mock(Template)
+        }
+        def element = Mock(Element) {
+            getKind() >> ElementKind.FIELD
+            getSimpleName() >> Mock(Name) {
+                toString() >> elemName
+            }
+            getModifiers() >> modifiers
+            getEnclosingElement() >> Mock(Element) {
+                getModifiers() >> modifiers
+            }
+        }
+        def parser = new OptionalParser()
+
+        when:
+        parser.parse(budrCtx, [element] as Set)
+
+        then:
+        noExceptionThrown()
+
+        where:
+        elemName    | modifiers                 | isOptional    | injectId
+        'name'      | [Modifier.PUBLIC] as Set  | true          | 'ijid'
+    }
+
+    def 'Test helper'() {
+        given:
+        def classBudr = Mock(ClassMeta.Builder)
+        classBudr.findSetterBuilders() >> [Mock(SetterMeta.Builder) {
+            getIsOptional() >> isOptional
+            getInjectId() >> injectId
+            getFieldName() >> elemName
+        }]
+        classBudr.addMethodBuilder(_) >> classBudr
+        classBudr.addAnnotationBuilder(_) >> classBudr
+        def budrCtx = Mock(IBuilderContext) {
+            getLogger() >> Mock(LogSupport)
+            findClassBuilder(_) >> classBudr
+            getBuilders() >> [classBudr]
+            loadTemplate(_) >> Mock(Template)
+        }
+        def parser = new OptionalParser()
+
+        when:
+        def helper = parser.getHelper()
+        helper.setOptional(budrCtx, classBudr, elemName)
+
+        then:
+        helper != null
+
+        where:
+        elemName    | modifiers                 | isOptional    | injectId
+        'name'      | [Modifier.PUBLIC] as Set  | true          | 'ijid'
     }
 }
