@@ -31,8 +31,8 @@ public class InjectableHandler extends AnnotationsHandler {
     private static final Class<? extends Annotation>[] orderedAnnotations =
             new Class[] { Inject.class, Optional.class };
 
-    private final InjectParser _injectParser;
-    private final OptionalParser _optionalParser;
+    private InjectParser _injectParser;
+    private OptionalParser _optionalParser;
 
     private final InjectableHandlerHelper _handlerHelper;
 

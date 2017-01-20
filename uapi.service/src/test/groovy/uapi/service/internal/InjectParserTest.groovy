@@ -401,10 +401,10 @@ class InjectParserTest extends Specification {
         fieldName   | fieldType | injectId  | injectFrom    | isCollection  | isMap | mapKeyType
         'name'      | 'String'  | 'id'      | 'Local'       | true          | false | 'Int'
     }
-}
 
-class Test {
+    class Test {
 
-    @Inject('iid')
-    public String t;
+        @Inject('iid')
+        public String t;
+    }
 }
