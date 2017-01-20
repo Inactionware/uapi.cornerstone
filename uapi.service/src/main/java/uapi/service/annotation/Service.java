@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  * Indicate the annotated class is a service
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Service {
 
     /**

@@ -114,11 +114,13 @@ public final class InitialHandler extends AnnotationsHandler {
             ArgumentChecker.required(methodNames, "methodNames");
 
             Map<String, Object> tempInitModel = classBuilder.createTransienceIfAbsent(MODEL_INIT, HashMap::new);
-            String[] methods = (String[]) tempInitModel.get(VAR_METHODS);
-            List<String> tmpMethods = new ArrayList<>();
-            if (methods == null) {
+            Object existingMethods = tempInitModel.get(VAR_METHODS);
+            String[] methods;
+            if (existingMethods == null) {
                 methods = methodNames;
             } else {
+                methods = (String[]) existingMethods;
+                List<String> tmpMethods = new ArrayList<>();
                 Looper.on(methodNames).foreach(tmpMethods::add);
                 Looper.on(methods).foreach(tmpMethods::add);
                 methods = tmpMethods.toArray(new String[tmpMethods.size()]);
