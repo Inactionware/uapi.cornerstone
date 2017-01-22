@@ -18,4 +18,4 @@
 * uapi.service.spring - Provide ability inject service from Spring framework
 * uapi.service.remote - Provide ability inject remote service via http restful
 * uapi.log - Logging framework
-* uapi.config - Configuration framework
+* uapi.config - uapi.config.Configuration framework

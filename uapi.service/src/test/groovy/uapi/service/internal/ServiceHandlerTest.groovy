@@ -14,6 +14,7 @@ import spock.lang.Specification
 import uapi.GeneralException
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
+import uapi.codegen.LogSupport
 import uapi.service.IServiceHandlerHelper
 import uapi.service.annotation.Service
 
@@ -147,6 +148,7 @@ class ServiceHandlerTest extends Specification {
         def budrCtx = Mock(IBuilderContext) {
             findClassBuilder(classElem) >> classBudr
             loadTemplate(_) >> Mock(Template)
+            getLogger() >> Mock(LogSupport)
         }
         def svcHandler = new ServiceHandler()
 

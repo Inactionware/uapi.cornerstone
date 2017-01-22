@@ -67,6 +67,8 @@ public final class ServiceHandler extends AnnotationsHandler {
             }
             builderCtx.checkModifiers(classElement, Service.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
+            builderCtx.getLogger().info("Start handle annotation {} for class {}",
+                    annotationType, classElement.getSimpleName().toString());
             // Receive service id array
             ClassMeta.Builder classBuilder = builderCtx.findClassBuilder(classElement);
             AnnotationMirror svcAnnoMirror = MoreElements.getAnnotationMirror(classElement, Service.class).get();
@@ -111,6 +113,8 @@ public final class ServiceHandler extends AnnotationsHandler {
                             .addCodeBuilder(CodeMeta.builder()
                                     .setTemplate(tempGetIds)
                                     .setModel(classBuilder.getTransience(MODEL_GET_IDS))));
+            builderCtx.getLogger().info("End handle annotation {} for class {}",
+                    annotationType, classElement.getSimpleName().toString());
         });
     }
 
