@@ -41,7 +41,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     private final SatisfyDecider _satisfyDecider;
     private final Multimap<String, IServiceHolder> _svcRepo;
     private final List<WeakReference<ISatisfyHook>> _satisfyHooks;
-    private final Map<String, IServiceLoader> _svcLoaders;
+    private Map<String, IServiceLoader> _svcLoaders;
     private final SortedSet<IServiceLoader> _orderedSvcLoaders;
 
     private ILogger _logger;
@@ -189,6 +189,10 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             List<Dependency> unsetSvcs = Looper.on(this._svcRepo.values())
                     .flatmap(svcHolder -> Looper.on(svcHolder.getUnsetDependencies()))
                     .toList();
+
+            if (unsetSvcs.size() == 0) {
+                return;
+            }
 
             // Remove duplicated dependencies
             CollectionHelper.removeDuplicate(unsetSvcs);
@@ -342,12 +346,13 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     ) throws InvalidArgumentException, GeneralException {
         ArgumentChecker.notNull(injection, "injection");
         if (ISatisfyHook.class.getName().equals(injection.getId())) {
-            if (! (injection.getObject() instanceof ISatisfyHook)) {
+            Object injectedObj = injection.getObject();
+            if (! (injectedObj instanceof ISatisfyHook)) {
                 throw new InvalidArgumentException(
                         "The injected object {} can't be converted to {}", injection.getObject(), ISatisfyHook.class.getName());
             }
             releaseHooks();
-            ISatisfyHook hook = (ISatisfyHook) injection.getObject();
+            ISatisfyHook hook = (ISatisfyHook) injectedObj;
             this._satisfyHooks.add(new WeakReference<>(hook));
             return;
         }
