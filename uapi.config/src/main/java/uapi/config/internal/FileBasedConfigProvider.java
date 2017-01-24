@@ -18,7 +18,7 @@ import uapi.service.annotation.Init;
 import uapi.service.annotation.Inject;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
-import uapi.service.log.ILogger;
+import uapi.log.ILogger;
 
 import java.io.File;
 import java.util.ArrayList;

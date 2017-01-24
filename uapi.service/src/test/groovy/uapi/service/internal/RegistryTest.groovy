@@ -21,7 +21,7 @@ import uapi.service.IService
 import uapi.service.IServiceLoader
 import uapi.service.Injection
 import uapi.service.QualifiedServiceId
-import uapi.service.log.ILogger
+import uapi.log.ILogger
 
 /**
  * Test case for Registry

@@ -20,7 +20,7 @@ import uapi.common.Guarder;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.*;
-import uapi.service.log.ILogger;
+import uapi.log.ILogger;
 
 import java.lang.ref.WeakReference;
 import java.util.*;

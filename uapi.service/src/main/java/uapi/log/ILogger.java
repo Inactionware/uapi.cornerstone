@@ -7,7 +7,7 @@
  * use the project into a commercial product
  */
 
-package uapi.service.log;
+package uapi.log;
 
 public interface ILogger {
 

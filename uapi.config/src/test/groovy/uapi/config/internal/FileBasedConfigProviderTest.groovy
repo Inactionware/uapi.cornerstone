@@ -12,7 +12,7 @@ package uapi.config.internal
 import spock.lang.Specification
 import uapi.config.IConfigFileParser
 import uapi.config.IConfigTracer
-import uapi.service.log.ILogger
+import uapi.log.ILogger
 
 /**
  * Test case for FileBasedConfigProvider
