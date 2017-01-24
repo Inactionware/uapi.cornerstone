@@ -23,10 +23,10 @@ import java.util.List;
  * The service hold one or more than one parsers
  */
 @Service
-//@Tag("Config")
+@Tag("Config")
 public class ConfigValueParsers {
 
-//    @Inject
+    @Inject
     protected List<IConfigValueParser> _parsers = new ArrayList<>();
 
     public IConfigValueParser findParser(String inType, String outType) {

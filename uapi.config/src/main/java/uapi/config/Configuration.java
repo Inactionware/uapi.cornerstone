@@ -116,8 +116,9 @@ public class Configuration {
     public void setValue(final Object value) {
         if (value instanceof Map) {
             setValue((Map<String, Object>) value);
+        } else {
+            this._value = value;
         }
-        this._value = value;
 
         Looper.on(this._configuableSvcs.values())
                 .filter(ref -> ref.get() != null)
@@ -134,11 +135,6 @@ public class Configuration {
             Configuration config = getOrCreateChild(entry.getKey());
             config.setValue(entry.getValue());
         });
-    }
-
-    public void setValue(final List<Object> configList) {
-        ArgumentChecker.notNull(configList, "configList");
-        // TODO:
     }
 
     public void setValue(final String path, final Object value) {

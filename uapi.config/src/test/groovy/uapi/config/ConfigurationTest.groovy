@@ -10,6 +10,7 @@
 package uapi.config
 
 import spock.lang.Specification
+import uapi.service.IServiceReference
 
 /**
  * Test case for Configuration
@@ -24,7 +25,10 @@ class ConfigurationTest extends Specification {
         config.setChild("a", "value a")
 
         then:
+        config.getKey() == Configuration.ROOT_KEY
         config.getValue("a") == "value a"
+        config.getValueType() == null
+        config.getChild('a').getValueType() == String.class
     }
 
     def "Test get value by deeper path"() {
@@ -70,4 +74,31 @@ class ConfigurationTest extends Specification {
         root.getValue("a1").get("b1").getValue() == "value b1"
         root.getValue("a1").get("b2").getValue() == "value b2"
     }
+
+    def 'Test set map value'() {
+        given:
+        def root = new Configuration()
+
+        when:
+        root.setValue(['a': 'b', 'c': 'd', 'e': ['f': 'g']])
+
+        then:
+        root.getChild('a').getValue() == 'b'
+        root.getChild('c').getValue() == 'd'
+        root.getChild('e').getChild('f').getValue() == 'g'
+        root.getValue('e.f') == 'g'
+    }
+
+//    def 'Test bind configurable service'() {
+//        given:
+//        def root = new Configuration()
+//        def svcRef = Mock(IServiceReference) {
+//
+//        }
+//
+//        when:
+//        root.setValue('a', 'b')
+//        def config = root.getChild('a')
+//        config.bindConfigurable(svcRef)
+//    }
 }
