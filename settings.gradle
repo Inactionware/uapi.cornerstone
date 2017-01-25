@@ -1,4 +1,4 @@
 rootProject.name = 'uapi.cornerstone'
 
 include 'uapi.service', 'uapi.config', 'uapi.log'
-include 'uapi.event'
+include 'uapi.event', 'uapi.behavior'
