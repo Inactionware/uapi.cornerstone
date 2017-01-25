@@ -11,6 +11,7 @@ package uapi.config
 
 import spock.lang.Specification
 import uapi.service.IServiceReference
+import uapi.service.QualifiedServiceId
 
 /**
  * Test case for Configuration
@@ -89,16 +90,63 @@ class ConfigurationTest extends Specification {
         root.getValue('e.f') == 'g'
     }
 
-//    def 'Test bind configurable service'() {
-//        given:
-//        def root = new Configuration()
-//        def svcRef = Mock(IServiceReference) {
-//
-//        }
-//
-//        when:
-//        root.setValue('a', 'b')
-//        def config = root.getChild('a')
-//        config.bindConfigurable(svcRef)
-//    }
+    def 'Test bind configurable service'() {
+        given:
+        def root = new Configuration()
+        def configurable = Mock(IConfigurable)
+        def svcRef = Mock(IServiceReference) {
+            getQualifiedId() >> Mock(QualifiedServiceId)
+            getService() >> configurable
+        }
+
+        when:
+        root.setValue('a', 'b')
+        def config = root.getChild('a')
+        def result = config.bindConfigurable(svcRef)
+
+        then:
+        result
+        1 * configurable.config('a', 'b')
+    }
+
+    def 'Test double bind configurable service'() {
+        given:
+        def root = new Configuration()
+        def configurable = Mock(IConfigurable)
+        def svcRef = Mock(IServiceReference) {
+            getQualifiedId() >> Mock(QualifiedServiceId)
+            getService() >> configurable
+        }
+
+        when:
+        root.setValue('a', 'b')
+        def config = root.getChild('a')
+        config.bindConfigurable(svcRef)
+        def result = config.bindConfigurable(svcRef)
+
+        then:
+        result
+        1 * configurable.config('a', 'b')
+    }
+
+    def 'Test double bind configurable service on empty value'() {
+        given:
+        def root = new Configuration()
+        def configurable = Mock(IConfigurable) {
+            isOptionalConfig('a') >> true
+        }
+        def svcRef = Mock(IServiceReference) {
+            getQualifiedId() >> Mock(QualifiedServiceId)
+            getService() >> configurable
+        }
+
+        when:
+        root.setValue('a.b', 'c')
+        def config = root.getChild('a')
+        config.bindConfigurable(svcRef)
+        def result = config.bindConfigurable(svcRef)
+
+        then:
+        result
+    }
 }

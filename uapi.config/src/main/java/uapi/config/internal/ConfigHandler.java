@@ -184,7 +184,7 @@ public class ConfigHandler extends AnnotationsHandler {
         });
     }
 
-    public static final class ConfigInfo {
+    public static class ConfigInfo {
 
         private String path;
         private String fieldName;

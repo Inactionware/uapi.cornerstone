@@ -145,6 +145,16 @@ public class Configuration {
         config.setValue(value);
     }
 
+    /**
+     * Bind a service reference to current configuration.
+     * If the configuration has value then the configuration item will be configured to the service then return true.
+     * If the configuration has no value and the configuration is not optional for the service then the method will
+     * return false.
+     *
+     * @param   serviceRef
+     *          The service reference hold configurable service
+     * @return  True means the service is configured or the configuration is optional otherwise return false
+     */
     public boolean bindConfigurable(final IServiceReference serviceRef) {
         ArgumentChecker.notNull(serviceRef, "serviceRef");
 
@@ -168,6 +178,18 @@ public class Configuration {
         }
     }
 
+    /**
+     * Bind a service reference to current configuration.
+     * If the configuration has value then the configuration item will be configured to the service then return true.
+     * If the configuration has no value and the configuration is not optional for the service then the method will
+     * return false.
+     *
+     * @param   path
+     *          The full path of the configuration
+     * @param   serviceRef
+     *          The service reference hold configurable service
+     * @return  True means the service is configured or the configuration is optional otherwise return false
+     */
     public boolean bindConfigurable(final String path, final IServiceReference serviceRef) {
         ArgumentChecker.notEmpty(path, "path");
         ArgumentChecker.notNull(serviceRef, "serviceRef");

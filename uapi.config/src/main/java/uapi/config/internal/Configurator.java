@@ -35,11 +35,6 @@ class Configurator implements ISatisfyHook, IConfigTracer {
         this._rootConfig = Configuration.createRoot();
     }
 
-    @Init
-    public void init() {
-//        Observable.from(this._configProviders).subscribe(provider -> provider.setTracer(this._configTracer));
-    }
-
     @Override
     public boolean isSatisfied(IServiceReference serviceRef) {
         ArgumentChecker.notNull(serviceRef, "serviceRef");
