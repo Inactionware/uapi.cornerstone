@@ -42,7 +42,7 @@ final class Logger implements ILogger {
 
     @Override
     public void warn(Throwable t) {
-        this._slfLogger.warn(t.getMessage(), t);
+        warn(t, t.getMessage());
     }
 
     @Override
@@ -57,7 +57,7 @@ final class Logger implements ILogger {
 
     @Override
     public void error(Throwable t) {
-        this._slfLogger.error(t.getMessage(), t);
+        error(t, t.getMessage());
     }
 
     @Override
