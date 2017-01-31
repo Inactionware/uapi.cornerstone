@@ -9,7 +9,7 @@
 
 package uapi.behavior.internal;
 
-import uapi.behavior.IEventDrivenBehavior;
+import uapi.behavior.IBehaviorBuilder;
 import uapi.behavior.IResponsible;
 import uapi.common.ArgumentChecker;
 
@@ -31,7 +31,13 @@ public class Responsible implements IResponsible {
     }
 
     @Override
-    public IEventDrivenBehavior[] behaviors() {
+    public IBehaviorBuilder on(String topic) {
         return null;
     }
+
+    @Override
+    public IBehaviorBuilder on(Class<?> type) {
+        return null;
+    }
+
 }

@@ -21,5 +21,23 @@ public interface IResponsible {
      */
     String name();
 
-    IEventDrivenBehavior[] behaviors();
+    /**
+     * Create new behavior builder on specific event topic.
+     *
+     * @param   topic
+     *          The event topic
+     * @return  The behavior builder which can build a specific behavior which can handle specific event
+     */
+    IBehaviorBuilder on(String topic);
+
+    /**
+     * Create new behavior builder on specific input data type which can handled by the behavior.
+     *
+     * @param   type
+     *          The data type which can be handled by the behavior
+     * @return  The behavior builder
+     */
+    IBehaviorBuilder on(Class<?> type);
+
+
 }

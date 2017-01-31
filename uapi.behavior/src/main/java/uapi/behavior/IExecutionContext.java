@@ -17,24 +17,6 @@ import java.util.Map;
 public interface IExecutionContext {
 
     /**
-     * Fire an event to the framework
-     *
-     * @param   event
-     *          The event which will be fired
-     */
-    void fire(IBehaviorEvent event);
-
-    /**
-     * Fire an async event or sync event to the framework
-     *
-     * @param   event
-     *          The event which will be fired
-     * @param   syncable
-     *          Indicate fire event by async way or async way
-     */
-    void fire(IBehaviorEvent event, boolean syncable);
-
-    /**
      * Put single k/v data under specific scope
      *
      * @param   key

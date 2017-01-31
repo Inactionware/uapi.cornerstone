@@ -12,7 +12,7 @@ package uapi.behavior;
 import uapi.IIdentifiable;
 
 /**
- * The IAction is minimum data handling unit in Behavior framework.
+ * The IAction is minimum data handling unit in BEHAVIOR framework.
  * It process input data and output processed data.
  *
  * @param   <I>
@@ -21,17 +21,6 @@ import uapi.IIdentifiable;
  *          Output data type
  */
 public interface IAction<I, O> extends IIdentifiable<String> {
-
-    default String getId() {
-        return name();
-    }
-
-    /**
-     * Return the action name
-     *
-     * @return  Action name
-     */
-    String name();
 
     /**
      * Process input data and output processed data

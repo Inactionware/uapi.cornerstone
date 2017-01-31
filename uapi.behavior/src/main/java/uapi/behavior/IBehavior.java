@@ -17,7 +17,4 @@ package uapi.behavior;
  * @param   <O>
  *          Output data type
  */
-public interface IBehavior<I, O> extends IAction<I, O> {
-
-//    void setExecution(IExecution execution);
-}
+public interface IBehavior<I, O> extends IAction<I, O> { }

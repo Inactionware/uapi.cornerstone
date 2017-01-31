@@ -9,8 +9,6 @@
 
 package uapi.behavior.internal;
 
-import uapi.behavior.IBehaviorEvent;
-import uapi.behavior.IEventDrivenBehavior;
 import uapi.behavior.IExecutionContext;
 import uapi.behavior.Scope;
 import uapi.common.ArgumentChecker;
@@ -37,22 +35,11 @@ public final class ExecutionContext implements IExecutionContext {
     }
 
     @Override
-    public void fire(IBehaviorEvent event) {
-        fire(event, false);
-    }
-
-    @Override
-    public void fire(IBehaviorEvent event, boolean syncable) {
-        event.attach(IEventDrivenBehavior.KEY_EVENT_CONTEXT, this._globalData);
-        this._eventBus.fire(event, syncable);
-    }
-
-    @Override
     public void put(Object key, Object value, Scope scope) {
         ArgumentChecker.required(key, "key");
         ArgumentChecker.required(scope, "scope");
 
-        if (scope == Scope.Behavior) {
+        if (scope == Scope.BEHAVIOR) {
             this._data.put(key, value);
         } else {
             this._globalData.put(key, value);
@@ -64,7 +51,7 @@ public final class ExecutionContext implements IExecutionContext {
         ArgumentChecker.required(data, "data");
         ArgumentChecker.required(scope, "scope");
 
-        if (scope == Scope.Behavior) {
+        if (scope == Scope.BEHAVIOR) {
             this._data.putAll(data);
         } else {
             this._globalData.putAll(data);

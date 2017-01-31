@@ -24,7 +24,7 @@ public @interface EventBehavior {
     /**
      * The behavior's name
      *
-     * @return  Behavior name
+     * @return  BEHAVIOR name
      */
     String name();
 

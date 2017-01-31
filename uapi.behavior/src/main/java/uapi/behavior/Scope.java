@@ -17,10 +17,10 @@ public enum Scope {
     /**
      * Always keep the data until the context is destroyed
      */
-    Global,
+    GLOBAL,
 
     /**
      * Keep the data only when the context go throw same behavior
      */
-    Behavior
+    BEHAVIOR
 }

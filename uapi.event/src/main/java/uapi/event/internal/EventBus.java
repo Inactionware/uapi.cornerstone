@@ -11,6 +11,7 @@ package uapi.event.internal;
 
 import uapi.GeneralException;
 import uapi.common.ArgumentChecker;
+import uapi.common.IAttributed;
 import uapi.config.IntervalTime;
 import uapi.config.annotation.Config;
 import uapi.config.internal.IntervalTimeParser;
@@ -85,6 +86,15 @@ public class EventBus implements IEventBus {
         List<IEventHandler> handlers = Looper.on(this._eventHandlers)
                 .filter(handler -> handler.topic().equals(topic))
                 .toList();
+        if (event instanceof IAttributed) {
+            final IAttributed attributed = (IAttributed) event;
+            handlers = Looper.on(handlers)
+                    .filter(handler -> (handler instanceof IAttributedEventHandler))
+                    .map(handler -> (IAttributedEventHandler) handler)
+                    .filter(handler -> attributed.contains(handler.getAttributes()))
+                    .map(handler -> (IEventHandler) handler)
+                    .toList();
+        }
         if (handlers.size() == 0) {
             throw new NoEventHandlerException(topic);
         }

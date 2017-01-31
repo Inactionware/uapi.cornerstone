@@ -9,85 +9,39 @@
 
 package uapi.behavior.internal;
 
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import uapi.GeneralException;
-import uapi.behavior.IBehaviorRepository;
 import uapi.behavior.IResponsible;
-import uapi.config.annotation.Config;
+import uapi.behavior.IResponsibleRegistry;
 import uapi.event.IEventBus;
 import uapi.log.ILogger;
-import uapi.rx.Looper;
-import uapi.service.annotation.Init;
 import uapi.service.annotation.Inject;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
-import javax.script.*;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Read js files and generate Responsible
  */
 @Service
-@Tag("Behavior")
-public class ResponsibleRegistry {
-
-    @Config(path="path.behavior", optional=true)
-    protected String _behaviorDefPath;
+@Tag("BEHAVIOR")
+public class ResponsibleRegistry implements IResponsibleRegistry {
 
     @Inject
     protected ILogger _logger;
 
     @Inject
-    protected List<IResponsible> _responsibles = new LinkedList<>();
-
-    @Inject
     protected IEventBus _eventBus;
 
-    @Inject
-    protected IBehaviorRepository _behaviorRepo;
+    private Map<String, IResponsible> _responsibles = new HashMap<>();
 
-    @Init
-    public void init() {
-        // Load js based responsible if the config is specified
-        if (this._behaviorDefPath != null) {
-            File dir = new File(this._behaviorDefPath);
-            if (!dir.exists()) {
-                throw new GeneralException("The behavior definition directory is not exist - {}", this._behaviorDefPath);
-            }
-            if (!dir.isDirectory()) {
-                throw new GeneralException("The behavior definition directory is not a directory - {}", this._behaviorDefPath);
-            }
-
-            // Initial javascript engine
-            ScriptEngine jsEngine = new ScriptEngineManager().getEngineByName("nashorn");
-            Bindings bindings = jsEngine.createBindings();
-            bindings.put("registry", this);
-            bindings.put("behaviorRepo", this._behaviorRepo);
-            jsEngine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
-
-            // Load all js file
-            File[] jsFiles = dir.listFiles(file -> file.getName().endsWith(".js"));
-            Looper.on(jsFiles).foreach(jsFile -> {
-                try {
-                    jsEngine.eval(new FileReader(jsFile));
-                } catch (IOException | ScriptException ex) {
-                    this._logger.error(ex);
-                }
-            });
-        }
-
-        // Register behavior/event handler into event bus
-        Looper.on(this._responsibles)
-                .flatmap(responsible -> Looper.on(responsible.behaviors()))
-                .foreach(behavior -> this._eventBus.register(behavior));
+    @Override
+    public IResponsible register(String name) {
+        return null;
     }
 
-    public void register(ScriptObjectMirror mirror) {
-        // Todo: invoked from javascript
+    @Override
+    public void unregister(String name) {
+
     }
 }
