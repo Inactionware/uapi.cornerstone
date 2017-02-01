@@ -9,6 +9,8 @@
 
 package uapi.behavior;
 
+import uapi.behavior.annotation.BehaviorExecutingEventHandler;
+
 /**
  * It represent as a domain object, it's responsibility to generate related behavior
  */
@@ -28,7 +30,7 @@ public interface IResponsible {
      *          The event topic
      * @return  The behavior builder which can build a specific behavior which can handle specific event
      */
-    IBehaviorBuilder on(String topic);
+    IBehaviorBuilder newBehavior(String topic);
 
     /**
      * Create new behavior builder on specific input data type which can handled by the behavior.
@@ -37,7 +39,9 @@ public interface IResponsible {
      *          The data type which can be handled by the behavior
      * @return  The behavior builder
      */
-    IBehaviorBuilder on(Class<?> type);
+    IBehaviorBuilder newBehavior(Class<?> type);
 
+    void on(BehaviorExecutingEventHandler handler);
 
+    void on(BehaviorFinishedEventHandler handler);
 }

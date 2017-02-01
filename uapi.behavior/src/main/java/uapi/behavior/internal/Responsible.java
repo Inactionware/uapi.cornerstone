@@ -9,20 +9,27 @@
 
 package uapi.behavior.internal;
 
+import uapi.behavior.BehaviorFinishedEvent;
+import uapi.behavior.BehaviorFinishedEventHandler;
 import uapi.behavior.IBehaviorBuilder;
 import uapi.behavior.IResponsible;
+import uapi.behavior.annotation.BehaviorExecutingEventHandler;
 import uapi.common.ArgumentChecker;
 
 /**
- * Created by xquan on 10/11/2016.
+ * A responsible is used to fire behavior event and define specific behaviors based on behavior event
  */
 public class Responsible implements IResponsible {
 
     private String _name;
 
-    public void setName(String name) {
+    Responsible(String name) {
         ArgumentChecker.required(name, "name");
         this._name = name;
+
+        this.on((BehaviorFinishedEvent event) -> {
+
+        });
     }
 
     @Override
@@ -31,13 +38,22 @@ public class Responsible implements IResponsible {
     }
 
     @Override
-    public IBehaviorBuilder on(String topic) {
+    public IBehaviorBuilder newBehavior(String topic) {
         return null;
     }
 
     @Override
-    public IBehaviorBuilder on(Class<?> type) {
+    public IBehaviorBuilder newBehavior(Class<?> type) {
         return null;
     }
 
+    @Override
+    public void on(BehaviorExecutingEventHandler handler) {
+
+    }
+
+    @Override
+    public void on(BehaviorFinishedEventHandler handler) {
+
+    }
 }

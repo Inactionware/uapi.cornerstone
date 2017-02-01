@@ -21,7 +21,6 @@ public class AttributedEvent extends PlainEvent implements IAttributed {
 
     public Object set(Object key, Object attribute) {
         ArgumentChecker.required(key, "key");
-        ArgumentChecker.required(attribute, "attribute");
         return this._attributes.put(key, attribute);
     }
 
