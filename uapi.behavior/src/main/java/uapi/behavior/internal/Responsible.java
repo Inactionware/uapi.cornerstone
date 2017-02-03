@@ -9,11 +9,7 @@
 
 package uapi.behavior.internal;
 
-import uapi.behavior.BehaviorFinishedEvent;
-import uapi.behavior.BehaviorFinishedEventHandler;
-import uapi.behavior.IBehaviorBuilder;
-import uapi.behavior.IResponsible;
-import uapi.behavior.annotation.BehaviorExecutingEventHandler;
+import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
 
 /**
@@ -26,10 +22,6 @@ public class Responsible implements IResponsible {
     Responsible(String name) {
         ArgumentChecker.required(name, "name");
         this._name = name;
-
-        this.on((BehaviorFinishedEvent event) -> {
-
-        });
     }
 
     @Override

@@ -23,7 +23,7 @@ public interface IBehaviorBuilder {
      *          Traceable behavior
      * @return  The behavior builder self
      */
-    IBehaviorBuilder tracable(boolean traceable);
+    IBehaviorBuilder traceable(boolean traceable);
 
     /**
      * Set condition for current behavior branch
@@ -60,4 +60,9 @@ public interface IBehaviorBuilder {
      * @return  A navigator
      */
     INavigator navigator();
+
+    /**
+     * Indi
+     */
+    IBehavior build();
 }

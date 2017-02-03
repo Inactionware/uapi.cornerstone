@@ -9,8 +9,6 @@
 
 package uapi.behavior;
 
-import uapi.behavior.annotation.BehaviorExecutingEventHandler;
-
 /**
  * It represent as a domain object, it's responsibility to generate related behavior
  */
