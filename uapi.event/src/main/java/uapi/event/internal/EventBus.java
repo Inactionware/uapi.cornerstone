@@ -118,6 +118,12 @@ public class EventBus implements IEventBus {
         this._eventHandlers.add(eventHandler);
     }
 
+    @Override
+    public boolean unregister(IEventHandler eventHandler) {
+        ArgumentChecker.required(eventHandler, "eventHandler");
+        return this._eventHandlers.remove(eventHandler);
+    }
+
     public void destroy() throws InterruptedException {
         this._fjPoll.shutdown();
         this._fjPoll.awaitTermination(this._awaitTime.seconds(), TimeUnit.SECONDS);

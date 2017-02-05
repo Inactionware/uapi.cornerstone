@@ -34,15 +34,22 @@ public class Behavior<I, O>
     private Class<I> _iType;
     private Class<O> _oType;
 
+    private final Responsible _resposible;
     private final Repository<String, IAction<?, ?>> _actionRepo;
     private final ActionHolder _entryAction;
     private final Navigator _navigator;
 
     private Functionals.Evaluator _lastEvaluator;
 
-    Behavior(Repository<String, IAction<?, ?>> actionRepository, Class inputType) {
+    Behavior(
+            final Responsible resposible,
+            final Repository<String, IAction<?, ?>> actionRepository,
+            final Class inputType
+    ) {
+        ArgumentChecker.required(resposible, "resposible");
         ArgumentChecker.required(actionRepository, "responsible");
         ArgumentChecker.required(inputType, "inputType");
+        this._resposible = resposible;
         this._actionRepo = actionRepository;
         EndpointAction starting = new EndpointAction(inputType);
         this._entryAction = new ActionHolder(starting);
@@ -187,7 +194,7 @@ public class Behavior<I, O>
 
     @Override
     protected void afterCreateInstance() {
-        // Do nothing
+        this._resposible.publish(this);
     }
 
     @Override

@@ -65,4 +65,13 @@ public interface IEventBus {
      *          The event handler
      */
     void register(IEventHandler eventHandler);
+
+    /**
+     * Unregister a event handler
+     *
+     * @param   eventHandler
+     *          The event handler
+     * @return  True means operation is successful otherwise is failed
+     */
+    boolean unregister(IEventHandler eventHandler);
 }

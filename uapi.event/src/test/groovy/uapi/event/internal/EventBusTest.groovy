@@ -115,4 +115,25 @@ class EventBusTest extends Specification{
         eventTopic  | none
         'Topic'     | null
     }
+
+    def 'Test unregister handler'() {
+        given:
+        IEventHandler handler = Mock(IEventHandler) {
+            topic() >> eventTopic
+        }
+        EventBus eventBus = new EventBus()
+        eventBus.init()
+        eventBus.register(handler)
+
+        when:
+        boolean success = eventBus.unregister(handler)
+
+        then:
+        noExceptionThrown()
+        success
+
+        where:
+        eventTopic  | none
+        'Topic'     | null
+    }
 }
