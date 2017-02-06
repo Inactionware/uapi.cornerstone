@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A Behavior represent a serial actions to process input data to output data
@@ -33,17 +34,19 @@ public class Behavior<I, O>
     private ActionIdentify _actionId;
     private Class<I> _iType;
     private Class<O> _oType;
+    private boolean _traceable;
 
     private final Responsible _resposible;
-    private final Repository<String, IAction<?, ?>> _actionRepo;
+    private final Repository<ActionIdentify, IAction<?, ?>> _actionRepo;
     private final ActionHolder _entryAction;
     private final Navigator _navigator;
+    private final AtomicInteger _sequence;
 
     private Functionals.Evaluator _lastEvaluator;
 
     Behavior(
             final Responsible resposible,
-            final Repository<String, IAction<?, ?>> actionRepository,
+            final Repository<ActionIdentify, IAction<?, ?>> actionRepository,
             final Class inputType
     ) {
         ArgumentChecker.required(resposible, "resposible");
@@ -55,6 +58,7 @@ public class Behavior<I, O>
         this._entryAction = new ActionHolder(starting);
 
         this._navigator = new Navigator(this._entryAction);
+        this._sequence = new AtomicInteger(0);
     }
 
     // ----------------------------------------------------
@@ -62,9 +66,9 @@ public class Behavior<I, O>
     // ----------------------------------------------------
 
     @Override
-    public String getId() {
+    public ActionIdentify getId() {
         ensureBuilt();
-        return this._actionId.getId();
+        return this._actionId;
     }
 
     // ----------------------------------------------------
@@ -109,8 +113,8 @@ public class Behavior<I, O>
     @Override
     public IBehaviorBuilder traceable(boolean traceable) {
         ensureNotBuilt();
-        // Todo: set trace
-        return null;
+        this._traceable = traceable;
+        return this;
     }
 
     @Override
@@ -133,7 +137,7 @@ public class Behavior<I, O>
     public IBehaviorBuilder then(ActionIdentify id, String label) {
         ensureNotBuilt();
         ArgumentChecker.required(id, "id");
-        IAction<?, ?> action = (IAction<?, ?>) this._actionRepo.get(id.getId());
+        IAction<?, ?> action = this._actionRepo.get(id);
         if (action == null) {
             throw new GeneralException("There is no action named - {}", id.getId());
         }
@@ -200,6 +204,23 @@ public class Behavior<I, O>
     @Override
     protected IBehavior<I, O> createInstance() {
         return this;
+    }
+
+    // ----------------------------------------------------
+    // Non-public Methods
+    // ----------------------------------------------------
+    Execution newExecution() {
+        ensureBuilt();
+        return new Execution(this, this._sequence.incrementAndGet());
+    }
+
+    ActionHolder entryAction() {
+        ensureBuilt();
+        return this._entryAction;
+    }
+
+    boolean traceable() {
+        return this._traceable;
     }
 
     private final class EndpointAction implements IAction {

@@ -12,6 +12,7 @@ package uapi.behavior.internal;
 import uapi.behavior.IExecutionContext;
 import uapi.behavior.Scope;
 import uapi.common.ArgumentChecker;
+import uapi.event.IEvent;
 import uapi.event.IEventBus;
 
 import java.util.HashMap;
@@ -23,15 +24,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class ExecutionContext implements IExecutionContext {
 
-    private final IEventBus _eventBus;
     private final Map<Object, Object> _globalData;
     private final Map<Object, Object> _data;
+    private final IEventBus _eventBus;
 
     public ExecutionContext(final IEventBus eventBus) {
         ArgumentChecker.required(eventBus, "eventBus");
-        this._eventBus = eventBus;
         this._globalData = new ConcurrentHashMap<>();
         this._data = new HashMap<>();
+        this._eventBus = eventBus;
     }
 
     @Override
@@ -70,5 +71,10 @@ public final class ExecutionContext implements IExecutionContext {
             value = this._globalData.get(key);
         }
         return (T) value;
+    }
+
+    public void fireEvent(final IEvent event) {
+        ArgumentChecker.required(event, "event");
+        this._eventBus.fire(event);
     }
 }

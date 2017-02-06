@@ -20,7 +20,7 @@ import uapi.IIdentifiable;
  * @param   <O>
  *          Output data type
  */
-public interface IAction<I, O> extends IIdentifiable<String> {
+public interface IAction<I, O> extends IIdentifiable<ActionIdentify> {
 
     /**
      * Process input data and output processed data

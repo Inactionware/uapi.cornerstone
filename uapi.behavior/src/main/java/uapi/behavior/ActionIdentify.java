@@ -3,14 +3,13 @@ package uapi.behavior;
 import uapi.IPartibleIdentify;
 import uapi.InvalidArgumentException;
 import uapi.common.ArgumentChecker;
-import uapi.common.StringHelper;
 
 /**
  * Identify for action and behavior
  */
 public class ActionIdentify implements IPartibleIdentify<String> {
 
-    private static final String SEPARATOR   = "@";
+    protected static final String SEPARATOR   = "@";
 
     private final String _name;
     private final ActionType _type;
@@ -30,7 +29,7 @@ public class ActionIdentify implements IPartibleIdentify<String> {
         }
     }
 
-    private ActionIdentify(
+    protected ActionIdentify(
             final String name,
             final ActionType type
     ) {
@@ -44,6 +43,28 @@ public class ActionIdentify implements IPartibleIdentify<String> {
     @Override
     public String getId() {
         return this._id;
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (! (other instanceof ActionIdentify)) {
+            return false;
+        }
+        ActionIdentify actionId = (ActionIdentify) other;
+        return this.getId().equals(actionId.getId());
+    }
+
+    @Override
+    public String toString() {
+        return getId();
     }
 
     @Override

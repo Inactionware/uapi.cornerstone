@@ -1,5 +1,6 @@
 package uapi.behavior;
 
+import uapi.behavior.internal.ExecutionIdentify;
 import uapi.common.IAttributed;
 import uapi.event.IEvent;
 
@@ -10,7 +11,6 @@ public interface IBehaviorTraceEvent extends IAttributed, IEvent {
 
     String TOPIC                = "BehaviorTrace";
     String KEY_EXECUTION_ID     = "ExecutionId";
-    String KEY_BEHAVIOR_NAME    = "BehaviorName";
     String KEY_ORIGINAL_DATA    = "OriginalData";
     String KEY_DATA             = "Data";
 
@@ -24,8 +24,8 @@ public interface IBehaviorTraceEvent extends IAttributed, IEvent {
      *
      * @return  The behavior execution id
      */
-    default String executionId() {
-        return (String) get(KEY_EXECUTION_ID);
+    default ExecutionIdentify executionId() {
+        return (ExecutionIdentify) get(KEY_EXECUTION_ID);
     }
 
     /**
@@ -34,7 +34,7 @@ public interface IBehaviorTraceEvent extends IAttributed, IEvent {
      * @return  The behavior name
      */
     default String behaviorName() {
-        return (String) get(KEY_BEHAVIOR_NAME);
+        return executionId().getName();
     }
 
     /**

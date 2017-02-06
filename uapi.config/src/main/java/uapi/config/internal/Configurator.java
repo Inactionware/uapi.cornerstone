@@ -15,7 +15,6 @@ import uapi.config.IConfigTracer;
 import uapi.config.IConfigurable;
 import uapi.service.ISatisfyHook;
 import uapi.service.IServiceReference;
-import uapi.service.annotation.Init;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
