@@ -9,8 +9,14 @@
 
 package uapi.behavior.internal;
 
+import uapi.GeneralException;
+import uapi.behavior.ActionIdentify;
+import uapi.behavior.IAction;
 import uapi.behavior.IResponsible;
 import uapi.behavior.IResponsibleRegistry;
+import uapi.common.ArgumentChecker;
+import uapi.common.Guarder;
+import uapi.common.Repository;
 import uapi.event.IEventBus;
 import uapi.log.ILogger;
 import uapi.service.annotation.Inject;
@@ -19,9 +25,11 @@ import uapi.service.annotation.Tag;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Read js files and generate Responsible
+ * Registry for responsible
  */
 @Service
 @Tag("BEHAVIOR")
@@ -33,15 +41,40 @@ public class ResponsibleRegistry implements IResponsibleRegistry {
     @Inject
     protected IEventBus _eventBus;
 
-    private Map<String, IResponsible> _responsibles = new HashMap<>();
+    private final Repository<ActionIdentify, IAction<?, ?>> _actionRepo;
+
+    private final Lock _lock;
+
+    private final Map<String, IResponsible> _responsibles;
+
+    public ResponsibleRegistry() {
+        this._actionRepo = new Repository<>();
+        this._lock = new ReentrantLock();
+        this._responsibles = new HashMap<>();
+    }
+
+    @Inject
+    public void addAction(IAction<?, ?> action) {
+        ArgumentChecker.required(action, "action");
+        this._actionRepo.put(action);
+    }
 
     @Override
     public IResponsible register(String name) {
-        return null;
+        ArgumentChecker.required(name, "name");
+        Responsible responsible = new Responsible(name, this._eventBus, this._actionRepo);
+        Guarder.by(this._lock).run(() -> {
+            if (this._responsibles.containsKey(name)) {
+                throw new GeneralException("");
+            }
+            this._responsibles.put(name, responsible);
+        });
+        return responsible;
     }
 
     @Override
     public void unregister(String name) {
-
+        ArgumentChecker.required(name, "name");
+        Guarder.by(this._lock).run(() -> this._responsibles.remove(name));
     }
 }

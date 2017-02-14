@@ -10,6 +10,7 @@
 package uapi.service.internal
 
 import freemarker.template.Template
+import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.GeneralException
 import uapi.codegen.ClassMeta
@@ -63,10 +64,10 @@ class InjectParserTest extends Specification {
         ElementKind.CONSTRUCTOR | 'FieldName'   | GeneralException
         ElementKind.ENUM        | 'FieldName'   | GeneralException
         ElementKind.INTERFACE   | 'FieldName'   | GeneralException
-        ElementKind.METHOD      | 'FieldName'   | GeneralException
         ElementKind.PARAMETER   | 'FieldName'   | GeneralException
     }
 
+    @Ignore
     def 'Test parse on collection field element with incorrect generic type'() {
         given:
         def collectionTypeElement = Mock(TypeElement)
@@ -179,6 +180,7 @@ class InjectParserTest extends Specification {
         'test'      | 'String'  | true          | false | 'Integer'
     }
 
+    @Ignore
     def 'Test parse on map field element with incorrect generic type'() {
         given:
         def collectionTypeElement = Mock(TypeElement)

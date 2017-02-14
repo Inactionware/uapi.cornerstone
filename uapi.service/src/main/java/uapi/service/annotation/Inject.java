@@ -18,9 +18,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicate the annotated field can be injected into
+ * Indicate the annotated field/method(setter) can be injected into.
+ * The method(setter) must be contains one parameter only and return void
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Inject {
 

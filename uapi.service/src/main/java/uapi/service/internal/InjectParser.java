@@ -22,10 +22,7 @@ import uapi.rx.Looper;
 import uapi.service.*;
 import uapi.service.annotation.Inject;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
@@ -42,6 +39,7 @@ class InjectParser {
     private static final String TEMPLATE_INJECT             = "template/inject_method.ftl";
     private static final String TEMPLATE_GET_DEPENDENCIES   = "template/getDependencies_method.ftl";
     private static final String SETTER_PARAM_NAME           = "value";
+    private static final String INJECT_METHODS              = "InjectMethods";
 
     private final InjectParserHelper _helper = new InjectParserHelper();
 
@@ -53,68 +51,107 @@ class InjectParser {
             final IBuilderContext builderCtx,
             final Set<? extends Element> elements
     ) throws GeneralException {
-        elements.forEach(fieldElement -> {
-            if (fieldElement.getKind() != ElementKind.FIELD) {
+        elements.forEach(annotatedElement -> {
+            ElementKind elementKind = annotatedElement.getKind();
+            if (elementKind != ElementKind.FIELD && elementKind != ElementKind.METHOD) {
                 throw new GeneralException(
                         "The Inject annotation only can be applied on field",
-                        fieldElement.getSimpleName().toString());
+                        annotatedElement.getSimpleName().toString());
             }
-            builderCtx.checkModifiers(fieldElement, Inject.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
-            Element classElemt = fieldElement.getEnclosingElement();
+            builderCtx.checkModifiers(annotatedElement, Inject.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            Element classElemt = annotatedElement.getEnclosingElement();
             builderCtx.checkModifiers(classElemt, Inject.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
-            String fieldName = fieldElement.getSimpleName().toString();
-            String fieldTypeName = fieldElement.asType().toString();
-            boolean isCollection = isCollection(fieldElement, builderCtx);
-            boolean isMap = isMap(fieldElement, builderCtx);
-            String setterName = ClassHelper.makeSetterName(fieldName, isCollection, isMap);
-            String idType = null;
-            if (isCollection) {
-                List<TypeMirror> typeArgs = getTypeArguments(fieldElement);
-                if (typeArgs.size() != 1) {
-                    throw new GeneralException(
-                            "The collection field [{}.{}] must be define only ONE type argument",
-                            classElemt.getSimpleName().toString(),
-                            fieldElement.getSimpleName().toString());
-                }
-                fieldTypeName = typeArgs.get(0).toString();
-            } else if (isMap) {
-                List<TypeMirror> typeArgs = getTypeArguments(fieldElement);
-                if (typeArgs.size() != 2) {
-                    throw new GeneralException(
-                            "The map field [{}.{}] must be define only TWO type arguments",
-                            classElemt.getSimpleName().toString(),
-                            fieldElement.getSimpleName().toString());
-                }
-                idType = typeArgs.get(0).toString();
-                Types typeUtils = builderCtx.getTypeUtils();
-                Elements elemtUtils = builderCtx.getElementUtils();
-                TypeElement identifiableElemt = elemtUtils.getTypeElement( IIdentifiable.class.getCanonicalName());
-                DeclaredType identifiableType = typeUtils.getDeclaredType(identifiableElemt);
-                if (! typeUtils.isAssignable(typeArgs.get(1), identifiableType)) {
-                    throw new GeneralException(
-                            "The value type of the field [{}.{}] must be implement IIdentifiable interface",
-                            classElemt.getSimpleName().toString(),
-                            fieldElement.getSimpleName().toString());
-                }
-                fieldTypeName = typeArgs.get(1).toString();
-            }
-
-            Inject inject = fieldElement.getAnnotation(Inject.class);
+            Inject inject = annotatedElement.getAnnotation(Inject.class);
             String injectId = inject.value();
-            if (Strings.isNullOrEmpty(injectId)) {
-                injectId = fieldTypeName;
-            }
             String injectFrom = inject.from();
             if (Strings.isNullOrEmpty(injectFrom)) {
                 throw new GeneralException(
                         "The inject service from [{}.{}] must be specified",
                         classElemt.getSimpleName().toString(),
-                        fieldElement.getSimpleName().toString());
+                        annotatedElement.getSimpleName().toString());
             }
 
-            ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
-            addSetter(clsBuilder, fieldName, fieldTypeName, injectId, injectFrom, setterName, isCollection, isMap, idType, false);
+            if (elementKind == ElementKind.FIELD) {
+                String fieldName = annotatedElement.getSimpleName().toString();
+                String fieldTypeName = annotatedElement.asType().toString();
+                boolean isCollection = isCollection(annotatedElement, builderCtx);
+                boolean isMap = isMap(annotatedElement, builderCtx);
+                String setterName = ClassHelper.makeSetterName(fieldName, isCollection, isMap);
+                String idType = null;
+                if (isCollection) {
+                    List<TypeMirror> typeArgs = getTypeArguments(annotatedElement);
+                    if (typeArgs.size() != 1) {
+                        throw new GeneralException(
+                                "The collection field [{}.{}] must be define only ONE type argument",
+                                classElemt.getSimpleName().toString(),
+                                annotatedElement.getSimpleName().toString());
+                    }
+                    fieldTypeName = typeArgs.get(0).toString();
+                } else if (isMap) {
+                    List<TypeMirror> typeArgs = getTypeArguments(annotatedElement);
+                    if (typeArgs.size() != 2) {
+                        throw new GeneralException(
+                                "The map field [{}.{}] must be define only TWO type arguments",
+                                classElemt.getSimpleName().toString(),
+                                annotatedElement.getSimpleName().toString());
+                    }
+                    idType = typeArgs.get(0).toString();
+                    Types typeUtils = builderCtx.getTypeUtils();
+                    Elements elemtUtils = builderCtx.getElementUtils();
+                    TypeElement identifiableElemt = elemtUtils.getTypeElement(IIdentifiable.class.getCanonicalName());
+                    DeclaredType identifiableType = typeUtils.getDeclaredType(identifiableElemt);
+                    if (!typeUtils.isAssignable(typeArgs.get(1), identifiableType)) {
+                        throw new GeneralException(
+                                "The value type of the field [{}.{}] must be implement IIdentifiable interface",
+                                classElemt.getSimpleName().toString(),
+                                annotatedElement.getSimpleName().toString());
+                    }
+                    fieldTypeName = typeArgs.get(1).toString();
+                }
+
+                if (Strings.isNullOrEmpty(injectId)) {
+                    injectId = fieldTypeName;
+                }
+
+                ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
+                addSetter(clsBuilder, fieldName, fieldTypeName, injectId, injectFrom, setterName, isCollection, isMap, idType, false);
+            } else if (elementKind == ElementKind.METHOD) {
+                String methodName = annotatedElement.getSimpleName().toString();
+                ExecutableElement methodElemt = (ExecutableElement) annotatedElement;
+                String returnType = methodElemt.getReturnType().toString();
+                if (! Type.VOID.equals(returnType)) {
+                    throw new GeneralException(
+                            "Expect then injected method [{}] return void, but it return - {}",
+                            methodName, returnType
+                    );
+                }
+                List paramElements = methodElemt.getParameters();
+                if (paramElements.size() != 1) {
+                    throw new GeneralException(
+                            "Expect the injected method [{}] has only 1 parameter, but found - {}",
+                            methodName, paramElements.size()
+                    );
+                }
+                VariableElement paramElem = (VariableElement) paramElements.get(0);
+                String paramType = paramElem.asType().toString();
+                // Remove generic type
+                if (paramType.contains("<")) {
+                    paramType = paramType.substring(0, paramType.indexOf("<"));
+                }
+
+                if (Strings.isNullOrEmpty(injectId)) {
+                    injectId = paramType;
+                }
+
+                ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
+                List injectMethods = clsBuilder.getTransience(INJECT_METHODS);
+                if (injectMethods == null) {
+                    injectMethods = new ArrayList();
+                    clsBuilder.putTransience(INJECT_METHODS, injectMethods);
+                }
+                injectMethods.add(new InjectMethod(methodName, injectId, paramType, injectFrom));
+            }
         });
 
         Template tempInject = builderCtx.loadTemplate(TEMPLATE_INJECT);
@@ -229,11 +266,21 @@ class InjectParser {
                 .map(setterBuilder -> {
                     DependencyModel depModel = new DependencyModel(
                             QualifiedServiceId.combine(setterBuilder.getInjectId(), setterBuilder.getInjectFrom()),
+                            setterBuilder.getInjectId(),
                             setterBuilder.getInjectType());
                     depModel.setSingle(setterBuilder.getIsSingle());
                     return depModel;
                 })
                 .toList();
+        List<InjectMethod> injectMethods = classBuilder.getTransience(INJECT_METHODS);
+        if (injectMethods != null && injectMethods.size() > 0) {
+            Looper.on(injectMethods).foreach(injectMethod -> {
+                dependencies.add(new DependencyModel(
+                        QualifiedServiceId.combine(injectMethod.injectId(), injectMethod.injectFrom()),
+                        injectMethod.injectId(),
+                        injectMethod.injectType()));
+            });
+        }
         // Check duplicated dependency
         dependencies.stream()
                 .collect(Collectors.groupingBy(p -> p, Collectors.summingInt(p -> 1)))
@@ -277,6 +324,16 @@ class InjectParser {
                     setterBuilder.getInjectId(),
                     setterBuilder.getInjectType()));
         });
+        List<InjectMethod> injectMethods = classBuilder.getTransience(INJECT_METHODS);
+        if (injectMethods != null && injectMethods.size() > 0) {
+            Looper.on(injectMethods).foreach(injectMethod -> {
+                setterModels.add(new SetterModel(
+                        injectMethod.methodName(),
+                        injectMethod.injectId(),
+                        injectMethod.injectType()
+                ));
+            });
+        }
         Map<String, Object> tempModel = new HashMap<>();
         tempModel.put("setters", setterModels);
 
@@ -323,6 +380,42 @@ class InjectParser {
         }
     }
 
+    private static final class InjectMethod {
+
+        private String _methodName;
+        private String _injectId;
+        private String _injectType;
+        private String _injectFrom;
+
+        private InjectMethod(
+                final String methodName,
+                final String injectId,
+                final String injectType,
+                final String injectFrom
+        ) {
+            this._methodName = methodName;
+            this._injectId = injectId;
+            this._injectType = injectType;
+            this._injectFrom = injectFrom;
+        }
+
+        private String methodName() {
+            return this._methodName;
+        }
+
+        private String injectId() {
+            return this._injectId;
+        }
+
+        private String injectType() {
+            return this._injectType;
+        }
+
+        private String injectFrom() {
+            return this._injectFrom;
+        }
+    }
+
     public static final class SetterModel {
 
         private String _name;
@@ -358,14 +451,17 @@ class InjectParser {
     public static final class DependencyModel {
 
         private String _qSvcId;
+        private String _svcId;
         private String _svcType;
-        private boolean _optional;
         private boolean _single;
 
         private DependencyModel(
                 final String qualifiedServiceId,
-                final String serviceType) {
+                final String serviceId,
+                final String serviceType
+        ) {
             this._qSvcId = qualifiedServiceId;
+            this._svcId = serviceId;
             this._svcType = serviceType;
         }
 
@@ -377,12 +473,12 @@ class InjectParser {
             return this._svcType;
         }
 
-        public void setOptional(boolean optional) {
-            this._optional = optional;
+        public String getServiceId() {
+            return this._svcId;
         }
 
-        public boolean getOptional() {
-            return this._optional;
+        public void setServiceId(String serviceId) {
+            this._svcId = serviceId;
         }
 
         public void setSingle(boolean single) {
