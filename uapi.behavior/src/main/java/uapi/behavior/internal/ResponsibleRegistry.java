@@ -56,7 +56,10 @@ public class ResponsibleRegistry implements IResponsibleRegistry {
     @Inject
     public void addAction(IAction<?, ?> action) {
         ArgumentChecker.required(action, "action");
-        this._actionRepo.put(action);
+        IAction<?, ?> existing = this._actionRepo.put(action);
+        if (existing != null) {
+            this._logger.warn("The existing action {} was overridden by new action {}", existing, action);
+        }
     }
 
     @Override

@@ -12,10 +12,7 @@ package uapi.behavior.internal;
 import uapi.GeneralException;
 import uapi.InvalidArgumentException;
 import uapi.behavior.*;
-import uapi.common.ArgumentChecker;
-import uapi.common.Pair;
-import uapi.common.Repository;
-import uapi.common.StringHelper;
+import uapi.common.*;
 import uapi.event.IAttributedEventHandler;
 import uapi.event.IEvent;
 import uapi.event.IEventBus;
@@ -33,7 +30,7 @@ public class Responsible implements IResponsible {
     private final Repository<ActionIdentify, IAction<?, ?>> _actionRepo;
     private final IEventBus _eventBus;
 
-    private final Map<ActionIdentify, Pair<Behavior, String>> _behaviors;
+    private final Map<ActionIdentify, BehaviorHolder> _behaviors;
 
     private BehaviorExecutingEventHandler _behaviorExecutingHandler;
     private BehaviorFinishedEventHandler _behaviorFinishedHandler;
@@ -62,7 +59,7 @@ public class Responsible implements IResponsible {
     public IBehaviorBuilder newBehavior(final String topic) {
         ArgumentChecker.required(topic, "topic");
         Behavior behavior = new Behavior(this, this._actionRepo, BehaviorEvent.class);
-        this._behaviors.put(behavior.getId(), new Pair<>(behavior, topic));
+        this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior, topic));
         return behavior;
     }
 
@@ -70,7 +67,7 @@ public class Responsible implements IResponsible {
     public IBehaviorBuilder newBehavior(Class<?> type) {
         ArgumentChecker.required(type, "type");
         Behavior behavior = new Behavior(this, this._actionRepo, type);
-        this._behaviors.put(behavior.getId(), new Pair<>(behavior, ""));
+        this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior));
         return behavior;
     }
 
@@ -91,20 +88,22 @@ public class Responsible implements IResponsible {
     void publish(final Behavior behavior) {
         ArgumentChecker.required(behavior, "behavior");
         ActionIdentify behaviorId = behavior.getId();
-        Pair<Behavior, String> pair = this._behaviors.get(behaviorId);
-        if (pair == null) {
+        BehaviorHolder behaviorHolder = this._behaviors.get(behaviorId);
+        if (behaviorHolder == null) {
             throw new InvalidArgumentException(
-                    "Can't publish behavior - {} in - {}, reason: not found",
-                    behaviorId, this._name);
+                    "Can't publish behavior - {} in - {}, reason: not found", behaviorId, this._name);
         }
-        String topic = pair.getRightValue();
+        if (behaviorHolder.isPublished()) {
+            throw new GeneralException("The behavior - {} in {} is published", behaviorId, this._name);
+        }
+        String topic = behaviorHolder.topic();
         if (ArgumentChecker.isEmpty(topic)) {
             this._actionRepo.put(behavior);
         } else {
             BehaviorEventHandler handler = new BehaviorEventHandler(topic, behavior);
             this._eventBus.register(handler);
-            // TODO: avoid publish multiple times.
         }
+        behaviorHolder.setPublished();
     }
 
     private void registerEventHandler() {
@@ -112,6 +111,7 @@ public class Responsible implements IResponsible {
             return;
         }
         this._eventBus.register(new BehaviorTraceEventHandler());
+        this._traceEventHandlerRegistered = true;
     }
 
     private final class BehaviorEventHandler implements IAttributedEventHandler<BehaviorEvent> {
@@ -174,6 +174,44 @@ public class Responsible implements IResponsible {
             if (Responsible.this._behaviorFinishedHandler != null) {
                 Responsible.this._behaviorFinishedHandler.accept(event);
             }
+        }
+    }
+
+    private static final class BehaviorHolder extends Multivariate {
+
+        private static final int IDX_BEHAVIOR   = 0;
+        private static final int IDX_TOPIC      = 1;
+        private static final int IDX_PUBLISHED  = 2;
+
+        private BehaviorHolder(final Behavior behavior) {
+            this(behavior, null, false);
+        }
+
+        private BehaviorHolder(final Behavior behavior, final String topic) {
+            this(behavior, topic, false);
+        }
+
+        private BehaviorHolder(final Behavior behavior, final String topic, final boolean published) {
+            super(3);
+            put(IDX_BEHAVIOR, behavior);
+            put(IDX_TOPIC, topic);
+            put(IDX_PUBLISHED, published);
+        }
+
+        private Behavior behavior() {
+            return get(IDX_BEHAVIOR);
+        }
+
+        public String topic() {
+            return get(IDX_TOPIC);
+        }
+
+        public boolean isPublished() {
+            return get(IDX_PUBLISHED);
+        }
+
+        public void setPublished() {
+            put(IDX_PUBLISHED, true);
         }
     }
 }
