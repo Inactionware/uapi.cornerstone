@@ -10,22 +10,27 @@
 package uapi.behavior.internal;
 
 import com.google.auto.service.AutoService;
+import com.google.common.base.Strings;
+import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.Type;
+import uapi.behavior.ActionIdentify;
+import uapi.behavior.IAction;
+import uapi.behavior.IExecutionContext;
 import uapi.behavior.annotation.Action;
+import uapi.behavior.annotation.ActionDo;
 import uapi.codegen.*;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.annotation.Service;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -33,6 +38,11 @@ import java.util.Set;
  */
 @AutoService(IAnnotationsHandler.class)
 public class ActionHandler extends AnnotationsHandler {
+
+    private static final String TEMPLATE_GET_ID         = "template/getId_method.ftl";
+    private static final String TEMPLATE_INPUT_TYPE     = "template/inputType_method.ftl";
+    private static final String TEMPLATE_OUTPUT_TYPE    = "template/outputType_method";
+    private static final String TEMPLATE_PROCESS        = "template/process_method";
 
     @SuppressWarnings("unchecked")
     private static final Class<? extends Annotation>[] orderedAnnotations =
@@ -59,49 +69,99 @@ public class ActionHandler extends AnnotationsHandler {
                         "The element {} must be a class element", classElement.getSimpleName().toString());
             }
             builderContext.checkAnnotations(classElement, Service.class);
-
-            TypeElement typeElement = (TypeElement) classElement;
-            List<TypeMirror> intfTypes = (List<TypeMirror>) typeElement.getInterfaces();
-            DeclaredType actionType = Looper.on(intfTypes)
-                    .filter(intfType -> intfType instanceof DeclaredType)
-                    .map(intfType -> (DeclaredType) intfType)
-                    .first();
-            if (actionType == null) {
-                throw new GeneralException(
-                        "The action class {} must implement IAction interface and specified its parameterized types",
-                        classElement.getSimpleName().toString());
-            }
-            List typeArgs = actionType.getTypeArguments();
-            if (typeArgs.size() != 2) {
-                throw new GeneralException(
-                        "The parameterized types of IAction must be 2 - {}", classElement.getSimpleName().toString());
-            }
-
             Action action = classElement.getAnnotation(Action.class);
             String actionName = action.value();
-            String inputType = typeArgs.get(0).toString(); //(DeclaredType) typeArgs.get(0)).asElement().getSimpleName().toString();
-            String outputType = typeArgs.get(1).toString(); //((DeclaredType) typeArgs.get(1)).asElement().getSimpleName().toString();
+            if (Strings.isNullOrEmpty(actionName)) {
+                throw new GeneralException("The name of acton must be specified - {}",
+                        classElement.getSimpleName().toString());
+            }
+            // Check process method
+            List actionDoElements = Looper.on(classElement.getEnclosedElements())
+                    .filter(element -> element.getKind() == ElementKind.METHOD)
+                    .filter(element -> element.getAnnotation(ActionDo.class) != null)
+                    .toList();
+            if (actionDoElements.size() == 0) {
+                throw new GeneralException(
+                        "The action class {} must define a method which is annotated with ActionDo annotation",
+                        classElement.getSimpleName().toString());
+            }
+            if (actionDoElements.size() > 1) {
+                throw new GeneralException(
+                        "The action class {} define more methods which is annotated with ActionDo annotation",
+                        classElement.getSimpleName().toString());
+            }
+            ExecutableElement actionDoElement = (ExecutableElement) actionDoElements.get(0);
+            String actionMethodName = actionDoElement.getSimpleName().toString();
+            List paramElements = actionDoElement.getParameters();
+            String inputType;
+            String outputType;
+            boolean needContext = false;
+            if (paramElements.size() == 0) {
+                throw new GeneralException(
+                        "The method annotated with ActionDo must contains 1 or 2 parameters - {}::{}",
+                        classElement.getSimpleName().toString(), actionMethodName);
+            } else if (paramElements.size() > 2) {
+                throw new GeneralException(
+                        "The method annotated with ActionDo must contains more than 2 parameters - {}::{}",
+                        classElement.getSimpleName().toString(), actionMethodName);
+            } else {
+                VariableElement inputParamElement = (VariableElement) paramElements.get(0);
+                inputType = inputParamElement.asType().toString();
+                if (paramElements.size() == 2) {
+                    VariableElement contextParamElement = (VariableElement) paramElements.get(1);
+                    if (! IExecutionContext.class.getCanonicalName().equals(contextParamElement.asType().toString())) {
+                        throw new GeneralException(
+                                "The second parameter of method which annotated with ActionDo must be IExecutionContext - {}::{}",
+                                classElement.getSimpleName().toString(), actionMethodName);
+                    }
+                    needContext = true;
+                }
+            }
+            outputType = actionDoElement.getReturnType().toString();
+            // TODO: convert native type to associated object type
+
+            Template tempGetId = builderContext.loadTemplate(TEMPLATE_GET_ID);
+            Template tempInputType = builderContext.loadTemplate(TEMPLATE_INPUT_TYPE);
+            Template tempOutputType = builderContext.loadTemplate(TEMPLATE_OUTPUT_TYPE);
+            Template tempProcess = builderContext.loadTemplate(TEMPLATE_PROCESS);
+            Map<String, Object> model = new HashMap<>();
+            model.put("actionName", actionName);
+            model.put("actionMethodName", actionMethodName);
+            model.put("inputType", inputType);
+            model.put("outputType", outputType);
+            model.put("needContext", needContext);
 
             ClassMeta.Builder clsBuilder = builderContext.findClassBuilder(classElement);
             clsBuilder
+                    .addImplement(IAction.class.getCanonicalName())
                     .addMethodBuilder(MethodMeta.builder()
-                            .setName("name")
+                            .setName("getId")
                             .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName("Override"))
-                            .setReturnTypeName(Type.STRING)
-                            .addCodeBuilder(CodeMeta.builder().addRawCode(StringHelper.makeString("return \"{}\";", actionName))))
+                            .setReturnTypeName(ActionIdentify.class.getCanonicalName())
+                            .addCodeBuilder(CodeMeta.builder().setTemplate(tempGetId).setModel(model)))
                     .addMethodBuilder(MethodMeta.builder()
                             .setName("inputType")
                             .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName("Override"))
                             .setReturnTypeName(StringHelper.makeString("java.lang.Class<{}>", inputType))
-                            .addCodeBuilder(CodeMeta.builder().addRawCode(StringHelper.makeString("return {}.class;", inputType))))
+                            .addCodeBuilder(CodeMeta.builder().setTemplate(tempInputType).setModel(model)))
                     .addMethodBuilder(MethodMeta.builder()
                             .setName("outputType")
                             .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName("Override"))
                             .setReturnTypeName(StringHelper.makeString("java.lang.Class<{}>", outputType))
-                            .addCodeBuilder(CodeMeta.builder().addRawCode(StringHelper.makeString("return {}.class;", outputType))));
+                            .addCodeBuilder(CodeMeta.builder().setTemplate(tempOutputType).setModel(model)))
+                    .addMethodBuilder(MethodMeta.builder()
+                            .setName("process")
+                            .addModifier(Modifier.PUBLIC)
+                            .addAnnotationBuilder(AnnotationMeta.builder().setName("Override"))
+                            .setReturnTypeName(outputType)
+                            .addParameterBuilder(ParameterMeta.builder()
+                                    .setName("input").setType(inputType))
+                            .addParameterBuilder(ParameterMeta.builder()
+                                    .setName("context").setType(IExecutionContext.class.getCanonicalName()))
+                            .addCodeBuilder(CodeMeta.builder().setTemplate(tempProcess).setModel(model)));
         });
     }
 }

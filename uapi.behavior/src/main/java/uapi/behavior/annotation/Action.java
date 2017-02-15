@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 public @interface Action {
 
     /**
-     * The action name
+     * Name of the action
      *
      * @return  Action name
      */

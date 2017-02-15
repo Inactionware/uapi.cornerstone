@@ -15,30 +15,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The class with this annotation will implement IEventDrivenBehavior interface
+ * Indicate a method contains codes for action execution
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface EventBehavior {
-
-    /**
-     * The behavior's name
-     *
-     * @return  BEHAVIOR name
-     */
-    String name();
-
-    /**
-     * The topic of event which will be handled by this behavior
-     *
-     * @return  Event topic
-     */
-    String topic();
-
-    /**
-     * The type of event which will be handled by this behavior
-     *
-     * @return  Event class type
-     */
-    Class event();
+public @interface ActionDo {
 }
