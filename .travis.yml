@@ -1,7 +1,7 @@
 language: java
 jdk:
     - oraclejdk8
-script: ./gradlew jacocoRootReport --stacktrace
+script: ./gradlew jacocoRootReport --refresh-dependencies --stacktrace
 after_success:
     - ./gradlew bintrayUpload
     - ./gradlew uploadCoverageToCodacy
