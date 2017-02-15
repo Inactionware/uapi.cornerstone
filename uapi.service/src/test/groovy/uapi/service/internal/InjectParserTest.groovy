@@ -67,7 +67,6 @@ class InjectParserTest extends Specification {
         ElementKind.PARAMETER   | 'FieldName'   | GeneralException
     }
 
-    @Ignore
     def 'Test parse on collection field element with incorrect generic type'() {
         given:
         def collectionTypeElement = Mock(TypeElement)
@@ -100,6 +99,9 @@ class InjectParserTest extends Specification {
             asType() >> Mock(DeclaredType) {
                 toString() >> fieldType
                 getTypeArguments() >> [Mock(TypeMirror), Mock(TypeMirror)]
+            }
+            getAnnotation(_) >> {
+                return Test.class.getField('t').getAnnotation(Inject.class)
             }
         }
         def parser = new InjectParser()
@@ -180,7 +182,6 @@ class InjectParserTest extends Specification {
         'test'      | 'String'  | true          | false | 'Integer'
     }
 
-    @Ignore
     def 'Test parse on map field element with incorrect generic type'() {
         given:
         def collectionTypeElement = Mock(TypeElement)
@@ -217,6 +218,9 @@ class InjectParserTest extends Specification {
             asType() >> Mock(DeclaredType) {
                 toString() >> fieldType
                 getTypeArguments() >> [Mock(TypeMirror)]
+            }
+            getAnnotation(_) >> {
+                return Test.class.getField('t').getAnnotation(Inject.class)
             }
         }
         def parser = new InjectParser()
