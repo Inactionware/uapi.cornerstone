@@ -72,8 +72,7 @@ public class ActionHandler extends AnnotationsHandler {
             Action action = classElement.getAnnotation(Action.class);
             String actionName = action.value();
             if (Strings.isNullOrEmpty(actionName)) {
-                throw new GeneralException("The name of acton must be specified - {}",
-                        classElement.getSimpleName().toString());
+                actionName = classElement.getSimpleName().toString();
             }
             // Check process method
             List actionDoElements = Looper.on(classElement.getEnclosedElements())
@@ -118,7 +117,9 @@ public class ActionHandler extends AnnotationsHandler {
                 }
             }
             outputType = actionDoElement.getReturnType().toString();
-            // TODO: convert native type to associated object type
+            // convert native type to associated qualified type
+            inputType = Type.toQType(inputType);
+            outputType = Type.toQType(outputType);
 
             Template tempGetId = builderContext.loadTemplate(TEMPLATE_GET_ID);
             Template tempInputType = builderContext.loadTemplate(TEMPLATE_INPUT_TYPE);

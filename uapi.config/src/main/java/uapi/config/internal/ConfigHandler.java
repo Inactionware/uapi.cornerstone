@@ -70,8 +70,8 @@ public class ConfigHandler extends AnnotationsHandler {
             builderContext.checkModifiers(fieldElement, Config.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
             Element classElement = fieldElement.getEnclosingElement();
-            checkModifiers(classElement, Config.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
-            checkAnnotations(classElement, Service.class);
+            builderContext.checkModifiers(classElement, Config.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            builderContext.checkAnnotations(classElement, Service.class);
 
             // Get field which is reference IRegistry instance
             Element svcRegElem = builderContext.findFieldWith(classElement, IRegistry.class, Inject.class);

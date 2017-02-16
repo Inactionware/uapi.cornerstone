@@ -10,13 +10,11 @@
 package uapi.service.internal
 
 import freemarker.template.Template
-import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.GeneralException
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.LogSupport
-import uapi.codegen.MethodMeta
 import uapi.service.SetterMeta
 
 import javax.lang.model.element.Element

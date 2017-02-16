@@ -26,5 +26,5 @@ public @interface Action {
      *
      * @return  Action name
      */
-    String value();
+    String value() default "";
 }

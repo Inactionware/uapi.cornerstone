@@ -29,7 +29,7 @@ public class ActionIdentify implements IPartibleIdentify<String> {
         }
     }
 
-    protected ActionIdentify(
+    public ActionIdentify(
             final String name,
             final ActionType type
     ) {

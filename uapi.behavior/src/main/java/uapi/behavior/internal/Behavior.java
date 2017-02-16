@@ -36,7 +36,7 @@ public class Behavior<I, O>
     private Class<O> _oType;
     private boolean _traceable;
 
-    private final Responsible _resposible;
+    private final Responsible _responsible;
     private final Repository<ActionIdentify, IAction<?, ?>> _actionRepo;
     private final ActionHolder _entryAction;
     private final Navigator _navigator;
@@ -45,14 +45,14 @@ public class Behavior<I, O>
     private Functionals.Evaluator _lastEvaluator;
 
     Behavior(
-            final Responsible resposible,
+            final Responsible responsible,
             final Repository<ActionIdentify, IAction<?, ?>> actionRepository,
             final Class inputType
     ) {
-        ArgumentChecker.required(resposible, "resposible");
+        ArgumentChecker.required(responsible, "responsible");
         ArgumentChecker.required(actionRepository, "responsible");
         ArgumentChecker.required(inputType, "inputType");
-        this._resposible = resposible;
+        this._responsible = responsible;
         this._actionRepo = actionRepository;
         EndpointAction starting = new EndpointAction(inputType);
         this._entryAction = new ActionHolder(starting);
@@ -103,10 +103,10 @@ public class Behavior<I, O>
     // ----------------------------------------------------
 
     @Override
-    public IBehaviorBuilder id(ActionIdentify actionId) {
+    public IBehaviorBuilder name(final String name) {
         ensureNotBuilt();
-        ArgumentChecker.required(actionId, "actionId");
-        this._actionId = actionId;
+        ArgumentChecker.required(name, "name");
+        this._actionId = new ActionIdentify(name, ActionType.BEHAVIOR);
         return this;
     }
 
@@ -198,7 +198,7 @@ public class Behavior<I, O>
 
     @Override
     protected void afterCreateInstance() {
-        this._resposible.publish(this);
+        this._responsible.publish(this);
     }
 
     @Override

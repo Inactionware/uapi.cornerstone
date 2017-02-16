@@ -68,9 +68,9 @@ public final class InitialHandler extends AnnotationsHandler {
                         "The Init annotation only can be applied on method",
                         methodElement.getSimpleName().toString());
             }
-            checkModifiers(methodElement, Init.class, Modifier.PRIVATE, Modifier.STATIC);
+            builderCtx.checkModifiers(methodElement, Init.class, Modifier.PRIVATE, Modifier.STATIC);
             Element classElemt = methodElement.getEnclosingElement();
-            checkModifiers(classElemt, Init.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            builderCtx.checkModifiers(classElemt, Init.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
             MethodMeta.Builder methodBuilder = MethodMeta.builder(methodElement, builderCtx);
             if (methodBuilder.getParameterCount() > 0) {
                 throw new GeneralException(

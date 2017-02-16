@@ -8,13 +8,13 @@ import uapi.common.Functionals;
 public interface IBehaviorBuilder {
 
     /**
-     * Set behavior id
+     * Set behavior name
      *
-     * @param   id
-     *          The behavior id
+     * @param   name
+     *          The behavior name
      * @return  The behavior builder self
      */
-    IBehaviorBuilder id(ActionIdentify id);
+    IBehaviorBuilder name(String name);
 
     /**
      * Set this behavior is traceable or not
