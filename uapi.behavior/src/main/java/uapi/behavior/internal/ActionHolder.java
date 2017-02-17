@@ -38,7 +38,6 @@ class ActionHolder {
         }
         this._action = action;
         this._nextActions = new LinkedList<>();
-//        this._previousAction = previousAction;
     }
 
     void next(IAction action) {
@@ -69,7 +68,7 @@ class ActionHolder {
         if (data instanceof IAttributed) {
             IAttributed attributed = (IAttributed) data;
             next = Looper.on(this._nextActions)
-                    .filter(actionHolder -> this._evaluator.accept(attributed))
+                    .filter(actionHolder -> actionHolder._evaluator.accept(attributed))
                     .first();
         } else {
             if (this._nextActions.size() != 1) {
