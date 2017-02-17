@@ -7,19 +7,20 @@
  * use the project into a commercial product
  */
 
-package uapi.behavior;
+package uapi.behavior
 
-import uapi.event.AttributedEvent;
-
-import java.util.HashMap;
-import java.util.Map;
+import spock.lang.Specification
 
 /**
- * The implementation for IBehaviorEvent interface
+ * Unit test for BehaviorEvent
  */
-public class BehaviorEvent extends AttributedEvent {
+class BehaviorEventTest extends Specification {
 
-    public BehaviorEvent(final String topic) {
-        super(topic);
+    def 'Test create instance'() {
+        when:
+        new BehaviorEvent('topic')
+
+        then:
+        noExceptionThrown()
     }
 }

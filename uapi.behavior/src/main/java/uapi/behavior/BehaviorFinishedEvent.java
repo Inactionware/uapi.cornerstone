@@ -1,6 +1,5 @@
 package uapi.behavior;
 
-import uapi.behavior.internal.ExecutionIdentify;
 import uapi.common.ArgumentChecker;
 import uapi.event.AttributedEvent;
 

@@ -22,7 +22,12 @@ public class ActionIdentify implements IPartibleIdentify<String> {
         }
         String[] combined = id.split(SEPARATOR);
         if (combined.length == 2) {
-            ActionType type = ActionType.valueOf(combined[1]);
+            ActionType type;
+            try {
+                type = ActionType.valueOf(combined[1]);
+            } catch (IllegalArgumentException ex) {
+                throw new InvalidArgumentException(ex);
+            }
             return new ActionIdentify(combined[0], type);
         } else {
             throw new InvalidArgumentException(id, InvalidArgumentException.InvalidArgumentType.FORMAT);

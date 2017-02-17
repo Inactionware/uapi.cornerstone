@@ -1,6 +1,5 @@
 package uapi.behavior;
 
-import uapi.behavior.internal.ExecutionIdentify;
 import uapi.common.ArgumentChecker;
 import uapi.event.AttributedEvent;
 
@@ -26,7 +25,7 @@ public class BehaviorExecutingEvent extends AttributedEvent implements IBehavior
         set(KEY_DATA, data);
     }
 
-    public String actionId() {
-        return (String) get(KEY_ACTION_ID);
+    public ActionIdentify actionId() {
+        return (ActionIdentify) get(KEY_ACTION_ID);
     }
 }

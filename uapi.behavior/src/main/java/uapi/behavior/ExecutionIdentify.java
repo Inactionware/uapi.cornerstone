@@ -7,7 +7,7 @@
  * use the project into a commercial product
  */
 
-package uapi.behavior.internal;
+package uapi.behavior;
 
 import uapi.InvalidArgumentException;
 import uapi.behavior.ActionIdentify;
