@@ -130,6 +130,7 @@ public class Behavior<I, O>
 
     @Override
     public IBehaviorBuilder then(ActionIdentify id) {
+        ensureNotBuilt();
         return then(id, null);
     }
 
@@ -158,6 +159,7 @@ public class Behavior<I, O>
 
     @Override
     protected void validate() throws InvalidArgumentException {
+        ensureNotBuilt();
         if (this._lastEvaluator != null) {
             throw new GeneralException("The evaluator is set but it does not used");
         }
