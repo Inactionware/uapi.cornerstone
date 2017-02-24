@@ -2,6 +2,8 @@ package uapi.behavior.internal;
 
 import uapi.GeneralException;
 import uapi.InvalidArgumentException;
+import uapi.behavior.BehaviorErrors;
+import uapi.behavior.BehaviorException;
 import uapi.behavior.IAction;
 import uapi.common.ArgumentChecker;
 import uapi.common.Functionals;
@@ -47,10 +49,18 @@ class ActionHolder {
 
     void next(IAction action, Functionals.Evaluator evaluator) {
         if (! this._action.outputType().equals(action.inputType())) {
-            throw new InvalidArgumentException(
-                    "Unmatched output type {} of action {} to input type {} of action {}",
-                    this._action.outputType(), this._action.getId(),
-                    action.outputType(), action.getId());
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.UNMATCHED_ACTION)
+                    .variableBuilder(new BehaviorErrors.UnmatchedActionVariableBuilder()
+                            .outputType(this._action.outputType().getCanonicalName())
+                            .outputAction(this._action.getId().toString())
+                            .inputType(action.inputType().getCanonicalName())
+                            .intputAction(action.getId().toString()))
+                    .build();
+//            throw new InvalidArgumentException(
+//                    "Unmatched output type {} of action {} to input type {} of action {}",
+//                    this._action.outputType(), this._action.getId(),
+//                    action.outputType(), action.getId());
         }
         this._nextActions.add(new ActionHolder(action, evaluator));
     }

@@ -13,6 +13,7 @@ import spock.lang.Specification
 import uapi.GeneralException
 import uapi.InvalidArgumentException
 import uapi.behavior.ActionIdentify
+import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
 import uapi.behavior.IExecutionContext
 import uapi.common.Functionals
@@ -51,7 +52,7 @@ class ActionHolderTest extends Specification {
         instance.next(new TestAction2())
 
         then:
-        thrown(InvalidArgumentException)
+        thrown(BehaviorException)
         ! instance.hasNext()
     }
 
