@@ -66,14 +66,14 @@ class ActionHolderTest extends Specification {
         instance.hasNext()
     }
 
-    def 'Test find next action but no next action'() {
-        when:
-        def instance = new ActionHolder(new TestAction1())
-        instance.findNext(new Object())
-
-        then:
-        thrown(GeneralException)
-    }
+//    def 'Test find next action but no next action'() {
+//        when:
+//        def instance = new ActionHolder(new TestAction1())
+//        instance.findNext(new Object())
+//
+//        then:
+//        thrown(GeneralException)
+//    }
 
     def 'Test find next action with one next action'() {
         when:

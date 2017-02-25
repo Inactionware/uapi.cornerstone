@@ -20,20 +20,20 @@ class BehaviorTest extends Specification {
 
     def 'Test create instance'() {
         when:
-        new Behavior(Mock(Responsible), Mock(Repository), String.class)
+        new Behavior(Mock(Responsible), Mock(Repository), 'aaa', String.class)
 
         then:
         noExceptionThrown()
     }
 
-    def 'Test get id before built'() {
-        given:
-        def behavior = new Behavior(Mock(Responsible), Mock(Repository), String.class)
-
-        when:
-        behavior.getId()
-
-        then:
-        thrown(GeneralException)
-    }
+//    def 'Test get id before built'() {
+//        given:
+//        def behavior = new Behavior(Mock(Responsible), Mock(Repository), String.class)
+//
+//        when:
+//        behavior.getId()
+//
+//        then:
+//        thrown(GeneralException)
+//    }
 }

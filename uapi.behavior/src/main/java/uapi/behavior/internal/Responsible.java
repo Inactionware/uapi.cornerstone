@@ -56,17 +56,38 @@ public class Responsible implements IResponsible {
     }
 
     @Override
-    public IBehaviorBuilder newBehavior(final String topic) {
+    public IBehaviorBuilder newBehavior(
+            final String name,
+            final String topic
+    ) throws BehaviorException {
         ArgumentChecker.required(topic, "topic");
-        Behavior behavior = new Behavior(this, this._actionRepo, BehaviorEvent.class);
+        Behavior behavior = new Behavior(this, this._actionRepo, name, BehaviorEvent.class);
+        ActionIdentify behaviorId = behavior.getId();
+        if (this._behaviors.containsKey(behaviorId)) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.BEHAVIOR_ID_IS_USED)
+                    .variableBuilder(new BehaviorErrors.BehaviorIdIsUsedVariableBuilder()
+                            .behaviorId(behaviorId.getId()))
+                    .build();
+        }
         this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior, topic));
         return behavior;
     }
 
     @Override
-    public IBehaviorBuilder newBehavior(Class<?> type) {
-        ArgumentChecker.required(type, "type");
-        Behavior behavior = new Behavior(this, this._actionRepo, type);
+    public IBehaviorBuilder newBehavior(
+            final String name,
+            final Class<?> type
+    ) throws BehaviorException {
+        Behavior behavior = new Behavior(this, this._actionRepo, name, type);
+        ActionIdentify behaviorId = behavior.getId();
+        if (this._behaviors.containsKey(behaviorId)) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.BEHAVIOR_ID_IS_USED)
+                    .variableBuilder(new BehaviorErrors.BehaviorIdIsUsedVariableBuilder()
+                            .behaviorId(behaviorId.getId()))
+                    .build();
+        }
         this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior));
         return behavior;
     }
@@ -193,6 +214,7 @@ public class Responsible implements IResponsible {
 
         private BehaviorHolder(final Behavior behavior, final String topic, final boolean published) {
             super(3);
+            ArgumentChecker.required(topic, "topic");
             put(IDX_BEHAVIOR, behavior);
             put(IDX_TOPIC, topic);
             put(IDX_PUBLISHED, published);

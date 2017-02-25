@@ -47,13 +47,16 @@ public class Behavior<I, O>
     Behavior(
             final Responsible responsible,
             final Repository<ActionIdentify, IAction<?, ?>> actionRepository,
+            final String name,
             final Class inputType
     ) {
         ArgumentChecker.required(responsible, "responsible");
         ArgumentChecker.required(actionRepository, "responsible");
+        ArgumentChecker.required(name, "name");
         ArgumentChecker.required(inputType, "inputType");
         this._responsible = responsible;
         this._actionRepo = actionRepository;
+        this._actionId = new ActionIdentify(name, ActionType.BEHAVIOR);
         EndpointAction starting = new EndpointAction(inputType);
         this._entryAction = new ActionHolder(starting);
 
@@ -102,13 +105,13 @@ public class Behavior<I, O>
     // Methods implement from IBehaviorBuilder interface
     // ----------------------------------------------------
 
-    @Override
-    public IBehaviorBuilder name(final String name) {
-        ensureNotBuilt();
-        ArgumentChecker.required(name, "name");
-        this._actionId = new ActionIdentify(name, ActionType.BEHAVIOR);
-        return this;
-    }
+//    @Override
+//    public IBehaviorBuilder name(final String name) {
+//        ensureNotBuilt();
+//        ArgumentChecker.required(name, "name");
+//        this._actionId = new ActionIdentify(name, ActionType.BEHAVIOR);
+//        return this;
+//    }
 
     @Override
     public IBehaviorBuilder traceable(boolean traceable) {

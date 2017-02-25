@@ -27,8 +27,10 @@ public interface IResponsible {
      * @param   topic
      *          The event topic
      * @return  The behavior builder which can build a specific behavior which can handle specific event
+     * @throws  BehaviorException
+     *          The name is used in registered behavior, error code see {@link BehaviorErrors.BEHAVIOR_ID_IS_USED}
      */
-    IBehaviorBuilder newBehavior(String topic);
+    IBehaviorBuilder newBehavior(String name, String topic) throws BehaviorException;
 
     /**
      * Create new behavior builder on specific input data type which can handled by the behavior.
@@ -36,8 +38,10 @@ public interface IResponsible {
      * @param   type
      *          The data type which can be handled by the behavior
      * @return  The behavior builder
+     * @throws  BehaviorException
+     *          The name is used in other behavior, error code see {@link BehaviorErrors.BEHAVIOR_ID_IS_USED}
      */
-    IBehaviorBuilder newBehavior(Class<?> type);
+    IBehaviorBuilder newBehavior(String name, Class<?> type) throws BehaviorException;
 
     void on(BehaviorExecutingEventHandler handler);
 

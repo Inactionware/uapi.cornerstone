@@ -1,7 +1,5 @@
 package uapi.behavior.internal;
 
-import uapi.GeneralException;
-import uapi.InvalidArgumentException;
 import uapi.behavior.BehaviorErrors;
 import uapi.behavior.BehaviorException;
 import uapi.behavior.IAction;
@@ -55,7 +53,7 @@ class ActionHolder {
                             .outputType(this._action.outputType().getCanonicalName())
                             .outputAction(this._action.getId().toString())
                             .inputType(action.inputType().getCanonicalName())
-                            .intputAction(action.getId().toString()))
+                            .inputAction(action.getId().toString()))
                     .build();
 //            throw new InvalidArgumentException(
 //                    "Unmatched output type {} of action {} to input type {} of action {}",
@@ -82,9 +80,14 @@ class ActionHolder {
                     .first();
         } else {
             if (this._nextActions.size() != 1) {
-                throw new GeneralException(
-                        "Found zero or more post action when handler data without attributes - {}",
-                        this._action.getId());
+                throw BehaviorException.builder()
+                        .errorCode(BehaviorErrors.NOT_ONLY_POST_ACTION)
+                        .variableBuilder(new BehaviorErrors.NotOnlyPostActionVariableBuilder()
+                                .actionName(this._action.getId().toString()))
+                        .build();
+//                throw new GeneralException(
+//                        "Found zero or more post action when handler data without attributes - {}",
+//                        this._action.getId());
             }
             next = this._nextActions.get(0);
         }
