@@ -40,25 +40,24 @@ class ActionHolder {
         this._nextActions = new LinkedList<>();
     }
 
-    void next(IAction action) {
+    void next(final IAction action) {
         ArgumentChecker.required(action, "action");
         next(action, null);
     }
 
-    void next(IAction action, Functionals.Evaluator evaluator) {
+    void next(
+            final IAction action,
+            final Functionals.Evaluator evaluator
+    ) throws BehaviorException {
         if (! this._action.outputType().equals(action.inputType())) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.UNMATCHED_ACTION)
-                    .variableBuilder(new BehaviorErrors.UnmatchedActionVariableBuilder()
+                    .variables(new BehaviorErrors.UnmatchedAction()
                             .outputType(this._action.outputType().getCanonicalName())
                             .outputAction(this._action.getId().toString())
                             .inputType(action.inputType().getCanonicalName())
                             .inputAction(action.getId().toString()))
                     .build();
-//            throw new InvalidArgumentException(
-//                    "Unmatched output type {} of action {} to input type {} of action {}",
-//                    this._action.outputType(), this._action.getId(),
-//                    action.outputType(), action.getId());
         }
         this._nextActions.add(new ActionHolder(action, evaluator));
     }
@@ -82,12 +81,9 @@ class ActionHolder {
             if (this._nextActions.size() != 1) {
                 throw BehaviorException.builder()
                         .errorCode(BehaviorErrors.NOT_ONLY_POST_ACTION)
-                        .variableBuilder(new BehaviorErrors.NotOnlyPostActionVariableBuilder()
+                        .variables(new BehaviorErrors.NotOnlyPostAction()
                                 .actionName(this._action.getId().toString()))
                         .build();
-//                throw new GeneralException(
-//                        "Found zero or more post action when handler data without attributes - {}",
-//                        this._action.getId());
             }
             next = this._nextActions.get(0);
         }

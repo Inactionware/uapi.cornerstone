@@ -285,7 +285,11 @@ public class Behavior<I, O>
             ArgumentChecker.required(label, "label");
             ActionHolder matched = this._labeledActions.get(label);
             if (matched == null) {
-                throw new InvalidArgumentException("No action is labeled - {}", label);
+                throw BehaviorException.builder()
+                        .errorCode(BehaviorErrors.NO_ACTION_WITH_LABEL)
+                        .variables(new BehaviorErrors.NoActionWithLabel()
+                                .label(label))
+                        .build();
             }
             this._current = matched;
             return Behavior.this;
@@ -295,14 +299,17 @@ public class Behavior<I, O>
                 final IAction action,
                 final Functionals.Evaluator evaluator,
                 final String label
-        ) {
+        ) throws BehaviorException {
             this._current = new ActionHolder(action, evaluator);
             if (! ArgumentChecker.isEmpty(label)) {
                 ActionHolder existingAction = this._labeledActions.get(label);
                 if (existingAction != null) {
-                    throw new InvalidArgumentException(
-                            "The label [{}] has been bind to action [{}]",
-                            label, existingAction.action().getId());
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.ACTION_LABEL_IS_BIND)
+                            .variables(new BehaviorErrors.ActionLabelIsBind()
+                                    .label(label)
+                                    .actionId(existingAction.action().getId()))
+                            .build();
                 }
                 this._labeledActions.put(label, this._current);
             }

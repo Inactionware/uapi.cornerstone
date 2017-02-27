@@ -14,7 +14,6 @@ import uapi.InvalidArgumentException;
 import uapi.behavior.*;
 import uapi.common.*;
 import uapi.event.IAttributedEventHandler;
-import uapi.event.IEvent;
 import uapi.event.IEventBus;
 import uapi.event.IEventHandler;
 
@@ -66,8 +65,8 @@ public class Responsible implements IResponsible {
         if (this._behaviors.containsKey(behaviorId)) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.BEHAVIOR_ID_IS_USED)
-                    .variableBuilder(new BehaviorErrors.BehaviorIdIsUsedVariableBuilder()
-                            .behaviorId(behaviorId.getId()))
+                    .variables(new BehaviorErrors.BehaviorIdIsUsed()
+                            .behaviorId(behaviorId.getId()).get())
                     .build();
         }
         this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior, topic));
@@ -84,8 +83,8 @@ public class Responsible implements IResponsible {
         if (this._behaviors.containsKey(behaviorId)) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.BEHAVIOR_ID_IS_USED)
-                    .variableBuilder(new BehaviorErrors.BehaviorIdIsUsedVariableBuilder()
-                            .behaviorId(behaviorId.getId()))
+                    .variables(new BehaviorErrors.BehaviorIdIsUsed()
+                            .behaviorId(behaviorId.getId()).get())
                     .build();
         }
         this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior));

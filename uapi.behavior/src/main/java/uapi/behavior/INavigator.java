@@ -25,6 +25,8 @@ public interface INavigator {
      * @param   label
      *          The action/behavior label in this behavior
      * @return  The associated behavior builder
+     * @throws  BehaviorException
+     *          If the labeled action was not found, see {@link BehaviorErrors.NoActionWithLabel}
      */
-    IBehaviorBuilder moveTo(String label);
+    IBehaviorBuilder moveTo(String label) throws BehaviorException;
 }
