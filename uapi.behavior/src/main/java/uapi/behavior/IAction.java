@@ -46,4 +46,7 @@ public interface IAction<I, O> extends IIdentifiable<ActionIdentify> {
      * @return  output data type
      */
     Class<O> outputType();
+
+    @Override
+    ActionIdentify getId();
 }

@@ -19,17 +19,31 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
     public static final int CATEGORY   = 0x0100;
 
     public static final int UNMATCHED_ACTION        = 1;
-    public static final int NOT_ONLY_POST_ACTION    = 2;
+    public static final int NOT_ONLY_NEXT_ACTION    = 2;
     public static final int BEHAVIOR_ID_IS_USED     = 3;
     public static final int NO_ACTION_WITH_LABEL    = 4;
     public static final int ACTION_LABEL_IS_BIND    = 5;
+    public static final int EVALUATOR_IS_SET        = 6;
+    public static final int ACTION_NOT_FOUND        = 7;
+    public static final int EVALUATOR_NOT_USED      = 8;
+    public static final int NO_ACTION_IN_BEHAVIOR   = 9;
+    public static final int ACTION_IO_MISMATCH      = 10;
+    public static final int PUBLISH_UNREG_BEHAVIOR  = 11;
+    public static final int BEHAVIOR_IS_PUBLISHED   = 12;
 
     static {
         mapCodeKey(UNMATCHED_ACTION, UnmatchedAction.KEY);
-        mapCodeKey(NOT_ONLY_POST_ACTION, NotOnlyPostAction.KEY);
+        mapCodeKey(NOT_ONLY_NEXT_ACTION, NotOnlyNextAction.KEY);
         mapCodeKey(BEHAVIOR_ID_IS_USED, BehaviorIdIsUsed.KEY);
         mapCodeKey(NO_ACTION_WITH_LABEL, NoActionWithLabel.KEY);
         mapCodeKey(ACTION_LABEL_IS_BIND, ActionLabelIsBind.KEY);
+        mapCodeKey(EVALUATOR_IS_SET, EvaluatorIsSet.KEY);
+        mapCodeKey(ACTION_NOT_FOUND, ActionNotFound.KEY);
+        mapCodeKey(EVALUATOR_NOT_USED, EvaluatorNotUsed.KEY);
+        mapCodeKey(NO_ACTION_IN_BEHAVIOR, NoActionInBehavior.KEY);
+        mapCodeKey(ACTION_IO_MISMATCH, ActionIOMismatch.KEY);
+        mapCodeKey(PUBLISH_UNREG_BEHAVIOR, PublishUnregBehavior.KEY);
+        mapCodeKey(BEHAVIOR_IS_PUBLISHED, BehaviorIsPublished.KEY);
     }
 
     @Override
@@ -50,8 +64,8 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
 
         private String _outputType;
         private String _inputType;
-        private String _outputAction;
-        private String _inputAction;
+        private ActionIdentify _outputAction;
+        private ActionIdentify _inputAction;
 
         public UnmatchedAction outputType(String outputType) {
             this._outputType = outputType;
@@ -63,13 +77,13 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
             return this;
         }
 
-        public UnmatchedAction outputAction(String outputAction) {
-            this._outputAction = outputAction;
+        public UnmatchedAction outputAction(ActionIdentify actionId) {
+            this._outputAction = actionId;
             return this;
         }
 
-        public UnmatchedAction inputAction(String inputAction) {
-            this._inputAction = inputAction;
+        public UnmatchedAction inputAction(ActionIdentify actionId) {
+            this._inputAction = actionId;
             return this;
         }
 
@@ -83,20 +97,20 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template:
      *      Found zero or more post action when handler data without attributes - {}
      */
-    public static final class NotOnlyPostAction extends IndexedVariables<NotOnlyPostAction> {
+    public static final class NotOnlyNextAction extends IndexedVariables<NotOnlyNextAction> {
 
-        private static final String KEY = "NotOnlyPostAction";
+        private static final String KEY = "NotOnlyNextAction";
 
-        private String _actionName;
+        private ActionIdentify _actionId;
 
-        public NotOnlyPostAction actionName(String actionName) {
-            this._actionName = actionName;
+        public NotOnlyNextAction actionId(ActionIdentify actionId) {
+            this._actionId = actionId;
             return this;
         }
 
         @Override
         public Object[] get() {
-            return new Object[] { this._actionName };
+            return new Object[] { this._actionId};
         }
     }
 
@@ -108,9 +122,9 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
 
         private static final String KEY = "BehaviorIdIsUsed";
 
-        private String _behaviorId;
+        private ActionIdentify _behaviorId;
 
-        public BehaviorIdIsUsed behaviorId(String behaviorId) {
+        public BehaviorIdIsUsed behaviorId(ActionIdentify behaviorId) {
             this._behaviorId = behaviorId;
             return this;
         }
@@ -152,14 +166,14 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
         private static final String KEY = "ActionLabelIsBind";
 
         private String _label;
-        private Object _actionId;
+        private ActionIdentify _actionId;
 
         public ActionLabelIsBind label(String label) {
             this._label = label;
             return this;
         }
 
-        public ActionLabelIsBind actionId(Object actionId) {
+        public ActionLabelIsBind actionId(ActionIdentify actionId) {
             this._actionId = actionId;
             return this;
         }
@@ -167,6 +181,171 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
         @Override
         public Object[] get() {
             return new Object[] { this._label, this._actionId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The evaluator is set for action - {}
+     */
+    public static final class EvaluatorIsSet extends IndexedVariables<EvaluatorIsSet> {
+
+        private static final String KEY = "EvaluatorIsSet";
+
+        private ActionIdentify _actionId;
+
+        public EvaluatorIsSet actionId(ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._actionId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      There is no action named - {}
+     */
+    public static final class ActionNotFound extends IndexedVariables<ActionNotFound> {
+
+        private static final String KEY = "ActionNotFound";
+
+        private ActionIdentify _actionId;
+
+        public ActionNotFound actionId(ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._actionId};
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The evaluator is set but it does not used
+     */
+    public static final class EvaluatorNotUsed extends IndexedVariables<EvaluatorNotUsed> {
+
+        private static final String KEY = "EvaluatorNotUsed";
+    }
+
+    /**
+     * Error string template:
+     *      The behavior builder has no action defined - {}
+     */
+    public static final class NoActionInBehavior extends IndexedVariables<NoActionInBehavior> {
+
+        private static final String KEY = "NoActionInBehavior";
+
+        private ActionIdentify _behaviorId;
+
+        public NoActionInBehavior behaviorId(ActionIdentify behaviorId) {
+            this._behaviorId = behaviorId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._behaviorId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Incorrect output/input type [{} vs. {}] between actions - {} and {}
+     */
+    public static final class ActionIOMismatch extends IndexedVariables<ActionIOMismatch> {
+
+        private static final String KEY = "ActionIOMismatch";
+
+        private Class _outputType;
+        private Class _inputType;
+        private ActionIdentify _outputAction;
+        private ActionIdentify _inputAction;
+
+        public ActionIOMismatch outputType(final Class outputType) {
+            this._outputType = outputType;
+            return this;
+        }
+
+        public ActionIOMismatch inputType(final Class inputType) {
+            this._inputType = inputType;
+            return this;
+        }
+
+        public ActionIOMismatch outputAction(final ActionIdentify outputAction) {
+            this._outputAction = outputAction;
+            return this;
+        }
+
+        public ActionIOMismatch inputAction(final ActionIdentify inputAction) {
+            this._inputAction = inputAction;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._outputType, this._inputType, this._outputAction, this._inputAction };
+        }
+    }
+
+    /**
+     * Error string template
+     *      Can't publish behavior - {} in - {}, the behavior is unregistered
+     */
+    public static final class PublishUnregBehavior extends IndexedVariables<PublishUnregBehavior> {
+
+        private static final String KEY = "PublishUnregBehavior";
+
+        private ActionIdentify _behaviorId;
+        private String _responsibleName;
+
+        public PublishUnregBehavior behaviorId(ActionIdentify behaviorId) {
+            this._behaviorId = behaviorId;
+            return this;
+        }
+
+        public PublishUnregBehavior responsibleName(String responsibleName) {
+            this._responsibleName = responsibleName;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._behaviorId, this._responsibleName };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The behavior - {} in {} is published
+     */
+    public static final class BehaviorIsPublished extends IndexedVariables<BehaviorIsPublished> {
+
+        private static final String KEY = "BehaviorIsPublished";
+
+        private ActionIdentify _behaviorId;
+        private String _responsibleName;
+
+        public BehaviorIsPublished behaviorId(ActionIdentify behaviorId) {
+            this._behaviorId = behaviorId;
+            return this;
+        }
+
+        public BehaviorIsPublished responsibleName(String responsibleName) {
+            this._responsibleName = responsibleName;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._behaviorId, this._responsibleName };
         }
     }
 }

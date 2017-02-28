@@ -9,8 +9,6 @@
 
 package uapi.behavior.internal;
 
-import uapi.GeneralException;
-import uapi.InvalidArgumentException;
 import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
 import uapi.common.Builder;
@@ -91,7 +89,7 @@ public class Behavior<I, O>
     }
 
     @Override
-    public O process(I input, IExecutionContext context) {
+    public O process(final I input, final IExecutionContext context) {
         ensureBuilt();
         ActionHolder current = this._entryAction;
         Object data = input;
@@ -121,29 +119,37 @@ public class Behavior<I, O>
     }
 
     @Override
-    public IBehaviorBuilder when(Functionals.Evaluator evaluator) {
+    public IBehaviorBuilder when(final Functionals.Evaluator evaluator) throws BehaviorException {
         ensureNotBuilt();
         ArgumentChecker.required(evaluator, "evaluator");
         if (this._lastEvaluator != null) {
-            throw new GeneralException("The evaluator is set");
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.EVALUATOR_IS_SET)
+                    .variables(new BehaviorErrors.EvaluatorIsSet()
+                            .actionId(this._navigator._current.action().getId()))
+                    .build();
         }
         this._lastEvaluator = evaluator;
         return this;
     }
 
     @Override
-    public IBehaviorBuilder then(ActionIdentify id) {
+    public IBehaviorBuilder then(final ActionIdentify id) throws BehaviorException {
         ensureNotBuilt();
         return then(id, null);
     }
 
     @Override
-    public IBehaviorBuilder then(ActionIdentify id, String label) {
+    public IBehaviorBuilder then(final ActionIdentify id, final String label) throws BehaviorException {
         ensureNotBuilt();
         ArgumentChecker.required(id, "id");
         IAction<?, ?> action = this._actionRepo.get(id);
         if (action == null) {
-            throw new GeneralException("There is no action named - {}", id.getId());
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
+                    .variables(new BehaviorErrors.ActionNotFound()
+                            .actionId(id))
+                    .build();
         }
         this._navigator.newNextAction(action, this._lastEvaluator, label);
         this._lastEvaluator = null;
@@ -161,10 +167,13 @@ public class Behavior<I, O>
     // ----------------------------------------------------
 
     @Override
-    protected void validate() throws InvalidArgumentException {
+    protected void validate() throws BehaviorException {
         ensureNotBuilt();
         if (this._lastEvaluator != null) {
-            throw new GeneralException("The evaluator is set but it does not used");
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.EVALUATOR_NOT_USED)
+                    .build();
+//            throw new GeneralException("The evaluator is set but it does not used");
         }
         // Check all leaf action's output type, they must be a same type
         List<ActionHolder> leafActions = Looper.on(this._navigator._actions)
@@ -172,7 +181,12 @@ public class Behavior<I, O>
                 .toList();
         Class outputType = leafActions.get(0).action().outputType();
         if (outputType == null) {
-            throw new GeneralException("The behavior builder has no action defined");
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.NO_ACTION_IN_BEHAVIOR)
+                    .variables(new BehaviorErrors.NoActionInBehavior()
+                            .behaviorId(this.getId()))
+                    .build();
+//            throw new GeneralException("The behavior builder has no action defined - {}", this.getId());
         }
         if (leafActions.size() > 1) {
             Looper.on(leafActions).foreachWithIndex((idx, action) -> {
@@ -182,9 +196,14 @@ public class Behavior<I, O>
                 IAction action1 = leafActions.get(idx - 1).action();
                 IAction action2 = leafActions.get(idx).action();
                 if (!action1.outputType().equals(action2.outputType())) {
-                    throw new GeneralException(
-                            "Incorrect output type [{} vs. {}] between action [{} vs. {}]",
-                            action1, action2, action1.outputType(), action2.outputType());
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.ACTION_IO_MISMATCH)
+                            .variables(new BehaviorErrors.ActionIOMismatch()
+                                    .outputType(action1.outputType())
+                                    .inputType(action2.inputType())
+                                    .outputAction(action1.getId())
+                                    .inputAction(action2.getId()))
+                            .build();
                 }
             });
         }
@@ -240,7 +259,7 @@ public class Behavior<I, O>
         }
 
         @Override
-        public String getId() {
+        public ActionIdentify getId() {
             return null;
         }
 

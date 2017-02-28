@@ -126,7 +126,7 @@ public class ActionHandler extends AnnotationsHandler {
             Template tempOutputType = builderContext.loadTemplate(TEMPLATE_OUTPUT_TYPE);
             Template tempProcess = builderContext.loadTemplate(TEMPLATE_PROCESS);
             Map<String, Object> model = new HashMap<>();
-            model.put("actionName", actionName);
+            model.put("actionId", actionName);
             model.put("actionMethodName", actionMethodName);
             model.put("inputType", inputType);
             model.put("outputType", outputType);

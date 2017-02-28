@@ -66,7 +66,7 @@ public class Responsible implements IResponsible {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.BEHAVIOR_ID_IS_USED)
                     .variables(new BehaviorErrors.BehaviorIdIsUsed()
-                            .behaviorId(behaviorId.getId()).get())
+                            .behaviorId(behaviorId).get())
                     .build();
         }
         this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior, topic));
@@ -84,7 +84,7 @@ public class Responsible implements IResponsible {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.BEHAVIOR_ID_IS_USED)
                     .variables(new BehaviorErrors.BehaviorIdIsUsed()
-                            .behaviorId(behaviorId.getId()).get())
+                            .behaviorId(behaviorId).get())
                     .build();
         }
         this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior));
@@ -105,16 +105,25 @@ public class Responsible implements IResponsible {
         registerEventHandler();
     }
 
-    void publish(final Behavior behavior) {
+    void publish(final Behavior behavior) throws BehaviorException {
         ArgumentChecker.required(behavior, "behavior");
         ActionIdentify behaviorId = behavior.getId();
         BehaviorHolder behaviorHolder = this._behaviors.get(behaviorId);
         if (behaviorHolder == null) {
-            throw new InvalidArgumentException(
-                    "Can't publish behavior - {} in - {}, reason: not found", behaviorId, this._name);
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.PUBLISH_UNREG_BEHAVIOR)
+                    .variables(new BehaviorErrors.PublishUnregBehavior()
+                            .behaviorId(behaviorId)
+                            .responsibleName(this._name))
+                    .build();
         }
         if (behaviorHolder.isPublished()) {
-            throw new GeneralException("The behavior - {} in {} is published", behaviorId, this._name);
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.BEHAVIOR_IS_PUBLISHED)
+                    .variables(new BehaviorErrors.BehaviorIsPublished()
+                            .behaviorId(behaviorId)
+                            .responsibleName(this._name))
+                    .build();
         }
         String topic = behaviorHolder.topic();
         if (ArgumentChecker.isEmpty(topic)) {

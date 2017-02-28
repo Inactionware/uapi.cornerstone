@@ -40,11 +40,31 @@ class ActionHolder {
         this._nextActions = new LinkedList<>();
     }
 
-    void next(final IAction action) {
+    /**
+     * Set default next action
+     *
+     * @param   action
+     *          The next action
+     * @throws  BehaviorException
+     *          If this action's output type is not matched next action's input type,
+     *          see {@link BehaviorErrors.UnmatchedAction}
+     */
+    void next(final IAction action) throws BehaviorException {
         ArgumentChecker.required(action, "action");
         next(action, null);
     }
 
+    /**
+     * Set next action by specific evaluator
+     *
+     * @param   action
+     *          The next action
+     * @param   evaluator
+     *          The evaluator which will be evaluated when decide which next action is used by output from last action
+     * @throws  BehaviorException
+     *          If this action's output type is not matched next action's input type,
+     *          see {@link BehaviorErrors.UnmatchedAction}
+     */
     void next(
             final IAction action,
             final Functionals.Evaluator evaluator
@@ -54,9 +74,9 @@ class ActionHolder {
                     .errorCode(BehaviorErrors.UNMATCHED_ACTION)
                     .variables(new BehaviorErrors.UnmatchedAction()
                             .outputType(this._action.outputType().getCanonicalName())
-                            .outputAction(this._action.getId().toString())
+                            .outputAction(this._action.getId())
                             .inputType(action.inputType().getCanonicalName())
-                            .inputAction(action.getId().toString()))
+                            .inputAction(action.getId()))
                     .build();
         }
         this._nextActions.add(new ActionHolder(action, evaluator));
@@ -70,7 +90,16 @@ class ActionHolder {
         return this._action;
     }
 
-    ActionHolder findNext(Object data) {
+    /**
+     * Find next action by specific input data
+     *
+     * @param   data
+     *          The input data which will be used to evaluate out next action
+     * @return  The next action
+     * @throws  BehaviorException
+     *          If founded next action is not only one, see {@link BehaviorErrors.NotOnlyNextAction}
+     */
+    ActionHolder findNext(final Object data) throws BehaviorException {
         ActionHolder next;
         if (data instanceof IAttributed) {
             IAttributed attributed = (IAttributed) data;
@@ -80,9 +109,9 @@ class ActionHolder {
         } else {
             if (this._nextActions.size() != 1) {
                 throw BehaviorException.builder()
-                        .errorCode(BehaviorErrors.NOT_ONLY_POST_ACTION)
-                        .variables(new BehaviorErrors.NotOnlyPostAction()
-                                .actionName(this._action.getId().toString()))
+                        .errorCode(BehaviorErrors.NOT_ONLY_NEXT_ACTION)
+                        .variables(new BehaviorErrors.NotOnlyNextAction()
+                                .actionId(this._action.getId()))
                         .build();
             }
             next = this._nextActions.get(0);
