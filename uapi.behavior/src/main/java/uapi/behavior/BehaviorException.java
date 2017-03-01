@@ -20,8 +20,9 @@ public class BehaviorException extends ParameterizedException {
         return new BehaviorExceptionBuilder();
     }
 
-    private BehaviorException(ExceptionBuilder builder) {
+    protected BehaviorException(BehaviorExceptionBuilder builder) {
         super(builder);
+        int i = 1;
     }
 
     public static final class BehaviorExceptionBuilder

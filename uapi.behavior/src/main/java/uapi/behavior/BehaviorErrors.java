@@ -47,6 +47,10 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         mapCodeKey(BEHAVIOR_IS_PUBLISHED, BehaviorIsPublished.KEY);
     }
 
+    public BehaviorErrors() {
+        super();
+    }
+
     @Override
     protected String getFile(BehaviorException exception) {
         if (exception.category() == CATEGORY) {
@@ -90,7 +94,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 
         @Override
         public Object[] get() {
-            return new Object[] { this._outputType, this._inputType, this._outputAction , this._inputAction };
+            return new Object[] { this._outputType, this._outputAction, this._inputType , this._inputAction };
         }
     }
 

@@ -173,20 +173,25 @@ public class Behavior<I, O>
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.EVALUATOR_NOT_USED)
                     .build();
-//            throw new GeneralException("The evaluator is set but it does not used");
         }
         // Check all leaf action's output type, they must be a same type
         List<ActionHolder> leafActions = Looper.on(this._navigator._actions)
                 .filter(ActionHolder::hasNext)
                 .toList();
+        if (leafActions.size() == 0) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.NO_ACTION_IN_BEHAVIOR)
+                    .variables(new BehaviorErrors.NoActionInBehavior()
+                            .behaviorId(this._actionId))
+                    .build();
+        }
         Class outputType = leafActions.get(0).action().outputType();
         if (outputType == null) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.NO_ACTION_IN_BEHAVIOR)
                     .variables(new BehaviorErrors.NoActionInBehavior()
-                            .behaviorId(this.getId()))
+                            .behaviorId(this._actionId))
                     .build();
-//            throw new GeneralException("The behavior builder has no action defined - {}", this.getId());
         }
         if (leafActions.size() > 1) {
             Looper.on(leafActions).foreachWithIndex((idx, action) -> {
@@ -320,6 +325,7 @@ public class Behavior<I, O>
                 final String label
         ) throws BehaviorException {
             this._current = new ActionHolder(action, evaluator);
+            this._actions.add(this._current);
             if (! ArgumentChecker.isEmpty(label)) {
                 ActionHolder existingAction = this._labeledActions.get(label);
                 if (existingAction != null) {
