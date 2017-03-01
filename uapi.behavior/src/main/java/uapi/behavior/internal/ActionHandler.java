@@ -25,8 +25,6 @@ import uapi.rx.Looper;
 import uapi.service.annotation.Service;
 
 import javax.lang.model.element.*;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.List;

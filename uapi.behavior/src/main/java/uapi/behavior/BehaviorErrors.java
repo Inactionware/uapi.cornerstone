@@ -9,12 +9,13 @@
 
 package uapi.behavior;
 
-import uapi.ExceptionErrors;
+import uapi.exception.FileBasedExceptionErrors;
+import uapi.exception.IndexedParameters;
 
 /**
  * Error codes for behavior framework.
  */
-public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
+public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> {
 
     public static final int CATEGORY   = 0x0100;
 
@@ -47,7 +48,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
     }
 
     @Override
-    protected String getPropertiesFile(BehaviorException exception) {
+    protected String getFile(BehaviorException exception) {
         if (exception.category() == CATEGORY) {
             return "/behaviorErrors.properties";
         }
@@ -58,7 +59,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template:
      *      Unmatched output type {} of action {} to input type {} of action {}
      */
-    public static final class UnmatchedAction extends IndexedVariables<UnmatchedAction> {
+    public static final class UnmatchedAction extends IndexedParameters<UnmatchedAction> {
 
         private static final String KEY = "UnmatchedAction";
 
@@ -97,7 +98,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template:
      *      Found zero or more post action when handler data without attributes - {}
      */
-    public static final class NotOnlyNextAction extends IndexedVariables<NotOnlyNextAction> {
+    public static final class NotOnlyNextAction extends IndexedParameters<NotOnlyNextAction> {
 
         private static final String KEY = "NotOnlyNextAction";
 
@@ -118,7 +119,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template:
      *      The behavior is used - {}
      */
-    public static final class BehaviorIdIsUsed extends IndexedVariables<BehaviorIdIsUsed> {
+    public static final class BehaviorIdIsUsed extends IndexedParameters<BehaviorIdIsUsed> {
 
         private static final String KEY = "BehaviorIdIsUsed";
 
@@ -139,7 +140,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * String template:
      *      No action is labeled - {}
      */
-    public static final class NoActionWithLabel extends IndexedVariables<NoActionWithLabel> {
+    public static final class NoActionWithLabel extends IndexedParameters<NoActionWithLabel> {
 
         private static final String KEY = "NoActonWithLabel";
 
@@ -161,7 +162,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template:
      *      The label [{}] has been bind to action [{}]
      */
-    public static final class ActionLabelIsBind extends IndexedVariables<ActionLabelIsBind> {
+    public static final class ActionLabelIsBind extends IndexedParameters<ActionLabelIsBind> {
 
         private static final String KEY = "ActionLabelIsBind";
 
@@ -188,7 +189,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template:
      *      The evaluator is set for action - {}
      */
-    public static final class EvaluatorIsSet extends IndexedVariables<EvaluatorIsSet> {
+    public static final class EvaluatorIsSet extends IndexedParameters<EvaluatorIsSet> {
 
         private static final String KEY = "EvaluatorIsSet";
 
@@ -209,7 +210,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template:
      *      There is no action named - {}
      */
-    public static final class ActionNotFound extends IndexedVariables<ActionNotFound> {
+    public static final class ActionNotFound extends IndexedParameters<ActionNotFound> {
 
         private static final String KEY = "ActionNotFound";
 
@@ -230,7 +231,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template:
      *      The evaluator is set but it does not used
      */
-    public static final class EvaluatorNotUsed extends IndexedVariables<EvaluatorNotUsed> {
+    public static final class EvaluatorNotUsed extends IndexedParameters<EvaluatorNotUsed> {
 
         private static final String KEY = "EvaluatorNotUsed";
     }
@@ -239,7 +240,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template:
      *      The behavior builder has no action defined - {}
      */
-    public static final class NoActionInBehavior extends IndexedVariables<NoActionInBehavior> {
+    public static final class NoActionInBehavior extends IndexedParameters<NoActionInBehavior> {
 
         private static final String KEY = "NoActionInBehavior";
 
@@ -260,7 +261,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template:
      *      Incorrect output/input type [{} vs. {}] between actions - {} and {}
      */
-    public static final class ActionIOMismatch extends IndexedVariables<ActionIOMismatch> {
+    public static final class ActionIOMismatch extends IndexedParameters<ActionIOMismatch> {
 
         private static final String KEY = "ActionIOMismatch";
 
@@ -299,7 +300,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template
      *      Can't publish behavior - {} in - {}, the behavior is unregistered
      */
-    public static final class PublishUnregBehavior extends IndexedVariables<PublishUnregBehavior> {
+    public static final class PublishUnregBehavior extends IndexedParameters<PublishUnregBehavior> {
 
         private static final String KEY = "PublishUnregBehavior";
 
@@ -326,7 +327,7 @@ public class BehaviorErrors extends ExceptionErrors<BehaviorException> {
      * Error string template:
      *      The behavior - {} in {} is published
      */
-    public static final class BehaviorIsPublished extends IndexedVariables<BehaviorIsPublished> {
+    public static final class BehaviorIsPublished extends IndexedParameters<BehaviorIsPublished> {
 
         private static final String KEY = "BehaviorIsPublished";
 

@@ -10,7 +10,6 @@
 package uapi.behavior.internal;
 
 import uapi.GeneralException;
-import uapi.InvalidArgumentException;
 import uapi.behavior.*;
 import uapi.common.*;
 import uapi.event.IAttributedEventHandler;

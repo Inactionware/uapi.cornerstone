@@ -18,6 +18,7 @@ dependencies {
 
     compile (
             "uapi:uapi.common:${uapi_base_version}",
+            "uapi:uapi.exception:${uapi_base_version}",
             "uapi:uapi.codegen:${uapi_base_version}",
 
             "com.google.auto.service:auto-service:${auto_service_version}",

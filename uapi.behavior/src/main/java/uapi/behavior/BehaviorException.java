@@ -9,12 +9,12 @@
 
 package uapi.behavior;
 
-import uapi.PropertiedException;
+import uapi.exception.ParameterizedException;
 
 /**
  * The root exception for behavior framework
  */
-public class BehaviorException extends PropertiedException {
+public class BehaviorException extends ParameterizedException {
 
     public static BehaviorExceptionBuilder builder() {
         return new BehaviorExceptionBuilder();
