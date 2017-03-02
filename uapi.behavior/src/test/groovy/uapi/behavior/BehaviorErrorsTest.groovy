@@ -9,7 +9,6 @@
 
 package uapi.behavior
 
-import spock.lang.Ignore
 import spock.lang.Specification
 
 /**
@@ -17,31 +16,31 @@ import spock.lang.Specification
  */
 class BehaviorErrorsTest extends Specification {
 
-//    def 'Test get exception message'() {
-//        when:
-//        def ex = BehaviorException.builder()
-//                .errorCode(BehaviorErrors.UNMATCHED_ACTION)
-//                .variables(new BehaviorErrors.UnmatchedAction()
-//                        .inputType('1')
-//                        .outputType('2')
-//                        .inputAction(new ActionIdentify('ia', ActionType.ACTION))
-//                        .outputAction(new ActionIdentify('oa', ActionType.ACTION)))
-//                .build()
-//
-//        then:
-//        ex.getMessage() == "Unmatched output type 2 of action oa@ACTION to input type 1 of action ia@ACTION"
-//    }
-
-    @Ignore
-    def 'tt'() {
+    def 'Test get exception message'() {
         when:
         def ex = BehaviorException.builder()
-                    .errorCode(BehaviorErrors.NO_ACTION_WITH_LABEL)
-                    .variables(new BehaviorErrors.NoActionInBehavior()
-                        .behaviorId(new ActionIdentify('tt', ActionType.ACTION)))
+                .errorCode(BehaviorErrors.UNMATCHED_ACTION)
+                .variables(new BehaviorErrors.UnmatchedAction()
+                        .inputType('1')
+                        .outputType('2')
+                        .inputAction(new ActionIdentify('ia', ActionType.ACTION))
+                        .outputAction(new ActionIdentify('oa', ActionType.ACTION)))
+                .build()
+
+        then:
+        ex.getMessage() == "Unmatched output type 2 of action oa@ACTION to input type 1 of action ia@ACTION"
+    }
+
+    def 'Test get BehaviorIsPublish message'() {
+        when:
+        def ex = BehaviorException.builder()
+                    .errorCode(BehaviorErrors.BEHAVIOR_IS_PUBLISHED)
+                    .variables(new BehaviorErrors.BehaviorIsPublished()
+                        .behaviorId(new ActionIdentify('tt', ActionType.BEHAVIOR))
+                        .responsibleName('resName'))
                     .build();
 
         then:
-        ex.getMessage() == 'aaa'
+        ex.getMessage() == 'The behavior - tt@BEHAVIOR in resName is published'
     }
 }

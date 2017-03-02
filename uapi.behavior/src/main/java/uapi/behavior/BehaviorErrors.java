@@ -12,6 +12,9 @@ package uapi.behavior;
 import uapi.exception.FileBasedExceptionErrors;
 import uapi.exception.IndexedParameters;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Error codes for behavior framework.
  */
@@ -32,19 +35,22 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int PUBLISH_UNREG_BEHAVIOR  = 11;
     public static final int BEHAVIOR_IS_PUBLISHED   = 12;
 
+    private static final Map<Integer, String> keyCodeMapping;
+
     static {
-        mapCodeKey(UNMATCHED_ACTION, UnmatchedAction.KEY);
-        mapCodeKey(NOT_ONLY_NEXT_ACTION, NotOnlyNextAction.KEY);
-        mapCodeKey(BEHAVIOR_ID_IS_USED, BehaviorIdIsUsed.KEY);
-        mapCodeKey(NO_ACTION_WITH_LABEL, NoActionWithLabel.KEY);
-        mapCodeKey(ACTION_LABEL_IS_BIND, ActionLabelIsBind.KEY);
-        mapCodeKey(EVALUATOR_IS_SET, EvaluatorIsSet.KEY);
-        mapCodeKey(ACTION_NOT_FOUND, ActionNotFound.KEY);
-        mapCodeKey(EVALUATOR_NOT_USED, EvaluatorNotUsed.KEY);
-        mapCodeKey(NO_ACTION_IN_BEHAVIOR, NoActionInBehavior.KEY);
-        mapCodeKey(ACTION_IO_MISMATCH, ActionIOMismatch.KEY);
-        mapCodeKey(PUBLISH_UNREG_BEHAVIOR, PublishUnregBehavior.KEY);
-        mapCodeKey(BEHAVIOR_IS_PUBLISHED, BehaviorIsPublished.KEY);
+        keyCodeMapping = new ConcurrentHashMap<>();
+        keyCodeMapping.put(UNMATCHED_ACTION, UnmatchedAction.KEY);
+        keyCodeMapping.put(NOT_ONLY_NEXT_ACTION, NotOnlyNextAction.KEY);
+        keyCodeMapping.put(BEHAVIOR_ID_IS_USED, BehaviorIdIsUsed.KEY);
+        keyCodeMapping.put(NO_ACTION_WITH_LABEL, NoActionWithLabel.KEY);
+        keyCodeMapping.put(ACTION_LABEL_IS_BIND, ActionLabelIsBind.KEY);
+        keyCodeMapping.put(EVALUATOR_IS_SET, EvaluatorIsSet.KEY);
+        keyCodeMapping.put(ACTION_NOT_FOUND, ActionNotFound.KEY);
+        keyCodeMapping.put(EVALUATOR_NOT_USED, EvaluatorNotUsed.KEY);
+        keyCodeMapping.put(NO_ACTION_IN_BEHAVIOR, NoActionInBehavior.KEY);
+        keyCodeMapping.put(ACTION_IO_MISMATCH, ActionIOMismatch.KEY);
+        keyCodeMapping.put(PUBLISH_UNREG_BEHAVIOR, PublishUnregBehavior.KEY);
+        keyCodeMapping.put(BEHAVIOR_IS_PUBLISHED, BehaviorIsPublished.KEY);
     }
 
     public BehaviorErrors() {
@@ -57,6 +63,11 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
             return "/behaviorErrors.properties";
         }
         return null;
+    }
+
+    @Override
+    protected String getKey(BehaviorException e) {
+        return keyCodeMapping.get(e.errorCode());
     }
 
     /**

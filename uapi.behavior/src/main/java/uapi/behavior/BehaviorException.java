@@ -9,6 +9,7 @@
 
 package uapi.behavior;
 
+import uapi.exception.ExceptionBuilder;
 import uapi.exception.ParameterizedException;
 
 /**
