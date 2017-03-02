@@ -10,6 +10,7 @@
 package uapi.behavior;
 
 import uapi.exception.ExceptionBuilder;
+import uapi.exception.IndexedParameters;
 import uapi.exception.ParameterizedException;
 
 /**
@@ -23,7 +24,6 @@ public class BehaviorException extends ParameterizedException {
 
     protected BehaviorException(BehaviorExceptionBuilder builder) {
         super(builder);
-        int i = 1;
     }
 
     public static final class BehaviorExceptionBuilder
@@ -37,5 +37,16 @@ public class BehaviorException extends ParameterizedException {
         protected BehaviorException createInstance() {
             return new BehaviorException(this);
         }
+//
+//        public BehaviorExceptionBuilder parameters(IndexedParameterSetter parametersSetter) {
+//            parametersSetter.accept(null);
+//            return this;
+//        }
     }
+
+//    @FunctionalInterface
+//    public interface IndexedParameterSetter {
+//
+//        <T extends IndexedParameters> void accept(T parameters);
+//    }
 }
