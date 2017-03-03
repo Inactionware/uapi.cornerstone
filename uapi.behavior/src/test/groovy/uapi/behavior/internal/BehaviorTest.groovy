@@ -10,7 +10,6 @@
 package uapi.behavior.internal
 
 import spock.lang.Specification
-import uapi.GeneralException
 import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorException
@@ -30,17 +29,6 @@ class BehaviorTest extends Specification {
 
         then:
         noExceptionThrown()
-    }
-
-    def 'Test get id before built'() {
-        given:
-        def behavior = new Behavior(Mock(Responsible), Mock(Repository), 'aaa', String.class)
-
-        when:
-        behavior.getId()
-
-        then:
-        thrown(GeneralException)
     }
 
     def 'Test create and build instance'() {

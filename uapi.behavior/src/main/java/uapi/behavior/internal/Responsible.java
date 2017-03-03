@@ -221,7 +221,6 @@ public class Responsible implements IResponsible {
 
         private BehaviorHolder(final Behavior behavior, final String topic, final boolean published) {
             super(3);
-            ArgumentChecker.required(topic, "topic");
             put(IDX_BEHAVIOR, behavior);
             put(IDX_TOPIC, topic);
             put(IDX_PUBLISHED, published);

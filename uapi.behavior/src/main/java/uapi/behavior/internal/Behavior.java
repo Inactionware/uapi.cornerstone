@@ -29,7 +29,7 @@ public class Behavior<I, O>
         extends Builder<IBehavior<I, O>>
         implements IBehavior<I, O>, IBehaviorBuilder {
 
-    private ActionIdentify _actionId;
+    private final ActionIdentify _actionId;
     private Class<I> _iType;
     private Class<O> _oType;
     private boolean _traceable;
@@ -68,7 +68,6 @@ public class Behavior<I, O>
 
     @Override
     public ActionIdentify getId() {
-        ensureBuilt();
         return this._actionId;
     }
 
