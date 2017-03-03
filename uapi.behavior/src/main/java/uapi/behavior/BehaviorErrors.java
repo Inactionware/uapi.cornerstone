@@ -22,18 +22,19 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 
     public static final int CATEGORY   = 0x0100;
 
-    public static final int UNMATCHED_ACTION        = 1;
-    public static final int NOT_ONLY_NEXT_ACTION    = 2;
-    public static final int BEHAVIOR_ID_IS_USED     = 3;
-    public static final int NO_ACTION_WITH_LABEL    = 4;
-    public static final int ACTION_LABEL_IS_BIND    = 5;
-    public static final int EVALUATOR_IS_SET        = 6;
-    public static final int ACTION_NOT_FOUND        = 7;
-    public static final int EVALUATOR_NOT_USED      = 8;
-    public static final int NO_ACTION_IN_BEHAVIOR   = 9;
-    public static final int ACTION_IO_MISMATCH      = 10;
-    public static final int PUBLISH_UNREG_BEHAVIOR  = 11;
-    public static final int BEHAVIOR_IS_PUBLISHED   = 12;
+    public static final int UNMATCHED_ACTION            = 1;
+    public static final int NOT_ONLY_NEXT_ACTION        = 2;
+    public static final int BEHAVIOR_ID_IS_USED         = 3;
+    public static final int NO_ACTION_WITH_LABEL        = 4;
+    public static final int ACTION_LABEL_IS_BIND        = 5;
+    public static final int EVALUATOR_IS_SET            = 6;
+    public static final int ACTION_NOT_FOUND            = 7;
+    public static final int EVALUATOR_NOT_USED          = 8;
+    public static final int NO_ACTION_IN_BEHAVIOR       = 9;
+    public static final int ACTION_IO_MISMATCH          = 10;
+    public static final int PUBLISH_UNREG_BEHAVIOR      = 11;
+    public static final int BEHAVIOR_IS_PUBLISHED       = 12;
+    public static final int INCONSISTENT_LEAF_ACTIONS   = 13;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -51,6 +52,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(ACTION_IO_MISMATCH, ActionIOMismatch.KEY);
         keyCodeMapping.put(PUBLISH_UNREG_BEHAVIOR, PublishUnregBehavior.KEY);
         keyCodeMapping.put(BEHAVIOR_IS_PUBLISHED, BehaviorIsPublished.KEY);
+        keyCodeMapping.put(INCONSISTENT_LEAF_ACTIONS, InconsistentLeafActions.KEY);
     }
 
     public BehaviorErrors() {
@@ -362,6 +364,45 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._behaviorId, this._responsibleName };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Inconsistent leaf action output type [{} vs. {}] on leaf actions [{} vs. {}]
+     */
+    public static final class InconsistentLeafActions extends IndexedParameters<InconsistentLeafActions> {
+
+        private static final String KEY = "InconsistentLeafActions";
+
+        private ActionIdentify _leafAction1;
+        private ActionIdentify _leafAction2;
+        private Class _leafAction1Output;
+        private Class _leafAction2Output;
+
+        public InconsistentLeafActions leafAction1(ActionIdentify actionId) {
+            this._leafAction1 = actionId;
+            return this;
+        }
+
+        public InconsistentLeafActions leafAction2(ActionIdentify actionId) {
+            this._leafAction2 = actionId;
+            return this;
+        }
+
+        public InconsistentLeafActions leafAction1Output(Class type) {
+            this._leafAction1Output = type;
+            return this;
+        }
+
+        public InconsistentLeafActions leafAction2Output(Class type) {
+            this._leafAction2Output = type;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._leafAction1Output, this._leafAction2Output, this._leafAction1, this._leafAction2 };
         }
     }
 }

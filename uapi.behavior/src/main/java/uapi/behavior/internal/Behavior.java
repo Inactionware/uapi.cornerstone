@@ -36,7 +36,7 @@ public class Behavior<I, O>
 
     private final Responsible _responsible;
     private final Repository<ActionIdentify, IAction<?, ?>> _actionRepo;
-    private final ActionHolder _entryAction;
+    private final ActionHolder _entranceAction;
     private final Navigator _navigator;
     private final AtomicInteger _sequence;
 
@@ -55,10 +55,10 @@ public class Behavior<I, O>
         this._responsible = responsible;
         this._actionRepo = actionRepository;
         this._actionId = new ActionIdentify(name, ActionType.BEHAVIOR);
-        EndpointAction starting = new EndpointAction(inputType);
-        this._entryAction = new ActionHolder(starting);
+        EndpointAction entrance = new EndpointAction(EndpointType.ENTRANCE, inputType);
+        this._entranceAction = new ActionHolder(entrance);
 
-        this._navigator = new Navigator(this._entryAction);
+        this._navigator = new Navigator(this._entranceAction);
         this._sequence = new AtomicInteger(0);
     }
 
@@ -89,14 +89,27 @@ public class Behavior<I, O>
     }
 
     @Override
-    public O process(final I input, final IExecutionContext context) {
+    public O process(
+            final I input,
+            final IExecutionContext context
+    ) {
         ensureBuilt();
-        ActionHolder current = this._entryAction;
+        ActionHolder current = this._entranceAction;
         Object data = input;
         while (current != null) {
-            data = current.action().process(input, context);
+            data = current.action().process(data, context);
+            current = current.findNext(data);
         }
         return (O) data;
+    }
+
+    // ----------------------------------------------------
+    // Methods implement from IBehavior interface
+    // ----------------------------------------------------
+    @Override
+    public boolean traceable() {
+        ensureBuilt();
+        return this._traceable;
     }
 
     // ----------------------------------------------------
@@ -112,14 +125,18 @@ public class Behavior<I, O>
 //    }
 
     @Override
-    public IBehaviorBuilder traceable(boolean traceable) {
+    public IBehaviorBuilder traceable(
+            final boolean traceable
+    ) {
         ensureNotBuilt();
         this._traceable = traceable;
         return this;
     }
 
     @Override
-    public IBehaviorBuilder when(final Functionals.Evaluator evaluator) throws BehaviorException {
+    public IBehaviorBuilder when(
+            final Functionals.Evaluator evaluator
+    ) throws BehaviorException {
         ensureNotBuilt();
         ArgumentChecker.required(evaluator, "evaluator");
         if (this._lastEvaluator != null) {
@@ -134,13 +151,17 @@ public class Behavior<I, O>
     }
 
     @Override
-    public IBehaviorBuilder then(final ActionIdentify id) throws BehaviorException {
-        ensureNotBuilt();
+    public IBehaviorBuilder then(
+            final ActionIdentify id
+    ) throws BehaviorException {
         return then(id, null);
     }
 
     @Override
-    public IBehaviorBuilder then(final ActionIdentify id, final String label) throws BehaviorException {
+    public IBehaviorBuilder then(
+            final ActionIdentify id,
+            final String label
+    ) throws BehaviorException {
         ensureNotBuilt();
         ArgumentChecker.required(id, "id");
         IAction<?, ?> action = this._actionRepo.get(id);
@@ -176,23 +197,17 @@ public class Behavior<I, O>
         }
         // Check all leaf action's output type, they must be a same type
         List<ActionHolder> leafActions = Looper.on(this._navigator._actions)
-                .filter(ActionHolder::hasNext)
+                .filter(actionHolder -> ! actionHolder.hasNext())
                 .toList();
         if (leafActions.size() == 0) {
+            // Impossible happen
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.NO_ACTION_IN_BEHAVIOR)
                     .variables(new BehaviorErrors.NoActionInBehavior()
                             .behaviorId(this._actionId))
                     .build();
         }
-        Class outputType = leafActions.get(0).action().outputType();
-        if (outputType == null) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.NO_ACTION_IN_BEHAVIOR)
-                    .variables(new BehaviorErrors.NoActionInBehavior()
-                            .behaviorId(this._actionId))
-                    .build();
-        }
+        // Make sure all leaf action must be has same output type
         if (leafActions.size() > 1) {
             Looper.on(leafActions).foreachWithIndex((idx, action) -> {
                 if (idx == 0) {
@@ -202,21 +217,22 @@ public class Behavior<I, O>
                 IAction action2 = leafActions.get(idx).action();
                 if (!action1.outputType().equals(action2.outputType())) {
                     throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.ACTION_IO_MISMATCH)
-                            .variables(new BehaviorErrors.ActionIOMismatch()
-                                    .outputType(action1.outputType())
-                                    .inputType(action2.inputType())
-                                    .outputAction(action1.getId())
-                                    .inputAction(action2.getId()))
+                            .errorCode(BehaviorErrors.INCONSISTENT_LEAF_ACTIONS)
+                            .variables(new BehaviorErrors.InconsistentLeafActions()
+                                    .leafAction1(action1.getId())
+                                    .leafAction2(action2.getId())
+                                    .leafAction1Output(action1.outputType())
+                                    .leafAction2Output(action2.outputType()))
                             .build();
                 }
             });
         }
-        // Make all leaf action's next to a terminal action
-        IAction terminal = new EndpointAction(outputType);
-        Looper.on(leafActions).foreach(aHolder -> aHolder.next(terminal));
+        // Make all leaf action's next to a exit action
+        Class outputType = leafActions.get(0).action().outputType();
+        IAction exit = new EndpointAction(EndpointType.EXIT, outputType);
+        Looper.on(leafActions).foreach(aHolder -> aHolder.next(new ActionHolder(exit)));
 
-        this._iType = this._entryAction.action().inputType();
+        this._iType = this._entranceAction.action().inputType();
         this._oType = outputType;
     }
 
@@ -243,29 +259,30 @@ public class Behavior<I, O>
         return new Execution(this, this._sequence.incrementAndGet());
     }
 
-    ActionHolder entryAction() {
+    ActionHolder entranceAction() {
         ensureBuilt();
-        return this._entryAction;
-    }
-
-    boolean traceable() {
-        return this._traceable;
+        return this._entranceAction;
     }
 
     private final class EndpointAction implements IAction {
 
+        private final EndpointType _type;
         private final Class<?> _intputType;
         private final Class<?> _outputType;
 
-        private EndpointAction(final Class inputType) {
+        private EndpointAction(
+                final EndpointType type,
+                final Class inputType
+        ) {
             ArgumentChecker.required(inputType, "inputType");
             this._intputType = inputType;
             this._outputType = inputType;
+            this._type = type;
         }
 
         @Override
         public ActionIdentify getId() {
-            return null;
+            return new ActionIdentify(this._type.name(), ActionType.ACTION);
         }
 
         @Override
@@ -275,13 +292,17 @@ public class Behavior<I, O>
 
         @Override
         public Class outputType() {
-            return this.outputType();
+            return this._outputType;
         }
 
         @Override
         public Object process(Object input, IExecutionContext context) {
             return input;
         }
+    }
+
+    private enum EndpointType {
+        ENTRANCE, EXIT
     }
 
     private final class Navigator implements INavigator {
@@ -324,8 +345,19 @@ public class Behavior<I, O>
                 final Functionals.Evaluator evaluator,
                 final String label
         ) throws BehaviorException {
-            this._current = new ActionHolder(action, evaluator);
-            this._actions.add(this._current);
+            ActionHolder newAction = new ActionHolder(action, evaluator);
+            // Check new action input is matched to current action output
+            if (! this._current.action().outputType().equals(action.inputType())) {
+                throw BehaviorException.builder()
+                        .errorCode(BehaviorErrors.ACTION_IO_MISMATCH)
+                        .variables(new BehaviorErrors.ActionIOMismatch()
+                                .outputAction(this._current.action().getId())
+                                .outputType(this._current.action().outputType())
+                                .inputAction(action.getId())
+                                .inputType(action.inputType()))
+                        .build();
+            }
+            // Check action label
             if (! ArgumentChecker.isEmpty(label)) {
                 ActionHolder existingAction = this._labeledActions.get(label);
                 if (existingAction != null) {
@@ -336,8 +368,12 @@ public class Behavior<I, O>
                                     .actionId(existingAction.action().getId()))
                             .build();
                 }
-                this._labeledActions.put(label, this._current);
+                this._labeledActions.put(label, newAction);
             }
+
+            this._current.next(newAction);
+            this._current = newAction;
+            this._actions.add(newAction);
         }
     }
 }

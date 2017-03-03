@@ -20,7 +20,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         ArgumentChecker.required(behavior, "behavior");
         this._id = new ExecutionIdentify(behavior.getId(), sequence);
         this._traceable = behavior.traceable();
-        this._current = behavior.entryAction();
+        this._current = behavior.entranceAction();
     }
 
     @Override

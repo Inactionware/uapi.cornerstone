@@ -17,4 +17,13 @@ package uapi.behavior;
  * @param   <O>
  *          Output data type
  */
-public interface IBehavior<I, O> extends IAction<I, O> { }
+public interface IBehavior<I, O> extends IAction<I, O> {
+
+    /**
+     * Indicate the behavior is traceable or not, if the behavior is traceable then some behavior events will be thrown
+     * during behavior is processing.
+     *
+     * @return  True means the behavior is traceable otherwise means it is untraceable
+     */
+    boolean traceable();
+}

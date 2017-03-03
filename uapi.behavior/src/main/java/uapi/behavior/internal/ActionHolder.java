@@ -31,6 +31,9 @@ class ActionHolder {
             final Functionals.Evaluator evaluator
     ) {
         ArgumentChecker.required(action, "action");
+        ArgumentChecker.required(action.getId(), "action.id");
+        ArgumentChecker.required(action.inputType(), "action.inputType");
+        ArgumentChecker.required(action.outputType(), "action.outputType");
         if (evaluator == null) {
             this._evaluator = ALWAYS_MATCHED;
         } else {
@@ -40,46 +43,46 @@ class ActionHolder {
         this._nextActions = new LinkedList<>();
     }
 
-    /**
-     * Set default next action
-     *
-     * @param   action
-     *          The next action
-     * @throws  BehaviorException
-     *          If this action's output type is not matched next action's input type,
-     *          see {@link BehaviorErrors.UnmatchedAction}
-     */
-    void next(final IAction action) throws BehaviorException {
-        ArgumentChecker.required(action, "action");
-        next(action, null);
-    }
+//    /**
+//     * Set default next action
+//     *
+//     * @param   actionHolder
+//     *          The next action
+//     * @throws  BehaviorException
+//     *          If this action's output type is not matched next action's input type,
+//     *          see {@link BehaviorErrors.UnmatchedAction}
+//     */
+//    void next(final ActionHolder actionHolder) throws BehaviorException {
+//        ArgumentChecker.required(actionHolder, "action");
+//        next(actionHolder, null);
+//    }
 
     /**
      * Set next action by specific evaluator
      *
-     * @param   action
+     * @param   actionHolder
      *          The next action
-     * @param   evaluator
-     *          The evaluator which will be evaluated when decide which next action is used by output from last action
+//     * @param   evaluator
+//     *          The evaluator which will be evaluated when decide which next action is used by output from last action
      * @throws  BehaviorException
      *          If this action's output type is not matched next action's input type,
      *          see {@link BehaviorErrors.UnmatchedAction}
      */
     void next(
-            final IAction action,
-            final Functionals.Evaluator evaluator
+            final ActionHolder actionHolder
+//            final Functionals.Evaluator evaluator
     ) throws BehaviorException {
-        if (! this._action.outputType().equals(action.inputType())) {
+        if (! this._action.outputType().equals(actionHolder.action().inputType())) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.UNMATCHED_ACTION)
                     .variables(new BehaviorErrors.UnmatchedAction()
                             .outputType(this._action.outputType().getCanonicalName())
                             .outputAction(this._action.getId())
-                            .inputType(action.inputType().getCanonicalName())
-                            .inputAction(action.getId()))
+                            .inputType(actionHolder.action().inputType().getCanonicalName())
+                            .inputAction(actionHolder.action().getId()))
                     .build();
         }
-        this._nextActions.add(new ActionHolder(action, evaluator));
+        this._nextActions.add(actionHolder);
     }
 
     boolean hasNext() {
@@ -104,17 +107,27 @@ class ActionHolder {
         if (data instanceof IAttributed) {
             IAttributed attributed = (IAttributed) data;
             next = Looper.on(this._nextActions)
+                    .filter(actionHolder -> actionHolder._evaluator != ALWAYS_MATCHED)
                     .filter(actionHolder -> actionHolder._evaluator.accept(attributed))
                     .first();
+            // Find out default next action if no action's evaluator is satisfied
+            if (next == null) {
+                next = Looper.on(this._nextActions)
+                        .filter(actionHolder -> actionHolder._evaluator == ALWAYS_MATCHED)
+                        .first();
+            }
         } else {
-            if (this._nextActions.size() != 1) {
+            if (this._nextActions.size() == 0) {
+                next = null;
+            } else if (this._nextActions.size() == 1) {
+                next = this._nextActions.get(0);
+            } else {
                 throw BehaviorException.builder()
                         .errorCode(BehaviorErrors.NOT_ONLY_NEXT_ACTION)
                         .variables(new BehaviorErrors.NotOnlyNextAction()
                                 .actionId(this._action.getId()))
                         .build();
             }
-            next = this._nextActions.get(0);
         }
         return next;
     }

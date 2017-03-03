@@ -26,7 +26,11 @@ class ActionHolderTest extends Specification {
 
     def 'Test create instance'() {
         when:
-        def action = Mock(IAction)
+        def action = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputType() >> String.class
+            outputType() >> String.class
+        }
         def actionHolder = new ActionHolder(action)
 
         then:
@@ -37,7 +41,11 @@ class ActionHolderTest extends Specification {
 
     def 'Test create instance with evaluator'() {
         when:
-        def action = Mock(IAction)
+        def action = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputType() >> String.class
+            outputType() >> String.class
+        }
         def actionHolder = new ActionHolder(action, Mock(Functionals.Evaluator))
 
         then:
@@ -49,7 +57,7 @@ class ActionHolderTest extends Specification {
     def 'Test set next action by unmatched input type'() {
         when:
         def instance = new ActionHolder(new TestAction1())
-        instance.next(new TestAction2())
+        instance.next(new ActionHolder(new TestAction2()))
 
         then:
         thrown(BehaviorException)
@@ -59,7 +67,7 @@ class ActionHolderTest extends Specification {
     def 'Test set next action'() {
         when:
         def instance = new ActionHolder(new TestAction1())
-        instance.next(new TestAction3())
+        instance.next(new ActionHolder(new TestAction3()))
 
         then:
         noExceptionThrown()
@@ -79,7 +87,7 @@ class ActionHolderTest extends Specification {
         when:
         def instance = new ActionHolder(new TestAction1())
         def nextAction = new TestAction3()
-        instance.next(nextAction)
+        instance.next(new ActionHolder(nextAction))
         ActionHolder next = instance.findNext(new Object())
 
         then:
@@ -93,12 +101,12 @@ class ActionHolderTest extends Specification {
         def instance = new ActionHolder(new TestAction1())
         def nextAction1 = new TestAction3()
         def nextAction2 = new TestAction4()
-        instance.next(nextAction1, Mock(Functionals.Evaluator) {
+        instance.next(new ActionHolder(nextAction1, Mock(Functionals.Evaluator) {
             accept(_ as IAttributed) >> false
-        })
-        instance.next(nextAction2, Mock(Functionals.Evaluator) {
+        }))
+        instance.next(new ActionHolder(nextAction2, Mock(Functionals.Evaluator) {
             accept(_ as IAttributed) >> true
-        })
+        }))
         ActionHolder next = instance.findNext(Mock(IAttributed))
 
         then:
