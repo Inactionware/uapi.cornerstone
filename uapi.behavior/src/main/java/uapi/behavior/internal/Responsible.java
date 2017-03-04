@@ -18,6 +18,7 @@ import uapi.event.IEventHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A responsible is used to fire behavior event and define specific behaviors based on behavior event
@@ -32,7 +33,7 @@ public class Responsible implements IResponsible {
 
     private BehaviorExecutingEventHandler _behaviorExecutingHandler;
     private BehaviorFinishedEventHandler _behaviorFinishedHandler;
-    private boolean _traceEventHandlerRegistered = false;
+    private final AtomicBoolean _traceEventHandlerRegistered;
 
     Responsible(
             final String name,
@@ -46,6 +47,7 @@ public class Responsible implements IResponsible {
         this._eventBus = eventBus;
         this._actionRepo = actionRepository;
         this._behaviors = new HashMap<>();
+        this._traceEventHandlerRegistered = new AtomicBoolean(false);
     }
 
     @Override
@@ -135,11 +137,10 @@ public class Responsible implements IResponsible {
     }
 
     private void registerEventHandler() {
-        if (this._traceEventHandlerRegistered) {
-            return;
+        boolean registered = this._traceEventHandlerRegistered.getAndSet(true);
+        if (! registered) {
+            this._eventBus.register(new BehaviorTraceEventHandler());
         }
-        this._eventBus.register(new BehaviorTraceEventHandler());
-        this._traceEventHandlerRegistered = true;
     }
 
     private final class BehaviorEventHandler implements IAttributedEventHandler<BehaviorEvent> {
