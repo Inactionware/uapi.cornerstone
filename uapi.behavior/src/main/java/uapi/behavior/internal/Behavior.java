@@ -100,15 +100,15 @@ public class Behavior<I, O>
 //            current = current.findNext(data);
 //        }
 //        return (O) data;
-        if (! (context instanceof ExecutionContext)) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.INCORRECT_CONTEXT_TYPE)
-                    .variables(new BehaviorErrors.IncorrectContextType()
-                            .contextType(context.getClass()))
-                    .build();
-        }
+//        if (! (context instanceof ExecutionContext)) {
+//            throw BehaviorException.builder()
+//                    .errorCode(BehaviorErrors.INCORRECT_CONTEXT_TYPE)
+//                    .variables(new BehaviorErrors.IncorrectContextType()
+//                            .contextType(context.getClass()))
+//                    .build();
+//        }
         Execution execution = newExecution();
-        return (O) execution.execute(input, (ExecutionContext) context);
+        return (O) execution.execute(input, context);
     }
 
     // ----------------------------------------------------

@@ -5,6 +5,7 @@ import uapi.behavior.ActionIdentify;
 import uapi.behavior.BehaviorExecutingEvent;
 import uapi.behavior.BehaviorFinishedEvent;
 import uapi.behavior.ExecutionIdentify;
+import uapi.behavior.IExecutionContext;
 import uapi.common.ArgumentChecker;
 
 /**
@@ -39,7 +40,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
      */
     Object execute(
             final Object input,
-            final ExecutionContext executionContext
+            final IExecutionContext executionContext
     ) {
         ArgumentChecker.required(executionContext, "executionContext");
         Object output = input;

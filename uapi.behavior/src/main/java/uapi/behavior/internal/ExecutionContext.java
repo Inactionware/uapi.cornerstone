@@ -9,6 +9,8 @@
 
 package uapi.behavior.internal;
 
+import uapi.behavior.BehaviorEvent;
+import uapi.behavior.IBehaviorTraceEvent;
 import uapi.behavior.IExecutionContext;
 import uapi.behavior.Scope;
 import uapi.common.ArgumentChecker;
@@ -73,7 +75,14 @@ public class ExecutionContext implements IExecutionContext {
         return (T) value;
     }
 
-    public void fireEvent(final IEvent event) {
+    @Override
+    public void fireEvent(final IBehaviorTraceEvent event) {
+        ArgumentChecker.required(event, "event");
+        this._eventBus.fire(event);
+    }
+
+    @Override
+    public void fireEvent(final BehaviorEvent event) {
         ArgumentChecker.required(event, "event");
         this._eventBus.fire(event);
     }

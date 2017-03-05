@@ -46,4 +46,8 @@ public interface IExecutionContext {
      * @return  The value
      */
     <T> T get(Object key);
+
+    void fireEvent(IBehaviorTraceEvent event);
+
+    void fireEvent(BehaviorEvent event);
 }
