@@ -139,7 +139,7 @@ class BehaviorTest extends Specification {
 
         when:
         def behavior = new Behavior(Mock(Responsible), repo, bName, biType)
-        def o = behavior.then(aId).build().process(input, Mock(IExecutionContext))
+        def o = behavior.then(aId).build().process(input, Mock(ExecutionContext))
 
         then:
         noExceptionThrown()
@@ -206,7 +206,7 @@ class BehaviorTest extends Specification {
         when:
         def behavior = new Behavior(Mock(Responsible), repo, bName, bInput)
         behavior.then(a1, 'a1').then(a2, 'a2').navigator().moveTo('a1').when({ data -> true }).then(a3).build()
-        def o = behavior.process('A', Mock(IExecutionContext))
+        def o = behavior.process('A', Mock(ExecutionContext))
 
         then:
         noExceptionThrown()

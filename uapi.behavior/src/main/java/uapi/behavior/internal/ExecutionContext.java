@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The implementation of IExecutionContext
  */
-public final class ExecutionContext implements IExecutionContext {
+public class ExecutionContext implements IExecutionContext {
 
     private final Map<Object, Object> _globalData;
     private final Map<Object, Object> _data;

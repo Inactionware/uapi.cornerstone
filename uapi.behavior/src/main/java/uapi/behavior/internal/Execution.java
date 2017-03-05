@@ -42,12 +42,12 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
             final ExecutionContext executionContext
     ) {
         ArgumentChecker.required(executionContext, "executionContext");
-        Object output;
+        Object output = input;
         do {
-            output = this._current.action().process(input, executionContext);
+            output = this._current.action().process(output, executionContext);
             if (this._traceable) {
                 BehaviorExecutingEvent event = new BehaviorExecutingEvent(
-                        this._id, input, output, (ActionIdentify) this._current.action().getId());
+                        this._id, input, output, this._current.action().getId());
                 executionContext.fireEvent(event);
             }
             this._current = this._current.findNext(output);
