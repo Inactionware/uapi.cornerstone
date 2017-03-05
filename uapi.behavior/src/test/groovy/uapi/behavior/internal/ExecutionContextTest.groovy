@@ -4,7 +4,6 @@ import spock.lang.Specification
 import uapi.behavior.BehaviorEvent
 import uapi.behavior.IBehaviorTraceEvent
 import uapi.behavior.Scope
-import uapi.event.IEvent
 import uapi.event.IEventBus
 
 /**
