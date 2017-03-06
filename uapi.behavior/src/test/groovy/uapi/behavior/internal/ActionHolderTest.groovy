@@ -13,6 +13,7 @@ import spock.lang.Specification
 import uapi.GeneralException
 import uapi.InvalidArgumentException
 import uapi.behavior.ActionIdentify
+import uapi.behavior.ActionType
 import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
 import uapi.behavior.IExecutionContext
@@ -113,6 +114,52 @@ class ActionHolderTest extends Specification {
         noExceptionThrown()
         next != null
         next.action() == nextAction2
+    }
+
+    def 'Test find next action by default'() {
+        when:
+        def instance = new ActionHolder(new TestAction1())
+        def nextAction1 = new TestAction3()
+        def nextAction2 = new TestAction4()
+        instance.next(new ActionHolder(nextAction1))
+        instance.next(new ActionHolder(nextAction2, Mock(Functionals.Evaluator) {
+            accept(_ as IAttributed) >> false
+        }))
+        ActionHolder next = instance.findNext(Mock(IAttributed))
+
+        then:
+        noExceptionThrown()
+        next != null
+        next.action() == nextAction1
+    }
+
+    def 'Test find next but it has multiple default next'() {
+        when:
+        def instance = new ActionHolder(new TestAction1())
+        def nextAction1 = new TestAction3()
+        def nextAction2 = new TestAction4()
+        instance.next(new ActionHolder(nextAction1))
+        instance.next(new ActionHolder(nextAction2))
+        ActionHolder next = instance.findNext(Mock(IAttributed))
+
+        then:
+        thrown(BehaviorException)
+    }
+
+    def 'Test find next but it has multiple non-default next'() {
+        when:
+        def instance = new ActionHolder(new TestAction1())
+        def nextAction1 = new TestAction3()
+        def nextAction2 = new TestAction4()
+        def evaluator = Mock(Functionals.Evaluator) {
+            accept(_ as IAttributed) >> true
+        }
+        instance.next(new ActionHolder(nextAction1, evaluator))
+        instance.next(new ActionHolder(nextAction2, evaluator))
+        ActionHolder next = instance.findNext(Mock(IAttributed))
+
+        then:
+        thrown(BehaviorException)
     }
 
     class TestAction1 implements IAction<Void, String> {

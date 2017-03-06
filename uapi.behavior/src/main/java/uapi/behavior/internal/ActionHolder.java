@@ -103,32 +103,38 @@ class ActionHolder {
      *          If founded next action is not only one, see {@link BehaviorErrors.NotOnlyNextAction}
      */
     ActionHolder findNext(final Object data) throws BehaviorException {
-        ActionHolder next;
+        List<ActionHolder> matchedActions;
         if (data instanceof IAttributed) {
             IAttributed attributed = (IAttributed) data;
-            next = Looper.on(this._nextActions)
+            matchedActions = Looper.on(this._nextActions)
                     .filter(actionHolder -> actionHolder._evaluator != ALWAYS_MATCHED)
                     .filter(actionHolder -> actionHolder._evaluator.accept(attributed))
-                    .first();
-            // Find out default next action if no action's evaluator is satisfied
-            if (next == null) {
-                next = Looper.on(this._nextActions)
-                        .filter(actionHolder -> actionHolder._evaluator == ALWAYS_MATCHED)
-                        .first();
-            }
-        } else {
-            if (this._nextActions.size() == 0) {
-                next = null;
-            } else if (this._nextActions.size() == 1) {
-                next = this._nextActions.get(0);
-            } else {
+                    .toList();
+            if (matchedActions.size() == 1) {
+                return matchedActions.get(0);
+            } else if (matchedActions.size() > 1) {
                 throw BehaviorException.builder()
                         .errorCode(BehaviorErrors.NOT_ONLY_NEXT_ACTION)
                         .variables(new BehaviorErrors.NotOnlyNextAction()
-                                .actionId(this._action.getId()))
+                                .actionId(this._action.getId())
+                                .data(data))
                         .build();
             }
         }
-        return next;
+        matchedActions = Looper.on(this._nextActions)
+                .filter(actionHolder -> actionHolder._evaluator == ALWAYS_MATCHED)
+                .toList();
+        if (matchedActions.size() == 0) {
+            return null;
+        } else if (matchedActions.size() == 1) {
+            return matchedActions.get(0);
+        } else {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.NOT_ONLY_NEXT_ACTION)
+                    .variables(new BehaviorErrors.NotOnlyNextAction()
+                            .actionId(this._action.getId())
+                            .data(data))
+                    .build();
+        }
     }
 }

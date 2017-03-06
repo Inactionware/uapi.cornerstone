@@ -122,15 +122,21 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         private static final String KEY = "NotOnlyNextAction";
 
         private ActionIdentify _actionId;
+        private Object _data;
 
         public NotOnlyNextAction actionId(ActionIdentify actionId) {
             this._actionId = actionId;
             return this;
         }
 
+        public NotOnlyNextAction data(Object data) {
+            this._data = data;
+            return this;
+        }
+
         @Override
         public Object[] get() {
-            return new Object[] { this._actionId};
+            return new Object[] { this._actionId, this._data};
         }
     }
 
