@@ -22,20 +22,21 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 
     public static final int CATEGORY   = 0x0100;
 
-    public static final int UNMATCHED_ACTION            = 1;
-    public static final int NOT_ONLY_NEXT_ACTION        = 2;
-    public static final int BEHAVIOR_ID_IS_USED         = 3;
-    public static final int NO_ACTION_WITH_LABEL        = 4;
-    public static final int ACTION_LABEL_IS_BIND        = 5;
-    public static final int EVALUATOR_IS_SET            = 6;
-    public static final int ACTION_NOT_FOUND            = 7;
-    public static final int EVALUATOR_NOT_USED          = 8;
-    public static final int NO_ACTION_IN_BEHAVIOR       = 9;
-    public static final int ACTION_IO_MISMATCH          = 10;
-    public static final int PUBLISH_UNREG_BEHAVIOR      = 11;
-    public static final int BEHAVIOR_IS_PUBLISHED       = 12;
-    public static final int INCONSISTENT_LEAF_ACTIONS   = 13;
-    public static final int DUPLICATED_RESPONSIBLE_NAME = 14;
+    public static final int UNMATCHED_ACTION                = 1;
+    public static final int NOT_ONLY_NEXT_ACTION            = 2;
+    public static final int BEHAVIOR_ID_IS_USED             = 3;
+    public static final int NO_ACTION_WITH_LABEL            = 4;
+    public static final int ACTION_LABEL_IS_BIND            = 5;
+    public static final int EVALUATOR_IS_SET                = 6;
+    public static final int ACTION_NOT_FOUND                = 7;
+    public static final int EVALUATOR_NOT_USED              = 8;
+    public static final int NO_ACTION_IN_BEHAVIOR           = 9;
+    public static final int ACTION_IO_MISMATCH              = 10;
+    public static final int PUBLISH_UNREG_BEHAVIOR          = 11;
+    public static final int BEHAVIOR_IS_PUBLISHED           = 12;
+    public static final int INCONSISTENT_LEAF_ACTIONS       = 13;
+    public static final int DUPLICATED_RESPONSIBLE_NAME     = 14;
+    public static final int UNSUPPORTED_BEHAVIOR_EVENT_TYPE = 15;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -55,6 +56,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(BEHAVIOR_IS_PUBLISHED, BehaviorIsPublished.KEY);
         keyCodeMapping.put(INCONSISTENT_LEAF_ACTIONS, InconsistentLeafActions.KEY);
         keyCodeMapping.put(DUPLICATED_RESPONSIBLE_NAME, DuplicatedResponsibleName.KEY);
+        keyCodeMapping.put(UNSUPPORTED_BEHAVIOR_EVENT_TYPE, UnsupportedBehaviorTraceEventType.KEY);
     }
 
     public BehaviorErrors() {
@@ -432,6 +434,27 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._respName };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Unsupported behavior trace event type - {}
+     */
+    public static final class UnsupportedBehaviorTraceEventType extends IndexedParameters<UnsupportedBehaviorTraceEventType> {
+
+        private static final String KEY = "UnsupportedBehaviorTraceEventType";
+
+        private Class _eventType;
+
+        public UnsupportedBehaviorTraceEventType eventType(Class eventType) {
+            this._eventType = eventType;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._eventType };
         }
     }
 }

@@ -43,20 +43,6 @@ class ActionHolder {
         this._nextActions = new LinkedList<>();
     }
 
-//    /**
-//     * Set default next action
-//     *
-//     * @param   actionHolder
-//     *          The next action
-//     * @throws  BehaviorException
-//     *          If this action's output type is not matched next action's input type,
-//     *          see {@link BehaviorErrors.UnmatchedAction}
-//     */
-//    void next(final ActionHolder actionHolder) throws BehaviorException {
-//        ArgumentChecker.required(actionHolder, "action");
-//        next(actionHolder, null);
-//    }
-
     /**
      * Set next action by specific evaluator
      *
@@ -70,7 +56,6 @@ class ActionHolder {
      */
     void next(
             final ActionHolder actionHolder
-//            final Functionals.Evaluator evaluator
     ) throws BehaviorException {
         if (! this._action.outputType().equals(actionHolder.action().inputType())) {
             throw BehaviorException.builder()

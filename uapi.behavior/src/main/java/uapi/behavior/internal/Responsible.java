@@ -189,7 +189,11 @@ public class Responsible implements IResponsible {
             } else if (event instanceof BehaviorFinishedEvent) {
                 handleFinishedEvent((BehaviorFinishedEvent) event);
             } else {
-                throw new GeneralException("Unsupported event type - {}", event.getClass().getName());
+                throw BehaviorException.builder()
+                        .errorCode(BehaviorErrors.UNSUPPORTED_BEHAVIOR_EVENT_TYPE)
+                        .variables(new BehaviorErrors.UnsupportedBehaviorTraceEventType()
+                                .eventType(event.getClass()))
+                        .build();
             }
         }
 

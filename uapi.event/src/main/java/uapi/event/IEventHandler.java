@@ -9,6 +9,8 @@
 
 package uapi.event;
 
+import uapi.UapiException;
+
 /**
  * A handler for specific event
  */
@@ -26,6 +28,8 @@ public interface IEventHandler<T extends IEvent> {
      *
      * @param   event
      *          The event
+     * @throws  UapiException
+     *          Handle event failed
      */
-    void handle(T event);
+    void handle(T event) throws UapiException;
 }

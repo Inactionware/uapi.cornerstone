@@ -14,12 +14,18 @@ import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorEvent
 import uapi.behavior.BehaviorException
+import uapi.behavior.BehaviorExecutingEvent
 import uapi.behavior.BehaviorExecutingEventHandler
+import uapi.behavior.BehaviorFinishedEvent
 import uapi.behavior.BehaviorFinishedEventHandler
 import uapi.behavior.IAction
+import uapi.behavior.IBehaviorTraceEvent
 import uapi.behavior.IExecutionContext
 import uapi.common.Repository
+import uapi.event.IEvent
 import uapi.event.IEventBus
+import uapi.event.IEventHandler
+import uapi.event.NoEventHandlerException
 
 /**
  * Unit test for Responsible
@@ -165,7 +171,7 @@ class ResponsibleTest extends Specification {
         thrown(BehaviorException)
     }
 
-    def 'Test handle behavior executing event'() {
+    def 'Test register behavior tracer event handler'() {
         given:
         def eventBus = Mock(IEventBus) {
             1 * register(_)
@@ -180,5 +186,117 @@ class ResponsibleTest extends Specification {
 
         then:
         noExceptionThrown()
+    }
+
+    def 'Test invoke behavior execution event handler'() {
+        given:
+        def eventBus = new MockEventBus()
+        def exeHandler = Mock(BehaviorExecutingEventHandler)
+        def exeEvent = Mock(BehaviorExecutingEvent)
+
+        when:
+        def responsible = new Responsible('name', eventBus, Mock(Repository))
+        responsible.on(exeHandler)
+        eventBus.invokeHandler(exeEvent)
+
+        then:
+        noExceptionThrown()
+        1 * exeHandler.accept(exeEvent)
+    }
+
+    def 'Test invoke behavior finished event handler'() {
+        given:
+        def eventBus = new MockEventBus()
+        def finHandler = Mock(BehaviorFinishedEventHandler)
+        def finEvent = Mock(BehaviorFinishedEvent)
+
+        when:
+        def responsible = new Responsible('name', eventBus, Mock(Repository))
+        responsible.on(finHandler)
+        eventBus.invokeHandler(finEvent)
+
+        then:
+        noExceptionThrown()
+        1 * finHandler.accept(finEvent)
+    }
+
+    def 'Test invoke unsupported behavior event'() {
+        given:
+        def eventBus = new MockEventBus()
+        def event = Mock(IBehaviorTraceEvent)
+
+        when:
+        def responsible = new Responsible('name', eventBus, Mock(Repository))
+        responsible.on(Mock(BehaviorExecutingEventHandler))
+        eventBus.invokeHandler(event)
+
+        then:
+        thrown(BehaviorException)
+    }
+
+    def 'Test invoke behavior event handler'() {
+        given:
+        def actionId = new ActionIdentify('action', ActionType.ACTION)
+        def action = Mock(IAction) {
+            getId() >> new ActionIdentify('action', ActionType.ACTION)
+            inputType() >> String.class
+            outputType() >> String.class
+            process(_, _) >> 'Out Data'
+        }
+        def repo = Mock(Repository) {
+            get(actionId) >> action
+            1 * put(_)
+        }
+        def eventBus = new MockEventBus()
+
+        when:
+        def responsible = new Responsible('name', eventBus, repo)
+        def behaviorBuilder = responsible.newBehavior('bName', String.class)
+        def behavior = behaviorBuilder.then(actionId).build()
+        eventBus.invokeHandler(Mock(BehaviorEvent))
+
+        then:
+        noExceptionThrown()
+    }
+
+    class MockEventBus implements IEventBus {
+
+        private IEventHandler _handler;
+
+        @Override
+        void fire(String topic) throws NoEventHandlerException {
+
+        }
+
+        @Override
+        void fire(String topic, boolean syncable) throws NoEventHandlerException {
+
+        }
+
+        @Override
+        void fire(IEvent event) throws NoEventHandlerException {
+
+        }
+
+        @Override
+        void fire(IEvent event, boolean syncable) throws NoEventHandlerException {
+
+        }
+
+        @Override
+        void register(IEventHandler eventHandler) {
+            this._handler = eventHandler
+        }
+
+        @Override
+        boolean unregister(IEventHandler eventHandler) {
+            return false
+        }
+
+        void invokeHandler(IEvent event) {
+            if (this._handler != null) {
+                this._handler.handle(event)
+            }
+        }
     }
 }
