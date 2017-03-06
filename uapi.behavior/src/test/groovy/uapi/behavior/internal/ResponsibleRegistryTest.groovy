@@ -11,6 +11,10 @@ package uapi.behavior.internal
 
 import spock.lang.Ignore
 import spock.lang.Specification
+import uapi.behavior.ActionIdentify
+import uapi.behavior.ActionType
+import uapi.behavior.BehaviorException
+import uapi.behavior.IAction
 import uapi.behavior.IResponsible
 import uapi.event.IEventBus
 import uapi.log.ILogger
@@ -18,26 +22,100 @@ import uapi.log.ILogger
 /**
  * Unit test for ResponsibleRegistry
  */
-@Ignore
 class ResponsibleRegistryTest extends Specification {
 
-    def 'Test init'() {
-        given:
-        ResponsibleRegistry reg = new ResponsibleRegistry()
-        def eventBus = Mock(IEventBus)
-        reg._eventBus = eventBus
-        reg._logger = Mock(ILogger)
-        reg._responsibles.add(Mock(IResponsible) {
-            behaviors() >> Mock(IEventDrivenBehavior) {
-                topic() >> 'event-topic'
-            }
-        })
-
+    def 'Test create instance'() {
         when:
-        reg.init()
+        def respReg = new ResponsibleRegistry()
 
         then:
         noExceptionThrown()
-        1 * eventBus.register(_)
+        respReg.actionCount() == 0
+        respReg.responsibleCount() == 0
+    }
+
+    def 'Test add action'() {
+        given:
+        def logger = Mock(ILogger) {
+            0 * warn(_, _, _)
+        }
+
+        when:
+        def respReg = new ResponsibleRegistry()
+        respReg._logger = logger
+        respReg.addAction(Mock(IAction) {
+            getId() >> new ActionIdentify('aname', ActionType.ACTION)
+        })
+
+        then:
+        noExceptionThrown()
+        respReg.actionCount() == 1
+        respReg.responsibleCount() == 0
+    }
+
+    def 'Test add duplicated action'() {
+        given:
+        def logger = Mock(ILogger) {
+            1 * warn(_, _, _)
+        }
+
+        when:
+        def respReg = new ResponsibleRegistry()
+        respReg._logger = logger
+        respReg.addAction(Mock(IAction) {
+            getId() >> new ActionIdentify('aname', ActionType.ACTION)
+        })
+        respReg.addAction(Mock(IAction) {
+            getId() >> new ActionIdentify('aname', ActionType.ACTION)
+        })
+
+        then:
+        noExceptionThrown()
+        respReg.actionCount() == 1
+        respReg.responsibleCount() == 0
+    }
+
+    def 'Test register'() {
+        given:
+        def eventBus = Mock(IEventBus)
+
+        when:
+        def respReg = new ResponsibleRegistry()
+        respReg._eventBus = eventBus
+        def resp = respReg.register('resp')
+
+        then:
+        noExceptionThrown()
+        resp != null
+        respReg.actionCount() == 0
+        respReg.responsibleCount() == 1
+    }
+
+    def 'Test register with duplicated name'() {
+        given:
+        def eventBus = Mock(IEventBus)
+
+        when:
+        def respReg = new ResponsibleRegistry()
+        respReg._eventBus = eventBus
+        respReg.register('resp')
+        respReg.register('resp')
+
+        then:
+        thrown(BehaviorException)
+        respReg.actionCount() == 0
+        respReg.responsibleCount() == 1
+    }
+
+    def 'Test unregister'() {
+        when:
+        def respReg = new ResponsibleRegistry()
+        respReg._eventBus = Mock(IEventBus)
+        respReg.register('resp')
+        respReg.unregister('resp')
+
+        then:
+        respReg.actionCount() == 0
+        respReg.responsibleCount() == 0
     }
 }

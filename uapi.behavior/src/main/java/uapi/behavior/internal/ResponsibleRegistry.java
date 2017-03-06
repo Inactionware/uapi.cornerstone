@@ -10,10 +10,7 @@
 package uapi.behavior.internal;
 
 import uapi.GeneralException;
-import uapi.behavior.ActionIdentify;
-import uapi.behavior.IAction;
-import uapi.behavior.IResponsible;
-import uapi.behavior.IResponsibleRegistry;
+import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
 import uapi.common.Guarder;
 import uapi.common.Repository;
@@ -63,12 +60,16 @@ public class ResponsibleRegistry implements IResponsibleRegistry {
     }
 
     @Override
-    public IResponsible register(String name) {
+    public IResponsible register(String name) throws BehaviorException {
         ArgumentChecker.required(name, "name");
         Responsible responsible = new Responsible(name, this._eventBus, this._actionRepo);
         Guarder.by(this._lock).run(() -> {
             if (this._responsibles.containsKey(name)) {
-                throw new GeneralException("");
+                throw BehaviorException.builder()
+                        .errorCode(BehaviorErrors.DUPLICATED_RESPONSIBLE_NAME)
+                        .variables(new BehaviorErrors.DuplicatedResponsibleName()
+                                .responsibleName(name))
+                        .build();
             }
             this._responsibles.put(name, responsible);
         });
@@ -79,5 +80,14 @@ public class ResponsibleRegistry implements IResponsibleRegistry {
     public void unregister(String name) {
         ArgumentChecker.required(name, "name");
         Guarder.by(this._lock).run(() -> this._responsibles.remove(name));
+    }
+
+    @Override
+    public int responsibleCount() {
+        return this._responsibles.size();
+    }
+
+    public int actionCount() {
+        return this._actionRepo.count();
     }
 }

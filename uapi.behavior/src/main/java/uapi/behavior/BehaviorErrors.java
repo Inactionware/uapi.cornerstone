@@ -35,6 +35,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int PUBLISH_UNREG_BEHAVIOR      = 11;
     public static final int BEHAVIOR_IS_PUBLISHED       = 12;
     public static final int INCONSISTENT_LEAF_ACTIONS   = 13;
+    public static final int DUPLICATED_RESPONSIBLE_NAME = 14;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -53,6 +54,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(PUBLISH_UNREG_BEHAVIOR, PublishUnregBehavior.KEY);
         keyCodeMapping.put(BEHAVIOR_IS_PUBLISHED, BehaviorIsPublished.KEY);
         keyCodeMapping.put(INCONSISTENT_LEAF_ACTIONS, InconsistentLeafActions.KEY);
+        keyCodeMapping.put(DUPLICATED_RESPONSIBLE_NAME, DuplicatedResponsibleName.KEY);
     }
 
     public BehaviorErrors() {
@@ -403,6 +405,27 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._leafAction1Output, this._leafAction2Output, this._leafAction1, this._leafAction2 };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Register duplicated responsible name is denied - {}
+     */
+    public static final class DuplicatedResponsibleName extends IndexedParameters<DuplicatedResponsibleName> {
+
+        private static final String KEY = "DuplicatedResponsibleName";
+
+        private String _respName;
+
+        public DuplicatedResponsibleName responsibleName(final String name) {
+            this._respName = name;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._respName };
         }
     }
 }

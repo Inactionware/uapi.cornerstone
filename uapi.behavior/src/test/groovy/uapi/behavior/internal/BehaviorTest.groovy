@@ -14,7 +14,6 @@ import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
-import uapi.behavior.IExecutionContext
 import uapi.common.IAttributed
 import uapi.common.Repository
 
