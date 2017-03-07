@@ -10,6 +10,8 @@
 package uapi.app.internal;
 
 import uapi.GeneralException;
+import uapi.app.AppErrors;
+import uapi.app.AppException;
 import uapi.config.IConfigValueParser;
 import uapi.common.CollectionHelper;
 import uapi.rx.Looper;
@@ -58,20 +60,23 @@ public class ProfilesParser implements IConfigValueParser {
                 .foreach(profileCfg -> {
                     String name = profileCfg.get(NAME).toString();
                     if (profiles.containsKey(name)) {
-                        throw new GeneralException("Duplicated profile - {}", name);
+                        throw AppException.builder()
+                                .errorCode(AppErrors.DUPLICATED_PROFILE)
+                                .variables(new AppErrors.DuplicatedProfile()
+                                        .name(name))
+                                .build();
                     }
                     Profile.Model model = Profile.Model.parse(profileCfg.get(MODEL).toString());
                     Profile.Matching matching = Profile.Matching.parse(profileCfg.get(MATCHING).toString());
                     Object tagsObj = profileCfg.get(TAGS);
                     if (! (tagsObj instanceof List)) {
-                        throw new GeneralException("The tags configuration must be a List");
+                        throw AppException.builder()
+                                .errorCode(AppErrors.TAG_CONFIG_IS_NOT_LIST)
+                                .build();
                     }
                     List<String> tagList = (List<String>) tagsObj;
                     String[] tags = tagList.toArray(new String[tagList.size()]);
                     Profile profile = new Profile(name, model, matching, tags);
-                    if (profiles.containsKey(name)) {
-                        throw new GeneralException("Found Duplicated profile name - {}", name);
-                    }
                     profiles.put(name, profile);
                 });
         return profiles;

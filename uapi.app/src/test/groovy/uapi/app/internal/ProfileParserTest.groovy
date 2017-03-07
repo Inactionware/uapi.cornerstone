@@ -12,6 +12,7 @@ package uapi.app.internal
 import com.esotericsoftware.yamlbeans.YamlReader
 import spock.lang.Specification
 import uapi.GeneralException
+import uapi.app.AppException
 
 /**
  * Test case for ProfileParser
@@ -78,6 +79,6 @@ class ProfileParserTest extends Specification {
         parser.parse(config.get('profiles'))
 
         then:
-        thrown(GeneralException)
+        thrown(AppException)
     }
 }

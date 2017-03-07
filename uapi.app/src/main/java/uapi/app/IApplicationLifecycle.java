@@ -10,15 +10,16 @@
 package uapi.app;
 
 /**
- * The IAppLifecycle contains some callback methods which will be invoked by application lifecycle
+ * The IApplicationLifecycle contains some callback methods which will be invoked by application lifecycle
  */
-public interface IAppLifecycle {
+public interface IApplicationLifecycle {
 
     /**
-     * The name of the app lifecycle
-     * @return
+     * The name of the application
+     *
+     * @return  The name of application
      */
-    String getAppName();
+    String getApplicationName();
 
     /**
      * Invoked when application is started

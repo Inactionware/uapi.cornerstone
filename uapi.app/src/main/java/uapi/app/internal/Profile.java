@@ -9,7 +9,8 @@
 
 package uapi.app.internal;
 
-import uapi.GeneralException;
+import uapi.app.AppErrors;
+import uapi.app.AppException;
 import uapi.common.ArgumentChecker;
 import uapi.common.CollectionHelper;
 import uapi.service.IService;
@@ -18,7 +19,7 @@ import uapi.service.ITagged;
 /**
  * A profile implementation
  */
-class Profile implements IProfile {
+public class Profile implements IProfile {
 
     private String _name;
     private String[] _tags;
@@ -58,7 +59,6 @@ class Profile implements IProfile {
         String[] tags = new String[0];
         if (service instanceof ITagged) {
             tags = ((ITagged) service).getTags();
-
         }
 
         if (this._model == Model.INCLUDE) {
@@ -67,7 +67,11 @@ class Profile implements IProfile {
             } else if (this._matching == Matching.SATISFY_ANY) {
                 return CollectionHelper.isContains(tags, this._tags);
             } else {
-                throw new GeneralException("Unsupported matching - {}", this._matching);
+                throw AppException.builder()
+                        .errorCode(AppErrors.UNSUPPORTED_PROFILE_MATCHING)
+                        .variables(new AppErrors.UnsupportedProfileMatching()
+                                .matching(this._matching.toString()))
+                        .build();
             }
         } else if (this._model == Model.EXCLUDE) {
             if (this._matching == Matching.SATISFY_ALL) {
@@ -75,10 +79,18 @@ class Profile implements IProfile {
             } else if (this._matching == Matching.SATISFY_ANY) {
                 return ! CollectionHelper.isContains(tags, this._tags);
             } else {
-                throw new GeneralException("Unsupported matching - {}", this._matching);
+                throw AppException.builder()
+                        .errorCode(AppErrors.UNSUPPORTED_PROFILE_MATCHING)
+                        .variables(new AppErrors.UnsupportedProfileMatching()
+                                .matching(this._matching.toString()))
+                        .build();
             }
         } else {
-            throw new GeneralException("Unsupported model - {}", this._model);
+            throw AppException.builder()
+                    .errorCode(AppErrors.UNSUPPORTED_PROFILE_MODEL)
+                    .variables(new AppErrors.UnsupportedProfileModel()
+                            .model(this._model.toString()))
+                    .build();
         }
     }
 
@@ -98,7 +110,11 @@ class Profile implements IProfile {
             } else if ("exclude".equalsIgnoreCase(value)) {
                 return EXCLUDE;
             } else {
-                throw new GeneralException("The value {} can't be parsed as Model enum");
+                throw AppException.builder()
+                        .errorCode(AppErrors.UNSUPPORTED_PROFILE_MODEL)
+                        .variables(new AppErrors.UnsupportedProfileModel()
+                                .model(value))
+                        .build();
             }
         }
     }
@@ -119,7 +135,11 @@ class Profile implements IProfile {
             } else if (SATISFY_ANY._value.equalsIgnoreCase(value)) {
                 return SATISFY_ANY;
             } else {
-                throw new GeneralException("The value {} can't be parsed as Matching enum", value);
+                throw AppException.builder()
+                        .errorCode(AppErrors.UNSUPPORTED_PROFILE_MATCHING)
+                        .variables(new AppErrors.UnsupportedProfileMatching()
+                                .matching(value))
+                        .build();
             }
         }
 

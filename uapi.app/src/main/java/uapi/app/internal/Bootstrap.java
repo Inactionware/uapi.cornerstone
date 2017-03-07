@@ -10,6 +10,8 @@
 package uapi.app.internal;
 
 import uapi.GeneralException;
+import uapi.app.AppErrors;
+import uapi.app.AppException;
 import uapi.config.ICliConfigProvider;
 import uapi.common.CollectionHelper;
 import uapi.rx.Looper;
@@ -23,10 +25,10 @@ import java.util.ServiceLoader;
 
 /**
  * The UAPI application entry point
- * The Bootstrapper's responsibility is load basic services and all other services is loaded by
+ * The Bootstrap's responsibility is load basic services and all other services is loaded by
  * profile definition
  */
-public class Bootstrapper {
+public class Bootstrap {
 
     private static final String[] basicSvcTags = new String[] {
             "Application", "Registry", "Config", "Profile", "Log"
@@ -58,18 +60,29 @@ public class Bootstrapper {
                 });
 
         if (svcRegistries.size() == 0) {
-            throw new GeneralException("A IRegistry must be provided");
+            throw AppException.builder()
+                    .errorCode(AppErrors.REGISTRY_IS_REQUIRED)
+                    .build();
         }
         if (svcRegistries.size() > 1) {
-            throw new GeneralException("Found multiple IRegistry instance {}", svcRegistries);
+            throw AppException.builder()
+                    .errorCode(AppErrors.MORE_REGISTRY)
+                    .variables(new AppErrors.MoreRegistry()
+                            .registries(svcRegistries))
+                    .build();
         }
 
         IRegistry svcRegistry = svcRegistries.get(0);
         // Register basic service first
         svcRegistry.register(basicSvcs.toArray(new IService[basicSvcs.size()]));
+        String svcRegType = svcRegistry.getClass().getCanonicalName();
         svcRegistry = svcRegistry.findService(IRegistry.class);
         if (svcRegistry == null) {
-            throw new GeneralException("The service repository can't be satisfied");
+            throw AppException.builder()
+                    .errorCode(AppErrors.REGISTRY_IS_UNSATISFIED)
+                    .variables(new AppErrors.RepositoryIsUnsatisfied()
+                            .serviceRegistryType(svcRegType))
+                    .build();
         }
 
         // Parse command line parameters
@@ -89,7 +102,9 @@ public class Bootstrapper {
 
         Application app = svcRegistry.findService(Application.class);
         if (app == null) {
-            throw new GeneralException("The Application was not initialized");
+            throw AppException.builder()
+                    .errorCode(AppErrors.INIT_APPLICATION_FAILE)
+                    .build();
         }
         app.startup(startTime);
     }

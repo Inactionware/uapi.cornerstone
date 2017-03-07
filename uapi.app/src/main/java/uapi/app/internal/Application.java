@@ -9,7 +9,7 @@
 
 package uapi.app.internal;
 
-import uapi.app.IAppLifecycle;
+import uapi.app.IApplicationLifecycle;
 import uapi.app.IApplication;
 import uapi.common.StringHelper;
 import uapi.config.IntervalTime;
@@ -41,7 +41,7 @@ public class Application implements IApplication {
 
     @Inject
     @Optional
-    protected List<IAppLifecycle> _lifecycles;
+    protected List<IApplicationLifecycle> _lifecycles;
 
     @Config(path="app.name", optional=true)
     protected String _appName;
@@ -63,16 +63,16 @@ public class Application implements IApplication {
     @Override
     public void startup(long startTime) {
         this._state = AppState.STARTING;
-        IAppLifecycle appLifecycle = null;
+        IApplicationLifecycle appLifecycle = null;
 
         if (StringHelper.isNullOrEmpty(this._appName)) {
             this._logger.info("app.name was not specified");
         } else {
             appLifecycle = Looper.on(this._lifecycles)
-                    .filter(lifecycle -> lifecycle.getAppName().equals(this._appName))
+                    .filter(lifecycle -> lifecycle.getApplicationName().equals(this._appName))
                     .first(null);
             if (appLifecycle == null) {
-                this._logger.warn("No IAppLifecycle is named - {}", this._appName);
+                this._logger.warn("No IApplicationLifecycle is named - {}", this._appName);
             } else {
                 appLifecycle.onStarted();
             }
