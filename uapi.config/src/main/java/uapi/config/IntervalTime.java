@@ -27,25 +27,25 @@ import java.util.concurrent.TimeUnit;
  */
 public class IntervalTime {
 
-    private static final String UNIT_MS         = "ms";
-    private static final String UNIT_SECOND     = "s";
-    private static final String UNIT_MINUTE     = "m";
-    private static final String UNIT_HOUR       = "h";
-    private static final String UNIT_DAY        = "d";
+    public static final String UNIT_MS              = "ms";
+    public static final String UNIT_SECOND          = "s";
+    public static final String UNIT_MINUTE          = "m";
+    public static final String UNIT_HOUR            = "h";
+    public static final String UNIT_DAY             = "d";
 
-    private static final long MS_OF_SECOND          = 1000;
-    private static final long SECOND_OF_MINUTE      = 60;
-    private static final long MINUTE_OF_HOUR        = 60;
-    private static final long HOUR_OF_DAY           = 24;
+    public static final long MS_OF_SECOND           = 1000;
+    public static final long SECOND_OF_MINUTE       = 60;
+    public static final long MINUTE_OF_HOUR         = 60;
+    public static final long HOUR_OF_DAY            = 24;
 
-    private static final long MS_OF_MINUTE          = MS_OF_SECOND * SECOND_OF_MINUTE;
-    private static final long MS_OF_HOUR            = MS_OF_MINUTE * MINUTE_OF_HOUR;
-    private static final long MS_OF_DAY             = MS_OF_HOUR * HOUR_OF_DAY;
+    public static final long MS_OF_MINUTE           = MS_OF_SECOND * SECOND_OF_MINUTE;
+    public static final long MS_OF_HOUR             = MS_OF_MINUTE * MINUTE_OF_HOUR;
+    public static final long MS_OF_DAY              = MS_OF_HOUR * HOUR_OF_DAY;
 
-    private static final long SECOND_OF_HOUR        = SECOND_OF_MINUTE * MINUTE_OF_HOUR;
-    private static final long SECOND_OF_DAY         = SECOND_OF_HOUR * HOUR_OF_DAY;
+    public static final long SECOND_OF_HOUR         = SECOND_OF_MINUTE * MINUTE_OF_HOUR;
+    public static final long SECOND_OF_DAY          = SECOND_OF_HOUR * HOUR_OF_DAY;
 
-    private static final long MINUTE_OF_DAY         = MINUTE_OF_HOUR * HOUR_OF_DAY;
+    public static final long MINUTE_OF_DAY          = MINUTE_OF_HOUR * HOUR_OF_DAY;
 
     public static IntervalTime parse(String intervalString) {
         ArgumentChecker.required(intervalString, "intervalString");

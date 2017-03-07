@@ -1,0 +1,64 @@
+/*
+ * Copyright (C) 2017. The UAPI Authors
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at the LICENSE file.
+ *
+ * You must gained the permission from the authors if you want to
+ * use the project into a commercial product
+ */
+
+package uapi.app.internal;
+
+import uapi.common.StringHelper;
+import uapi.config.annotation.Config;
+import uapi.log.ILogger;
+import uapi.service.IService;
+import uapi.service.annotation.Inject;
+import uapi.service.annotation.Service;
+import uapi.service.annotation.Tag;
+
+import java.util.Map;
+
+/**
+ * Manage multiple service profiles
+ */
+@Service
+@Tag("Profile")
+class ProfileManager {
+
+    static final IProfile DEFAULT_PROFILE   = new IncludeAllProfile();
+
+    @Config(path="app.active-profile", optional=true)
+    protected String _usedProfile;
+
+    @Config(path="profiles", parser=ProfilesParser.class, optional=true)
+    protected Map<String, IProfile> _profiles;
+
+    @Inject
+    protected ILogger _logger;
+
+    public IProfile getActiveProfile() {
+        IProfile profile;
+        if (StringHelper.isNullOrEmpty(this._usedProfile)) {
+            profile = DEFAULT_PROFILE;
+            this._logger.info("No profile is specified, using default profile");
+        } else {
+            profile = this._profiles.get(this._usedProfile);
+            if (profile == null) {
+                this._logger.warn("No profile is named {}, using default profile instead of", this._usedProfile);
+                profile = DEFAULT_PROFILE;
+            } else {
+                this._logger.info("Active profile is - {}", this._usedProfile);
+            }
+        }
+        return profile;
+    }
+
+    private static final class IncludeAllProfile implements IProfile {
+
+        @Override
+        public boolean isAllow(IService service) {
+            return true;
+        }
+    }
+}
