@@ -9,6 +9,7 @@
 
 package uapi.app.internal;
 
+import uapi.GeneralException;
 import uapi.app.AppErrors;
 import uapi.app.AppException;
 import uapi.common.ArgumentChecker;
@@ -61,37 +62,23 @@ public class Profile implements IProfile {
             tags = ((ITagged) service).getTags();
         }
 
-        if (this._model == Model.INCLUDE) {
-            if (this._matching == Matching.SATISFY_ALL) {
-                return CollectionHelper.isContainsAll(tags, this._tags);
-            } else if (this._matching == Matching.SATISFY_ANY) {
-                return CollectionHelper.isContains(tags, this._tags);
-            } else {
-                throw AppException.builder()
-                        .errorCode(AppErrors.UNSUPPORTED_PROFILE_MATCHING)
-                        .variables(new AppErrors.UnsupportedProfileMatching()
-                                .matching(this._matching.toString()))
-                        .build();
-            }
-        } else if (this._model == Model.EXCLUDE) {
-            if (this._matching == Matching.SATISFY_ALL) {
-                return ! CollectionHelper.isContainsAll(tags, this._tags);
-            } else if (this._matching == Matching.SATISFY_ANY) {
-                return ! CollectionHelper.isContains(tags, this._tags);
-            } else {
-                throw AppException.builder()
-                        .errorCode(AppErrors.UNSUPPORTED_PROFILE_MATCHING)
-                        .variables(new AppErrors.UnsupportedProfileMatching()
-                                .matching(this._matching.toString()))
-                        .build();
-            }
-        } else {
-            throw AppException.builder()
-                    .errorCode(AppErrors.UNSUPPORTED_PROFILE_MODEL)
-                    .variables(new AppErrors.UnsupportedProfileModel()
-                            .model(this._model.toString()))
-                    .build();
+        switch (this._model) {
+            case INCLUDE:
+                switch(this._matching) {
+                    case SATISFY_ALL:
+                        return CollectionHelper.isContainsAll(tags, this._tags);
+                    case SATISFY_ANY:
+                        return CollectionHelper.isContains(tags, this._tags);
+                }
+            case EXCLUDE:
+                switch (this._matching) {
+                    case SATISFY_ALL:
+                        return ! CollectionHelper.isContainsAll(tags, this._tags);
+                    case SATISFY_ANY:
+                        return ! CollectionHelper.isContains(tags, this._tags);
+                }
         }
+        throw new GeneralException("Unsupported model or matching - {}, {}", this._model, this._matching);
     }
 
     public enum Model {

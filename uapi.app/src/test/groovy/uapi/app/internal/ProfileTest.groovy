@@ -10,6 +10,7 @@
 package uapi.app.internal
 
 import spock.lang.Specification
+import uapi.app.AppException
 import uapi.service.IService
 import uapi.service.ITagged
 
@@ -32,6 +33,20 @@ class ProfileTest extends Specification {
         'eXcLuDe'   | Profile.Model.EXCLUDE
     }
 
+    def 'Test Model.parser with exception'() {
+        when:
+        Profile.Model.parse(str)
+
+        then:
+        thrown(AppException)
+
+        where:
+        str         | placeholder
+        'A'         | null
+        'included'  | null
+        'excluded'  | null
+    }
+
     def 'Test Matching.parser'() {
         expect:
         Profile.Matching.parse(str) == matching
@@ -44,6 +59,21 @@ class ProfileTest extends Specification {
         'SATISFY-ANY'   | Profile.Matching.SATISFY_ANY
         'satisfy-any'   | Profile.Matching.SATISFY_ANY
         'SatiSfY-AnY'   | Profile.Matching.SATISFY_ANY
+    }
+
+    def 'Test Matching.parser with exception'() {
+        when:
+        Profile.Matching.parse(str)
+
+        then:
+        thrown(AppException)
+
+        where:
+        str         | placeholder
+        'A'         | null
+        'satisfy'   | null
+        'all'       | null
+        'any'       | null
     }
 
     def 'Test isAllow'() {

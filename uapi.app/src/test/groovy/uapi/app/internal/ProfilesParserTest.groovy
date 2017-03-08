@@ -17,7 +17,26 @@ import uapi.app.AppException
 /**
  * Test case for ProfileParser
  */
-class ProfileParserTest extends Specification {
+class ProfilesParserTest extends Specification {
+
+    def 'Test create instance'() {
+        when:
+        def parser = new ProfilesParser()
+
+        then:
+        noExceptionThrown()
+        parser.getName() == ProfilesParser.class.name
+        parser.isSupport(inType, outType) == isSupport
+
+        where:
+        inType                      | outType                       | isSupport
+        List.class.canonicalName    | Map.class.canonicalName       | true
+        List.class.canonicalName    | String.class.canonicalName    | false
+        String.class.canonicalName  | Map.class.canonicalName       | false
+        null                        | Map.canonicalName             | false
+        List.canonicalName          | null                          | false
+        null                        | null                          | false
+    }
 
     def 'Test parse'() {
         given:
@@ -67,6 +86,27 @@ class ProfileParserTest extends Specification {
         Map config;
         try {
             reader = new YamlReader(new FileReader('src/test/resources/duplicated-profiles.yaml'));
+            config = reader.read()
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
+        }
+
+        when:
+        ProfilesParser parser = new ProfilesParser()
+        parser.parse(config.get('profiles'))
+
+        then:
+        thrown(AppException)
+    }
+
+    def 'Test parse incorrect tags profile'() {
+        given:
+        YamlReader reader = null;
+        Map config;
+        try {
+            reader = new YamlReader(new FileReader('src/test/resources/incorrect-tags-profile.yaml'));
             config = reader.read()
         } finally {
             if (reader != null) {

@@ -9,7 +9,6 @@
 
 package uapi.app.internal;
 
-import uapi.GeneralException;
 import uapi.app.AppErrors;
 import uapi.app.AppException;
 import uapi.config.ICliConfigProvider;
@@ -103,7 +102,7 @@ public class Bootstrap {
         Application app = svcRegistry.findService(Application.class);
         if (app == null) {
             throw AppException.builder()
-                    .errorCode(AppErrors.INIT_APPLICATION_FAILE)
+                    .errorCode(AppErrors.INIT_APPLICATION_FAILED)
                     .build();
         }
         app.startup(startTime);

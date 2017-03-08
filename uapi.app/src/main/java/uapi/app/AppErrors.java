@@ -27,7 +27,7 @@ public class AppErrors extends FileBasedExceptionErrors<AppException> {
     public static final int REGISTRY_IS_REQUIRED            = 1;
     public static final int MORE_REGISTRY                   = 2;
     public static final int REGISTRY_IS_UNSATISFIED         = 3;
-    public static final int INIT_APPLICATION_FAILE          = 4;
+    public static final int INIT_APPLICATION_FAILED         = 4;
     public static final int UNSUPPORTED_PROFILE_MATCHING    = 5;
     public static final int UNSUPPORTED_PROFILE_MODEL       = 6;
     public static final int DUPLICATED_PROFILE              = 7;
@@ -40,7 +40,7 @@ public class AppErrors extends FileBasedExceptionErrors<AppException> {
         keyCodeMapping.put(REGISTRY_IS_REQUIRED, RegistryIsRequired.KEY);
         keyCodeMapping.put(MORE_REGISTRY, MoreRegistry.KEY);
         keyCodeMapping.put(REGISTRY_IS_UNSATISFIED, RepositoryIsUnsatisfied.KEY);
-        keyCodeMapping.put(INIT_APPLICATION_FAILE, InitApplicationFailed.KEY);
+        keyCodeMapping.put(INIT_APPLICATION_FAILED, InitApplicationFailed.KEY);
         keyCodeMapping.put(UNSUPPORTED_PROFILE_MATCHING, UnsupportedProfileMatching.KEY);
         keyCodeMapping.put(UNSUPPORTED_PROFILE_MODEL, UnsupportedProfileModel.KEY);
         keyCodeMapping.put(DUPLICATED_PROFILE, DuplicatedProfile.KEY);

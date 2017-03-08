@@ -1,0 +1,5 @@
+profiles:
+  - name: 1
+    model: exclude
+    matching: satisfy-all
+    tags: a
