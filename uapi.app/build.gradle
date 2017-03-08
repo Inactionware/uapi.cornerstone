@@ -20,6 +20,8 @@ dependencies {
             "uapi:uapi.common:${uapi_base_version}",
             "uapi:uapi.exception:${uapi_base_version}",
     )
+
+    testCompile "org.awaitility:awaitility-groovy:${awaitility_version}"
 }
 
 publishing {

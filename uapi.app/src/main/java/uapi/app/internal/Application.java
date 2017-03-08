@@ -55,11 +55,6 @@ public class Application implements IApplication {
         this._semaphore = new Semaphore(0);
     }
 
-    public void stop() {
-        this._logger.info("The system is going to shutdown by system...");
-        this._semaphore.release();
-    }
-
     @Override
     public void startup(long startTime) {
         this._state = AppState.STARTING;
