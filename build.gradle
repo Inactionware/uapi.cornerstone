@@ -90,7 +90,7 @@ task wrapper(type: Wrapper) {
     gradleVersion = "${gradle_version}"
 }
 
-def publishedProjects = subprojects.findAll { it.path != ':uapi.sample' }
+def publishedProjects = subprojects.findAll { it.path != ':uapi.example' }
 
 task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
     description = 'Generates an aggregate report from all subprojects'

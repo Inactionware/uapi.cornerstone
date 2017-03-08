@@ -141,10 +141,11 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
 
     @Override
     public Object getService() {
-        if (tryActivate(false)) {
-            return this._svc;
-        }
-        return null;
+//        if (tryActivate(false)) {
+//            return this._svc;
+//        }
+//        return null;
+        return this._svc;
     }
 
     @Override
@@ -317,6 +318,7 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
         // Inject all dependent service
         Looper.on(_dependencies.entries())
                 .map(Map.Entry::getValue)
+                .filter(svcHolder -> svcHolder != null)
                 .foreach(IServiceHolder::inject);
 
         // Inject depended service
@@ -344,6 +346,7 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
 
         Looper.on(_dependencies.entries())
                 .map(Map.Entry::getValue)
+                .filter(svcHolder -> svcHolder != null)
                 .foreach(IServiceHolder::satisfy);
 
         if (! _satisfyHook.isSatisfied(StatefulServiceHolder.this)) {
@@ -358,6 +361,7 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
 
         Looper.on(_dependencies.entries())
                 .map(Map.Entry::getValue)
+                .filter(svcHolder -> svcHolder != null)
                 .foreach(IServiceHolder::activate);
 
         if (_svc instanceof IInitial) {

@@ -1,0 +1,9 @@
+app:
+  name: HelloApp
+
+profiles:
+  - name: HelloAppProfile
+    model: include
+    matching: satisfy-any
+    tags:
+      - Hello

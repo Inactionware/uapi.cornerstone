@@ -37,7 +37,6 @@ public class Bootstrap {
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
 
-//        ServiceLoader<IService> svcLoaders = ServiceLoader.load(IService.class);
         Iterable<IService> svcLoaders = appSvcLoader.loadServices();
         final List<IRegistry> svcRegistries = new ArrayList<>();
         final List<IService> basicSvcs = new ArrayList<>();

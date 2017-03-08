@@ -1,0 +1,38 @@
+/*
+ * Copyright (C) 2017. The UAPI Authors
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at the LICENSE file.
+ *
+ * You must gained the permission from the authors if you want to
+ * use the project into a commercial product
+ */
+
+apply plugin: 'application'
+
+dependencies {
+    compile project(':uapi.service')
+    compile project(':uapi.config')
+    compile project(':uapi.log')
+    compile project(':uapi.event')
+    compile project(':uapi.behavior')
+    compile project(':uapi.app')
+}
+
+mainClassName = 'uapi.app.internal.Bootstrap'
+
+
+task copyConfig {
+    def cfgDir = file("conf")
+    outputs.dir cfgDir
+}
+
+distributions {
+    main {
+        baseName = 'uapi-example'
+        contents {
+            from (copyConfig) {
+                into "conf"
+            }
+        }
+    }
+}
