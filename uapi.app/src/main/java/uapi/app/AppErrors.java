@@ -32,6 +32,7 @@ public class AppErrors extends FileBasedExceptionErrors<AppException> {
     public static final int UNSUPPORTED_PROFILE_MODEL       = 6;
     public static final int DUPLICATED_PROFILE              = 7;
     public static final int TAG_CONFIG_IS_NOT_LIST          = 8;
+    public static final int SPECIFIC_SERVICE_NOT_FOUND      = 9;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -45,6 +46,7 @@ public class AppErrors extends FileBasedExceptionErrors<AppException> {
         keyCodeMapping.put(UNSUPPORTED_PROFILE_MODEL, UnsupportedProfileModel.KEY);
         keyCodeMapping.put(DUPLICATED_PROFILE, DuplicatedProfile.KEY);
         keyCodeMapping.put(TAG_CONFIG_IS_NOT_LIST, TagConfigIsNotList.KEY);
+        keyCodeMapping.put(SPECIFIC_SERVICE_NOT_FOUND, SpecificServiceNotFound.KEY);
     }
 
     @Override
@@ -190,5 +192,26 @@ public class AppErrors extends FileBasedExceptionErrors<AppException> {
     public static final class TagConfigIsNotList extends IndexedParameters<TagConfigIsNotList> {
 
         private static final String KEY = "TagConfigIsNotList";
+    }
+
+    /**
+     * Error string template:
+     *      The specific service was not found in the registry - {}
+     */
+    public static final class SpecificServiceNotFound extends IndexedParameters<SpecificServiceNotFound> {
+
+        private static final String KEY = "SpecificServiceNotFound";
+
+        private String _svcType;
+
+        public SpecificServiceNotFound serviceType(String type) {
+            this._svcType = type;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._svcType };
+        }
     }
 }

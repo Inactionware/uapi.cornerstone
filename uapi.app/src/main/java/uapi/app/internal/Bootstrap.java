@@ -20,7 +20,6 @@ import uapi.service.ITagged;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ServiceLoader;
 
 /**
  * The UAPI application entry point
@@ -33,10 +32,13 @@ public class Bootstrap {
             "Application", "Registry", "Config", "Profile", "Log"
     };
 
+    static AppServiceLoader appSvcLoader = new AppServiceLoader();
+
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
 
-        ServiceLoader<IService> svcLoaders = ServiceLoader.load(IService.class);
+//        ServiceLoader<IService> svcLoaders = ServiceLoader.load(IService.class);
+        Iterable<IService> svcLoaders = appSvcLoader.loadServices();
         final List<IRegistry> svcRegistries = new ArrayList<>();
         final List<IService> basicSvcs = new ArrayList<>();
         final List<IService> otherSvcs = new ArrayList<>();
@@ -86,10 +88,24 @@ public class Bootstrap {
 
         // Parse command line parameters
         ICliConfigProvider cliCfgProvider = svcRegistry.findService(ICliConfigProvider.class);
+        if (cliCfgProvider == null) {
+            throw AppException.builder()
+                    .errorCode(AppErrors.SPECIFIC_SERVICE_NOT_FOUND)
+                    .variables(new AppErrors.SpecificServiceNotFound()
+                            .serviceType(ICliConfigProvider.class.getCanonicalName()))
+                    .build();
+        }
         cliCfgProvider.parse(args);
 
         // Create profile
         ProfileManager profileMgr = svcRegistry.findService(ProfileManager.class);
+        if (profileMgr == null) {
+            throw AppException.builder()
+                    .errorCode(AppErrors.SPECIFIC_SERVICE_NOT_FOUND)
+                    .variables(new AppErrors.SpecificServiceNotFound()
+                            .serviceType(ICliConfigProvider.class.getCanonicalName()))
+                    .build();
+        }
         IProfile profile = profileMgr.getActiveProfile();
 
         // Register other service
