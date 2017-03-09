@@ -9,7 +9,6 @@
 
 package uapi.service.internal;
 
-import com.google.common.base.Strings;
 import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.IIdentifiable;
@@ -55,7 +54,7 @@ class InjectParser {
             ElementKind elementKind = annotatedElement.getKind();
             if (elementKind != ElementKind.FIELD && elementKind != ElementKind.METHOD) {
                 throw new GeneralException(
-                        "The Inject annotation only can be applied on field",
+                        "The Inject annotation only can be applied on field or method",
                         annotatedElement.getSimpleName().toString());
             }
             builderCtx.checkModifiers(annotatedElement, Inject.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
@@ -65,7 +64,7 @@ class InjectParser {
             Inject inject = annotatedElement.getAnnotation(Inject.class);
             String injectId = inject.value();
             String injectFrom = inject.from();
-            if (Strings.isNullOrEmpty(injectFrom)) {
+            if (StringHelper.isNullOrEmpty(injectFrom)) {
                 throw new GeneralException(
                         "The inject service from [{}.{}] must be specified",
                         classElemt.getSimpleName().toString(),
@@ -110,7 +109,7 @@ class InjectParser {
                     fieldTypeName = typeArgs.get(1).toString();
                 }
 
-                if (Strings.isNullOrEmpty(injectId)) {
+                if (StringHelper.isNullOrEmpty(injectId)) {
                     injectId = fieldTypeName;
                 }
 
@@ -122,14 +121,14 @@ class InjectParser {
                 String returnType = methodElemt.getReturnType().toString();
                 if (! Type.VOID.equals(returnType)) {
                     throw new GeneralException(
-                            "Expect then injected method [{}] return void, but it return - {}",
+                            "Expect the injected method [{}] return void, but it return - {}",
                             methodName, returnType
                     );
                 }
                 List paramElements = methodElemt.getParameters();
                 if (paramElements.size() != 1) {
                     throw new GeneralException(
-                            "Expect the injected method [{}] has only 1 parameter, but found - {}",
+                            "Expect the injected method [{}] is only allowed 1 parameter, but found - {} parameters",
                             methodName, paramElements.size()
                     );
                 }
@@ -140,7 +139,7 @@ class InjectParser {
                     paramType = paramType.substring(0, paramType.indexOf("<"));
                 }
 
-                if (Strings.isNullOrEmpty(injectId)) {
+                if (StringHelper.isNullOrEmpty(injectId)) {
                     injectId = paramType;
                 }
 
@@ -380,7 +379,7 @@ class InjectParser {
         }
     }
 
-    public static final class InjectMethod {
+    public static class InjectMethod {
 
         private String _methodName;
         private String _injectId;

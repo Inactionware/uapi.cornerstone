@@ -13,6 +13,7 @@ import freemarker.template.Template
 import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.GeneralException
+import uapi.Type
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.service.SetterMeta
@@ -20,13 +21,16 @@ import uapi.service.annotation.Inject
 
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
+import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Name
 import javax.lang.model.element.TypeElement
+import javax.lang.model.element.VariableElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.type.WildcardType
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
+import java.lang.reflect.Executable
 
 /**
  * Unit test for InjectParser
@@ -371,6 +375,115 @@ class InjectParserTest extends Specification {
         where:
         fieldName   | fieldType | isCollection  | isMap | vt        | kt
         'test'      | 'String'  | false         | true  | 'Integer' | 'String'
+    }
+
+    def 'Test parser on method which has incorrect return type'() {
+        given:
+        def builderCtx = Mock(IBuilderContext)
+        def methodElemnt = Mock(ExecutableElement) {
+            getKind() >> ElementKind.METHOD
+            getAnnotation(_) >> {
+                return Test.class.getField('t').getAnnotation(Inject.class)
+            }
+            getSimpleName() >> Mock(Name) {
+                toString() >> 'methodName'
+            }
+            getReturnType() >> Mock(TypeMirror) {
+                toString() >> 'returnType'
+            }
+            getEnclosingElement() >> Mock(Element) {
+                getSimpleName() >> Mock(Name) {
+                    toString() >> 'className'
+                }
+            }
+        }
+        def parser = new InjectParser()
+
+        when:
+        parser.parse(builderCtx, [methodElemnt] as Set)
+
+        then:
+        thrown(GeneralException)
+    }
+
+    def 'Test parser on method which has incorrect parameter count'() {
+        given:
+        def builderCtx = Mock(IBuilderContext)
+        def methodElemnt = Mock(ExecutableElement) {
+            getKind() >> ElementKind.METHOD
+            getAnnotation(_) >> {
+                return Test.class.getField('t').getAnnotation(Inject.class)
+            }
+            getSimpleName() >> Mock(Name) {
+                toString() >> 'methodName'
+            }
+            getReturnType() >> Mock(TypeMirror) {
+                toString() >> Type.VOID
+            }
+            getEnclosingElement() >> Mock(Element) {
+                getSimpleName() >> Mock(Name) {
+                    toString() >> 'className'
+                }
+            }
+            getParameters() >> [Mock(VariableElement), Mock(VariableElement)]
+        }
+        def parser = new InjectParser()
+
+        when:
+        parser.parse(builderCtx, [methodElemnt] as Set)
+
+        then:
+        thrown(GeneralException)
+    }
+
+    def 'Test parser on method'() {
+        given:
+        def injectMethod = Mock(InjectParser.InjectMethod) {
+            methodName() >> 'methodName'
+            injectId() >> 'injectId'
+            injectFrom() >> 'Local'
+            isOptional() >> true
+            injectType() >> 'List'
+        }
+        def classBuilder = Mock(ClassMeta.Builder)
+        classBuilder.findSetterBuilders() >> []
+        classBuilder.addImplement(_) >> classBuilder
+        classBuilder.addMethodBuilder(_) >> classBuilder
+        classBuilder.getTransience(InjectParser.INJECT_METHODS) >> [injectMethod]
+        def builderCtx = Mock(IBuilderContext) {
+            findClassBuilder(_) >> classBuilder
+            getBuilders() >> [classBuilder]
+            loadTemplate(_) >> Mock(Template)
+        }
+        def methodElemnt = Mock(ExecutableElement) {
+            getKind() >> ElementKind.METHOD
+            getAnnotation(_) >> {
+                return Test.class.getField('t').getAnnotation(Inject.class)
+            }
+            getSimpleName() >> Mock(Name) {
+                toString() >> 'methodName'
+            }
+            getReturnType() >> Mock(TypeMirror) {
+                toString() >> Type.VOID
+            }
+            getEnclosingElement() >> Mock(Element) {
+                getSimpleName() >> Mock(Name) {
+                    toString() >> 'className'
+                }
+            }
+            getParameters() >> [Mock(VariableElement) {
+                asType() >> Mock(TypeMirror) {
+                    toString() >> 'List<String>'
+                }
+            }]
+        }
+        def parser = new InjectParser()
+
+        when:
+        parser.parse(builderCtx, [methodElemnt] as Set)
+
+        then:
+        noExceptionThrown()
     }
 
     def 'Test add dependency'() {

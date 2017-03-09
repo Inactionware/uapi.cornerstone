@@ -19,8 +19,11 @@ import uapi.service.SetterMeta
 
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
+import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.Name
+import javax.lang.model.element.VariableElement
+import javax.lang.model.type.TypeMirror
 
 /**
  * Test for OptionalParser
@@ -132,6 +135,146 @@ class OptionalParserTest extends Specification {
         where:
         elemName    | modifiers                 | isOptional    | injectId
         'name'      | [Modifier.PUBLIC] as Set  | true          | 'ijid'
+    }
+
+    def 'Test parse on method'() {
+        given:
+        def injectMethod = Mock(InjectParser.InjectMethod) {
+            methodName() >> elemName
+            injectId() >> ijtid
+            isOptional() >> true
+        }
+        def classBudr = Mock(ClassMeta.Builder)
+        classBudr.getTransience(InjectParser.INJECT_METHODS) >> [injectMethod]
+        classBudr.findSetterBuilders() >> []
+        def budrCtx = Mock(IBuilderContext) {
+            getLogger() >> Mock(LogSupport)
+            findClassBuilder(_) >> classBudr
+            getBuilders() >> [classBudr]
+            loadTemplate(_) >> Mock(Template)
+        }
+        def element = Mock(Element) {
+            getKind() >> ElementKind.METHOD
+            getSimpleName() >> Mock(Name) {
+                toString() >> elemName
+            }
+            getModifiers() >> modifiers
+            getEnclosingElement() >> Mock(Element) {
+                getModifiers() >> modifiers
+            }
+        }
+        def parser = new OptionalParser()
+
+        when:
+        parser.parse(budrCtx, [element] as Set)
+
+        then:
+        noExceptionThrown()
+        1 * injectMethod.setOptional(true)
+
+        where:
+        elemName    | modifiers                 | isOptional    | ijtid
+        'name'      | [Modifier.PUBLIC] as Set  | true          | 'ijid'
+    }
+
+    def 'Test parse on override methods'() {
+        given:
+        def injectMethod = Mock(InjectParser.InjectMethod) {
+            methodName() >> elemName
+            injectId() >> ijtid
+            isOptional() >> true
+            injectType() >> 'List'
+        }
+        def injectMethod2 = Mock(InjectParser.InjectMethod) {
+            methodName() >> elemName
+            injectId() >> ijtid
+            isOptional() >> true
+            injectType() >> 'Integer'
+        }
+        def classBudr = Mock(ClassMeta.Builder)
+        classBudr.getTransience(InjectParser.INJECT_METHODS) >> [injectMethod, injectMethod2]
+        classBudr.findSetterBuilders() >> []
+        def budrCtx = Mock(IBuilderContext) {
+            getLogger() >> Mock(LogSupport)
+            findClassBuilder(_) >> classBudr
+            getBuilders() >> [classBudr]
+            loadTemplate(_) >> Mock(Template)
+        }
+        def element = Mock(ExecutableElement) {
+            getKind() >> ElementKind.METHOD
+            getSimpleName() >> Mock(Name) {
+                toString() >> elemName
+            }
+            getModifiers() >> modifiers
+            getEnclosingElement() >> Mock(Element) {
+                getModifiers() >> modifiers
+            }
+            getParameters() >> [Mock(VariableElement) {
+                asType() >> Mock(TypeMirror) {
+                    toString() >> 'List<String>'
+                }
+            }]
+        }
+        def parser = new OptionalParser()
+
+        when:
+        parser.parse(budrCtx, [element] as Set)
+
+        then:
+        noExceptionThrown()
+        1 * injectMethod.setOptional(true)
+
+        where:
+        elemName    | modifiers                 | ijtid
+        'name'      | [Modifier.PUBLIC] as Set  | 'ijid'
+    }
+
+    def 'Test parse on methods which has incorrect parameters'() {
+        given:
+        def injectMethod = Mock(InjectParser.InjectMethod) {
+            methodName() >> elemName
+            injectId() >> ijtid
+            isOptional() >> true
+            injectType() >> 'List'
+        }
+        def injectMethod2 = Mock(InjectParser.InjectMethod) {
+            methodName() >> elemName
+            injectId() >> ijtid
+            isOptional() >> true
+            injectType() >> 'Integer'
+        }
+        def classBudr = Mock(ClassMeta.Builder)
+        classBudr.getTransience(InjectParser.INJECT_METHODS) >> [injectMethod, injectMethod2]
+        classBudr.findSetterBuilders() >> []
+        def budrCtx = Mock(IBuilderContext) {
+            getLogger() >> Mock(LogSupport)
+            findClassBuilder(_) >> classBudr
+            getBuilders() >> [classBudr]
+            loadTemplate(_) >> Mock(Template)
+        }
+        def element = Mock(ExecutableElement) {
+            getKind() >> ElementKind.METHOD
+            getSimpleName() >> Mock(Name) {
+                toString() >> elemName
+            }
+            getModifiers() >> modifiers
+            getEnclosingElement() >> Mock(Element) {
+                getModifiers() >> modifiers
+            }
+            getParameters() >> [Mock(VariableElement), Mock(VariableElement)]
+        }
+        def parser = new OptionalParser()
+
+        when:
+        parser.parse(budrCtx, [element] as Set)
+
+        then:
+        thrown(GeneralException)
+        0 * injectMethod.setOptional(true)
+
+        where:
+        elemName    | modifiers                 | ijtid
+        'name'      | [Modifier.PUBLIC] as Set  | 'ijid'
     }
 
     def 'Test helper'() {
