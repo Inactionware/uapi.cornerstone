@@ -7,7 +7,7 @@
  * use the project into a commercial product
  */
 
-package uapi.example.service.hello;
+package uapi.example.service.basic;
 
 import uapi.log.ILogger;
 import uapi.service.annotation.Inject;

@@ -7,7 +7,7 @@
  * use the project into a commercial product
  */
 
-package uapi.example.service.hello;
+package uapi.example.service.basic;
 
 /**
  * Created by xquan on 3/8/2017.

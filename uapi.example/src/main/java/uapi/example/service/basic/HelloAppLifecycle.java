@@ -7,7 +7,7 @@
  * use the project into a commercial product
  */
 
-package uapi.example.service.hello;
+package uapi.example.service.basic;
 
 import uapi.app.IApplicationLifecycle;
 import uapi.log.ILogger;
@@ -16,7 +16,7 @@ import uapi.service.annotation.Inject;
 import uapi.service.annotation.Service;
 
 /**
- * Created by xquan on 3/8/2017.
+ * Hello application lifecycle
  */
 @Service(IApplicationLifecycle.class)
 public class HelloAppLifecycle implements IApplicationLifecycle {

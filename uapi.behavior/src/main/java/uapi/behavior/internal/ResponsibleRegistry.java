@@ -17,6 +17,7 @@ import uapi.common.Repository;
 import uapi.event.IEventBus;
 import uapi.log.ILogger;
 import uapi.service.annotation.Inject;
+import uapi.service.annotation.Optional;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
