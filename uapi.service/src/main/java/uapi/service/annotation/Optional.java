@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 /**
  * Indicate specified field is optional
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.SOURCE)
 public @interface Optional {
 }

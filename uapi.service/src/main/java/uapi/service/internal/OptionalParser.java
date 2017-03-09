@@ -14,11 +14,11 @@ import uapi.GeneralException;
 import uapi.InvalidArgumentException;
 import uapi.Type;
 import uapi.codegen.*;
+import uapi.common.StringHelper;
+import uapi.rx.Looper;
 import uapi.service.SetterMeta;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
+import javax.lang.model.element.*;
 import java.util.*;
 
 /**
@@ -42,22 +42,60 @@ class OptionalParser {
     ) throws GeneralException {
         builderCtx.getLogger().info("Starting process Option annotation");
         // Initialize optional setters
-        elements.forEach(fieldElement -> {
-            if (fieldElement.getKind() != ElementKind.FIELD) {
-                throw new GeneralException(
-                        "The Optional annotation only can be applied on field",
-                        fieldElement.getSimpleName().toString());
-            }
-            builderCtx.checkModifiers(fieldElement, uapi.service.annotation.Optional.class,
+        elements.forEach(element -> {
+            builderCtx.checkModifiers(element, uapi.service.annotation.Optional.class,
                     Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
-            Element classElemt = fieldElement.getEnclosingElement();
+            builderCtx.checkAnnotations(element, uapi.service.annotation.Inject.class);
+            Element classElemt = element.getEnclosingElement();
             builderCtx.checkModifiers(classElemt, uapi.service.annotation.Optional.class,
                     Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
-            String fieldName = fieldElement.getSimpleName().toString();
+            if (element.getKind() == ElementKind.FIELD) {
+                String fieldName = element.getSimpleName().toString();
 
-            ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
-            setOptionalDependency(clsBuilder, fieldName);
+                ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
+                setOptionalDependency(clsBuilder, fieldName);
+            } else if (element.getKind() == ElementKind.METHOD) {
+                String methodName = element.getSimpleName().toString();
+                ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
+                List<InjectParser.InjectMethod> injectMethods = clsBuilder.getTransience(InjectParser.INJECT_METHODS);
+                List<InjectParser.InjectMethod> matchedMethods = Looper.on(injectMethods)
+                        .filter(method -> methodName.equals(method.methodName()))
+                        .toList();
+                InjectParser.InjectMethod matchedMethod = null;
+                if (matchedMethods.size() == 1) {
+                    matchedMethod = matchedMethods.get(0);
+                } else {
+                    ExecutableElement methodElemt = (ExecutableElement) element;
+                    List paramElements = methodElemt.getParameters();
+                    if (paramElements.size() != 1) {
+                        throw new GeneralException(
+                                "Expect the injected method [{}] has only 1 parameter, but found - {}",
+                                methodName, paramElements.size()
+                        );
+                    }
+                    VariableElement paramElem = (VariableElement) paramElements.get(0);
+                    String rawParamType = paramElem.asType().toString();
+                    // Remove generic type
+                    String paramType = rawParamType.contains("<") ?
+                            rawParamType.substring(0, rawParamType.indexOf("<")) : rawParamType;
+                    matchedMethods = Looper.on(matchedMethods)
+                            .filter(method -> paramType.equals(method.injectType()))
+                            .toList();
+                    if (matchedMethods.size() == 1) {
+                        matchedMethod = matchedMethods.get(0);
+                    }
+                }
+                if (matchedMethod == null) {
+                    throw new GeneralException(
+                            "Can't found inject information for method which annotated with Optional - {}", methodName);
+                }
+                matchedMethod.setOptional(true);
+            } else {
+                throw new GeneralException(
+                        "The Optional annotation only can be applied on field or method",
+                        element.getSimpleName().toString());
+            }
         });
 
 
@@ -74,16 +112,24 @@ class OptionalParser {
         String paramName        = "id";
         String paramType        = Type.STRING;
 
-        List<MethodMeta.Builder> setters = classBuilder.findSetterBuilders();
-        if (setters.size() == 0) {
-            // No setters means this class does not implement IInjectable interface
-            return;
-        }
         final List<String> optionals = new ArrayList<>();
-        setters.stream()
+        List<MethodMeta.Builder> setters = classBuilder.findSetterBuilders();
+        Looper.on(setters)
                 .map(setter -> (SetterMeta.Builder) setter)
                 .filter(SetterMeta.Builder::getIsOptional)
-                .forEach(setter -> optionals.add(setter.getInjectId()));
+                .foreach(setter -> optionals.add(setter.getInjectId()));
+
+        List<InjectParser.InjectMethod> injectMethods = classBuilder.getTransience(InjectParser.INJECT_METHODS);
+        if (injectMethods != null) {
+            Looper.on(injectMethods)
+                    .filter(InjectParser.InjectMethod::isOptional)
+                    .foreach(injectMethod -> optionals.add(injectMethod.injectId()));
+        }
+
+        if (setters.size() == 0 && (injectMethods == null || injectMethods.size() == 0)) {
+            // This class does not implement IInjectable interface
+            return;
+        }
 
         final Map<String, List<String>> tempModel = new HashMap<>();
         tempModel.put(MODEL_IS_OPTIONAL, optionals);

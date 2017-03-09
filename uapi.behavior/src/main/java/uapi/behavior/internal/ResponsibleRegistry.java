@@ -52,6 +52,7 @@ public class ResponsibleRegistry implements IResponsibleRegistry {
     }
 
     @Inject
+    @Optional
     public void addAction(IAction<?, ?> action) {
         ArgumentChecker.required(action, "action");
         IAction<?, ?> existing = this._actionRepo.put(action);

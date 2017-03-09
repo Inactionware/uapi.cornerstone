@@ -58,7 +58,6 @@ class OptionalParserTest extends Specification {
         elemKind            | elemName
         ElementKind.PACKAGE | 'name'
         ElementKind.CLASS   | 'name'
-        ElementKind.METHOD  | 'name'
         ElementKind.ENUM    | 'name'
     }
 

@@ -39,7 +39,7 @@ class InjectParser {
     private static final String TEMPLATE_INJECT             = "template/inject_method.ftl";
     private static final String TEMPLATE_GET_DEPENDENCIES   = "template/getDependencies_method.ftl";
     private static final String SETTER_PARAM_NAME           = "value";
-    private static final String INJECT_METHODS              = "InjectMethods";
+    public static final String INJECT_METHODS               = "InjectMethods";
 
     private final InjectParserHelper _helper = new InjectParserHelper();
 
@@ -145,9 +145,9 @@ class InjectParser {
                 }
 
                 ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
-                List injectMethods = clsBuilder.getTransience(INJECT_METHODS);
+                List<InjectMethod> injectMethods = clsBuilder.getTransience(INJECT_METHODS);
                 if (injectMethods == null) {
-                    injectMethods = new ArrayList();
+                    injectMethods = new ArrayList<>();
                     clsBuilder.putTransience(INJECT_METHODS, injectMethods);
                 }
                 injectMethods.add(new InjectMethod(methodName, injectId, paramType, injectFrom));
@@ -293,14 +293,15 @@ class InjectParser {
                                 dependSvc));
                     }
                 });
-//        Template tempDependencies = builderCtx.loadTemplate(TEMPLATE_GET_DEPENDENCIES);
-        Map<String, Object> tempModelDependencies = new HashMap<>();
-        tempModelDependencies.put("dependencies", dependencies);
-        if (classBuilder.findSetterBuilders().size() == 0) {
-            // No setters means this class does not implement IInjectable interface
+        if (dependencies.size() == 0) {
             return;
         }
-        classBuilder.overrideMethodBuilder(MethodMeta.builder()
+
+        Map<String, Object> tempModelDependencies = new HashMap<>();
+        tempModelDependencies.put("dependencies", dependencies);
+        classBuilder
+                .addImplement(IInjectable.class.getCanonicalName())
+                .overrideMethodBuilder(MethodMeta.builder()
                 .addAnnotationBuilder(AnnotationMeta.builder()
                         .setName(AnnotationMeta.OVERRIDE))
                 .setName("getDependencies")
@@ -334,13 +335,12 @@ class InjectParser {
                 ));
             });
         }
-        Map<String, Object> tempModel = new HashMap<>();
-        tempModel.put("setters", setterModels);
-
-        if (classBuilder.findSetterBuilders().size() == 0) {
-            // No setters means this class does not implement IInjectable interface
+        if (setterModels.size() == 0) {
             return;
         }
+
+        Map<String, Object> tempModel = new HashMap<>();
+        tempModel.put("setters", setterModels);
         classBuilder
                 .addImplement(IInjectable.class.getCanonicalName())
                 .overrideMethodBuilder(MethodMeta.builder()
@@ -380,12 +380,13 @@ class InjectParser {
         }
     }
 
-    private static final class InjectMethod {
+    public static final class InjectMethod {
 
         private String _methodName;
         private String _injectId;
         private String _injectType;
         private String _injectFrom;
+        private boolean _optional = false;
 
         private InjectMethod(
                 final String methodName,
@@ -399,20 +400,28 @@ class InjectParser {
             this._injectFrom = injectFrom;
         }
 
-        private String methodName() {
+        public String methodName() {
             return this._methodName;
         }
 
-        private String injectId() {
+        public String injectId() {
             return this._injectId;
         }
 
-        private String injectType() {
+        public String injectType() {
             return this._injectType;
         }
 
-        private String injectFrom() {
+        public String injectFrom() {
             return this._injectFrom;
+        }
+
+        public void setOptional(boolean optional) {
+            this._optional = optional;
+        }
+
+        public boolean isOptional() {
+            return this._optional;
         }
     }
 
