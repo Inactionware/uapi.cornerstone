@@ -10,7 +10,7 @@
 package uapi.example.service.basic;
 
 /**
- * Created by xquan on 3/8/2017.
+ * Hello interface
  */
 public interface IHello {
 

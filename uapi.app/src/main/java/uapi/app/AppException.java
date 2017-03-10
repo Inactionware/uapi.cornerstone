@@ -17,18 +17,18 @@ import uapi.exception.ParameterizedException;
  */
 public class AppException extends ParameterizedException {
 
-    public static ApplicationExceptionBuilder builder() {
-        return new ApplicationExceptionBuilder();
+    public static AppExceptionBuilder builder() {
+        return new AppExceptionBuilder();
     }
 
-    protected AppException(ApplicationExceptionBuilder builder) {
+    protected AppException(AppExceptionBuilder builder) {
         super(builder);
     }
 
-    public static final class ApplicationExceptionBuilder
-            extends ExceptionBuilder<AppException, ApplicationExceptionBuilder> {
+    public static final class AppExceptionBuilder
+            extends ExceptionBuilder<AppException, AppExceptionBuilder> {
 
-        private ApplicationExceptionBuilder() {
+        private AppExceptionBuilder() {
             super(AppErrors.CATEGORY, new AppErrors());
         }
 

@@ -15,7 +15,7 @@ import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
 /**
- * Created by xquan on 3/8/2017.
+ * IHell implementation
  */
 @Service(IHello.class)
 @Tag("Hello")

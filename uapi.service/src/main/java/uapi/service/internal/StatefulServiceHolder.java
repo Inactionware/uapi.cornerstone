@@ -158,7 +158,7 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
     ////////////////////////////////////////////
 
     public boolean tryActivate() {
-        return tryActivate(false);
+        return tryActivate(true);
     }
 
     public boolean tryActivate(final boolean throwException) {

@@ -23,7 +23,7 @@ import java.util.Stack;
 public interface IServiceHolder extends IServiceReference {
 
     /**
-     * Try to activate the service
+     * Try to activate the service, any exception will be thrown in default when invoke this method
      *
      * @return  True means the service is activated otherwise it is failed
      */
