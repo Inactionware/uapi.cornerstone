@@ -136,7 +136,7 @@ public interface IRegistry {
     /**
      * Invoked when the registry is ready
      */
-    void start();
+    void activeAll();
 
 //    void registerServiceLoader(IServiceLoader serviceLoader);
 

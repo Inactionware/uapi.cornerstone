@@ -16,16 +16,16 @@ import uapi.service.annotation.Inject;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
-import static uapi.example.service.basic.HelloAppLifecycle.APP_NAME;
+import static uapi.example.service.basic.HelloFactoryAppLifecycle.APP_NAME;
 
 /**
  * Hello application lifecycle
  */
 @Service(IApplicationLifecycle.class)
 @Tag(APP_NAME)
-public class HelloAppLifecycle implements IApplicationLifecycle {
+public class HelloFactoryAppLifecycle implements IApplicationLifecycle {
 
-    static final String APP_NAME    = "Hello";
+    static final String APP_NAME    = "HelloFactoryApp";
 
     @Inject
     protected IRegistry _registry;

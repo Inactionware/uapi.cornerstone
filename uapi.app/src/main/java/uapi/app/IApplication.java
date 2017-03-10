@@ -18,7 +18,7 @@ public interface IApplication {
      * Launch the application which is based on UAPI framework
      *
      * @param   startTime
-     *          The timestamp of the application start time
+     *          The timestamp of the application activeAll time
      */
     void startup(long startTime);
 

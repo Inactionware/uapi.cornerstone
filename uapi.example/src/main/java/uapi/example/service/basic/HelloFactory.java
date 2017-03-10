@@ -9,25 +9,21 @@
 
 package uapi.example.service.basic;
 
-import uapi.log.ILogger;
-import uapi.service.annotation.Inject;
+import uapi.service.IServiceFactory;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
-import static uapi.example.service.basic.HelloAppLifecycle.APP_NAME;
+import static uapi.example.service.basic.HelloFactoryAppLifecycle.APP_NAME;
 
 /**
- * IHell implementation
+ * Hello service factory
  */
-@Service(IHello.class)
+@Service
 @Tag(APP_NAME)
-public class Hello implements IHello {
-
-    @Inject
-    protected ILogger _logger;
+public class HelloFactory implements IServiceFactory<IHello> {
 
     @Override
-    public void to(String name) {
-        this._logger.info("Hello {} !", name);
+    public IHello createService(Object serveFor) {
+        return new Hello();
     }
 }

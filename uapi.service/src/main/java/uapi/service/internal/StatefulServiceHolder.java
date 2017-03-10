@@ -203,6 +203,7 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
         }
         this._dependencies.remove(dependency, null);
         this._dependencies.put(dependency, service);
+        // Todo: register monitor to dependencies
     }
 
     @Override
@@ -344,7 +345,7 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
             return;
         }
 
-        Looper.on(_dependencies.entries())
+        Looper.on(this._dependencies.entries())
                 .map(Map.Entry::getValue)
                 .filter(svcHolder -> svcHolder != null)
                 .foreach(IServiceHolder::satisfy);
@@ -359,7 +360,7 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
             return;
         }
 
-        Looper.on(_dependencies.entries())
+        Looper.on(this._dependencies.entries())
                 .map(Map.Entry::getValue)
                 .filter(svcHolder -> svcHolder != null)
                 .foreach(IServiceHolder::activate);

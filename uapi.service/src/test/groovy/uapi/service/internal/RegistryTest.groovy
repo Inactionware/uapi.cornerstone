@@ -208,7 +208,7 @@ class RegistryTest extends Specification {
         registry.register(svc)
 
         when:
-        registry.start()
+        registry.activeAll()
 
         then:
         1 * svc.init()
@@ -235,7 +235,7 @@ class RegistryTest extends Specification {
         registry.register(dependSvc)
 
         when:
-        registry.start()
+        registry.activeAll()
 
         then:
         1 * svc.init()
@@ -258,7 +258,7 @@ class RegistryTest extends Specification {
         registry.register(svc)
 
         when:
-        registry.start()
+        registry.activeAll()
 
         then:
         noExceptionThrown()
@@ -282,7 +282,7 @@ class RegistryTest extends Specification {
         registry.register(svc)
 
         when:
-        registry.start()
+        registry.activeAll()
 
         then:
         noExceptionThrown()
@@ -312,7 +312,7 @@ class RegistryTest extends Specification {
         registry._svcLoaders.put('Remote', svcLoader)
 
         when:
-        registry.start()
+        registry.activeAll()
 
         then:
         noExceptionThrown()
@@ -337,7 +337,7 @@ class RegistryTest extends Specification {
         registry.register(svc)
 
         when:
-        registry.start()
+        registry.activeAll()
 
         then:
         noExceptionThrown()
@@ -367,7 +367,7 @@ class RegistryTest extends Specification {
         registry._svcLoaders.put('Remote', svcLoader)
 
         when:
-        registry.start()
+        registry.activeAll()
 
         then:
         noExceptionThrown()
@@ -397,7 +397,7 @@ class RegistryTest extends Specification {
         registry._svcLoaders.put('Remote', svcLoader)
 
         when:
-        registry.start()
+        registry.activeAll()
 
         then:
         noExceptionThrown()
@@ -427,7 +427,7 @@ class RegistryTest extends Specification {
         registry._svcLoaders.put('Remote', svcLoader)
 
         when:
-        registry.start()
+        registry.activeAll()
 
         then:
         noExceptionThrown()

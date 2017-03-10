@@ -187,13 +187,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         return tags;
     }
 
-    public void start() {
-        try {
-
-        } catch (Exception ex) {
-            this._logger.error(ex);
-        }
-
+    public void activeAll() {
         try {
             Looper.on(this._svcRepo.values())
                     .foreach(svcHolder -> svcHolder.tryActivate(false));

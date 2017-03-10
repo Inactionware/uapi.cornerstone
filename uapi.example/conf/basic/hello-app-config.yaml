@@ -1,5 +1,6 @@
 app:
-  name: HelloApp
+  name: Hello
+  active-profile: HelloAppProfile
 
 profiles:
   - name: HelloAppProfile

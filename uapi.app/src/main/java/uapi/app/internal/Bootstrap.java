@@ -96,6 +96,8 @@ public class Bootstrap {
         }
         cliCfgProvider.parse(args);
 
+        svcRegistry.activeAll();
+
         // Create profile
         ProfileManager profileMgr = svcRegistry.findService(ProfileManager.class);
         if (profileMgr == null) {
@@ -112,7 +114,7 @@ public class Bootstrap {
                 .filter(profile::isAllow)
                 .foreach(svcRegistry::register);
 
-        svcRegistry.start();
+        svcRegistry.activeAll();
 
         Application app = svcRegistry.findService(Application.class);
         if (app == null) {
