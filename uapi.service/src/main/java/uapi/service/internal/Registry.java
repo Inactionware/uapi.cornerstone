@@ -189,8 +189,14 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
     public void start() {
         try {
+
+        } catch (Exception ex) {
+            this._logger.error(ex);
+        }
+
+        try {
             Looper.on(this._svcRepo.values())
-                    .foreach(IServiceHolder::tryActivate);
+                    .foreach(svcHolder -> svcHolder.tryActivate(false));
 
             List<Dependency> unsetSvcs = Looper.on(this._svcRepo.values())
                     .flatmap(svcHolder -> Looper.on(svcHolder.getUnsetDependencies()))
