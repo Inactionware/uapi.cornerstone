@@ -23,11 +23,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface Init {
 
-    /**
-     * Indicate the init method will be invoked when the service is satisfied or invoked by first used
-     *
-     * @return  true means invoked by first used
-     *          false means invoked by service is satisfied
-     */
-    boolean lazy() default true;
+//    /**
+//     * Indicate the init method will be invoked when the service is satisfied or invoked by first used
+//     *
+//     * @return  true means invoked by first used
+//     *          false means invoked by service is satisfied
+//     */
+//    ActivePolicy policy() default ActivePolicy.INIT_LAZY;
 }

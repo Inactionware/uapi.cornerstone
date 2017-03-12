@@ -17,6 +17,7 @@ import uapi.common.CollectionHelper;
 import uapi.rx.Looper;
 import uapi.service.*;
 import uapi.state.IShifter;
+import uapi.state.IStateListener;
 import uapi.state.IStateTracer;
 import uapi.state.StateCreator;
 
@@ -44,6 +45,8 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
 
     private final List<IServiceHolder> _injectedSvcs = new LinkedList<>();
     private final IStateTracer<ServiceState> _stateTracer;
+
+    private ActivePolicy _activePolicy = ActivePolicy.LAZY;
 
     StatefulServiceHolder(
             final String from,
@@ -203,7 +206,13 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
         }
         this._dependencies.remove(dependency, null);
         this._dependencies.put(dependency, service);
-        // Todo: register monitor to dependencies
+
+        if (this.isActivated()) {
+            service.setActivePolicy(ActivePolicy.ASAP);
+            service.subscribe(new ServiceStateListener(service));
+        } else {
+            service.setActivePolicy(this._activePolicy);
+        }
     }
 
     @Override
@@ -234,6 +243,25 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
         IServiceHolder svcHolder = dependencyStack.pop();
         if (svcHolder != this) {
             throw new GeneralException("The last service item was not self - {}", this._qualifiedSvcId);
+        }
+    }
+
+    @Override
+    public void subscribe(IStateListener<ServiceState> listener) {
+        this._stateTracer.subscribe(listener);
+    }
+
+    @Override
+    public void unsubscribe(final IStateListener<ServiceState> listener) {
+        this._stateTracer.unsubscribe(listener);
+    }
+
+    @Override
+    public void setActivePolicy(ActivePolicy policy) {
+        ArgumentChecker.required(policy, "policy");
+        this._activePolicy = policy;
+        if (this._activePolicy == ActivePolicy.ASAP) {
+            this.tryActivate(false);
         }
     }
 
@@ -367,6 +395,44 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
 
         if (_svc instanceof IInitial) {
             ((IInitial) _svc).init();
+        }
+    }
+
+    private final class ServiceStateListener implements IStateListener<ServiceState> {
+
+        private final IServiceHolder _svcHolder;
+
+        private ServiceStateListener(final IServiceHolder serviceHolder) {
+            this._svcHolder = serviceHolder;
+        }
+
+        @Override
+        public void stateChanged(ServiceState oldState, ServiceState newState) {
+            if (newState != ServiceState.Activated) {
+                return;
+            }
+
+            if (! StatefulServiceHolder.this.isActivated()) {
+                throw new GeneralException("The service is activated - {}",
+                        StatefulServiceHolder.this._qualifiedSvcId);
+            }
+
+            // Inject activated dependency service
+            Object injectedSvc = this._svcHolder.getService();
+            if (injectedSvc instanceof IServiceFactory) {
+                // Create service from service factory
+                injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
+            }
+            ((IInjectable) _svc).injectObject(new Injection(this._svcHolder.getId(), injectedSvc));
+            StatefulServiceHolder.this._injectedSvcs.add(this._svcHolder);
+
+            // Notify if the service need know some dependent service is injected
+            if (StatefulServiceHolder.this._svc instanceof IServiceLifecycle) {
+                IServiceLifecycle svcLifecycle = (IServiceLifecycle) StatefulServiceHolder.this._svc;
+                svcLifecycle.onServiceInjected(this._svcHolder.getId(), this._svcHolder.getService());
+            }
+
+            this._svcHolder.unsubscribe(this);
         }
     }
 }

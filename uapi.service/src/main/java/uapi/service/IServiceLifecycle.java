@@ -17,12 +17,12 @@ public interface IServiceLifecycle {
     /**
      * Invoked when a injectable property is set
      *
-     * @param   propertyName
-     *          The injected property name
-     * @param   propertyValue
-     *          The injected property value
+     * @param   serviceId
+     *          The injected service id
+     * @param   service
+     *          The injected service
      */
-    void onPropertySet(String propertyName, Object propertyValue);
+    void onServiceInjected(String serviceId, Object service);
 
     /**
      * Invoked when the service is resolved and all other conditions is satisfied.

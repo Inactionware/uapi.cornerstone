@@ -13,6 +13,7 @@ import uapi.service.CycleDependencyException;
 import uapi.service.Dependency;
 import uapi.service.IServiceReference;
 import uapi.service.QualifiedServiceId;
+import uapi.state.IStateListener;
 
 import java.util.List;
 import java.util.Stack;
@@ -79,9 +80,27 @@ public interface IServiceHolder extends IServiceReference {
      *          When the service has a cycle dependency
      */
     void checkCycleDependency(
-            final IServiceHolder svcToCheck,
-            final Stack<IServiceHolder> dependencyStack
+            IServiceHolder svcToCheck,
+            Stack<IServiceHolder> dependencyStack
     ) throws CycleDependencyException;
+
+    /**
+     * Subscribe service state
+     *
+     * @param   listener
+     *          The state listener
+     */
+    void subscribe(IStateListener<ServiceState> listener);
+
+    /**
+     * Unsubscibe service state
+     *
+     * @param   listener
+     *          The service state listener
+     */
+    void unsubscribe(IStateListener<ServiceState> listener);
+
+    void setActivePolicy(ActivePolicy policy);
 
     /**
      * Receive unresolved services from the repo
