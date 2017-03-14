@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AppErrors extends FileBasedExceptionErrors<AppException> {
 
-    public static final int CATEGORY = 0x0101;
+    public static final int CATEGORY = 0x0105;
 
     public static final int REGISTRY_IS_REQUIRED            = 1;
     public static final int MORE_REGISTRY                   = 2;

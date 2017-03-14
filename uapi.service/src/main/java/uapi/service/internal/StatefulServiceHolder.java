@@ -224,6 +224,13 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
     }
 
     @Override
+    public List<IServiceHolder> getUnactivatedServices() {
+        return Looper.on(this._dependencies.values())
+                .filter(svcHolder -> ! svcHolder.isActivated())
+                .toList();
+    }
+
+    @Override
     public void checkCycleDependency(
             final IServiceHolder svcToCheck,
             final Stack<IServiceHolder> dependencyStack
@@ -291,23 +298,23 @@ public final class StatefulServiceHolder implements IServiceReference, IServiceH
         this._stateTracer.shift(OP_ACTIVATE);
     }
 
-    /////////////////////
-    // Package methods //
-    /////////////////////
-
-    boolean isResolved() {
+    @Override
+    public boolean isResolved() {
         return this._stateTracer.get().value() >= ServiceState.Resolved.value();
     }
 
-    boolean isInjected() {
+    @Override
+    public boolean isInjected() {
         return this._stateTracer.get().value() >= ServiceState.Injected.value();
     }
 
-    boolean isSatisfied() {
+    @Override
+    public boolean isSatisfied() {
         return this._stateTracer.get().value() >= ServiceState.Satisfied.value();
     }
 
-    boolean isActivated() {
+    @Override
+    public boolean isActivated() {
         return this._stateTracer.get().value() >= ServiceState.Activated.value();
     }
 

@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> {
 
-    public static final int CATEGORY   = 0x0100;
+    public static final int CATEGORY   = 0x0104;
 
     public static final int UNMATCHED_ACTION                = 1;
     public static final int NOT_ONLY_NEXT_ACTION            = 2;

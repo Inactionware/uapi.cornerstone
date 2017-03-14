@@ -109,6 +109,11 @@ public interface IServiceHolder extends IServiceReference {
      */
     List<Dependency> getUnsetDependencies();
 
+    /////
+    // new methods
+    ////
+    List<IServiceHolder> getUnactivatedServices();
+
     /////////////////////////////////////////////
     // Methods for service life cycle exchange //
     /////////////////////////////////////////////
@@ -132,4 +137,12 @@ public interface IServiceHolder extends IServiceReference {
      * Activate this service
      */
     void activate();
+
+    boolean isResolved();
+
+    boolean isInjected();
+
+    boolean isSatisfied();
+
+    boolean isActivated();
 }
