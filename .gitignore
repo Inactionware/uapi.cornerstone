@@ -57,3 +57,7 @@ build
 #=================================
 .idea/
 *.iml
+
+# UAPI project files
+#=================================
+performance.txt
