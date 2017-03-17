@@ -60,4 +60,4 @@ build
 
 # UAPI project files
 #=================================
-performance.txt
+**/perf/*.txt
