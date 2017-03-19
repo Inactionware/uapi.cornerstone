@@ -13,6 +13,8 @@ import uapi.exception.FileBasedExceptionErrors;
 import uapi.exception.IndexedParameters;
 import uapi.rx.Looper;
 import uapi.service.internal.IServiceHolder;
+import uapi.service.internal.ServiceHolder;
+import uapi.service.internal.UnactivatedService;
 
 import java.util.Map;
 import java.util.Stack;
@@ -56,10 +58,13 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
 
         private String _svcDepStr;
 
-        public FoundCycleDependency serviceStack(Stack<IServiceHolder> serviceStack) {
+        public FoundCycleDependency serviceStack(UnactivatedService unactivatedService) {
             StringBuilder buffer = new StringBuilder();
-            Looper.on(serviceStack)
-                    .foreach(svcHolder -> buffer.insert(0, svcHolder.getId()).insert(0, " -> "));
+            buffer.append(unactivatedService.serviceHolder().getId()).insert(0, " -> ");
+            UnactivatedService refSvc = unactivatedService.referencedBy();
+            while (refSvc != null) {
+                buffer.insert(0, refSvc.serviceHolder().getId()).insert(0, " -> ");
+            }
             buffer.delete(0, 3);
             this._svcDepStr = buffer.toString();
             return this;

@@ -12,6 +12,7 @@ package uapi.service.internal;
 import uapi.GeneralException;
 import uapi.common.ArgumentChecker;
 import uapi.rx.Looper;
+import uapi.service.Dependency;
 import uapi.service.ServiceErrors;
 import uapi.service.ServiceException;
 
@@ -33,19 +34,18 @@ public class ServiceActivator {
         this._tasks = new LinkedList<>();
     }
 
-    public <T> T activeService(final IServiceHolder serviceHolder) {
+    public <T> T activeService(final ServiceHolder serviceHolder) {
         ArgumentChecker.required(serviceHolder, "serviceHolder");
         if (serviceHolder.isActivated()) {
             return (T) serviceHolder.getService();
         }
 
         // Make out unactivated dependency service tree, need check out cycle dependency case
-        Stack svcStack = new Stack();
+        Stack<UnactivatedService> svcStack = new Stack<>();
+        constructServiceStack(new UnactivatedService(null, serviceHolder), svcStack);
 
         // Check whether the service which in the tree is in existing service active task
         // if it is, then the service active should be wait until the existing active task finish
-
-        // Put the dependency service tree into a stack
 
         // Check service active task is full or not, if it is full then an exception should be thrown
 
@@ -53,23 +53,21 @@ public class ServiceActivator {
         return null;
     }
 
-    private void constructServiceStack(final IServiceHolder svcHolder, final Stack<IServiceHolder> svcStack) {
-        svcStack.push(svcHolder);
-        List<IServiceHolder> unactivatedSvcs = svcHolder.getUnactivatedServices();
+    private void constructServiceStack(final UnactivatedService service, final Stack<UnactivatedService> svcStack) {
+        svcStack.push(service);
+        if (service.serviceHolder() == null) {
+            return;
+        }
+        List<UnactivatedService> unactivatedSvcs = service.serviceHolder().getUnactivatedServices();
         if (unactivatedSvcs.size() == 0) {
             return;
         }
         Looper.on(unactivatedSvcs)
                 .next(unactivatedSvc -> {
-                    if (svcStack.contains(unactivatedSvc)) {
-                        throw ServiceException.builder()
-                                .errorCode(ServiceErrors.FOUND_CYCLE_DEPENDENCY)
-                                .variables(new ServiceErrors.FoundCycleDependency()
-                                        .serviceStack(svcStack).get())
-                                .build();
-                    }
+                    unactivatedSvc.referencedBy(service);
+                    unactivatedSvc.checkCycleDependency();
                 })
-                .foreach(unactivatedSvc -> constructServiceStack(unactivatedSvc, svcStack));
+                .foreach(unactivatedService -> constructServiceStack(unactivatedService, svcStack));
     }
 
     private final class ServiceActiveTask implements Runnable {
@@ -100,7 +98,7 @@ public class ServiceActivator {
             this._semaphore.release();
         }
 
-        private boolean in(IServiceHolder serviceHolder) {
+        private boolean in(Stack<UnactivatedService> unactivatedServices) {
             return false;
         }
     }

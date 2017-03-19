@@ -79,6 +79,7 @@ public interface IServiceHolder extends IServiceReference {
      * @throws  CycleDependencyException
      *          When the service has a cycle dependency
      */
+    @Deprecated
     void checkCycleDependency(
             IServiceHolder svcToCheck,
             Stack<IServiceHolder> dependencyStack
