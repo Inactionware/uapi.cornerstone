@@ -11,8 +11,8 @@ package uapi.app.internal;
 
 import uapi.app.IApplicationLifecycle;
 import uapi.app.IApplication;
+import uapi.common.IntervalTime;
 import uapi.common.StringHelper;
-import uapi.config.IntervalTime;
 import uapi.config.annotation.Config;
 import uapi.log.ILogger;
 import uapi.rx.Looper;

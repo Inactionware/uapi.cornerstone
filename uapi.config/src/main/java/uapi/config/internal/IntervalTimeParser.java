@@ -11,8 +11,8 @@ package uapi.config.internal;
 
 import uapi.common.ArgumentChecker;
 import uapi.common.CollectionHelper;
+import uapi.common.IntervalTime;
 import uapi.config.IConfigValueParser;
-import uapi.config.IntervalTime;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 

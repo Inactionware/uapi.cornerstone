@@ -11,6 +11,7 @@ package uapi.service.internal;
 
 import uapi.GeneralException;
 import uapi.common.ArgumentChecker;
+import uapi.common.CollectionHelper;
 import uapi.rx.Looper;
 import uapi.service.Dependency;
 import uapi.service.ServiceErrors;
@@ -53,8 +54,8 @@ public class ServiceActivator {
         return null;
     }
 
-    private void constructServiceStack(final UnactivatedService service, final Stack<UnactivatedService> svcStack) {
-        svcStack.push(service);
+    private void constructServiceStack(final UnactivatedService service, final List<UnactivatedService> svcList) {
+        svcList.add(service);
         if (service.serviceHolder() == null) {
             return;
         }
@@ -67,39 +68,43 @@ public class ServiceActivator {
                     unactivatedSvc.referencedBy(service);
                     unactivatedSvc.checkCycleDependency();
                 })
-                .foreach(unactivatedService -> constructServiceStack(unactivatedService, svcStack));
+                .foreach(unactivatedService -> constructServiceStack(unactivatedService, svcList));
     }
 
     private final class ServiceActiveTask implements Runnable {
 
-        private final Stack<IServiceHolder> _svcStack;
+        private final List<IServiceHolder> _svcList;
         private final Semaphore _semaphore;
         private Exception _ex;
 
-        ServiceActiveTask(final Stack<IServiceHolder> serviceStack, final Semaphore semaphore) {
-            this._svcStack = serviceStack;
+        ServiceActiveTask(final Stack<IServiceHolder> serviceList, final Semaphore semaphore) {
+            this._svcList = serviceList;
             this._semaphore = semaphore;
         }
 
         @Override
         public void run() {
-            while (this._svcStack.size() > 0) {
+            int position = 0;
+            while (position < this._svcList.size()) {
                 try {
-                    IServiceHolder svcHolder = this._svcStack.peek();
+                    IServiceHolder svcHolder = this._svcList.get(position);
                     if (!svcHolder.tryActivate()) {
                         this._ex = new GeneralException("The service can't be activate");
                         break;
                     }
-                    this._svcStack.pop();
+                    position++;
                 } catch (Exception ex) {
                     this._ex = ex;
                 }
             }
+            ServiceActivator.this._tasks.remove(this);
             this._semaphore.release();
         }
 
-        private boolean in(Stack<UnactivatedService> unactivatedServices) {
-            return false;
+        private boolean isInHandling(List<UnactivatedService> unactivatedServices) {
+            return Looper.on(unactivatedServices)
+                    .filter(this._svcList::contains)
+                    .first(null) != null;
         }
     }
 }

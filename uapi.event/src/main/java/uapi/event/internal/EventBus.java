@@ -12,7 +12,7 @@ package uapi.event.internal;
 import uapi.GeneralException;
 import uapi.common.ArgumentChecker;
 import uapi.common.IAttributed;
-import uapi.config.IntervalTime;
+import uapi.common.IntervalTime;
 import uapi.config.annotation.Config;
 import uapi.config.internal.IntervalTimeParser;
 import uapi.event.*;
