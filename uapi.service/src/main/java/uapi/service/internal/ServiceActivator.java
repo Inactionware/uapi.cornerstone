@@ -11,28 +11,32 @@ package uapi.service.internal;
 
 import uapi.GeneralException;
 import uapi.common.ArgumentChecker;
-import uapi.common.CollectionHelper;
+import uapi.common.Guarder;
+import uapi.common.Watcher;
 import uapi.rx.Looper;
-import uapi.service.Dependency;
-import uapi.service.ServiceErrors;
-import uapi.service.ServiceException;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The service activator is used to activate service
  */
 public class ServiceActivator {
 
+    private static final String DEFAULT_TIME_OUT    = "5s";
+
     private static final int MAX_ACTIVE_THREAD_COUNT = Runtime.getRuntime().availableProcessors();
 
+    private final Lock _lock;
     private final List<ServiceActiveTask> _tasks;
 
     public ServiceActivator() {
         this._tasks = new LinkedList<>();
+        this._lock = new ReentrantLock();
     }
 
     public <T> T activeService(final ServiceHolder serviceHolder) {
@@ -42,16 +46,44 @@ public class ServiceActivator {
         }
 
         // Make out unactivated dependency service tree, need check out cycle dependency case
-        Stack<UnactivatedService> svcStack = new Stack<>();
-        constructServiceStack(new UnactivatedService(null, serviceHolder), svcStack);
+        List<UnactivatedService> svcList = new ArrayList<>();
+        constructServiceStack(new UnactivatedService(null, serviceHolder), svcList);
 
-        // Check whether the service which in the tree is in existing service active task
-        // if it is, then the service active should be wait until the existing active task finish
+        ServiceActiveTask task = new ServiceActiveTask(svcList);
+        Watcher.on(() ->
+            Guarder.by(this._lock).runForResult(() -> {
+                // Check whether the service which in the tree is in existing service active task
+                // if it is, then the service active should be wait until the existing active task finish
+                boolean isInHandling = Looper.on(this._tasks)
+                        .map(handlingTask -> handlingTask.isInHandling(svcList))
+                        .filter(isHandling -> isHandling)
+                        .first(false);
+                if (isInHandling) {
+                    return false;
+                }
 
-        // Check service active task is full or not, if it is full then an exception should be thrown
+                // Check service active task is full or not, if it is full then an exception should be thrown
+                // TODO: need notify waited thread when task is not full
+                if (this._tasks.size() >= MAX_ACTIVE_THREAD_COUNT) {
+                    return false;
+                } else {
+                    this._tasks.add(task);
+                    return true;
+                }
+            })
+        ).timeout(DEFAULT_TIME_OUT).start();
 
         // Create new service active task thread to handle
-        return null;
+        new Thread(task).start();
+        try {
+            task._semaphore.acquire();
+        } catch (InterruptedException ex) {
+            throw new GeneralException(ex);
+        }
+        if (task._ex != null) {
+            throw new GeneralException(task._ex);
+        }
+        return (T) serviceHolder.getService();
     }
 
     private void constructServiceStack(final UnactivatedService service, final List<UnactivatedService> svcList) {
@@ -73,13 +105,13 @@ public class ServiceActivator {
 
     private final class ServiceActiveTask implements Runnable {
 
-        private final List<IServiceHolder> _svcList;
+        private final List<UnactivatedService> _svcList;
         private final Semaphore _semaphore;
         private Exception _ex;
 
-        ServiceActiveTask(final Stack<IServiceHolder> serviceList, final Semaphore semaphore) {
+        ServiceActiveTask(final List<UnactivatedService> serviceList) {
             this._svcList = serviceList;
-            this._semaphore = semaphore;
+            this._semaphore = new Semaphore(0);
         }
 
         @Override
@@ -87,11 +119,8 @@ public class ServiceActivator {
             int position = 0;
             while (position < this._svcList.size()) {
                 try {
-                    IServiceHolder svcHolder = this._svcList.get(position);
-                    if (!svcHolder.tryActivate()) {
-                        this._ex = new GeneralException("The service can't be activate");
-                        break;
-                    }
+                    UnactivatedService unactivatedSvc = this._svcList.get(position);
+                    unactivatedSvc.serviceHolder().activate();
                     position++;
                 } catch (Exception ex) {
                     this._ex = ex;
