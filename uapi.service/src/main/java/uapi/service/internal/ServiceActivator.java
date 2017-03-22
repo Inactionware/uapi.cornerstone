@@ -12,6 +12,7 @@ package uapi.service.internal;
 import uapi.GeneralException;
 import uapi.common.ArgumentChecker;
 import uapi.common.Guarder;
+import uapi.common.IntervalTime;
 import uapi.common.Watcher;
 import uapi.rx.Looper;
 
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -27,7 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ServiceActivator {
 
-    private static final String DEFAULT_TIME_OUT    = "5s";
+    private static final IntervalTime DEFAULT_TIME_OUT  = IntervalTime.parse("5s");
 
     private static final int MAX_ACTIVE_THREAD_COUNT = Runtime.getRuntime().availableProcessors();
 
@@ -75,10 +77,14 @@ public class ServiceActivator {
 
         // Create new service active task thread to handle
         new Thread(task).start();
+        boolean isTaskDone;
         try {
-            task._semaphore.acquire();
+            isTaskDone = task._semaphore.tryAcquire(DEFAULT_TIME_OUT.milliseconds(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException ex) {
             throw new GeneralException(ex);
+        }
+        if (! isTaskDone) {
+            throw new GeneralException("The task for activate service {} is timed out", serviceHolder.getQualifiedId());
         }
         if (task._ex != null) {
             throw new GeneralException(task._ex);
