@@ -19,6 +19,7 @@ import uapi.rx.Looper;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -34,9 +35,11 @@ public class ServiceActivator {
     private static final int MAX_ACTIVE_THREAD_COUNT = Runtime.getRuntime().availableProcessors();
 
     private final Lock _lock;
+    private final List<List<UnactivatedService>> _handlingSvcs;
     private final List<ServiceActiveTask> _tasks;
 
     public ServiceActivator() {
+        this._handlingSvcs = new LinkedList<>();
         this._tasks = new LinkedList<>();
         this._lock = new ReentrantLock();
     }
@@ -75,7 +78,20 @@ public class ServiceActivator {
             })
         ).timeout(DEFAULT_TIME_OUT).start();
 
-        // Create new service active task thread to handle
+//        // Create new service active task thread to handle
+//        CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> {
+//            int position = 0;
+//            while (position < svcList.size()) {
+//                    UnactivatedService unactivatedSvc = svcList.get(position);
+//                    unactivatedSvc.serviceHolder().activate();
+//                    position++;
+//            }
+//            ServiceActivator.this._handlingSvcs.remove(svcList);
+//            return (T) svcList.get(0).serviceHolder().getService();
+//        });
+//        future.whenComplete((svc, t) -> true);
+//        return (T) future.get();
+
         new Thread(task).start();
         boolean isTaskDone;
         try {
