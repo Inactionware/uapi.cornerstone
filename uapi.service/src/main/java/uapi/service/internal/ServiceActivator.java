@@ -13,13 +13,11 @@ import uapi.GeneralException;
 import uapi.common.ArgumentChecker;
 import uapi.common.Guarder;
 import uapi.common.IntervalTime;
-import uapi.common.Watcher;
 import uapi.rx.Looper;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -55,12 +53,17 @@ public class ServiceActivator {
         constructServiceStack(new UnactivatedService(null, serviceHolder), svcList);
 
         ServiceActiveTask task = new ServiceActiveTask(svcList);
-        Watcher.on(() ->
-            Guarder.by(this._lock).runForResult(() -> {
+        Watcher.on((isNotified) -> {
+            // Check unactivated service again when the watch is notified by other thread
+            List<UnactivatedService> newSvcList = isNotified ?
+                    Looper.on(svcList).filter(unactivatedSvc -> !unactivatedSvc.isActivated()).toList():
+                    svcList;
+
+            return Guarder.by(this._lock).runForResult(() -> {
                 // Check whether the service which in the tree is in existing service active task
                 // if it is, then the service active should be wait until the existing active task finish
                 boolean isInHandling = Looper.on(this._tasks)
-                        .map(handlingTask -> handlingTask.isInHandling(svcList))
+                        .map(handlingTask -> handlingTask.isInHandling(newSvcList))
                         .filter(isHandling -> isHandling)
                         .first(false);
                 if (isInHandling) {
@@ -75,8 +78,8 @@ public class ServiceActivator {
                     this._tasks.add(task);
                     return true;
                 }
-            })
-        ).timeout(DEFAULT_TIME_OUT).start();
+            });
+        }).timeout(DEFAULT_TIME_OUT).start();
 
 //        // Create new service active task thread to handle
 //        CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> {

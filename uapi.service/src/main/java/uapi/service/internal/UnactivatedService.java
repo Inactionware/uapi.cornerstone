@@ -53,6 +53,10 @@ public class UnactivatedService {
         }
     }
 
+    public boolean isActivated() {
+        return this._svcHolder.isActivated();
+    }
+
     @Override
     public boolean equals(final Object other) {
         if (! (other instanceof UnactivatedService)) {
