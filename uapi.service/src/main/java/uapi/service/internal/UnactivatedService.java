@@ -66,6 +66,14 @@ public class UnactivatedService implements INotifier {
         }
     }
 
+    public String serviceId() {
+        if (this._svcHolder != null) {
+            return this._svcHolder.getId();
+        } else {
+            return this._dependency.getServiceId().toString();
+        }
+    }
+
     public boolean isExternalService() {
         return this._svcHolder == null;
     }

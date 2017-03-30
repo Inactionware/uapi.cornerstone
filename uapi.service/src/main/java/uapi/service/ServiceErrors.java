@@ -60,10 +60,10 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
 
         public FoundCycleDependency serviceStack(UnactivatedService unactivatedService) {
             StringBuilder buffer = new StringBuilder();
-            buffer.append(unactivatedService.serviceHolder().getId()).insert(0, " -> ");
+            buffer.append(unactivatedService.serviceId()).insert(0, " -> ");
             UnactivatedService refSvc = unactivatedService.referencedBy();
             while (refSvc != null) {
-                buffer.insert(0, refSvc.serviceHolder().getId()).insert(0, " -> ");
+                buffer.insert(0, refSvc.serviceId()).insert(0, " -> ");
             }
             buffer.delete(0, 3);
             this._svcDepStr = buffer.toString();
