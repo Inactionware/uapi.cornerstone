@@ -28,6 +28,7 @@ public final class Watcher {
     }
 
     private final WatcherCondition _condition;
+    private INotifier _notifier;
 
     private IntervalTime _timeout           = DEFAULT_TIMEOUT;
     private int _pollingLimit               = DEFAULT_POLLING_LIMIT;
@@ -37,6 +38,12 @@ public final class Watcher {
     private Watcher(WatcherCondition condition) {
         ArgumentChecker.required(condition, "condition");
         this._condition = condition;
+    }
+
+    public Watcher notifyBy(final INotifier notifier) {
+        ArgumentChecker.required(notifier, "notifier");
+        this._notifier = notifier;
+        return this;
     }
 
     public Watcher timeout(String timeout) {
@@ -93,6 +100,28 @@ public final class Watcher {
             }
         }
 
+        if (this._notifier != null) {
+            doNotify(startTime);
+        } else {
+            doPolling(startTime);
+        }
+    }
+
+    private void doNotify(long startTime) {
+        long restTime = System.currentTimeMillis() - startTime;
+        while (restTime > 0) {
+            boolean notified = this._notifier.await(restTime);
+            if (this._condition.accept(notified)) {
+                return;
+            }
+            restTime = System.currentTimeMillis() - startTime;
+            if (restTime <= 0) {
+                throw new GeneralException("The watcher is timed out");
+            }
+        }
+    }
+
+    private void doPolling(long startTime) {
         int pollingCount = 1;
         check(startTime, pollingCount);
         while (true) {

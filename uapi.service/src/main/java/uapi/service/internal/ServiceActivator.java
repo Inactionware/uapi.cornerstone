@@ -113,10 +113,11 @@ public class ServiceActivator {
 
     private void constructServiceStack(final UnactivatedService service, final List<UnactivatedService> svcList) {
         svcList.add(service);
-        if (service.serviceHolder() == null) {
+        if (service.isExternalService()) {
+            // External service should not have dependencies
             return;
         }
-        List<UnactivatedService> unactivatedSvcs = service.serviceHolder().getUnactivatedServices();
+        List<UnactivatedService> unactivatedSvcs = service.getUnactivatedDependencies();
         if (unactivatedSvcs.size() == 0) {
             return;
         }
@@ -145,7 +146,8 @@ public class ServiceActivator {
             while (position < this._svcList.size()) {
                 try {
                     UnactivatedService unactivatedSvc = this._svcList.get(position);
-                    unactivatedSvc.serviceHolder().activate();
+                    // TODO: need consider load external service
+                    unactivatedSvc.activate();
                     position++;
                 } catch (Exception ex) {
                     this._ex = ex;
