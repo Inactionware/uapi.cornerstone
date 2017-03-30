@@ -60,6 +60,13 @@ public class Application implements IApplication {
         this._state = AppState.STARTING;
         IApplicationLifecycle appLifecycle = null;
 
+        // Set default uncaught exception handler for threads
+        Thread.setDefaultUncaughtExceptionHandler((t, e) ->
+            Application.this._logger.error(
+                    "Found uncaught exception was thrown from thread [id:{}, name:{}] -> {}",
+                    t.getId(), t.getName(), e)
+        );
+
         if (StringHelper.isNullOrEmpty(this._appName)) {
             this._logger.info("app.name was not specified");
         } else {
