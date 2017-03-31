@@ -40,10 +40,6 @@ public class UnactivatedService implements INotifier {
         return this._dependency;
     }
 
-//    public ServiceHolder serviceHolder() {
-//        return this._svcHolder;
-//    }
-
     public void referencedBy(UnactivatedService service) {
         this._refBy = service;
     }

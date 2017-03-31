@@ -33,12 +33,10 @@ public class ServiceActivator {
     private static final int MAX_ACTIVE_THREAD_COUNT = Runtime.getRuntime().availableProcessors();
 
     private final Lock _lock;
-    private final List<List<UnactivatedService>> _handlingSvcs;
-    private final List<ServiceActiveTask> _tasks;
+    private final NotifiableList<ServiceActiveTask> _tasks;
 
     public ServiceActivator() {
-        this._handlingSvcs = new LinkedList<>();
-        this._tasks = new LinkedList<>();
+        this._tasks = new NotifiableList<>(MAX_ACTIVE_THREAD_COUNT);
         this._lock = new ReentrantLock();
     }
 
@@ -53,30 +51,25 @@ public class ServiceActivator {
         constructServiceStack(new UnactivatedService(null, serviceHolder), svcList);
 
         ServiceActiveTask task = new ServiceActiveTask(svcList);
-        Watcher.on((isNotified) -> {
+        Watcher.on(() -> {
             // Check unactivated service again when the watch is notified by other thread
-            List<UnactivatedService> newSvcList = isNotified ?
-                    Looper.on(svcList).filter(unactivatedSvc -> !unactivatedSvc.isActivated()).toList():
-                    svcList;
+            List<UnactivatedService> newSvcList =
+                    Looper.on(svcList).filter(unactivatedSvc -> !unactivatedSvc.isActivated()).toList();
 
             return Guarder.by(this._lock).runForResult(() -> {
                 // Check whether the service which in the tree is in existing service active task
                 // if it is, then the service active should be wait until the existing active task finish
-                boolean isInHandling = Looper.on(this._tasks)
+                UnactivatedService handlingSvc = Looper.on(this._tasks.iterator())
                         .map(handlingTask -> handlingTask.isInHandling(newSvcList))
-                        .filter(isHandling -> isHandling)
-                        .first(false);
-                if (isInHandling) {
-                    return false;
+                        .first(null);
+                if (handlingSvc != null) {
+                    return new Watcher.ConditionResult(handlingSvc);
                 }
 
-                // Check service active task is full or not, if it is full then an exception should be thrown
-                // TODO: need notify waited thread when task is not full
-                if (this._tasks.size() >= MAX_ACTIVE_THREAD_COUNT) {
-                    return false;
+                if (this._tasks.put(task)) {
+                    return new Watcher.ConditionResult(false);
                 } else {
-                    this._tasks.add(task);
-                    return true;
+                    return new Watcher.ConditionResult(this._tasks);
                 }
             });
         }).timeout(DEFAULT_TIME_OUT).start();
@@ -105,6 +98,7 @@ public class ServiceActivator {
         if (! isTaskDone) {
             throw new GeneralException("The task for activate service {} is timed out", serviceHolder.getQualifiedId());
         }
+        this._tasks.remove(task);
         if (task._ex != null) {
             throw new GeneralException(task._ex);
         }
@@ -157,10 +151,16 @@ public class ServiceActivator {
             this._semaphore.release();
         }
 
-        private boolean isInHandling(List<UnactivatedService> unactivatedServices) {
-            return Looper.on(unactivatedServices)
-                    .filter(this._svcList::contains)
-                    .first(null) != null;
+        private UnactivatedService isInHandling(List<UnactivatedService> unactivatedServices) {
+            int foundIdx = Looper.on(unactivatedServices)
+                    .map(this._svcList::indexOf)
+                    .filter((idx) -> ! this._svcList.get(idx).isActivated())
+                    .first(-1);
+            if (foundIdx < 0) {
+                return null;
+            } else {
+                return this._svcList.get(foundIdx);
+            }
         }
     }
 }

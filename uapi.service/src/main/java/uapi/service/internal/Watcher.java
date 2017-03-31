@@ -20,30 +20,19 @@ public final class Watcher {
 
     private static final IntervalTime DEFAULT_TIMEOUT           = IntervalTime.parse("5s");
     private static final IntervalTime DEFAULT_POLLING_INTERVAL  = IntervalTime.parse("100ms");
-    private static final IntervalTime DEFAULT_DELAY_INTERVAL    = IntervalTime.parse("0ms");
-    private static final int DEFAULT_POLLING_LIMIT              = -1;
 
     public static Watcher on(WatcherCondition condition) {
         return new Watcher(condition);
     }
 
     private final WatcherCondition _condition;
-    private INotifier _notifier;
 
     private IntervalTime _timeout           = DEFAULT_TIMEOUT;
-    private int _pollingLimit               = DEFAULT_POLLING_LIMIT;
     private IntervalTime _pollingInterval   = DEFAULT_POLLING_INTERVAL;
-    private IntervalTime _delayInterval     = DEFAULT_DELAY_INTERVAL;
 
     private Watcher(WatcherCondition condition) {
         ArgumentChecker.required(condition, "condition");
         this._condition = condition;
-    }
-
-    public Watcher notifyBy(final INotifier notifier) {
-        ArgumentChecker.required(notifier, "notifier");
-        this._notifier = notifier;
-        return this;
     }
 
     public Watcher timeout(String timeout) {
@@ -54,11 +43,6 @@ public final class Watcher {
     public Watcher timeout(IntervalTime timeout) {
         ArgumentChecker.required(timeout, "timeout");
         this._timeout = timeout;
-        return this;
-    }
-
-    public Watcher pollingLimit(int limit) {
-        this._pollingLimit = limit;
         return this;
     }
 
@@ -73,88 +57,92 @@ public final class Watcher {
         return this;
     }
 
-    public Watcher delayTime(String delayInterval) {
-        this._delayInterval = IntervalTime.parse(delayInterval);
-        return this;
-    }
-
-    public Watcher delayTime(IntervalTime delayInterval) {
-        ArgumentChecker.required(delayInterval, "delayInterval");
-        this._delayInterval = delayInterval;
-        return this;
-    }
-
     public void start() {
         long startTime = System.currentTimeMillis();
-        if (this._condition.accept(false)) {
+        ConditionResult result = this._condition.accept();
+        if (! result.isDenied()) {
             return;
         }
-        if (this._delayInterval.milliseconds() != 0L) {
-            try {
-                Thread.sleep(this._delayInterval.milliseconds());
-            } catch (InterruptedException ex) {
-                throw new GeneralException(ex);
-            }
-            if (this._condition.accept(false)) {
-                return;
-            }
-        }
-
-        if (this._notifier != null) {
-            doNotify(startTime);
+        if (result.notifier() != null) {
+            doNotify(startTime, result.notifier());
         } else {
             doPolling(startTime);
         }
     }
 
-    private void doNotify(long startTime) {
+    private void doNotify(long startTime, INotifier notifier) {
         long restTime = System.currentTimeMillis() - startTime;
-        while (restTime > 0) {
-            boolean notified = this._notifier.await(restTime);
-            if (this._condition.accept(notified)) {
+        boolean notified = notifier.await(restTime);
+        ConditionResult result = null;
+        if (notified) {
+            result = this._condition.accept();
+            if (!result.isDenied()) {
                 return;
             }
-            restTime = System.currentTimeMillis() - startTime;
-            if (restTime <= 0) {
-                throw new GeneralException("The watcher is timed out");
-            }
+        }
+        check(startTime);
+        if (result != null && result.notifier() != null) {
+            doNotify(startTime, result.notifier());
+        } else {
+            doPolling(startTime);
         }
     }
 
     private void doPolling(long startTime) {
-        int pollingCount = 1;
-        check(startTime, pollingCount);
-        while (true) {
-            if (this._pollingInterval.milliseconds() > 0) {
-                try {
-                    Thread.sleep(this._pollingInterval.milliseconds());
-                } catch (InterruptedException ex) {
-                    throw new GeneralException(ex);
-                }
+        check(startTime);
+        if (this._pollingInterval.milliseconds() > 0) {
+            try {
+                Thread.sleep(this._pollingInterval.milliseconds());
+            } catch (InterruptedException ex) {
+                throw new GeneralException(ex);
             }
-            if (this._condition.accept(false)) {
-                return;
-            }
-            pollingCount++;
-            check(startTime, pollingCount);
+        }
+        ConditionResult result = this._condition.accept();
+        if (! result.isDenied()) {
+            return;
+        }
+        check(startTime);
+        if (result.notifier() != null) {
+            doNotify(startTime, result.notifier());
+        } else {
+            doPolling(startTime);
         }
     }
 
-    private void check(long startTime, int pollingCount) {
+    private void check(long startTime) {
         long timeout = this._timeout.milliseconds();
         if (System.currentTimeMillis() - startTime >= timeout) {
             throw new GeneralException("The watcher is timed out");
-        }
-        if (this._pollingLimit <= 0) {
-            return;
-        }
-        if (pollingCount >= this._pollingLimit) {
-            throw new GeneralException("The watcher's polling count is reach to limit - {}", this._pollingLimit);
         }
     }
 
     public interface WatcherCondition {
 
-        boolean accept(boolean isNotified);
+        ConditionResult accept();
+    }
+
+    public static class ConditionResult {
+
+        private final boolean _denied;
+        private final INotifier _notifier;
+
+        public ConditionResult(boolean denied) {
+            this._denied = denied;
+            this._notifier = null;
+        }
+
+        public ConditionResult(INotifier notifier) {
+            ArgumentChecker.required(notifier, "notified");
+            this._notifier = notifier;
+            this._denied = true;
+        }
+
+        public boolean isDenied() {
+            return this._denied;
+        }
+
+        public INotifier notifier() {
+            return this._notifier;
+        }
     }
 }
