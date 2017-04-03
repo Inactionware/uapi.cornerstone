@@ -15,13 +15,15 @@ import uapi.common.Guarder;
 import uapi.common.IntervalTime;
 import uapi.rx.Looper;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 /**
  * The service activator is used to activate service
@@ -47,7 +49,7 @@ public class ServiceActivator {
         }
 
         // Make out unactivated dependency service tree, need check out cycle dependency case
-        List<UnactivatedService> svcList = new ArrayList<>();
+        List<UnactivatedService> svcList = new LinkedList<>();
         constructServiceStack(new UnactivatedService(null, serviceHolder), svcList);
 
         ServiceActiveTask task = new ServiceActiveTask(svcList);
@@ -74,39 +76,35 @@ public class ServiceActivator {
             });
         }).timeout(DEFAULT_TIME_OUT).start();
 
-//        // Create new service active task thread to handle
-//        CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> {
-//            int position = 0;
-//            while (position < svcList.size()) {
-//                    UnactivatedService unactivatedSvc = svcList.get(position);
-//                    unactivatedSvc.serviceHolder().activate();
-//                    position++;
-//            }
-//            ServiceActivator.this._handlingSvcs.remove(svcList);
-//            return (T) svcList.get(0).serviceHolder().getService();
-//        });
-//        future.whenComplete((svc, t) -> true);
-//        return (T) future.get();
-
-        new Thread(task).start();
-        boolean isTaskDone;
+        // Assign service active task to handle
+        CompletableFuture<T> future = CompletableFuture.supplyAsync(task);
         try {
-            isTaskDone = task._semaphore.tryAcquire(DEFAULT_TIME_OUT.milliseconds(), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ex) {
+            return future.get(DEFAULT_TIME_OUT.milliseconds(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException ex) {
             throw new GeneralException(ex);
+        } catch (TimeoutException ex) {
+            throw new GeneralException("The task for activate service {] is timed out", serviceHolder.getQualifiedId());
         }
-        if (! isTaskDone) {
-            throw new GeneralException("The task for activate service {} is timed out", serviceHolder.getQualifiedId());
-        }
-        this._tasks.remove(task);
-        if (task._ex != null) {
-            throw new GeneralException(task._ex);
-        }
-        return (T) serviceHolder.getService();
+
+//        new Thread(task).start();
+//        boolean isTaskDone;
+//        try {
+//            isTaskDone = task._semaphore.tryAcquire(DEFAULT_TIME_OUT.milliseconds(), TimeUnit.MILLISECONDS);
+//        } catch (InterruptedException ex) {
+//            throw new GeneralException(ex);
+//        }
+//        if (! isTaskDone) {
+//            throw new GeneralException("The task for activate service {} is timed out", serviceHolder.getQualifiedId());
+//        }
+//        this._tasks.remove(task);
+//        if (task._ex != null) {
+//            throw new GeneralException(task._ex);
+//        }
+//        return (T) serviceHolder.getService();
     }
 
     private void constructServiceStack(final UnactivatedService service, final List<UnactivatedService> svcList) {
-        svcList.add(service);
+        svcList.add(0, service);
         if (service.isExternalService()) {
             // External service should not have dependencies
             return;
@@ -123,32 +121,32 @@ public class ServiceActivator {
                 .foreach(unactivatedService -> constructServiceStack(unactivatedService, svcList));
     }
 
-    private final class ServiceActiveTask implements Runnable {
+    private final class ServiceActiveTask<T> implements Supplier<T> {
 
         private final List<UnactivatedService> _svcList;
-        private final Semaphore _semaphore;
-        private Exception _ex;
 
         ServiceActiveTask(final List<UnactivatedService> serviceList) {
             this._svcList = serviceList;
-            this._semaphore = new Semaphore(0);
         }
 
         @Override
-        public void run() {
+        public T get() {
             int position = 0;
+            UnactivatedService unactivatedSvc = null;
             while (position < this._svcList.size()) {
-                try {
-                    UnactivatedService unactivatedSvc = this._svcList.get(position);
-                    // TODO: need consider load external service
-                    unactivatedSvc.activate();
-                    position++;
-                } catch (Exception ex) {
-                    this._ex = ex;
+                unactivatedSvc = this._svcList.get(position);
+                // TODO: need consider load external service
+                unactivatedSvc.activate();
+                if (! unactivatedSvc.isActivated()) {
+                    throw new GeneralException("The service activation is failed - {}", unactivatedSvc.serviceId());
                 }
+                position++;
             }
             ServiceActivator.this._tasks.remove(this);
-            this._semaphore.release();
+            if (unactivatedSvc == null) {
+                throw new GeneralException("The service activation is failed");
+            }
+            return (T) unactivatedSvc.service();
         }
 
         private UnactivatedService isInHandling(List<UnactivatedService> unactivatedServices) {

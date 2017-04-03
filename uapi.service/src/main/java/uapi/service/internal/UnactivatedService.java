@@ -78,6 +78,10 @@ public class UnactivatedService implements INotifier {
         return this._svcHolder.isActivated();
     }
 
+    public Object service() {
+        return this._svcHolder.getService();
+    }
+
     public List<UnactivatedService> getUnactivatedDependencies() {
         if (this._svcHolder == null) {
             return Collections.emptyList();
