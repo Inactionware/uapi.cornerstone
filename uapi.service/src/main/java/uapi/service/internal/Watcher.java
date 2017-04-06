@@ -63,14 +63,14 @@ public final class Watcher {
         if (! result.isDenied()) {
             return;
         }
-        if (result.notifier() != null) {
-            doNotify(startTime, result.notifier());
+        if (result.awaiting() != null) {
+            doNotify(startTime, result.awaiting());
         } else {
             doPolling(startTime);
         }
     }
 
-    private void doNotify(long startTime, INotifier notifier) {
+    private void doNotify(long startTime, IAwaiting notifier) {
         long restTime = System.currentTimeMillis() - startTime;
         boolean notified = notifier.await(restTime);
         ConditionResult result = null;
@@ -81,8 +81,8 @@ public final class Watcher {
             }
         }
         check(startTime);
-        if (result != null && result.notifier() != null) {
-            doNotify(startTime, result.notifier());
+        if (result != null && result.awaiting() != null) {
+            doNotify(startTime, result.awaiting());
         } else {
             doPolling(startTime);
         }
@@ -102,8 +102,8 @@ public final class Watcher {
             return;
         }
         check(startTime);
-        if (result.notifier() != null) {
-            doNotify(startTime, result.notifier());
+        if (result.awaiting() != null) {
+            doNotify(startTime, result.awaiting());
         } else {
             doPolling(startTime);
         }
@@ -124,16 +124,16 @@ public final class Watcher {
     public static class ConditionResult {
 
         private final boolean _denied;
-        private final INotifier _notifier;
+        private final IAwaiting _awaiting;
 
         public ConditionResult(boolean denied) {
             this._denied = denied;
-            this._notifier = null;
+            this._awaiting = null;
         }
 
-        public ConditionResult(INotifier notifier) {
+        public ConditionResult(IAwaiting notifier) {
             ArgumentChecker.required(notifier, "notified");
-            this._notifier = notifier;
+            this._awaiting = notifier;
             this._denied = true;
         }
 
@@ -141,8 +141,8 @@ public final class Watcher {
             return this._denied;
         }
 
-        public INotifier notifier() {
-            return this._notifier;
+        public IAwaiting awaiting() {
+            return this._awaiting;
         }
     }
 }

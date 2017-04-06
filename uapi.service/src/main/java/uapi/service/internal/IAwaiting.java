@@ -12,7 +12,7 @@ package uapi.service.internal;
 /**
  * Created by xquan on 3/30/2017.
  */
-public interface INotifier {
+public interface IAwaiting {
 
     boolean await(long waitTime);
 }

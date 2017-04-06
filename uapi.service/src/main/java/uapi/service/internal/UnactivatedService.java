@@ -1,7 +1,6 @@
 package uapi.service.internal;
 
 import uapi.GeneralException;
-import uapi.common.ArgumentChecker;
 import uapi.service.Dependency;
 import uapi.service.ServiceErrors;
 import uapi.service.ServiceException;
@@ -14,9 +13,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by min on 2017/3/19.
+ * An unactivated service hold a service holder which is not activated yet
+ * The unactivated service also implement IAwaiting interface which can make other service
+ * wait on the unactivated service until the unactivated service is activated
  */
-public class UnactivatedService implements INotifier {
+public class UnactivatedService implements IAwaiting {
 
     private final Dependency _dependency;
     private final ServiceHolder _svcHolder;
@@ -24,7 +25,7 @@ public class UnactivatedService implements INotifier {
     private UnactivatedService _refBy = null;
 
     private final Lock _lock;
-    private final Condition _notifier;
+    private final Condition _condition;
 
     public UnactivatedService(
             final Dependency dependency,
@@ -33,7 +34,7 @@ public class UnactivatedService implements INotifier {
         this._dependency = dependency;
         this._svcHolder = serviceHolder;
         this._lock = new ReentrantLock();
-        this._notifier = this._lock.newCondition();
+        this._condition = this._lock.newCondition();
     }
 
     public Dependency dependency() {
@@ -93,7 +94,9 @@ public class UnactivatedService implements INotifier {
         this._svcHolder.activate();
         this._lock.lock();
         try {
-            this._notifier.signalAll();
+            if (this._svcHolder.isActivated()) {
+                this._condition.signalAll();
+            }
         } finally {
             this._lock.unlock();
         }
@@ -106,7 +109,7 @@ public class UnactivatedService implements INotifier {
             if (this._svcHolder.isActivated()) {
                 return true;
             } else {
-                return this._notifier.await(waitTime, TimeUnit.MILLISECONDS);
+                return this._condition.await(waitTime, TimeUnit.MILLISECONDS);
             }
         } catch (InterruptedException ex) {
             throw new GeneralException(ex);

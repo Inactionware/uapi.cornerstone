@@ -35,10 +35,10 @@ public class ServiceActivator {
     private static final int MAX_ACTIVE_THREAD_COUNT = Runtime.getRuntime().availableProcessors();
 
     private final Lock _lock;
-    private final NotifiableList<ServiceActiveTask> _tasks;
+    private final AwaitingList<ServiceActiveTask> _tasks;
 
     public ServiceActivator() {
-        this._tasks = new NotifiableList<>(MAX_ACTIVE_THREAD_COUNT);
+        this._tasks = new AwaitingList<>(MAX_ACTIVE_THREAD_COUNT);
         this._lock = new ReentrantLock();
     }
 
@@ -85,22 +85,6 @@ public class ServiceActivator {
         } catch (TimeoutException ex) {
             throw new GeneralException("The task for activate service {] is timed out", serviceHolder.getQualifiedId());
         }
-
-//        new Thread(task).start();
-//        boolean isTaskDone;
-//        try {
-//            isTaskDone = task._semaphore.tryAcquire(DEFAULT_TIME_OUT.milliseconds(), TimeUnit.MILLISECONDS);
-//        } catch (InterruptedException ex) {
-//            throw new GeneralException(ex);
-//        }
-//        if (! isTaskDone) {
-//            throw new GeneralException("The task for activate service {} is timed out", serviceHolder.getQualifiedId());
-//        }
-//        this._tasks.remove(task);
-//        if (task._ex != null) {
-//            throw new GeneralException(task._ex);
-//        }
-//        return (T) serviceHolder.getService();
     }
 
     private void constructServiceStack(final UnactivatedService service, final List<UnactivatedService> svcList) {

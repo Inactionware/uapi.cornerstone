@@ -22,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by xquan on 3/31/2017.
  */
-public class NotifiableList<T> implements INotifier {
+public class AwaitingList<T> implements IAwaiting {
 
     private final int _sizeLimitation;
     private final List<T> _list;
@@ -30,7 +30,7 @@ public class NotifiableList<T> implements INotifier {
     private final Lock _lock = new ReentrantLock();
     private final Condition _condition = this._lock.newCondition();
 
-    public NotifiableList(int maxSize) {
+    public AwaitingList(int maxSize) {
         this._sizeLimitation = maxSize;
         this._list = new LinkedList<>();
     }
