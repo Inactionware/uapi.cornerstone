@@ -9,6 +9,7 @@
 
 package uapi.service.internal
 
+import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.GeneralException
 import uapi.InvalidArgumentException
@@ -26,6 +27,7 @@ import uapi.log.ILogger
 /**
  * Test case for Registry
  */
+@Ignore
 class RegistryTest extends Specification {
 
     Registry registry

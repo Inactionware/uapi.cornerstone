@@ -15,6 +15,7 @@ import uapi.state.StateCreator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * Hold service and provide dependency, lifecycle management
@@ -176,6 +177,31 @@ public class ServiceHolder implements IServiceReference {
         return this._stateTracer.get().value() >= ServiceState.Activated.value();
     }
 
+    public boolean isDependsOn(final String serviceId) {
+        ArgumentChecker.notEmpty(serviceId, "serviceId");
+        return isDependsOn(new QualifiedServiceId(serviceId, QualifiedServiceId.FROM_LOCAL));
+    }
+
+    public boolean isDependsOn(QualifiedServiceId qualifiedServiceId) {
+        ArgumentChecker.notNull(qualifiedServiceId, "qualifiedServiceId");
+        return findDependencies(qualifiedServiceId) != null;
+    }
+
+    public void setDependency(ServiceHolder service) {
+        ArgumentChecker.notNull(service, "service");
+
+        Stack<IServiceHolder> dependencyStack = new Stack<>();
+
+        // remove null entry first
+        Dependency dependency = findDependencies(service.getQualifiedId());
+        if (dependency == null) {
+            throw new GeneralException(
+                    "The service {} does not depend on service {}", this._qualifiedSvcId, service.getQualifiedId());
+        }
+        this._dependencies.remove(dependency, null);
+        this._dependencies.put(dependency, service);
+    }
+
     /**
      * Retrieve unactivated services including all optional services
      *
@@ -201,6 +227,12 @@ public class ServiceHolder implements IServiceReference {
     /////////////////////
     // Private methods //
     /////////////////////
+
+    private Dependency findDependencies(QualifiedServiceId qsId) {
+        return Looper.on(this._dependencies.keySet())
+                .filter(dependQsvcId -> qsId.isAssignTo(dependQsvcId.getServiceId()))
+                .first(null);
+    }
 
     private void innerResolve() {
         if (isResolved()) {

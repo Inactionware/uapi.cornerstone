@@ -37,9 +37,12 @@ public class ServiceActivator {
     private final Lock _lock;
     private final AwaitingList<ServiceActiveTask> _tasks;
 
-    public ServiceActivator() {
+    private final IExternalServiceLoader _extSvcLoader;
+
+    public ServiceActivator(final IExternalServiceLoader externalServiceLoader) {
         this._tasks = new AwaitingList<>(MAX_ACTIVE_THREAD_COUNT);
         this._lock = new ReentrantLock();
+        this._extSvcLoader = externalServiceLoader;
     }
 
     public <T> T activeService(final ServiceHolder serviceHolder) {
@@ -119,7 +122,14 @@ public class ServiceActivator {
             UnactivatedService unactivatedSvc = null;
             while (position < this._svcList.size()) {
                 unactivatedSvc = this._svcList.get(position);
-                // TODO: need consider load external service
+                if (unactivatedSvc.isExternalService()) {
+                    // load external service
+                    ServiceHolder svcHolder =
+                            ServiceActivator.this._extSvcLoader.loadService(unactivatedSvc.dependency());
+                    if (svcHolder == null) {
+                        throw new GeneralException("Load external service is failed - {}", unactivatedSvc.serviceId());
+                    }
+                }
                 unactivatedSvc.activate();
                 if (! unactivatedSvc.isActivated()) {
                     throw new GeneralException("The service activation is failed - {}", unactivatedSvc.serviceId());

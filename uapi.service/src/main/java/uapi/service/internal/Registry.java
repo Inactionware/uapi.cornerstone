@@ -39,10 +39,11 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
     private final Lock _svcRepoLock;
     private final SatisfyDecider _satisfyDecider;
-    private final Multimap<String, IServiceHolder> _svcRepo;
+    private final Multimap<String, ServiceHolder> _svcRepo;
     private final List<WeakReference<ISatisfyHook>> _satisfyHooks;
     private Map<String, IServiceLoader> _svcLoaders;
     private final SortedSet<IServiceLoader> _orderedSvcLoaders;
+    private final ServiceActivator _svcActivator;
 
     private ILogger _logger;
 
@@ -53,6 +54,52 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         this._satisfyDecider = new SatisfyDecider();
         this._svcLoaders = new HashMap<>();
         this._orderedSvcLoaders = new TreeSet<>();
+        this._svcActivator = new ServiceActivator((dependency) -> {
+            QualifiedServiceId qSvcId = dependency.getServiceId();
+            String from = qSvcId.getFrom();
+            String svcId = qSvcId.getId();
+            // Check currently the service is already loaded or not
+            ServiceHolder svcHolder = findServiceHolder(svcId, from);
+            if (svcHolder != null) {
+                return svcHolder;
+            }
+
+            Object svc = null;
+            if (from.equals(QualifiedServiceId.FROM_ANY)) {
+                // Search from any loader
+                Iterator<IServiceLoader> svcLoadersIte = Registry.this._orderedSvcLoaders.iterator();
+                boolean loaded = false;
+                while (svcLoadersIte.hasNext()) {
+                    IServiceLoader svcLoader = svcLoadersIte.next();
+                    svc = svcLoader.load(qSvcId.getId(), dependency.getServiceType());
+                    if (svc == null) {
+                        continue;
+                    }
+                    loaded = true;
+                    registerService(from, svc, new String[]{qSvcId.getId()}, new Dependency[0]);
+                    if (dependency.isSingle()) {
+                        break;
+                    }
+                }
+                if (!loaded && !dependency.isOptional()) {
+                    this._logger.error("No any service loader can load service {}", qSvcId);
+                }
+            } else {
+                // Search specific service loader
+                IServiceLoader svcLoader = this._svcLoaders.get(from);
+                if (svcLoader == null) {
+                    this._logger.error("Can't load service {} because no service loader for {}", qSvcId, from);
+                    return null;
+                }
+                svc = svcLoader.load(qSvcId.getId(), dependency.getServiceType());
+                if (svc == null && !dependency.isOptional()) {
+                    this._logger.error("Load service {} from location {} failed", qSvcId, from);
+                    return null;
+                }
+                registerService(from, svc, new String[]{qSvcId.getId()}, new Dependency[0]);
+            }
+            return findService(svcId, from);
+        });
     }
 
     @Override
@@ -131,23 +178,14 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             final String serviceId
     ) {
         ArgumentChecker.notEmpty(serviceId, "serviceId");
-        List<T> resolvedSvcs = new ArrayList<>();
-        try {
-            Guarder.by(this._svcRepoLock).run(() ->
-                    Looper.on(this._svcRepo.values())
-                            .filter(svcHolder -> svcHolder.getId().equals(serviceId))
-                            .filter(IServiceHolder::tryActivate)
-                            .map(IServiceHolder::getService)
-                            .foreach(svcHolder -> resolvedSvcs.add((T) svcHolder))
-            );
-        } catch (Exception ex) {
-            if (this._logger != null) {
-                this._logger.error(ex);
-            } else {
-                throw ex;
-            }
+        List<ServiceHolder> svcHolders = findServiceHolders(serviceId);
+        if (svcHolders == null || svcHolders.size() == 0) {
+            return Collections.EMPTY_LIST;
         }
-        return resolvedSvcs;
+        return (List<T>) Looper.on(svcHolders)
+                .map(this._svcActivator::activeService)
+                .filter(svc -> svc != null)
+                .toList();
     }
 
     @Override
@@ -156,15 +194,21 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             final String serviceId,
             final String serviceFrom
     ) {
-        List<T> found = null;
+        ArgumentChecker.required(serviceId, "serviceId");
+        ArgumentChecker.required(serviceFrom, "serviceFrom");
+        ServiceHolder svcHolder = findServiceHolder(serviceId, serviceFrom);
+        return this._svcActivator.activeService(svcHolder);
+    }
+
+    private List<ServiceHolder> findServiceHolders(
+            final String serviceId
+    ) {
+        List<ServiceHolder> svcHolders = null;
         try {
-             found = Guarder.by(this._svcRepoLock).runForResult(() ->
-                    (List<T>) Looper.on(this._svcRepo.values())
-                            .filter(svcHolder -> svcHolder.getId().equals(serviceId))
-                            .filter(svcHolder -> svcHolder.getFrom().equals(serviceFrom))
-                            .filter(IServiceHolder::tryActivate)
-                            .map(IServiceHolder::getService)
-                            .toList()
+            svcHolders = Guarder.by(this._svcRepoLock).runForResult(() ->
+                Looper.on(this._svcRepo.values())
+                    .filter(svcHolder -> svcHolder.getId().equals(serviceId))
+                    .toList()
             );
         } catch (Exception ex) {
             if (this._logger != null) {
@@ -173,6 +217,20 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                 throw ex;
             }
         }
+        return svcHolders;
+    }
+
+    private ServiceHolder findServiceHolder(
+            final String serviceId,
+            final String serviceFrom
+    ) {
+        List<ServiceHolder> found = findServiceHolders(serviceId);
+        if (found == null || found.size() == 0) {
+            return null;
+        }
+        found = Looper.on(found)
+                .filter(svcHolder -> svcHolder.getFrom().equals(serviceFrom))
+                .toList();
         if (found == null || found.size() == 0) {
             return null;
         }
@@ -187,108 +245,9 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         return tags;
     }
 
+    @Deprecated
     public void activeAll() {
-        try {
-            Looper.on(this._svcRepo.values())
-                    .foreach(svcHolder -> svcHolder.tryActivate(false));
-
-            List<Dependency> unsetSvcs = Looper.on(this._svcRepo.values())
-                    .flatmap(svcHolder -> Looper.on(svcHolder.getUnsetDependencies()))
-                    .toList();
-
-            if (unsetSvcs.size() == 0) {
-                return;
-            }
-
-            // Remove duplicated dependencies
-            CollectionHelper.removeDuplicate(unsetSvcs);
-
-            checkCycleDependency(unsetSvcs);
-
-            // If the unresolved service contains a required local service then throw exception
-            Iterator<Dependency> dependencies = unsetSvcs.iterator();
-            while (dependencies.hasNext()) {
-                Dependency dep = dependencies.next();
-                if (dep.getServiceId().getFrom().equalsIgnoreCase(QualifiedServiceId.FROM_LOCAL)) {
-                    if (dep.isOptional()) {
-                        this._logger.debug("Found an optional unresolved service - {}, ignored", dep.getServiceId());
-                        dependencies.remove();
-                    } else {
-                        throw new GeneralException("The local dependency is not satisfied - {}", dep.getServiceId());
-                    }
-                }
-            }
-
-            if (this._svcLoaders.size() > 0) {
-                this._orderedSvcLoaders.addAll(this._svcLoaders.values());
-            }
-
-            // If the unresolved service is optional then try to load it, if it can't be loaded no error
-            loadExternalServices(unsetSvcs);
-
-        } catch (Exception ex) {
-            this._logger.error(ex);
-        }
-    }
-
-    private void checkCycleDependency(
-            List<Dependency> unresolvedSvcs
-    ) {
-        // TODO: Check cycle dependency
-        this._logger.info("Check cycle dependency for unresolved services: {}", CollectionHelper.asString(unresolvedSvcs));
-    }
-
-    private void loadExternalServices(
-            List<Dependency> unresolvedSvcs
-    ) {
-        try {
-            Looper.on(unresolvedSvcs).foreach(this::loadExternalService);
-        } catch (Exception ex) {
-            this._logger.error(ex);
-        }
-    }
-
-    private Object loadExternalService(
-            Dependency dependency
-    ) {
-        QualifiedServiceId qSvcId = dependency.getServiceId();
-        String from = qSvcId.getFrom();
-        if (from.equals(QualifiedServiceId.FROM_ANY)) {
-            // Search from any loader
-            Iterator<IServiceLoader> svcLoadersIte = this._orderedSvcLoaders.iterator();
-            boolean loaded = false;
-            Object svc = null;
-            while (svcLoadersIte.hasNext()) {
-                IServiceLoader svcLoader = svcLoadersIte.next();
-                svc = svcLoader.load(qSvcId.getId(), dependency.getServiceType());
-                if (svc == null) {
-                    continue;
-                }
-                loaded = true;
-                registerService(from, svc, new String[]{qSvcId.getId()}, new Dependency[0]);
-                if (dependency.isSingle()) {
-                    break;
-                }
-            }
-            if (!loaded && !dependency.isOptional()) {
-                this._logger.error("No any service loader can load service {}", qSvcId);
-            }
-            return svc;
-        } else {
-            // Search specific service loader
-            IServiceLoader svcLoader = this._svcLoaders.get(from);
-            if (svcLoader == null) {
-                this._logger.error("Can't load service {} because no service loader for {}", qSvcId, from);
-                return null;
-            }
-            Object svc = svcLoader.load(qSvcId.getId(), dependency.getServiceType());
-            if (svc == null && !dependency.isOptional()) {
-                this._logger.error("Load service {} from location {} failed", qSvcId, from);
-                return null;
-            }
-            registerService(from, svc, new String[]{qSvcId.getId()}, new Dependency[0]);
-            return svc;
-        }
+        // do nothing
     }
 
     int getCount() {
@@ -314,7 +273,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         }
 
         Looper.on(svcIds)
-                .map(svcId -> new StatefulServiceHolder(svcFrom, svc, svcId, dependencies, this._satisfyDecider))
+                .map(svcId -> new ServiceHolder(svcFrom, svc, svcId, dependencies, this._satisfyDecider))
                 .foreach(svcHolder -> {
                     Guarder.by(this._svcRepoLock).run(() -> {
                         // Check whether the new register service depends on existing service
