@@ -42,6 +42,8 @@ public interface IServiceLoader extends Comparable<IServiceLoader>, IIdentifiabl
 
     /**
      * Load service by id and type
+     * If the service is null then the service load must be listen on the service, if the service is ready then the
+     * ServiceReadyListener must be invoked
      *
      * @param   serviceId
      *          The service id
@@ -52,4 +54,28 @@ public interface IServiceLoader extends Comparable<IServiceLoader>, IIdentifiabl
      * @return  The service instance or null
      */
     <T> T load(final String serviceId, final Class<?> serviceType);
+
+    /**
+     * Register service ready listener
+     * The listener will be invoked when specific service is ready to use
+     * @param listener
+     */
+    void register(IServiceReadyListener listener);
+
+    /**
+     * The listener is used to notify when specific service is ready to use
+     */
+    interface IServiceReadyListener {
+
+        /**
+         * The method is invoked when specific service is ready to use
+         *
+         * @param   dependency
+         *          The dependency
+         *
+         * @param   service
+         *          The service instance
+         */
+        void onReady(Dependency dependency, Object service);
+    }
 }

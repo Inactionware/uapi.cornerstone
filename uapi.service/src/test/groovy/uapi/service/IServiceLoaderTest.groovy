@@ -53,6 +53,11 @@ class IServiceLoaderTest extends Specification {
         }
 
         @Override
+        void register(IServiceLoader.IServiceReadyListener listener) {
+
+        }
+
+        @Override
         String getId() {
             return null
         }

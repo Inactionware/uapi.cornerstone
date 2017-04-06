@@ -187,10 +187,16 @@ public class ServiceHolder implements IServiceReference {
         return findDependencies(qualifiedServiceId) != null;
     }
 
+    public boolean isDependsOn(final Dependency dependency) {
+        ArgumentChecker.required(dependency, "dependency");
+        Dependency dep = Looper.on(this._dependencies.keys())
+                .filter(thisDependency -> dependency.getServiceId().isAssignTo(thisDependency.getServiceId()))
+                .first(null);
+        return dep != null;
+    }
+
     public void setDependency(ServiceHolder service) {
         ArgumentChecker.notNull(service, "service");
-
-        Stack<IServiceHolder> dependencyStack = new Stack<>();
 
         // remove null entry first
         Dependency dependency = findDependencies(service.getQualifiedId());
@@ -222,6 +228,26 @@ public class ServiceHolder implements IServiceReference {
                 })
                 .map(entry -> new UnactivatedService(entry.getKey(), entry.getValue()))
                 .toList();
+    }
+
+    public void injectNewDepdencies() {
+        if (! isActivated()) {
+            return;
+        }
+        if (! (this._svc instanceof IServiceLifecycle)) {
+            throw new GeneralException("The service {} can't dynamic inject service", this.getId());
+        }
+        Looper.on(this._dependencies.values())
+                .filter(dependSvcHolder -> ! this._injectedSvcs.contains(dependSvcHolder))
+                .foreach(dependSvcHolder -> {
+                    Object injectedSvc = dependSvcHolder.getService();
+                    if (injectedSvc instanceof IServiceFactory) {
+                        // Create service from service factory
+                        injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
+                    }
+                    ((IServiceLifecycle) _svc).onServiceInjected(dependSvcHolder.getId(), dependSvcHolder.getService());
+                    this._injectedSvcs.add(dependSvcHolder);
+                });
     }
 
     /////////////////////

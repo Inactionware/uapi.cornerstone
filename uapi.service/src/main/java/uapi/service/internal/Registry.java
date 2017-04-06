@@ -47,6 +47,8 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
     private ILogger _logger;
 
+    private final IServiceLoader.IServiceReadyListener _svcReadyListener;
+
     public Registry() {
         this._svcRepoLock = new ReentrantLock();
         this._svcRepo = LinkedListMultimap.create();
@@ -100,6 +102,30 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             }
             return findService(svcId, from);
         });
+
+        this._svcReadyListener = (dependency, service) -> {
+            // Register and activate the service
+            QualifiedServiceId qSvcId = dependency.getServiceId();
+            registerService(qSvcId.getFrom(), service, new String[]{qSvcId.getId()}, new Dependency[0]);
+            ServiceHolder newSvcHolder = findServiceHolder(qSvcId.getId(), qSvcId.getFrom());
+            this._svcActivator.activeService(newSvcHolder);
+
+            // Find out which service is depends on readied service
+            List<ServiceHolder> dependentSvcs = Guarder.by(this._svcRepoLock).runForResult(() ->
+                Looper.on(this._svcRepo.values())
+                        .filter(svcHolder -> svcHolder.isDependsOn(dependency))
+                        .toList()
+                );
+            if (dependentSvcs.size() == 0) {
+                return;
+            }
+            Looper.on(dependentSvcs)
+                .foreach(svcHolder -> {
+                    if (svcHolder.isActivated()) {
+                        svcHolder.injectNewDepdencies();
+                    }
+                });
+        };
     }
 
     @Override
