@@ -13,6 +13,7 @@ import uapi.GeneralException;
 import uapi.common.ArgumentChecker;
 import uapi.common.Guarder;
 import uapi.common.IntervalTime;
+import uapi.common.Watcher;
 import uapi.rx.Looper;
 
 import java.util.LinkedList;

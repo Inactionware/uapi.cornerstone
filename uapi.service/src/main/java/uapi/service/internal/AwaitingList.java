@@ -10,6 +10,7 @@
 package uapi.service.internal;
 
 import uapi.GeneralException;
+import uapi.common.IAwaiting;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -20,7 +21,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by xquan on 3/31/2017.
+ * An awaiting list
  */
 public class AwaitingList<T> implements IAwaiting {
 

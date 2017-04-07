@@ -1,6 +1,7 @@
 package uapi.service.internal;
 
 import uapi.GeneralException;
+import uapi.common.IAwaiting;
 import uapi.service.Dependency;
 import uapi.service.ServiceErrors;
 import uapi.service.ServiceException;
