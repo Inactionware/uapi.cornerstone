@@ -10,6 +10,6 @@ fi
 repositories=`git remote`
 for repository in ${repositories[@]}
 do
-    echo "push change to $repository"
+    echo ">>> push change to $repository <<<"
     git push $repository $1
 done
