@@ -2,6 +2,7 @@ package uapi.service.internal
 
 import spock.lang.Specification
 import uapi.service.Dependency
+import uapi.service.QualifiedServiceId
 import uapi.service.ServiceException
 
 /**
@@ -14,6 +15,7 @@ class UnactivatedServiceTest extends Specification {
         def dependency = Mock(Dependency)
         def serviceHolder = Mock(ServiceHolder) {
             getId() >> 'svc'
+            getUnactivatedServices() >> []
         };
 
         when:
@@ -25,6 +27,23 @@ class UnactivatedServiceTest extends Specification {
         unactivatedSvc.serviceId() == 'svc'
         ! unactivatedSvc.isActivated()
         unactivatedSvc.service() == null
+        ! unactivatedSvc.isExternalService()
+        unactivatedSvc.unactivatedDependencies == []
+    }
+
+    def 'Test get external service id'() {
+        given:
+        def dependency = Mock(Dependency) {
+            getServiceId() >> Mock(QualifiedServiceId) {
+                toString() >> 'svc'
+            }
+        }
+        def unactivatedSvc = new UnactivatedService(dependency, null)
+
+        expect:
+        unactivatedSvc.isExternalService()
+        unactivatedSvc.serviceId() == 'svc'
+        unactivatedSvc.unactivatedDependencies == []
     }
 
     def 'Test cycle dependencies check'() {
@@ -54,6 +73,23 @@ class UnactivatedServiceTest extends Specification {
         def dependency = Mock(Dependency)
         def serviceHolder = Mock(ServiceHolder) {
             getId() >> 'svc'
+        };
+        def unactivatedSvc = new UnactivatedService(dependency, serviceHolder)
+
+        when:
+        unactivatedSvc.activate()
+
+        then:
+        noExceptionThrown()
+        1 * serviceHolder.activate()
+    }
+
+    def 'Test activate an activated service'() {
+        given:
+        def dependency = Mock(Dependency)
+        def serviceHolder = Mock(ServiceHolder) {
+            getId() >> 'svc'
+            isActivated() >> true
         };
         def unactivatedSvc = new UnactivatedService(dependency, serviceHolder)
 

@@ -21,7 +21,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * An awaiting list
+ * An awaiting list which can make caller await on this list when the list is reach the limitation until
+ * one item is removed by other thread.
  */
 public class AwaitingList<T> implements IAwaiting {
 
@@ -57,7 +58,7 @@ public class AwaitingList<T> implements IAwaiting {
         this._lock.lock();
         try {
             this._list.remove(item);
-            if (this._list.size() >= this._sizeLimitation) {
+            if (this._list.size() < this._sizeLimitation) {
                 this._condition.signalAll();
             }
         } finally {
