@@ -4,7 +4,8 @@ usedBranch=""
 
 branches=`git branch`
 oldIFS="$IFS"
-IFS="\n"
+IFS='
+'
 lines=( $branches )
 IFS="$oldIFS"
 
@@ -16,8 +17,8 @@ do
     if [ "$t" = "*" ]
     then
         isCurrentBranch=true
-        branch=`expr substr "$line" 3 "${#line}"`
     fi
+    branch=`expr substr "$line" 3 "${#line}"`
     if test -z "$1"
     then
         if [ "$isCurrentBranch" = true ]
@@ -33,8 +34,6 @@ do
         fi
     fi
 done
-
-echo "$usedBranch"
 
 if test -z "$usedBranch"
 then
