@@ -11,13 +11,9 @@ package uapi.service;
 
 import uapi.exception.FileBasedExceptionErrors;
 import uapi.exception.IndexedParameters;
-import uapi.rx.Looper;
-import uapi.service.internal.IServiceHolder;
-import uapi.service.internal.ServiceHolder;
 import uapi.service.internal.UnactivatedService;
 
 import java.util.Map;
-import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -27,13 +23,19 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
 
     public static final int CATEGORY   = 0x0100;
 
-    public static final int FOUND_CYCLE_DEPENDENCY      = 1;
+    public static final int FOUND_CYCLE_DEPENDENCY          = 1;
+    public static final int LOAD_EXTERNAL_SERVICE_FAILED    = 2;
+    public static final int SERVICE_ACTIVE_TASK_TIMED_OUT   = 3;
+    public static final int SERVICE_ACTIVATION_FAILED       = 4;
 
     private static final Map<Integer, String> keyCodeMapping;
 
     static {
         keyCodeMapping = new ConcurrentHashMap<>();
         keyCodeMapping.put(FOUND_CYCLE_DEPENDENCY, FoundCycleDependency.KEY);
+        keyCodeMapping.put(LOAD_EXTERNAL_SERVICE_FAILED, LoadExternalServiceFailed.KEY);
+        keyCodeMapping.put(SERVICE_ACTIVE_TASK_TIMED_OUT, ServiceActiveTaskTimedOut.KEY);
+        keyCodeMapping.put(SERVICE_ACTIVATION_FAILED, ServiceActivationFailed.KEY);
     }
 
     @Override
@@ -58,7 +60,7 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
 
         private String _svcDepStr;
 
-        public FoundCycleDependency serviceStack(UnactivatedService unactivatedService) {
+        public FoundCycleDependency serviceStack(final UnactivatedService unactivatedService) {
             StringBuilder buffer = new StringBuilder();
             buffer.append(unactivatedService.serviceId()).insert(0, " >> ");
             UnactivatedService refSvc = unactivatedService.referencedBy();
@@ -74,6 +76,66 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         @Override
         public Object[] get() {
             return new Object[] { this._svcDepStr };
+        }
+    }
+
+    /**
+     * Load external service but it return nothing - {}
+     */
+    public static final class LoadExternalServiceFailed extends IndexedParameters<LoadExternalServiceFailed> {
+
+        private static final String KEY = "LoadExternalServiceFailed";
+
+        private String _svcId;
+
+        public LoadExternalServiceFailed serviceId(final String serviceId) {
+            this._svcId = serviceId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._svcId };
+        }
+    }
+
+    /**
+     * The task for activate service {} is timed out
+     */
+    public static final class ServiceActiveTaskTimedOut extends IndexedParameters<ServiceActiveTaskTimedOut> {
+
+        private static final String KEY = "ServiceActiveTaskTimedOut";
+
+        private QualifiedServiceId _svcId;
+
+        public ServiceActiveTaskTimedOut serviceId(final QualifiedServiceId serviceId) {
+            this._svcId = serviceId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._svcId };
+        }
+    }
+
+    /**
+     * The service activation is failed - {}
+     */
+    public static final class ServiceActivationFailed extends IndexedParameters<ServiceActivationFailed> {
+
+        private static final String KEY = "ServiceActivationFailed";
+
+        private String _svcId;
+
+        public ServiceActivationFailed serviceId(final String serviceId) {
+            this._svcId = serviceId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._svcId };
         }
     }
 }

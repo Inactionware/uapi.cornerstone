@@ -12,7 +12,7 @@ package uapi.service.internal;
 import uapi.service.Dependency;
 
 /**
- * Created by xquan on 4/6/2017.
+ * Used to load service from external loader
  */
 public interface IExternalServiceLoader {
 

@@ -15,6 +15,8 @@ import uapi.common.Guarder;
 import uapi.common.IntervalTime;
 import uapi.common.Watcher;
 import uapi.rx.Looper;
+import uapi.service.ServiceErrors;
+import uapi.service.ServiceException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -85,9 +87,17 @@ public class ServiceActivator {
         try {
             return future.get(DEFAULT_TIME_OUT.milliseconds(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException ex) {
-            throw new GeneralException(ex);
+            if (ex.getCause() instanceof ServiceException) {
+                throw (ServiceException) ex.getCause();
+            } else {
+                throw new GeneralException(ex);
+            }
         } catch (TimeoutException ex) {
-            throw new GeneralException("The task for activate service {] is timed out", serviceHolder.getQualifiedId());
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.SERVICE_ACTIVE_TASK_TIMED_OUT)
+                    .variables(new ServiceErrors.ServiceActiveTaskTimedOut()
+                        .serviceId(serviceHolder.getQualifiedId()))
+                    .build();
         }
     }
 
@@ -128,18 +138,30 @@ public class ServiceActivator {
                     ServiceHolder svcHolder =
                             ServiceActivator.this._extSvcLoader.loadService(unactivatedSvc.dependency());
                     if (svcHolder == null) {
-                        throw new GeneralException("Load external service is failed - {}", unactivatedSvc.serviceId());
+                        throw ServiceException.builder()
+                                .errorCode(ServiceErrors.LOAD_EXTERNAL_SERVICE_FAILED)
+                                .variables(new ServiceErrors.LoadExternalServiceFailed()
+                                    .serviceId(unactivatedSvc.serviceId()).get())
+                                .build();
                     }
                 }
                 unactivatedSvc.activate();
                 if (! unactivatedSvc.isActivated()) {
-                    throw new GeneralException("The service activation is failed - {}", unactivatedSvc.serviceId());
+                    throw ServiceException.builder()
+                            .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
+                            .variables(new ServiceErrors.ServiceActivationFailed()
+                                .serviceId(unactivatedSvc.serviceId()))
+                            .build();
                 }
                 position++;
             }
             ServiceActivator.this._tasks.remove(this);
             if (unactivatedSvc == null) {
-                throw new GeneralException("The service activation is failed");
+                throw ServiceException.builder()
+                        .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
+                        .variables(new ServiceErrors.ServiceActivationFailed()
+                                .serviceId(unactivatedSvc.serviceId()))
+                        .build();
             }
             return (T) unactivatedSvc.service();
         }
