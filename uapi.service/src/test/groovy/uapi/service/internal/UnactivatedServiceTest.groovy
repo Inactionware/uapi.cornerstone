@@ -143,9 +143,18 @@ class UnactivatedServiceTest extends Specification {
         def unactivatedSvc1 = new UnactivatedService(Mock(Dependency), serviceHolder1)
         def unactivatedSvc2 = new UnactivatedService(Mock(Dependency), serviceHolder)
 
+        def dependency = Mock(Dependency)
+        dependency.equals(dependency) >> true
+        def unactivatedSvc3 = new UnactivatedService(dependency, null)
+        def unactivatedSvc4 = new UnactivatedService(Mock(Dependency), null)
+        def unactivatedSvc5 = new UnactivatedService(dependency, null)
+
         expect:
         unactivatedSvc != unactivatedSvc1
         unactivatedSvc == unactivatedSvc2
         unactivatedSvc1 != unactivatedSvc2
+
+        unactivatedSvc3 != unactivatedSvc4
+        unactivatedSvc3 == unactivatedSvc5
     }
 }

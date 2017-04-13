@@ -125,9 +125,12 @@ public class UnactivatedService implements IAwaiting {
             return false;
         }
         UnactivatedService otherSvc = (UnactivatedService) other;
-        if (this._svcHolder == null || otherSvc._svcHolder == null) {
-            return true;
+        if (this._svcHolder != null) {
+            return this._svcHolder.equals(otherSvc._svcHolder);
         }
-        return this._svcHolder.equals(otherSvc._svcHolder);
+        if (this.isExternalService() && otherSvc.isExternalService()) {
+            return this._dependency.equals(otherSvc._dependency);
+        }
+        return false;
     }
 }

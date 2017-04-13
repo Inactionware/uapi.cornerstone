@@ -10,8 +10,8 @@
 package uapi.service.internal
 
 import spock.lang.Specification
-import uapi.GeneralException
 import uapi.service.Dependency
+import uapi.service.QualifiedServiceId
 import uapi.service.ServiceException
 
 /**
@@ -142,5 +142,81 @@ class ServiceActivatorTest extends Specification {
 
         then:
         thrown(ServiceException)
+    }
+
+    def 'Test activate tasks'() {
+        given:
+        def extDependency = Mock(Dependency) {
+            getServiceId() >> Mock(QualifiedServiceId) {
+                toString() >> 'extSvc'
+            }
+            equals(_) >> true
+        }
+        def extUnactivatedSvc = Mock(UnactivatedService) {
+            serviceId() >> 'extSvc'
+            isExternalService() >> true
+            dependency() >> extDependency
+            isActivated() >>> [false, true]
+        }
+        def svc = Mock(Object)
+        def svcHolder = Mock(ServiceHolder) {
+            serviceId() >> 'svc'
+            getService() >> svc
+            isActivated() >>> [false, true]
+            getUnactivatedServices() >> [extUnactivatedSvc]
+        }
+
+        def svc2 = Mock(Object)
+        def svcHolder2 = Mock(ServiceHolder) {
+            serviceId() >> 'svc'
+            getService() >> svc2
+            isActivated() >>> [false, true]
+            getUnactivatedServices() >> [extUnactivatedSvc]
+        }
+
+        def extSvc = Mock(ServiceHolder) {
+            serviceId() >> 'extSvcId'
+            isActivated() >> true
+        }
+        def lock = new Object()
+        def extSvcLoader = new IExternalServiceLoader() {
+            def unlocked = false
+            public ServiceHolder loadService(Dependency dep) {
+                if (! unlocked) {
+                    synchronized (lock) {
+                        lock.wait()
+                    }
+                }
+                return extSvc
+            }
+        }
+        def svcActivator = new ServiceActivator(extSvcLoader)
+
+        when:
+        def result = null
+        new Thread(new Runnable() {
+            @Override
+            void run() {
+                result = svcActivator.activeService(svcHolder)
+            }
+        }).start()
+        def result2 = null
+        new Thread(new Runnable() {
+            @Override
+            void run() {
+                result2 = svcActivator.activeService(svcHolder2)
+            }
+        }).start()
+        Thread.sleep(500)
+        extSvcLoader.unlocked = true
+        synchronized (lock) {
+            lock.notifyAll()
+        }
+        Thread.sleep(500)
+
+        then:
+        noExceptionThrown()
+        result == svc
+        result2 == svc2
     }
 }

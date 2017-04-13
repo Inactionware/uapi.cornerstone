@@ -155,7 +155,7 @@ public class ServiceActivator {
                 }
                 position++;
             }
-            ServiceActivator.this._tasks.remove(this);
+            Guarder.by(ServiceActivator.this._lock).run(() -> ServiceActivator.this._tasks.remove(this));
             if (unactivatedSvc == null) {
                 throw ServiceException.builder()
                         .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
