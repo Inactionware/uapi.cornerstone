@@ -218,10 +218,11 @@ public class ServiceHolder implements IServiceReference {
                 .filter(entry -> {
                     Dependency dependency = entry.getKey();
                     ServiceHolder svcHolder = entry.getValue();
-                    if (svcHolder == null && ! dependency.isOptional()) {
+                    if (svcHolder != null && ! svcHolder.isActivated()) {
                         return true;
                     }
-                    if (svcHolder != null && ! svcHolder.isActivated()) {
+                    if (svcHolder == null) {
+                        // Always try to load external service
                         return true;
                     }
                     return false;

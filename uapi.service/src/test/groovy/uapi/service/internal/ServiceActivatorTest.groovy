@@ -10,6 +10,7 @@
 package uapi.service.internal
 
 import spock.lang.Specification
+import uapi.common.IntervalTime
 import uapi.service.Dependency
 import uapi.service.QualifiedServiceId
 import uapi.service.ServiceException
@@ -144,6 +145,49 @@ class ServiceActivatorTest extends Specification {
         thrown(ServiceException)
     }
 
+    def 'Test activate service which is timed out'() {
+        given:
+        def svc = Mock(Object)
+        def svcHolder = Mock(ServiceHolder) {
+            getQualifiedId() >> Mock(QualifiedServiceId) {
+                toString() >> 'svc'
+            }
+            serviceId() >> 'svc'
+            isActivated() >>> [false, true]
+            getService() >> svc
+            getUnactivatedServices() >> [Mock(UnactivatedService) {
+                serviceId() >> 'extSvc'
+                isExternalService() >> true
+                dependency() >> Mock(Dependency)
+                isActivated() >> false
+            }]
+        }
+        def extSvc = Mock(ServiceHolder)
+        def lock = new Object()
+        def extSvcLoader = new IExternalServiceLoader() {
+            def unlocked = false
+            public ServiceHolder loadService(Dependency dep) {
+                if (! unlocked) {
+                    synchronized (lock) {
+                        lock.wait()
+                    }
+                }
+                return extSvc
+            }
+        }
+        def svcActivator = new ServiceActivator(extSvcLoader)
+
+        when:
+        svcActivator.activeService(svcHolder, IntervalTime.parse('1s'))
+        extSvcLoader.unlocked = true
+        synchronized (lock) {
+            lock.notifyAll()
+        }
+
+        then:
+        thrown(ServiceException)
+    }
+
     def 'Test activate tasks'() {
         given:
         def extDependency = Mock(Dependency) {
@@ -156,13 +200,14 @@ class ServiceActivatorTest extends Specification {
             serviceId() >> 'extSvc'
             isExternalService() >> true
             dependency() >> extDependency
-            isActivated() >>> [false, true]
+            isActivated() >>> [false, false, false, true]
+            equals(_) >> true
         }
         def svc = Mock(Object)
         def svcHolder = Mock(ServiceHolder) {
             serviceId() >> 'svc'
             getService() >> svc
-            isActivated() >>> [false, true]
+            isActivated() >>> [false, false, true]
             getUnactivatedServices() >> [extUnactivatedSvc]
         }
 
@@ -170,7 +215,7 @@ class ServiceActivatorTest extends Specification {
         def svcHolder2 = Mock(ServiceHolder) {
             serviceId() >> 'svc'
             getService() >> svc2
-            isActivated() >>> [false, true]
+            isActivated() >>> [false, false, true]
             getUnactivatedServices() >> [extUnactivatedSvc]
         }
 

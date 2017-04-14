@@ -49,7 +49,14 @@ public class ServiceActivator {
     }
 
     public <T> T activeService(final ServiceHolder serviceHolder) {
+        return activeService(serviceHolder, DEFAULT_TIME_OUT);
+    }
+
+    public <T> T activeService(final ServiceHolder serviceHolder, IntervalTime timeout) {
         ArgumentChecker.required(serviceHolder, "serviceHolder");
+        if (timeout == null) {
+            timeout = DEFAULT_TIME_OUT;
+        }
         if (serviceHolder.isActivated()) {
             return (T) serviceHolder.getService();
         }
@@ -80,12 +87,12 @@ public class ServiceActivator {
                     return new Watcher.ConditionResult(this._tasks);
                 }
             });
-        }).timeout(DEFAULT_TIME_OUT).start();
+        }).timeout(timeout).start();
 
         // Assign service active task to handle
         CompletableFuture<T> future = CompletableFuture.supplyAsync(task);
         try {
-            return future.get(DEFAULT_TIME_OUT.milliseconds(), TimeUnit.MILLISECONDS);
+            return future.get(timeout.milliseconds(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException ex) {
             if (ex.getCause() instanceof ServiceException) {
                 throw (ServiceException) ex.getCause();
@@ -169,7 +176,8 @@ public class ServiceActivator {
         private UnactivatedService isInHandling(List<UnactivatedService> unactivatedServices) {
             int foundIdx = Looper.on(unactivatedServices)
                     .map(this._svcList::indexOf)
-                    .filter((idx) -> ! this._svcList.get(idx).isActivated())
+                    .filter(idx -> idx >= 0)
+                    .filter(idx -> ! this._svcList.get(idx).isActivated())
                     .first(-1);
             if (foundIdx < 0) {
                 return null;
