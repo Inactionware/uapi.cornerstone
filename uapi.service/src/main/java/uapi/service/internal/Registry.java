@@ -15,7 +15,6 @@ import com.google.common.collect.Multimap;
 import uapi.GeneralException;
 import uapi.InvalidArgumentException;
 import uapi.common.ArgumentChecker;
-import uapi.common.CollectionHelper;
 import uapi.common.Guarder;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
@@ -122,7 +121,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             Looper.on(dependentSvcs)
                 .foreach(svcHolder -> {
                     if (svcHolder.isActivated()) {
-                        svcHolder.injectNewDepdencies();
+                        svcHolder.injectNewDependencies();
                     }
                 });
         };

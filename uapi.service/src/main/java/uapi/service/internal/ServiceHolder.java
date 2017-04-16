@@ -15,7 +15,6 @@ import uapi.state.StateCreator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 /**
  * Hold service and provide dependency, lifecycle management
@@ -71,7 +70,11 @@ public class ServiceHolder implements IServiceReference {
         // Create state convert rule
         IShifter<ServiceState> stateShifter = (currentState, operation) -> {
             if (currentState == ServiceState.Destroyed) {
-                throw new GeneralException("The service {} is destroyed", this._qualifiedSvcId);
+                throw ServiceException.builder()
+                        .errorCode(ServiceErrors.DESTROYED_SERVICE)
+                        .variables(new ServiceErrors.DestroyedService()
+                            .serviceId(this._qualifiedSvcId))
+                        .build();
             }
 
             ServiceState newState;
@@ -81,31 +84,29 @@ public class ServiceHolder implements IServiceReference {
                     newState = ServiceState.Resolved;
                     break;
                 case OP_INJECT:
-                    if (currentState.value() < ServiceState.Resolved.value()) {
-                        innerResolve();
-                    }
+                    innerResolve();
                     innerInject();
                     newState = ServiceState.Injected;
                     break;
                 case OP_SATISFY:
-                    if (currentState.value() < ServiceState.Injected.value()) {
-                        innerResolve();
-                        innerInject();
-                    }
+                    innerResolve();
+                    innerInject();
                     innerSatisfy();
                     newState = ServiceState.Satisfied;
                     break;
                 case OP_ACTIVATE:
-                    if (currentState.value() < ServiceState.Satisfied.value()) {
-                        innerResolve();
-                        innerInject();
-                        innerSatisfy();
-                    }
+                    innerResolve();
+                    innerInject();
+                    innerSatisfy();
                     innerActivate();
                     newState = ServiceState.Activated;
                     break;
                 default:
-                    throw new GeneralException("Unsupported operation type - {}", operation.type());
+                    throw ServiceException.builder()
+                            .errorCode(ServiceErrors.UNSUPPORTED_SERVICE_HOLDER_STATE)
+                            .variables(new ServiceErrors.UnsupportedServiceHolderState()
+                                .operationType(operation.type()))
+                            .build();
             }
             return newState;
         };
@@ -201,8 +202,12 @@ public class ServiceHolder implements IServiceReference {
         // remove null entry first
         Dependency dependency = findDependencies(service.getQualifiedId());
         if (dependency == null) {
-            throw new GeneralException(
-                    "The service {} does not depend on service {}", this._qualifiedSvcId, service.getQualifiedId());
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.NOT_A_DEPENDENCY)
+                    .variables(new ServiceErrors.NotDependency()
+                        .thisServiceId(this._qualifiedSvcId)
+                        .dependencyServiceId(service.getQualifiedId()))
+                    .build();
         }
         this._dependencies.remove(dependency, null);
         this._dependencies.put(dependency, service);
@@ -231,12 +236,16 @@ public class ServiceHolder implements IServiceReference {
                 .toList();
     }
 
-    public void injectNewDepdencies() {
+    public void injectNewDependencies() {
         if (! isActivated()) {
             return;
         }
         if (! (this._svc instanceof IServiceLifecycle)) {
-            throw new GeneralException("The service {} can't dynamic inject service", this.getId());
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.UNSUPPORTED_DYNAMIC_INJECTION)
+                    .variables(new ServiceErrors.UnsupportedDynamicInjection()
+                        .serviceId(this.getId()))
+                    .build();
         }
         Looper.on(this._dependencies.values())
                 .filter(dependSvcHolder -> ! this._injectedSvcs.contains(dependSvcHolder))
@@ -273,7 +282,12 @@ public class ServiceHolder implements IServiceReference {
                 .map(Map.Entry::getKey)
                 .first(null);
         if (requiredSvc != null) {
-            throw new GeneralException("The dependency {} of service {} is missing", requiredSvc, this._qualifiedSvcId);
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.MISSING_REQUIRED_DEPENDENCY)
+                    .variables(new ServiceErrors.MissingRequiredDependency()
+                        .dependency(requiredSvc)
+                        .qualifiedServiceId(this._qualifiedSvcId))
+                    .build();
         }
 
         // Ensure all dependencies are resolved
@@ -283,16 +297,18 @@ public class ServiceHolder implements IServiceReference {
                 .map(Map.Entry::getKey)
                 .first(null);
         if (unresolvedSvc != null) {
-            throw new GeneralException("The dependency {} of service is unresolved", unresolvedSvc, this._qualifiedSvcId);
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.UNRESOLVED_DEPENDENCY)
+                    .variables(new ServiceErrors.UnresolvedDependency()
+                        .thisServiceId(this._qualifiedSvcId)
+                        .dependency(unresolvedSvc))
+                    .build();
         }
     }
 
     private void innerInject() {
         if (isInjected()) {
             return;
-        }
-        if (this._dependencies.size() > 0 && !(_svc instanceof IInjectable)) {
-            throw new GeneralException("The service {} does not implement IInjectable interface", this._qualifiedSvcId);
         }
 
         // Ensure all dependencies are injected
@@ -301,7 +317,12 @@ public class ServiceHolder implements IServiceReference {
                 .map(Map.Entry::getKey)
                 .first(null);
         if (uninjectedSvc != null) {
-            throw new GeneralException("The dependency {} of service is uninjected", uninjectedSvc, this._qualifiedSvcId);
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.UNINJECTED_DEPENDENCY)
+                    .variables(new ServiceErrors.UninjectedDependency()
+                        .dependency(uninjectedSvc)
+                        .thisServiceId(this._qualifiedSvcId))
+                    .build();
         }
 
         // Inject depended service
@@ -333,11 +354,20 @@ public class ServiceHolder implements IServiceReference {
                 .map(Map.Entry::getKey)
                 .first(null);
         if (unsatisfiedSvc != null) {
-            throw new GeneralException("The dependency {} of service is unsatisfied", unsatisfiedSvc, this._qualifiedSvcId);
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.UNSATISFIED_DEPENDENCY)
+                    .variables(new ServiceErrors.UnsatisfiedDependency()
+                        .thisServiceId(this._qualifiedSvcId)
+                        .dependency(unsatisfiedSvc))
+                    .build();
         }
 
         if (! this._satisfyHook.isSatisfied(ServiceHolder.this)) {
-            throw new GeneralException("The service {} can'be satisfied", this._qualifiedSvcId);
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.SERVICE_CANNOT_BE_SATISFIED)
+                    .variables(new ServiceErrors.ServiceCannotBeSatisfied()
+                        .serviceId(this._qualifiedSvcId))
+                    .build();
         }
     }
 
@@ -352,49 +382,16 @@ public class ServiceHolder implements IServiceReference {
                 .map(Map.Entry::getKey)
                 .first(null);
         if (unactivatedSvc != null) {
-            throw new GeneralException("The dependency {} of service is unactivated", unactivatedSvc, this._qualifiedSvcId);
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.UNACTIVATED_DEPENDENCY)
+                    .variables(new ServiceErrors.UnactivatedDependency()
+                        .thisServiceId(this._qualifiedSvcId)
+                        .dependency(unactivatedSvc))
+                    .build();
         }
 
         if (_svc instanceof IInitial) {
             ((IInitial) _svc).init();
-        }
-    }
-
-    private final class ServiceStateListener implements IStateListener<ServiceState> {
-
-        private final ServiceHolder _svcHolder;
-
-        private ServiceStateListener(final ServiceHolder serviceHolder) {
-            this._svcHolder = serviceHolder;
-        }
-
-        @Override
-        public void stateChanged(ServiceState oldState, ServiceState newState) {
-            if (newState != ServiceState.Activated) {
-                return;
-            }
-
-            if (! ServiceHolder.this.isActivated()) {
-                throw new GeneralException("The service is activated - {}",
-                        ServiceHolder.this._qualifiedSvcId);
-            }
-
-            // Inject activated dependency service
-            Object injectedSvc = this._svcHolder.getService();
-            if (injectedSvc instanceof IServiceFactory) {
-                // Create service from service factory
-                injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
-            }
-            ((IInjectable) _svc).injectObject(new Injection(this._svcHolder.getId(), injectedSvc));
-            ServiceHolder.this._injectedSvcs.add(this._svcHolder);
-
-            // Notify if the service need know some dependent service is injected
-            if (ServiceHolder.this._svc instanceof IServiceLifecycle) {
-                IServiceLifecycle svcLifecycle = (IServiceLifecycle) ServiceHolder.this._svc;
-                svcLifecycle.onServiceInjected(this._svcHolder.getId(), this._svcHolder.getService());
-            }
-
-//            this._svcHolder.unsubscribe(this);
         }
     }
 }
