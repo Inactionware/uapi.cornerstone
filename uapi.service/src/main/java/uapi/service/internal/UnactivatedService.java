@@ -77,11 +77,11 @@ public class UnactivatedService implements IAwaiting {
     }
 
     public boolean isActivated() {
-        return this._svcHolder.isActivated();
+        return this._svcHolder == null ? false : this._svcHolder.isActivated();
     }
 
     public Object service() {
-        return this._svcHolder.getService();
+        return this._svcHolder == null ? null : this._svcHolder.getService();
     }
 
     public List<UnactivatedService> getUnactivatedDependencies() {

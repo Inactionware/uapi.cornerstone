@@ -110,20 +110,20 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             this._svcActivator.activeService(newSvcHolder);
 
             // Find out which service is depends on readied service
-            List<ServiceHolder> dependentSvcs = Guarder.by(this._svcRepoLock).runForResult(() ->
-                Looper.on(this._svcRepo.values())
-                        .filter(svcHolder -> svcHolder.isDependsOn(dependency))
-                        .toList()
-                );
-            if (dependentSvcs.size() == 0) {
-                return;
-            }
-            Looper.on(dependentSvcs)
-                .foreach(svcHolder -> {
-                    if (svcHolder.isActivated()) {
-                        svcHolder.injectNewDependencies();
-                    }
-                });
+//            List<ServiceHolder> dependentSvcs = Guarder.by(this._svcRepoLock).runForResult(() ->
+//                Looper.on(this._svcRepo.values())
+//                        .filter(svcHolder -> svcHolder.isDependsOn(dependency))
+//                        .toList()
+//                );
+//            if (dependentSvcs.size() == 0) {
+//                return;
+//            }
+//            Looper.on(dependentSvcs)
+//                .foreach(svcHolder -> {
+//                    if (svcHolder.isActivated()) {
+//                        svcHolder.injectNewDependencies();
+//                    }
+//                });
         };
     }
 
@@ -303,7 +303,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                     Guarder.by(this._svcRepoLock).run(() -> {
                         // Check whether the new register service depends on existing service
                         Looper.on(this._svcRepo.values())
-                                .filter(existingSvc -> svcHolder.isDependsOn(existingSvc.getId()))
+                                .filter(existingSvc -> svcHolder.isDependsOn(existingSvc.getQualifiedId()))
                                 .foreach(svcHolder::setDependency);
                         // Check whether existing service depends on the new register service
                         Looper.on(this._svcRepo.values())

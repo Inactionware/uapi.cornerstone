@@ -178,11 +178,6 @@ public class ServiceHolder implements IServiceReference {
         return this._stateTracer.get().value() >= ServiceState.Activated.value();
     }
 
-    public boolean isDependsOn(final String serviceId) {
-        ArgumentChecker.notEmpty(serviceId, "serviceId");
-        return isDependsOn(new QualifiedServiceId(serviceId, QualifiedServiceId.FROM_LOCAL));
-    }
-
     public boolean isDependsOn(QualifiedServiceId qualifiedServiceId) {
         ArgumentChecker.notNull(qualifiedServiceId, "qualifiedServiceId");
         return findDependencies(qualifiedServiceId) != null;
@@ -211,6 +206,25 @@ public class ServiceHolder implements IServiceReference {
         }
         this._dependencies.remove(dependency, null);
         this._dependencies.put(dependency, service);
+
+        // if service is activated then it should be notified
+        if (! isActivated()) {
+            return;
+        }
+        if (! (this._svc instanceof IServiceLifecycle)) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.UNSUPPORTED_DYNAMIC_INJECTION)
+                    .variables(new ServiceErrors.UnsupportedDynamicInjection()
+                            .serviceId(this.getId()))
+                    .build();
+        }
+        Object injectedSvc = service.getService();
+        if (injectedSvc instanceof IServiceFactory) {
+            // Create service from service factory
+            injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
+        }
+        ((IServiceLifecycle) _svc).onServiceInjected(service.getId(), injectedSvc);
+        this._injectedSvcs.add(service);
     }
 
     /**
@@ -221,44 +235,40 @@ public class ServiceHolder implements IServiceReference {
     public List<UnactivatedService> getUnactivatedServices() {
         return Looper.on(this._dependencies.entries())
                 .filter(entry -> {
-                    Dependency dependency = entry.getKey();
                     ServiceHolder svcHolder = entry.getValue();
-                    if (svcHolder != null && ! svcHolder.isActivated()) {
-                        return true;
-                    }
                     if (svcHolder == null) {
                         // Always try to load external service
                         return true;
                     }
-                    return false;
+                    return ! svcHolder.isActivated();
                 })
                 .map(entry -> new UnactivatedService(entry.getKey(), entry.getValue()))
                 .toList();
     }
 
-    public void injectNewDependencies() {
-        if (! isActivated()) {
-            return;
-        }
-        if (! (this._svc instanceof IServiceLifecycle)) {
-            throw ServiceException.builder()
-                    .errorCode(ServiceErrors.UNSUPPORTED_DYNAMIC_INJECTION)
-                    .variables(new ServiceErrors.UnsupportedDynamicInjection()
-                        .serviceId(this.getId()))
-                    .build();
-        }
-        Looper.on(this._dependencies.values())
-                .filter(dependSvcHolder -> ! this._injectedSvcs.contains(dependSvcHolder))
-                .foreach(dependSvcHolder -> {
-                    Object injectedSvc = dependSvcHolder.getService();
-                    if (injectedSvc instanceof IServiceFactory) {
-                        // Create service from service factory
-                        injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
-                    }
-                    ((IServiceLifecycle) _svc).onServiceInjected(dependSvcHolder.getId(), dependSvcHolder.getService());
-                    this._injectedSvcs.add(dependSvcHolder);
-                });
-    }
+//    public void injectNewDependencies() {
+//        if (! isActivated()) {
+//            return;
+//        }
+//        if (! (this._svc instanceof IServiceLifecycle)) {
+//            throw ServiceException.builder()
+//                    .errorCode(ServiceErrors.UNSUPPORTED_DYNAMIC_INJECTION)
+//                    .variables(new ServiceErrors.UnsupportedDynamicInjection()
+//                        .serviceId(this.getId()))
+//                    .build();
+//        }
+//        Looper.on(this._dependencies.values())
+//                .filter(dependSvcHolder -> ! this._injectedSvcs.contains(dependSvcHolder))
+//                .foreach(dependSvcHolder -> {
+//                    Object injectedSvc = dependSvcHolder.getService();
+//                    if (injectedSvc instanceof IServiceFactory) {
+//                        // Create service from service factory
+//                        injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
+//                    }
+//                    ((IServiceLifecycle) _svc).onServiceInjected(dependSvcHolder.getId(), injectedSvc);
+//                    this._injectedSvcs.add(dependSvcHolder);
+//                });
+//    }
 
     /////////////////////
     // Private methods //
@@ -313,6 +323,7 @@ public class ServiceHolder implements IServiceReference {
 
         // Ensure all dependencies are injected
         Dependency uninjectedSvc = Looper.on(this._dependencies.entries())
+                .filter(entry -> entry.getValue() != null)
                 .filter(entry -> ! entry.getValue().isInjected())
                 .map(Map.Entry::getKey)
                 .first(null);
@@ -350,6 +361,7 @@ public class ServiceHolder implements IServiceReference {
 
         // Ensure all dependencies are satisfied
         Dependency unsatisfiedSvc = Looper.on(this._dependencies.entries())
+                .filter(entry -> entry.getValue() != null)
                 .filter(entry -> ! entry.getValue().isSatisfied())
                 .map(Map.Entry::getKey)
                 .first(null);
@@ -378,6 +390,7 @@ public class ServiceHolder implements IServiceReference {
 
         // Ensure all dependencies are activated
         Dependency unactivatedSvc = Looper.on(this._dependencies.entries())
+                .filter(entry -> entry.getValue() != null)
                 .filter(entry -> ! entry.getValue().isActivated())
                 .map(Map.Entry::getKey)
                 .first(null);
