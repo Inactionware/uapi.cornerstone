@@ -27,7 +27,6 @@ import uapi.log.ILogger
 /**
  * Test case for Registry
  */
-@Ignore
 class RegistryTest extends Specification {
 
     Registry registry
@@ -201,6 +200,7 @@ class RegistryTest extends Specification {
         registry.getTags() == ['Registry'] as String[]
     }
 
+    @Ignore
     def 'Test start'() {
         given:
         def svc = Mock(IInitialService) {
@@ -216,6 +216,7 @@ class RegistryTest extends Specification {
         1 * svc.init()
     }
 
+    @Ignore
     def 'Test start on service has dependency'() {
         given:
         def svc = Mock(IInjectableService) {
@@ -266,6 +267,7 @@ class RegistryTest extends Specification {
         noExceptionThrown()
     }
 
+    @Ignore
     def 'Test start on service has dependency which is required'() {
         given:
         def svc = Mock(IInjectableService) {
@@ -291,6 +293,7 @@ class RegistryTest extends Specification {
         1 * logger.error(_ as Exception)
     }
 
+    @Ignore
     def 'Test start on service has dependency which load from outside'() {
         given:
         def svc = Mock(IInjectableService) {
@@ -321,6 +324,7 @@ class RegistryTest extends Specification {
         registry.findService('2') != null
     }
 
+    @Ignore
     def 'Test start on service has dependency which load from outside but no external service loader'() {
         given:
         def svc = Mock(IInjectableService) {
@@ -346,6 +350,7 @@ class RegistryTest extends Specification {
         1 * logger.error(_ as String, _ as QualifiedServiceId, _ as String)
     }
 
+    @Ignore
     def 'Test start on service has dependency which load from outside but failed'() {
         given:
         def svc = Mock(IInjectableService) {
@@ -376,6 +381,7 @@ class RegistryTest extends Specification {
         1 * logger.error(_ as String, _ as QualifiedServiceId, _ as String)
     }
 
+    @Ignore
     def 'Test start on service has dependency which load from any'() {
         given:
         def svc = Mock(IInjectableService) {
@@ -406,6 +412,7 @@ class RegistryTest extends Specification {
         registry.findService('2') != null
     }
 
+    @Ignore
     def 'Test start on service has dependency which load from any but failed'() {
         given:
         def svc = Mock(IInjectableService) {
