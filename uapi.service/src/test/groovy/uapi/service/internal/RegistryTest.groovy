@@ -200,98 +200,98 @@ class RegistryTest extends Specification {
         registry.getTags() == ['Registry'] as String[]
     }
 
-    @Ignore
-    def 'Test start'() {
-        given:
-        def svc = Mock(IInitialService) {
-            getIds() >> ['1']
-        }
-        registry._logger = Mock(ILogger)
-        registry.register(svc)
+//    @Ignore
+//    def 'Test start'() {
+//        given:
+//        def svc = Mock(IInitialService) {
+//            getIds() >> ['1']
+//        }
+//        registry._logger = Mock(ILogger)
+//        registry.register(svc)
+//
+//        when:
+//        registry.activeAll()
+//
+//        then:
+//        1 * svc.init()
+//    }
 
-        when:
-        registry.activeAll()
+//    @Ignore
+//    def 'Test start on service has dependency'() {
+//        given:
+//        def svc = Mock(IInjectableService) {
+//            getIds() >> ['1']
+//            getDependencies() >> [Mock(Dependency) {
+//                getServiceId() >> Mock(QualifiedServiceId) {
+//                    getId() >> '2'
+//                    getFrom() >> 'Local'
+//                }
+//                isSingle() >> true
+//                isOptional() >> false
+//            }]
+//        }
+//        def dependSvc = Mock(IService) {
+//            getIds() >> ['2']
+//        }
+//        registry._logger = Mock(ILogger)
+//        registry.register(svc)
+//        registry.register(dependSvc)
+//
+//        when:
+//        registry.activeAll()
+//
+//        then:
+//        1 * svc.init()
+//    }
 
-        then:
-        1 * svc.init()
-    }
+//    def 'Test start on service has dependency which is optional'() {
+//        given:
+//        def svc = Mock(IInjectableService) {
+//            getIds() >> ['1']
+//            getDependencies() >> [Mock(Dependency) {
+//                getServiceId() >> Mock(QualifiedServiceId) {
+//                    getId() >> '2'
+//                    getFrom() >> 'Local'
+//                }
+//                isSingle() >> true
+//                isOptional() >> true
+//            }]
+//        }
+//        registry._logger = Mock(ILogger)
+//        registry.register(svc)
+//
+//        when:
+//        registry.activeAll()
+//
+//        then:
+//        noExceptionThrown()
+//    }
 
-    @Ignore
-    def 'Test start on service has dependency'() {
-        given:
-        def svc = Mock(IInjectableService) {
-            getIds() >> ['1']
-            getDependencies() >> [Mock(Dependency) {
-                getServiceId() >> Mock(QualifiedServiceId) {
-                    getId() >> '2'
-                    getFrom() >> 'Local'
-                }
-                isSingle() >> true
-                isOptional() >> false
-            }]
-        }
-        def dependSvc = Mock(IService) {
-            getIds() >> ['2']
-        }
-        registry._logger = Mock(ILogger)
-        registry.register(svc)
-        registry.register(dependSvc)
-
-        when:
-        registry.activeAll()
-
-        then:
-        1 * svc.init()
-    }
-
-    def 'Test start on service has dependency which is optional'() {
-        given:
-        def svc = Mock(IInjectableService) {
-            getIds() >> ['1']
-            getDependencies() >> [Mock(Dependency) {
-                getServiceId() >> Mock(QualifiedServiceId) {
-                    getId() >> '2'
-                    getFrom() >> 'Local'
-                }
-                isSingle() >> true
-                isOptional() >> true
-            }]
-        }
-        registry._logger = Mock(ILogger)
-        registry.register(svc)
-
-        when:
-        registry.activeAll()
-
-        then:
-        noExceptionThrown()
-    }
-
-    @Ignore
-    def 'Test start on service has dependency which is required'() {
-        given:
-        def svc = Mock(IInjectableService) {
-            getIds() >> ['1']
-            getDependencies() >> [Mock(Dependency) {
-                getServiceId() >> Mock(QualifiedServiceId) {
-                    getId() >> '2'
-                    getFrom() >> 'Local'
-                }
-                isSingle() >> true
-                isOptional() >> false
-            }]
-        }
-        def logger = Mock(ILogger)
-        registry._logger = logger
-        registry.register(svc)
-
-        when:
-        registry.activeAll()
-
-        then:
-        noExceptionThrown()
-        1 * logger.error(_ as Exception)
-    }
+//    @Ignore
+//    def 'Test start on service has dependency which is required'() {
+//        given:
+//        def svc = Mock(IInjectableService) {
+//            getIds() >> ['1']
+//            getDependencies() >> [Mock(Dependency) {
+//                getServiceId() >> Mock(QualifiedServiceId) {
+//                    getId() >> '2'
+//                    getFrom() >> 'Local'
+//                }
+//                isSingle() >> true
+//                isOptional() >> false
+//            }]
+//        }
+//        def logger = Mock(ILogger)
+//        registry._logger = logger
+//        registry.register(svc)
+//
+//        when:
+//        registry.activeAll()
+//
+//        then:
+//        noExceptionThrown()
+//        1 * logger.error(_ as Exception)
+//    }
 
     @Ignore
     def 'Test start on service has dependency which load from outside'() {

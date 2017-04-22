@@ -10,19 +10,19 @@
 apply plugin: 'application'
 
 dependencies {
-    compile 'uapi:uapi.service:1.0.0+'
-    compile 'uapi:uapi.config:1.0.0+'
-    compile 'uapi:uapi.log:1.0.0+'
-    compile 'uapi:uapi.event:1.0.0+'
-    compile 'uapi:uapi.behavior:1.0.0+'
-    compile 'uapi:uapi.app:1.0.0+'
+//    compile 'uapi:uapi.service:1.0.0+'
+//    compile 'uapi:uapi.config:1.0.0+'
+//    compile 'uapi:uapi.log:1.0.0+'
+//    compile 'uapi:uapi.event:1.0.0+'
+//    compile 'uapi:uapi.behavior:1.0.0+'
+//    compile 'uapi:uapi.app:1.0.0+'
 
-//    compile project(':uapi.service')
-//    compile project(':uapi.config')
-//    compile project(':uapi.log')
-//    compile project(':uapi.event')
-//    compile project(':uapi.behavior')
-//    compile project(':uapi.app')
+    compile project(':uapi.service')
+    compile project(':uapi.config')
+    compile project(':uapi.log')
+    compile project(':uapi.event')
+    compile project(':uapi.behavior')
+    compile project(':uapi.app')
 }
 
 mainClassName = 'uapi.app.internal.Bootstrap'

@@ -65,7 +65,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                 return svcHolder;
             }
 
-            Object svc = null;
+            Object svc;
             if (from.equals(QualifiedServiceId.FROM_ANY)) {
                 // Search from any loader
                 Iterator<IServiceLoader> svcLoadersIte = Registry.this._orderedSvcLoaders.iterator();
@@ -268,11 +268,6 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     @Override
     public String[] getTags() {
         return tags;
-    }
-
-    @Deprecated
-    public void activeAll() {
-        // do nothing
     }
 
     int getCount() {

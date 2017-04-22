@@ -300,16 +300,16 @@ public class ServiceHolder implements IServiceReference {
                     .build();
         }
 
-        // Ensure all dependencies are resolved
+        // Ensure all dependencies are activated
         Dependency unresolvedSvc = Looper.on(this._dependencies.entries())
                 .filter(entry -> entry.getValue() != null)
-                .filter(entry -> ! entry.getValue().isResolved())
+                .filter(entry -> ! entry.getValue().isActivated())
                 .map(Map.Entry::getKey)
                 .first(null);
         if (unresolvedSvc != null) {
             throw ServiceException.builder()
-                    .errorCode(ServiceErrors.UNRESOLVED_DEPENDENCY)
-                    .variables(new ServiceErrors.UnresolvedDependency()
+                    .errorCode(ServiceErrors.UNACTIVATED_DEPENDENCY)
+                    .variables(new ServiceErrors.UnactivatedDependency()
                         .thisServiceId(this._qualifiedSvcId)
                         .dependency(unresolvedSvc))
                     .build();
@@ -321,16 +321,16 @@ public class ServiceHolder implements IServiceReference {
             return;
         }
 
-        // Ensure all dependencies are injected
+        // Ensure all dependencies are activated
         Dependency uninjectedSvc = Looper.on(this._dependencies.entries())
                 .filter(entry -> entry.getValue() != null)
-                .filter(entry -> ! entry.getValue().isInjected())
+                .filter(entry -> ! entry.getValue().isActivated())
                 .map(Map.Entry::getKey)
                 .first(null);
         if (uninjectedSvc != null) {
             throw ServiceException.builder()
-                    .errorCode(ServiceErrors.UNINJECTED_DEPENDENCY)
-                    .variables(new ServiceErrors.UninjectedDependency()
+                    .errorCode(ServiceErrors.UNACTIVATED_DEPENDENCY)
+                    .variables(new ServiceErrors.UnactivatedDependency()
                         .dependency(uninjectedSvc)
                         .thisServiceId(this._qualifiedSvcId))
                     .build();
@@ -362,13 +362,13 @@ public class ServiceHolder implements IServiceReference {
         // Ensure all dependencies are satisfied
         Dependency unsatisfiedSvc = Looper.on(this._dependencies.entries())
                 .filter(entry -> entry.getValue() != null)
-                .filter(entry -> ! entry.getValue().isSatisfied())
+                .filter(entry -> ! entry.getValue().isActivated())
                 .map(Map.Entry::getKey)
                 .first(null);
         if (unsatisfiedSvc != null) {
             throw ServiceException.builder()
-                    .errorCode(ServiceErrors.UNSATISFIED_DEPENDENCY)
-                    .variables(new ServiceErrors.UnsatisfiedDependency()
+                    .errorCode(ServiceErrors.UNACTIVATED_DEPENDENCY)
+                    .variables(new ServiceErrors.UnactivatedDependency()
                         .thisServiceId(this._qualifiedSvcId)
                         .dependency(unsatisfiedSvc))
                     .build();

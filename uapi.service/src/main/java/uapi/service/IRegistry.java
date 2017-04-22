@@ -133,10 +133,10 @@ public interface IRegistry {
      */
     <T> T findService(final String serviceId, final String serviceFrom);
 
-    /**
-     * Invoked when the registry is ready
-     */
-    void activeAll();
+//    /**
+//     * Invoked when the registry is ready
+//     */
+//    void activeAll();
 
 //    void registerServiceLoader(IServiceLoader serviceLoader);
 

@@ -273,7 +273,7 @@ class ServiceHolderTest extends Specification {
                 toString() >> 'depId'
                 1 * isAssignTo(_) >> true
             }
-            isResolved() >> true
+            isActivated() >> true
         }
         svcHolder.setDependency(depSvcHolder)
 
@@ -309,7 +309,7 @@ class ServiceHolderTest extends Specification {
                 toString() >> 'depId'
                 1 * isAssignTo(_) >> true
             }
-            isResolved() >> true
+            isActivated() >> true
         }
         svcHolder.setDependency(depSvcHolder)
         svcHolder.resolve()
@@ -386,8 +386,7 @@ class ServiceHolderTest extends Specification {
                 1 * isAssignTo(_) >> true
             }
             getService() >> depSvc
-            isResolved() >> true
-            isInjected() >> true
+            isActivated() >> true
         }
         svcHolder.setDependency(depSvcHolder)
 
@@ -427,8 +426,7 @@ class ServiceHolderTest extends Specification {
                 1 * isAssignTo(_) >> true
             }
             getService() >> depSvc
-            isResolved() >> true
-            isInjected() >> true
+            isActivated() >> true
         }
         svcHolder.setDependency(depSvcHolder)
 
@@ -471,8 +469,7 @@ class ServiceHolderTest extends Specification {
                 1 * isAssignTo(_) >> true
             }
             getService() >> depSvc
-            isResolved() >> true
-            isInjected() >> true
+            isActivated() >> true
         }
         svcHolder.setDependency(depSvcHolder)
 
@@ -512,9 +509,7 @@ class ServiceHolderTest extends Specification {
                 1 * isAssignTo(_) >> true
             }
             getService() >> depSvc
-            isResolved() >> true
-            isInjected() >> true
-            isSatisfied() >> false
+            isActivated() >> true
         }
         svcHolder.setDependency(depSvcHolder)
 
@@ -557,9 +552,7 @@ class ServiceHolderTest extends Specification {
                 1 * isAssignTo(_) >> true
             }
             getService() >> depSvc
-            isResolved() >> true
-            isInjected() >> true
-            isSatisfied() >> true
+            isActivated() >> true
         }
         svcHolder.setDependency(depSvcHolder)
 
@@ -602,9 +595,7 @@ class ServiceHolderTest extends Specification {
                 1 * isAssignTo(_) >> true
             }
             getService() >> depSvc
-            isResolved() >> true
-            isInjected() >> true
-            isSatisfied() >> true
+            isActivated() >> true
         }
         svcHolder.setDependency(depSvcHolder)
 
@@ -647,9 +638,7 @@ class ServiceHolderTest extends Specification {
                 1 * isAssignTo(_) >> true
             }
             getService() >> depSvc
-            isResolved() >> true
-            isInjected() >> true
-            isSatisfied() >> true
+            isActivated() >> true
         }
         svcHolder.setDependency(depSvcHolder)
 
@@ -682,7 +671,7 @@ class ServiceHolderTest extends Specification {
             isOption('depId') >> true
         }
         def satisfyHook  = Mock(ISatisfyHook) {
-            1 * isSatisfied(_ as ServiceHolder) >> true
+            0 * isSatisfied(_ as ServiceHolder) >> true
         }
         def svcHolder = new ServiceHolder(from, svc, svcId, [dependency] as Dependency[], satisfyHook)
         def depSvc = Mock(Object)
@@ -705,7 +694,7 @@ class ServiceHolderTest extends Specification {
 
         then:
         thrown(ServiceException)
-        1 * svc.injectObject(_ as Injection)
+        0 * svc.injectObject(_ as Injection)
         ! svcHolder.isResolved()
         ! svcHolder.isInjected()
         ! svcHolder.isSatisfied()
