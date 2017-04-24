@@ -151,8 +151,10 @@ public class ServiceActivator {
                                     .serviceId(unactivatedSvc.serviceId()).get())
                                 .build();
                     }
+                    unactivatedSvc.activate(svcHolder);
+                } else {
+                    unactivatedSvc.activate();
                 }
-                unactivatedSvc.activate();
                 if (! unactivatedSvc.isActivated()) {
                     throw ServiceException.builder()
                             .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)

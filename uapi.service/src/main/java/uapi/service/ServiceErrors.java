@@ -9,6 +9,7 @@
 
 package uapi.service;
 
+import uapi.common.CollectionHelper;
 import uapi.exception.FileBasedExceptionErrors;
 import uapi.exception.IndexedParameters;
 import uapi.service.internal.UnactivatedService;
@@ -37,6 +38,8 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
     public static final int UNSUPPORTED_SERVICE_HOLDER_STATE    = 12;
     public static final int DESTROYED_SERVICE                   = 13;
     public static final int UNSUPPORTED_DYNAMIC_INJECTION       = 14;
+    public static final int MISSING_DEPENDENCY_OR_SERVICE       = 15;
+    public static final int NO_SERVICE_TO_ACTIVATE              = 16;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -56,6 +59,8 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         keyCodeMapping.put(UNSUPPORTED_SERVICE_HOLDER_STATE, UnsupportedServiceHolderState.KEY);
         keyCodeMapping.put(DESTROYED_SERVICE, DestroyedService.KEY);
         keyCodeMapping.put(UNSUPPORTED_DYNAMIC_INJECTION, UnsupportedDynamicInjection.KEY);
+        keyCodeMapping.put(MISSING_DEPENDENCY_OR_SERVICE, MissingDependencyOrService.KEY);
+        keyCodeMapping.put(NO_SERVICE_TO_ACTIVATE, NoServiceToActivate.KEY);
     }
 
     @Override
@@ -392,6 +397,39 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         @Override
         public Object[] get() {
             return new Object[] { this._svcId };
+        }
+    }
+
+    /**
+     * The unactivated service requires service dependency or its service holder
+     */
+    public static final class MissingDependencyOrService extends IndexedParameters<MissingDependencyOrService> {
+
+        private static final String KEY = "MissingDependencyOrService";
+
+        @Override
+        public Object[] get() {
+            return CollectionHelper.EMPTY_ARRAY;
+        }
+    }
+
+    /**
+     * There are no service to activate - {}
+     */
+    public static final class NoServiceToActivate extends IndexedParameters<NoServiceToActivate> {
+
+        private static final String KEY = "NoServiceToActivate";
+
+        private QualifiedServiceId _qSvcId;
+
+        public NoServiceToActivate serviceId(QualifiedServiceId qid) {
+            this._qSvcId = qid;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._qSvcId };
         }
     }
 }

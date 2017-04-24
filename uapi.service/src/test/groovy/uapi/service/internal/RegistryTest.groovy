@@ -580,6 +580,39 @@ class RegistryTest extends Specification {
         IService.class.name     | null
     }
 
+    def 'Test external service loader'() {
+        given:
+        def svc = Mock(IInjectableService) {
+            getIds() >> ['1']
+            getDependencies() >> [Mock(Dependency) {
+                getServiceId() >> Mock(QualifiedServiceId) {
+                    getId() >> '2'
+                    getFrom() >> 'Remote'
+                }
+                getServiceType() >> String.class
+                isSingle() >> true
+                isOptional() >> false
+            }]
+        }
+        def logger = Mock(ILogger)
+        registry._logger = logger
+        registry.register(svc)
+        def svcLoader = Mock(IServiceLoader) {
+            getPriority() >> 1
+            load('2', _ as Class) >> Mock(ServiceHolder) {
+                isActivated() >> true
+            }
+        }
+        registry._svcLoaders.put('Remote', svcLoader)
+
+        when:
+        registry.findService('1')
+
+        then:
+        noExceptionThrown()
+        registry.findService('2') != null
+    }
+
     static interface IInitialService extends IService, IInitial {}
 
     static interface IInjectableService extends IService, IInjectable, IInitial {}

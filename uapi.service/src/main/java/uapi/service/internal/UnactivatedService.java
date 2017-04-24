@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class UnactivatedService implements IAwaiting {
 
     private final Dependency _dependency;
-    private final ServiceHolder _svcHolder;
+    private ServiceHolder _svcHolder;
 
     private UnactivatedService _refBy = null;
 
@@ -32,6 +32,11 @@ public class UnactivatedService implements IAwaiting {
             final Dependency dependency,
             final ServiceHolder serviceHolder
     ) {
+        if (dependency == null && serviceHolder == null) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.MISSING_DEPENDENCY_OR_SERVICE)
+                    .build();
+        }
         this._dependency = dependency;
         this._svcHolder = serviceHolder;
         this._lock = new ReentrantLock();
@@ -92,6 +97,13 @@ public class UnactivatedService implements IAwaiting {
     }
 
     public void activate() {
+        if (this._svcHolder == null) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.NO_SERVICE_TO_ACTIVATE)
+                    .variables(new ServiceErrors.NoServiceToActivate()
+                        .serviceId(this._dependency.getServiceId()))
+                    .build();
+        }
         this._svcHolder.activate();
         this._lock.lock();
         try {
@@ -101,6 +113,14 @@ public class UnactivatedService implements IAwaiting {
         } finally {
             this._lock.unlock();
         }
+    }
+
+    public void activate(ServiceHolder externalServiceHolder) {
+        if (this._svcHolder != null) {
+            throw new GeneralException("External service status incorrect");
+        }
+        this._svcHolder = externalServiceHolder;
+        activate();
     }
 
     @Override
