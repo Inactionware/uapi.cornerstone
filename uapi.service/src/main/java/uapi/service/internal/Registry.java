@@ -84,6 +84,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                 }
                 if (!loaded && !dependency.isOptional()) {
                     this._logger.error("No any service loader can load service {}", qSvcId);
+                    return null;
                 }
             } else {
                 // Search specific service loader
@@ -103,27 +104,9 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         });
 
         this._svcReadyListener = (dependency, service) -> {
-            // Register and activate the service
+            // Register new service
             QualifiedServiceId qSvcId = dependency.getServiceId();
             registerService(qSvcId.getFrom(), service, new String[]{qSvcId.getId()}, new Dependency[0]);
-            ServiceHolder newSvcHolder = findServiceHolder(qSvcId.getId(), qSvcId.getFrom());
-            this._svcActivator.activeService(newSvcHolder);
-
-            // Find out which service is depends on readied service
-//            List<ServiceHolder> dependentSvcs = Guarder.by(this._svcRepoLock).runForResult(() ->
-//                Looper.on(this._svcRepo.values())
-//                        .filter(svcHolder -> svcHolder.isDependsOn(dependency))
-//                        .toList()
-//                );
-//            if (dependentSvcs.size() == 0) {
-//                return;
-//            }
-//            Looper.on(dependentSvcs)
-//                .foreach(svcHolder -> {
-//                    if (svcHolder.isActivated()) {
-//                        svcHolder.injectNewDependencies();
-//                    }
-//                });
         };
     }
 
@@ -277,7 +260,8 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     private void registerService(
             final IService svc) {
         final String[] svcIds = svc.getIds();
-        final Dependency[] dependencies = svc instanceof IInjectable ? ((IInjectable) svc).getDependencies() : new Dependency[0];
+        final Dependency[] dependencies =
+                svc instanceof IInjectable ? ((IInjectable) svc).getDependencies() : new Dependency[0];
         registerService(QualifiedServiceId.FROM_LOCAL, svc, svcIds, dependencies);
     }
 
@@ -294,7 +278,11 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
         Looper.on(svcIds)
                 .map(svcId -> new ServiceHolder(svcFrom, svc, svcId, dependencies, this._satisfyDecider))
-                .foreach(svcHolder -> {
+                .next(svcHolder -> {
+                    if (svcHolder.getQualifiedId().isExternalService()) {
+                        this._svcActivator.activeService(svcHolder);
+                    }
+                }).foreach(svcHolder -> {
                     Guarder.by(this._svcRepoLock).run(() -> {
                         // Check whether the new register service depends on existing service
                         Looper.on(this._svcRepo.values())
@@ -318,7 +306,8 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             Object injectedObj = injection.getObject();
             if (! (injectedObj instanceof ISatisfyHook)) {
                 throw new InvalidArgumentException(
-                        "The injected object {} can't be converted to {}", injection.getObject(), ISatisfyHook.class.getName());
+                        "The injected object {} can't be converted to {}",
+                        injection.getObject(), ISatisfyHook.class.getName());
             }
             releaseHooks();
             ISatisfyHook hook = (ISatisfyHook) injectedObj;
@@ -328,7 +317,8 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         if (ILogger.class.getName().equals(injection.getId())) {
             if (! (injection.getObject() instanceof ILogger)) {
                 throw new InvalidArgumentException(
-                        "The injected object {} can't be converted to {}", injection.getObject(), ILogger.class.getName());
+                        "The injected object {} can't be converted to {}",
+                        injection.getObject(), ILogger.class.getName());
             }
             this._logger = (ILogger) injection.getObject();
             return;
@@ -336,10 +326,13 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         if (IServiceLoader.class.getName().equals(injection.getId())) {
             if (! (injection.getObject() instanceof IServiceLoader)) {
                 throw new InvalidArgumentException(
-                        "The injected object {} can't be converted to {}", injection.getObject(), IServiceLoader.class.getName());
+                        "The injected object {} can't be converted to {}",
+                        injection.getObject(), IServiceLoader.class.getName());
             }
             IServiceLoader svcLoader = (IServiceLoader) injection.getObject();
             this._svcLoaders.put(svcLoader.getId(), svcLoader);
+            this._orderedSvcLoaders.add(svcLoader);
+            svcLoader.register(this._svcReadyListener);
             return;
         }
         throw new InvalidArgumentException("The Registry does not depends on service {}", injection);
@@ -349,13 +342,22 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     public Dependency[] getDependencies() {
         return new Dependency[] {
                 new Dependency(
-                        StringHelper.makeString("{}{}{}", ISatisfyHook.class.getName(), QualifiedServiceId.LOCATION, QualifiedServiceId.FROM_LOCAL),
+                        StringHelper.makeString("{}{}{}",
+                                ISatisfyHook.class.getName(),
+                                QualifiedServiceId.LOCATION,
+                                QualifiedServiceId.FROM_LOCAL),
                         ISatisfyHook.class, false, true),
                 new Dependency(
-                        StringHelper.makeString("{}{}{}", ILogger.class.getName(), QualifiedServiceId.LOCATION, QualifiedServiceId.FROM_LOCAL),
+                        StringHelper.makeString("{}{}{}",
+                                ILogger.class.getName(),
+                                QualifiedServiceId.LOCATION,
+                                QualifiedServiceId.FROM_LOCAL),
                         ILogger.class, true, false),
                 new Dependency(
-                        StringHelper.makeString("{}{}{}", IServiceLoader.class.getName(), QualifiedServiceId.LOCATION, QualifiedServiceId.FROM_LOCAL),
+                        StringHelper.makeString("{}{}{}",
+                                IServiceLoader.class.getName(),
+                                QualifiedServiceId.LOCATION,
+                                QualifiedServiceId.FROM_LOCAL),
                         IServiceLoader.class, false, true)
         };
     }

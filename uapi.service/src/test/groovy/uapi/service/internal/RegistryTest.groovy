@@ -200,249 +200,6 @@ class RegistryTest extends Specification {
         registry.getTags() == ['Registry'] as String[]
     }
 
-//    @Ignore
-//    def 'Test start'() {
-//        given:
-//        def svc = Mock(IInitialService) {
-//            getIds() >> ['1']
-//        }
-//        registry._logger = Mock(ILogger)
-//        registry.register(svc)
-//
-//        when:
-//        registry.activeAll()
-//
-//        then:
-//        1 * svc.init()
-//    }
-
-//    @Ignore
-//    def 'Test start on service has dependency'() {
-//        given:
-//        def svc = Mock(IInjectableService) {
-//            getIds() >> ['1']
-//            getDependencies() >> [Mock(Dependency) {
-//                getServiceId() >> Mock(QualifiedServiceId) {
-//                    getId() >> '2'
-//                    getFrom() >> 'Local'
-//                }
-//                isSingle() >> true
-//                isOptional() >> false
-//            }]
-//        }
-//        def dependSvc = Mock(IService) {
-//            getIds() >> ['2']
-//        }
-//        registry._logger = Mock(ILogger)
-//        registry.register(svc)
-//        registry.register(dependSvc)
-//
-//        when:
-//        registry.activeAll()
-//
-//        then:
-//        1 * svc.init()
-//    }
-
-//    def 'Test start on service has dependency which is optional'() {
-//        given:
-//        def svc = Mock(IInjectableService) {
-//            getIds() >> ['1']
-//            getDependencies() >> [Mock(Dependency) {
-//                getServiceId() >> Mock(QualifiedServiceId) {
-//                    getId() >> '2'
-//                    getFrom() >> 'Local'
-//                }
-//                isSingle() >> true
-//                isOptional() >> true
-//            }]
-//        }
-//        registry._logger = Mock(ILogger)
-//        registry.register(svc)
-//
-//        when:
-//        registry.activeAll()
-//
-//        then:
-//        noExceptionThrown()
-//    }
-
-//    @Ignore
-//    def 'Test start on service has dependency which is required'() {
-//        given:
-//        def svc = Mock(IInjectableService) {
-//            getIds() >> ['1']
-//            getDependencies() >> [Mock(Dependency) {
-//                getServiceId() >> Mock(QualifiedServiceId) {
-//                    getId() >> '2'
-//                    getFrom() >> 'Local'
-//                }
-//                isSingle() >> true
-//                isOptional() >> false
-//            }]
-//        }
-//        def logger = Mock(ILogger)
-//        registry._logger = logger
-//        registry.register(svc)
-//
-//        when:
-//        registry.activeAll()
-//
-//        then:
-//        noExceptionThrown()
-//        1 * logger.error(_ as Exception)
-//    }
-
-    @Ignore
-    def 'Test start on service has dependency which load from outside'() {
-        given:
-        def svc = Mock(IInjectableService) {
-            getIds() >> ['1']
-            getDependencies() >> [Mock(Dependency) {
-                getServiceId() >> Mock(QualifiedServiceId) {
-                    getId() >> '2'
-                    getFrom() >> 'Remote'
-                }
-                isSingle() >> true
-                isOptional() >> false
-            }]
-        }
-        def logger = Mock(ILogger)
-        registry._logger = logger
-        registry.register(svc)
-        def svcLoader = Mock(IServiceLoader) {
-            getPriority() >> 1
-            load('2', _) >> new Object()
-        }
-        registry._svcLoaders.put('Remote', svcLoader)
-
-        when:
-        registry.activeAll()
-
-        then:
-        noExceptionThrown()
-        registry.findService('2') != null
-    }
-
-    @Ignore
-    def 'Test start on service has dependency which load from outside but no external service loader'() {
-        given:
-        def svc = Mock(IInjectableService) {
-            getIds() >> ['1']
-            getDependencies() >> [Mock(Dependency) {
-                getServiceId() >> Mock(QualifiedServiceId) {
-                    getId() >> '2'
-                    getFrom() >> 'Remote'
-                }
-                isSingle() >> true
-                isOptional() >> false
-            }]
-        }
-        def logger = Mock(ILogger)
-        registry._logger = logger
-        registry.register(svc)
-
-        when:
-        registry.activeAll()
-
-        then:
-        noExceptionThrown()
-        1 * logger.error(_ as String, _ as QualifiedServiceId, _ as String)
-    }
-
-    @Ignore
-    def 'Test start on service has dependency which load from outside but failed'() {
-        given:
-        def svc = Mock(IInjectableService) {
-            getIds() >> ['1']
-            getDependencies() >> [Mock(Dependency) {
-                getServiceId() >> Mock(QualifiedServiceId) {
-                    getId() >> '2'
-                    getFrom() >> 'Remote'
-                }
-                isSingle() >> true
-                isOptional() >> false
-            }]
-        }
-        def logger = Mock(ILogger)
-        registry._logger = logger
-        registry.register(svc)
-        def svcLoader = Mock(IServiceLoader) {
-            getPriority() >> 1
-            load('2', _) >> null
-        }
-        registry._svcLoaders.put('Remote', svcLoader)
-
-        when:
-        registry.activeAll()
-
-        then:
-        noExceptionThrown()
-        1 * logger.error(_ as String, _ as QualifiedServiceId, _ as String)
-    }
-
-    @Ignore
-    def 'Test start on service has dependency which load from any'() {
-        given:
-        def svc = Mock(IInjectableService) {
-            getIds() >> ['1']
-            getDependencies() >> [Mock(Dependency) {
-                getServiceId() >> Mock(QualifiedServiceId) {
-                    getId() >> '2'
-                    getFrom() >> 'Any'
-                }
-                isSingle() >> true
-                isOptional() >> false
-            }]
-        }
-        def logger = Mock(ILogger)
-        registry._logger = logger
-        registry.register(svc)
-        def svcLoader = Mock(IServiceLoader) {
-            getPriority() >> 1
-            load('2', _) >> new Object()
-        }
-        registry._svcLoaders.put('Remote', svcLoader)
-
-        when:
-        registry.activeAll()
-
-        then:
-        noExceptionThrown()
-        registry.findService('2') != null
-    }
-
-    @Ignore
-    def 'Test start on service has dependency which load from any but failed'() {
-        given:
-        def svc = Mock(IInjectableService) {
-            getIds() >> ['1']
-            getDependencies() >> [Mock(Dependency) {
-                getServiceId() >> Mock(QualifiedServiceId) {
-                    getId() >> '2'
-                    getFrom() >> 'Any'
-                }
-                isSingle() >> true
-                isOptional() >> false
-            }]
-        }
-        def logger = Mock(ILogger)
-        registry._logger = logger
-        registry.register(svc)
-        def svcLoader = Mock(IServiceLoader) {
-            getPriority() >> 1
-            load('2', _) >> null
-        }
-        registry._svcLoaders.put('Remote', svcLoader)
-
-        when:
-        registry.activeAll()
-
-        then:
-        noExceptionThrown()
-        1 * logger.error(_ as String, _ as QualifiedServiceId)
-    }
-
     def 'Test inject ISatisfyHook'() {
         given:
         def injection = Mock(Injection) {
@@ -580,7 +337,7 @@ class RegistryTest extends Specification {
         IService.class.name     | null
     }
 
-    def 'Test external service loader'() {
+    def 'Test find service by specific external service loader'() {
         given:
         def svc = Mock(IInjectableService) {
             getIds() >> ['1']
@@ -611,6 +368,201 @@ class RegistryTest extends Specification {
         then:
         noExceptionThrown()
         registry.findService('2') != null
+    }
+
+    def 'Test find service by specific external service loader but no such service loader'() {
+        given:
+        def svc = Mock(IInjectableService) {
+            getIds() >> ['1']
+            getDependencies() >> [Mock(Dependency) {
+                getServiceId() >> Mock(QualifiedServiceId) {
+                    getId() >> '2'
+                    getFrom() >> 'Remote'
+                }
+                getServiceType() >> String.class
+                isSingle() >> true
+                isOptional() >> false
+            }]
+        }
+        def logger = Mock(ILogger)
+        registry._logger = logger
+        registry.register(svc)
+
+        when:
+        def found = registry.findService('1')
+
+        then:
+        noExceptionThrown()
+        found == null
+        registry.findService('2') == null
+    }
+
+    def 'Test find service by specific external service loader but service loader load failed'() {
+        given:
+        def svc = Mock(IInjectableService) {
+            getIds() >> ['1']
+            getDependencies() >> [Mock(Dependency) {
+                getServiceId() >> Mock(QualifiedServiceId) {
+                    getId() >> '2'
+                    getFrom() >> 'Remote'
+                }
+                getServiceType() >> String.class
+                isSingle() >> true
+                isOptional() >> false
+            }]
+        }
+        def logger = Mock(ILogger)
+        registry._logger = logger
+        registry.register(svc)
+        def svcLoader = Mock(IServiceLoader) {
+            getPriority() >> 1
+        }
+        registry._svcLoaders.put('Remote', svcLoader)
+
+        when:
+        def found = registry.findService('1')
+
+        then:
+        noExceptionThrown()
+        found == null
+        registry.findService('2') == null
+    }
+
+    def 'Test find service by any external service loader'() {
+        given:
+        def svc = Mock(IInjectableService) {
+            getIds() >> ['1']
+            getDependencies() >> [Mock(Dependency) {
+                getServiceId() >> Mock(QualifiedServiceId) {
+                    getId() >> '2'
+                    getFrom() >> 'Any'
+                }
+                getServiceType() >> String.class
+                isSingle() >> true
+                isOptional() >> false
+            }]
+        }
+        def logger = Mock(ILogger)
+        registry._logger = logger
+        registry.register(svc)
+        def svcLoader = Mock(IServiceLoader) {
+            getPriority() >> 1
+            load('2', _ as Class) >> Mock(ServiceHolder) {
+                isActivated() >> true
+            }
+        }
+        registry._orderedSvcLoaders.add(svcLoader)
+
+        when:
+        registry.findService('1')
+
+        then:
+        noExceptionThrown()
+        registry.findService('2') != null
+    }
+
+    def 'Test find service form more external service loader'() {
+        given:
+        def svc = Mock(IInjectableService) {
+            getIds() >> ['1']
+            getDependencies() >> [Mock(Dependency) {
+                getServiceId() >> Mock(QualifiedServiceId) {
+                    getId() >> '2'
+                    getFrom() >> 'Any'
+                }
+                getServiceType() >> String.class
+                isSingle() >> true
+                isOptional() >> false
+            }]
+        }
+        def logger = Mock(ILogger)
+        registry._logger = logger
+        registry.register(svc)
+        def svcLoader1 = new IServiceLoader() {
+            public String getId() { return 'Test' }
+            public int getPriority() { return 1 }
+            public <Object> Object load(String serviceId, Class<?> serviceType) { return null }
+            public void register(IServiceLoader.IServiceReadyListener listener) {}
+        }
+        def svcLoaderInjection1 = Mock(Injection) {
+            getId() >> IServiceLoader.name
+            getObject() >> svcLoader1
+        }
+        def mocksvcHolder = Mock(ServiceHolder) {
+            isActivated() >> true
+        }
+        def svcLoader2 = new IServiceLoader() {
+            public String getId() { return 'Remote' }
+            public int getPriority() { return 2 }
+            public <ServiceHolder> ServiceHolder load(String serviceId, Class<?> serviceType) {
+                return mocksvcHolder
+            }
+            public void register(IServiceLoader.IServiceReadyListener listener) {}
+        }
+        def svcLoaderInjection2 = Mock(Injection) {
+            getId() >> IServiceLoader.name
+            getObject() >> svcLoader2
+        }
+
+        registry.injectObject(svcLoaderInjection1)
+        registry.injectObject(svcLoaderInjection2)
+
+        when:
+        registry.findService('1')
+
+        then:
+        noExceptionThrown()
+        registry.findService('2') != null
+    }
+
+    def 'Test find service but no any external service loader can load it'() {
+        given:
+        def svc = Mock(IInjectableService) {
+            getIds() >> ['1']
+            getDependencies() >> [Mock(Dependency) {
+                getServiceId() >> Mock(QualifiedServiceId) {
+                    getId() >> '2'
+                    getFrom() >> 'Any'
+                }
+                getServiceType() >> String.class
+                isSingle() >> true
+                isOptional() >> false
+            }]
+        }
+        def logger = Mock(ILogger)
+        registry._logger = logger
+        registry.register(svc)
+        def svcLoader1 = new IServiceLoader() {
+            public String getId() { return 'Test' }
+            public int getPriority() { return 1 }
+            public <Object> Object load(String serviceId, Class<?> serviceType) { return null }
+            public void register(IServiceLoader.IServiceReadyListener listener) {}
+        }
+        def svcLoaderInjection1 = Mock(Injection) {
+            getId() >> IServiceLoader.name
+            getObject() >> svcLoader1
+        }
+        def svcLoader2 = new IServiceLoader() {
+            public String getId() { return 'Remote' }
+            public int getPriority() { return 2 }
+            public <Object> Object load(String serviceId, Class<?> serviceType) { return null }
+            public void register(IServiceLoader.IServiceReadyListener listener) {}
+        }
+        def svcLoaderInjection2 = Mock(Injection) {
+            getId() >> IServiceLoader.name
+            getObject() >> svcLoader2
+        }
+
+        registry.injectObject(svcLoaderInjection1)
+        registry.injectObject(svcLoaderInjection2)
+
+        when:
+        def found = registry.findService('1')
+
+        then:
+        noExceptionThrown()
+        found == null
+        registry.findService('2') == null
     }
 
     static interface IInitialService extends IService, IInitial {}

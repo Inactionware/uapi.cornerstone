@@ -113,6 +113,10 @@ public class QualifiedServiceId extends Pair<String, String> {
         return false;
     }
 
+    public boolean isExternalService() {
+        return ! getFrom().equalsIgnoreCase(FROM_LOCAL);
+    }
+
     @Override
     public String toString() {
         return StringHelper.makeString("{}@{}", getId(), getFrom());

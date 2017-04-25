@@ -115,7 +115,8 @@ class ServiceActivatorTest extends Specification {
         def result = svcActivator.activeService(svcHolder)
 
         then:
-        thrown(ServiceException)
+        noExceptionThrown()
+        result == null
     }
 
     def 'Test activate external service which is not activated'() {

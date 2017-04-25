@@ -40,6 +40,7 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
     public static final int UNSUPPORTED_DYNAMIC_INJECTION       = 14;
     public static final int MISSING_DEPENDENCY_OR_SERVICE       = 15;
     public static final int NO_SERVICE_TO_ACTIVATE              = 16;
+    public static final int RESET_SERVICE_IS_DENIED             = 17;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -61,6 +62,7 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         keyCodeMapping.put(UNSUPPORTED_DYNAMIC_INJECTION, UnsupportedDynamicInjection.KEY);
         keyCodeMapping.put(MISSING_DEPENDENCY_OR_SERVICE, MissingDependencyOrService.KEY);
         keyCodeMapping.put(NO_SERVICE_TO_ACTIVATE, NoServiceToActivate.KEY);
+        keyCodeMapping.put(RESET_SERVICE_IS_DENIED, ResetServiceIsDenied.KEY);
     }
 
     @Override
@@ -424,6 +426,26 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
 
         public NoServiceToActivate serviceId(QualifiedServiceId qid) {
             this._qSvcId = qid;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._qSvcId };
+        }
+    }
+
+    /**
+     * Reset service is denied - {}
+     */
+    public static final class ResetServiceIsDenied extends IndexedParameters<ResetServiceIsDenied> {
+
+        private static final String KEY = "ResetServiceIsDenied";
+
+        private QualifiedServiceId _qSvcId;
+
+        public ResetServiceIsDenied serviceId(QualifiedServiceId qualifiedServiceId) {
+            this._qSvcId = qualifiedServiceId;
             return this;
         }
 

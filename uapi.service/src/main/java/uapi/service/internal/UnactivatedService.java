@@ -117,7 +117,11 @@ public class UnactivatedService implements IAwaiting {
 
     public void activate(ServiceHolder externalServiceHolder) {
         if (this._svcHolder != null) {
-            throw new GeneralException("External service status incorrect");
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.RESET_SERVICE_IS_DENIED)
+                    .variables(new ServiceErrors.ResetServiceIsDenied()
+                        .serviceId(this._dependency.getServiceId()))
+                    .build();
         }
         this._svcHolder = externalServiceHolder;
         activate();
