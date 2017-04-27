@@ -10,6 +10,7 @@
 package uapi.service;
 
 import uapi.InvalidArgumentException;
+import uapi.service.annotation.Service;
 
 import java.util.List;
 
@@ -85,8 +86,10 @@ public interface IRegistry {
      * @param   <T>
      *          The service type
      * @return  The service instance
+     * @throws  ServiceException
+     *          The service can't be found
      */
-    <T> T findService(final String serviceId);
+    <T> T findService(final String serviceId) throws ServiceException;
 
     /**
      * Find service by specific service type
@@ -96,8 +99,24 @@ public interface IRegistry {
      * @param   <T>
      *          The service type
      * @return  The service instance
+     * @throws  ServiceException
+     *          The service can't be found
      */
-    <T> T findService(final Class<T> serviceType);
+    <T> T findService(final Class<T> serviceType) throws ServiceException;
+
+    /**
+     * Find service from specified location
+     * @param   serviceId
+     *          The service id which used for service finding
+     * @param   serviceFrom
+     *          Where is the service from
+     * @param   <T>
+     *          The service type
+     * @return  The service instance or null if not such service available
+     * @throws  ServiceException
+     *          The service can't be found
+     */
+    <T> T findService(final String serviceId, final String serviceFrom) throws ServiceException;
 
     /**
      * Find multiple service by specific service id
@@ -121,17 +140,6 @@ public interface IRegistry {
      */
     <T> List<T> findServices(final Class<T> serviceType);
 
-    /**
-     * Find service from specified location
-     * @param   serviceId
-     *          The service id which used for service finding
-     * @param   serviceFrom
-     *          Where is the service from
-     * @param   <T>
-     *          The service type
-     * @return  The service instance or null if not such service available
-     */
-    <T> T findService(final String serviceId, final String serviceFrom);
 
 //    /**
 //     * Invoked when the registry is ready

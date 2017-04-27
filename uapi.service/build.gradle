@@ -13,7 +13,6 @@ plugins {
 
 dependencies {
     compile (
-            "com.google.guava:guava:${guava_version}",
             "uapi:uapi.common:${uapi_base_version}",
             "uapi:uapi.exception:${uapi_base_version}",
             "uapi:uapi.state:${uapi_base_version}",

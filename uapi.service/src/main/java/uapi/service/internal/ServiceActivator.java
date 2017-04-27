@@ -144,19 +144,20 @@ public class ServiceActivator {
                     // load external service
                     ServiceHolder svcHolder =
                             ServiceActivator.this._extSvcLoader.loadService(unactivatedSvc.dependency());
-                    if (svcHolder == null) {
-                        return null;
+//                    if (svcHolder == null) {
 //                        throw ServiceException.builder()
 //                                .errorCode(ServiceErrors.LOAD_EXTERNAL_SERVICE_FAILED)
 //                                .variables(new ServiceErrors.LoadExternalServiceFailed()
 //                                    .serviceId(unactivatedSvc.serviceId()).get())
 //                                .build();
+//                    }
+                    if (svcHolder != null) {
+                        unactivatedSvc.activate(svcHolder);
                     }
-                    unactivatedSvc.activate(svcHolder);
                 } else {
                     unactivatedSvc.activate();
                 }
-                if (! unactivatedSvc.isActivated()) {
+                if (! unactivatedSvc.isActivated() && ! unactivatedSvc.dependency().isOptional()) {
                     throw ServiceException.builder()
                             .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
                             .variables(new ServiceErrors.ServiceActivationFailed()

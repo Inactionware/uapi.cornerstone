@@ -96,6 +96,9 @@ public class Bootstrap {
         }
         cliCfgProvider.parse(args);
 
+        // All base service must be activated
+        Looper.on(basicSvcs).foreach(svc -> svc.getIds());
+
 //        svcRegistry.activeAll();
 
         // Create profile

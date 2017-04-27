@@ -68,7 +68,7 @@ public class Application implements IApplication {
         );
 
         if (StringHelper.isNullOrEmpty(this._appName)) {
-            this._logger.info("app.name was not specified");
+            this._logger.error("app.name was not specified");
         } else {
             appLifecycle = Looper.on(this._lifecycles)
                     .filter(lifecycle -> lifecycle.getApplicationName().equals(this._appName))

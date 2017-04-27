@@ -23,6 +23,7 @@ import uapi.service.IServiceLoader
 import uapi.service.Injection
 import uapi.service.QualifiedServiceId
 import uapi.log.ILogger
+import uapi.service.ServiceException
 
 /**
  * Test case for Registry
@@ -157,6 +158,7 @@ class RegistryTest extends Specification {
         def svc = registry.findService(String.class)
 
         then:
+        thrown(ServiceException)
         svc == null
     }
 
@@ -174,7 +176,7 @@ class RegistryTest extends Specification {
         registry.findService('1')
 
         then:
-        thrown(GeneralException)
+        thrown(ServiceException)
     }
 
     def 'Test find multiple service'() {
@@ -345,6 +347,7 @@ class RegistryTest extends Specification {
                 getServiceId() >> Mock(QualifiedServiceId) {
                     getId() >> '2'
                     getFrom() >> 'Remote'
+                    isExternalService() >> true
                 }
                 getServiceType() >> String.class
                 isSingle() >> true
@@ -378,6 +381,7 @@ class RegistryTest extends Specification {
                 getServiceId() >> Mock(QualifiedServiceId) {
                     getId() >> '2'
                     getFrom() >> 'Remote'
+                    isExternalService() >> true
                 }
                 getServiceType() >> String.class
                 isSingle() >> true
@@ -390,11 +394,12 @@ class RegistryTest extends Specification {
 
         when:
         def found = registry.findService('1')
+        def found2 = registry.findService('2')
 
         then:
-        noExceptionThrown()
+        thrown(ServiceException)
         found == null
-        registry.findService('2') == null
+        found2 == null
     }
 
     def 'Test find service by specific external service loader but service loader load failed'() {
@@ -405,6 +410,7 @@ class RegistryTest extends Specification {
                 getServiceId() >> Mock(QualifiedServiceId) {
                     getId() >> '2'
                     getFrom() >> 'Remote'
+                    isExternalService() >> true
                 }
                 getServiceType() >> String.class
                 isSingle() >> true
@@ -421,11 +427,12 @@ class RegistryTest extends Specification {
 
         when:
         def found = registry.findService('1')
+        def found2 = registry.findService('2')
 
         then:
-        noExceptionThrown()
+        thrown(ServiceException)
         found == null
-        registry.findService('2') == null
+        found2 == null
     }
 
     def 'Test find service by any external service loader'() {
@@ -436,6 +443,7 @@ class RegistryTest extends Specification {
                 getServiceId() >> Mock(QualifiedServiceId) {
                     getId() >> '2'
                     getFrom() >> 'Any'
+                    isExternalService() >> true
                 }
                 getServiceType() >> String.class
                 isSingle() >> true
@@ -469,6 +477,7 @@ class RegistryTest extends Specification {
                 getServiceId() >> Mock(QualifiedServiceId) {
                     getId() >> '2'
                     getFrom() >> 'Any'
+                    isExternalService() >> true
                 }
                 getServiceType() >> String.class
                 isSingle() >> true
@@ -523,6 +532,7 @@ class RegistryTest extends Specification {
                 getServiceId() >> Mock(QualifiedServiceId) {
                     getId() >> '2'
                     getFrom() >> 'Any'
+                    isExternalService() >> true
                 }
                 getServiceType() >> String.class
                 isSingle() >> true
@@ -558,11 +568,12 @@ class RegistryTest extends Specification {
 
         when:
         def found = registry.findService('1')
+        def found2 = registry.findService('2')
 
         then:
-        noExceptionThrown()
+        thrown(ServiceException)
         found == null
-        registry.findService('2') == null
+        found2 == null
     }
 
     static interface IInitialService extends IService, IInitial {}

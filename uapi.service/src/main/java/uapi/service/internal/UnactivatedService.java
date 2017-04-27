@@ -78,11 +78,11 @@ public class UnactivatedService implements IAwaiting {
     }
 
     public boolean isExternalService() {
-        return this._svcHolder == null;
+        return this._svcHolder == null && this._dependency.getServiceId().isExternalService();
     }
 
     public boolean isActivated() {
-        return this._svcHolder == null ? false : this._svcHolder.isActivated();
+        return this._svcHolder != null && this._svcHolder.isActivated();
     }
 
     public Object service() {
@@ -98,11 +98,12 @@ public class UnactivatedService implements IAwaiting {
 
     public void activate() {
         if (this._svcHolder == null) {
-            throw ServiceException.builder()
-                    .errorCode(ServiceErrors.NO_SERVICE_TO_ACTIVATE)
-                    .variables(new ServiceErrors.NoServiceToActivate()
-                        .serviceId(this._dependency.getServiceId()))
-                    .build();
+            return;
+//            throw ServiceException.builder()
+//                    .errorCode(ServiceErrors.NO_SERVICE_TO_ACTIVATE)
+//                    .variables(new ServiceErrors.NoServiceToActivate()
+//                        .serviceId(this._dependency.getServiceId()))
+//                    .build();
         }
         this._svcHolder.activate();
         this._lock.lock();

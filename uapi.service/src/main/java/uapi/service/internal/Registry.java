@@ -17,6 +17,7 @@ import uapi.InvalidArgumentException;
 import uapi.common.ArgumentChecker;
 import uapi.common.Guarder;
 import uapi.common.StringHelper;
+import uapi.log.ConsoleLogger;
 import uapi.rx.Looper;
 import uapi.service.*;
 import uapi.log.ILogger;
@@ -45,6 +46,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     private final ServiceActivator _svcActivator;
 
     private ILogger _logger;
+    private final ILogger _defaultLogger;
 
     private final IServiceLoader.IServiceReadyListener _svcReadyListener;
 
@@ -55,6 +57,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         this._satisfyDecider = new SatisfyDecider();
         this._svcLoaders = new HashMap<>();
         this._orderedSvcLoaders = new TreeSet<>();
+        this._defaultLogger = new ConsoleLogger();
         this._svcActivator = new ServiceActivator((dependency) -> {
             QualifiedServiceId qSvcId = dependency.getServiceId();
             String from = qSvcId.getFrom();
@@ -83,19 +86,19 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                     }
                 }
                 if (!loaded && !dependency.isOptional()) {
-                    this._logger.error("No any service loader can load service {}", qSvcId);
+                    getLogger().error("No any service loader can load service {}", qSvcId);
                     return null;
                 }
             } else {
                 // Search specific service loader
                 IServiceLoader svcLoader = this._svcLoaders.get(from);
                 if (svcLoader == null) {
-                    this._logger.error("Can't load service {} because no service loader for {}", qSvcId, from);
+                    getLogger().error("Can't load service {} because no service loader for {}", qSvcId, from);
                     return null;
                 }
                 svc = svcLoader.load(qSvcId.getId(), dependency.getServiceType());
                 if (svc == null && !dependency.isOptional()) {
-                    this._logger.error("Load service {} from location {} failed", qSvcId, from);
+                    getLogger().error("Load service {} from location {} failed", qSvcId, from);
                     return null;
                 }
                 registerService(from, svc, new String[]{qSvcId.getId()}, new Dependency[0]);
@@ -151,7 +154,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     @Override
     public <T> T findService(
             final Class<T> serviceType
-    ) {
+    ) throws ServiceException {
         ArgumentChecker.notNull(serviceType, "serviceType");
         return findService(serviceType.getName());
     }
@@ -160,16 +163,24 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     @SuppressWarnings("unchecked")
     public <T> T findService(
             final String serviceId
-    ) {
+    ) throws ServiceException {
         ArgumentChecker.notEmpty(serviceId, "serviceId");
         List<Object> svcs = findServices(serviceId);
-        if (svcs.size() == 0) {
-            return null;
-        }
         if (svcs.size() == 1) {
             return (T) svcs.get(0);
         }
-        throw new GeneralException("Find multiple service by service id {}", serviceId);
+        if (svcs.size() == 0) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.NO_SERVICE_FOUND)
+                    .variables(new ServiceErrors.NoServiceFound()
+                            .serviceId(serviceId))
+                    .build();
+        }
+        throw ServiceException.builder()
+                .errorCode(ServiceErrors.MULTIPLE_SERVICE_FOUND)
+                .variables(new ServiceErrors.MultipleServiceFound()
+                    .serviceId(serviceId))
+                .build();
     }
 
     @Override
@@ -188,7 +199,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         ArgumentChecker.notEmpty(serviceId, "serviceId");
         List<ServiceHolder> svcHolders = findServiceHolders(serviceId);
         if (svcHolders == null || svcHolders.size() == 0) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         return (List<T>) Looper.on(svcHolders)
                 .map(this._svcActivator::activeService)
@@ -197,15 +208,22 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T findService(
             final String serviceId,
             final String serviceFrom
-    ) {
+    ) throws ServiceException {
         ArgumentChecker.required(serviceId, "serviceId");
         ArgumentChecker.required(serviceFrom, "serviceFrom");
         ServiceHolder svcHolder = findServiceHolder(serviceId, serviceFrom);
-        return this._svcActivator.activeService(svcHolder);
+        T svc = this._svcActivator.activeService(svcHolder);
+        if (svc == null) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.NO_SERVICE_FOUND)
+                    .variables(new ServiceErrors.NoServiceFound()
+                            .serviceId(serviceId))
+                    .build();
+        }
+        return svc;
     }
 
     private List<ServiceHolder> findServiceHolders(
@@ -219,11 +237,8 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                     .toList()
             );
         } catch (Exception ex) {
-            if (this._logger != null) {
-                this._logger.error(ex);
-            } else {
-                throw ex;
-            }
+            getLogger().error(ex);
+            svcHolders = Collections.emptyList();
         }
         return svcHolders;
     }
@@ -255,6 +270,10 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
     int getCount() {
         return Guarder.by(this._svcRepoLock).runForResult(this._svcRepo::size);
+    }
+
+    private ILogger getLogger() {
+        return this._logger == null ? this._defaultLogger : this._logger;
     }
 
     private void registerService(

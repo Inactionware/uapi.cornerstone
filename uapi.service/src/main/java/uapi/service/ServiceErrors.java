@@ -41,6 +41,8 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
     public static final int MISSING_DEPENDENCY_OR_SERVICE       = 15;
     public static final int NO_SERVICE_TO_ACTIVATE              = 16;
     public static final int RESET_SERVICE_IS_DENIED             = 17;
+    public static final int MULTIPLE_SERVICE_FOUND              = 18;
+    public static final int NO_SERVICE_FOUND                    = 19;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -63,6 +65,8 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         keyCodeMapping.put(MISSING_DEPENDENCY_OR_SERVICE, MissingDependencyOrService.KEY);
         keyCodeMapping.put(NO_SERVICE_TO_ACTIVATE, NoServiceToActivate.KEY);
         keyCodeMapping.put(RESET_SERVICE_IS_DENIED, ResetServiceIsDenied.KEY);
+        keyCodeMapping.put(MULTIPLE_SERVICE_FOUND, MultipleServiceFound.KEY);
+        keyCodeMapping.put(NO_SERVICE_FOUND, NoServiceFound.KEY);
     }
 
     @Override
@@ -452,6 +456,46 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         @Override
         public Object[] get() {
             return new Object[] { this._qSvcId };
+        }
+    }
+
+    /**
+     * Found multiple service by service id {}
+     */
+    public static final class MultipleServiceFound extends IndexedParameters<MultipleServiceFound> {
+
+        private static final String KEY = "MultipleServiceFound";
+
+        private String _svcId;
+
+        public MultipleServiceFound serviceId(String serviceId) {
+            this._svcId = serviceId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._svcId };
+        }
+    }
+
+    /**
+     * Found 0 service by service id - {}
+     */
+    public static final class NoServiceFound extends IndexedParameters<NoServiceFound> {
+
+        private static final String KEY = "NoServiceFound";
+
+        private String _svcId;
+
+        public NoServiceFound serviceId(String serviceId) {
+            this._svcId = serviceId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._svcId };
         }
     }
 }

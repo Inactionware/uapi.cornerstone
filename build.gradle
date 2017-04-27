@@ -45,9 +45,8 @@ subprojects {
     }
 
     dependencies {
-        testCompile (
-                "org.spockframework:spock-core:${spock_version}"
-        )
+        testCompile "org.spockframework:spock-core:${spock_version}"
+
         testRuntime (
                 "cglib:cglib-nodep:${cglib_version}",           // allows mocking of classes (in addition to interfaces)
                 "org.objenesis:objenesis:${objenesis_version}"  // allows mocking of classes without default constructor (together with CGLIB)
