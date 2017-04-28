@@ -115,7 +115,7 @@ class ServiceActivatorTest extends Specification {
         def result = svcActivator.activeService(svcHolder)
 
         then:
-        noExceptionThrown()
+        thrown(ServiceException)
         result == null
     }
 

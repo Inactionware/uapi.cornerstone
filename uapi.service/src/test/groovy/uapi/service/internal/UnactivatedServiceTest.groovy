@@ -36,6 +36,7 @@ class UnactivatedServiceTest extends Specification {
         def dependency = Mock(Dependency) {
             getServiceId() >> Mock(QualifiedServiceId) {
                 toString() >> 'svc'
+                isExternalService() >> true
             }
         }
         def unactivatedSvc = new UnactivatedService(dependency, null)
@@ -145,8 +146,18 @@ class UnactivatedServiceTest extends Specification {
 
         def dependency = Mock(Dependency)
         dependency.equals(dependency) >> true
+        dependency.getServiceId() >> Mock(QualifiedServiceId) {
+            isExternalService() >> true
+        }
+
+        def dependency3 = Mock(Dependency) {
+            getServiceId() >> Mock(QualifiedServiceId) {
+                isExternalService() >> true
+            }
+        }
+
         def unactivatedSvc3 = new UnactivatedService(dependency, null)
-        def unactivatedSvc4 = new UnactivatedService(Mock(Dependency), null)
+        def unactivatedSvc4 = new UnactivatedService(dependency3, null)
         def unactivatedSvc5 = new UnactivatedService(dependency, null)
 
         expect:

@@ -78,6 +78,8 @@ public class UnactivatedService implements IAwaiting {
     }
 
     public boolean isExternalService() {
+        // only service holder is set to null not means it is external service, consider below case:
+        // sometime one service depends on a local service but it was no imported by incorrect configuration
         return this._svcHolder == null && this._dependency.getServiceId().isExternalService();
     }
 
