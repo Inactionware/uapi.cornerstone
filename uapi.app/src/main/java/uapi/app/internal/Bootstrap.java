@@ -11,8 +11,12 @@ package uapi.app.internal;
 
 import uapi.app.AppErrors;
 import uapi.app.AppException;
+import uapi.behavior.ActionIdentify;
+import uapi.behavior.IResponsible;
+import uapi.behavior.IResponsibleRegistry;
 import uapi.config.ICliConfigProvider;
 import uapi.common.CollectionHelper;
+import uapi.event.IEventBus;
 import uapi.rx.Looper;
 import uapi.service.IRegistry;
 import uapi.service.IService;
@@ -20,6 +24,7 @@ import uapi.service.ITagged;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 /**
  * The UAPI application entry point
@@ -29,10 +34,11 @@ import java.util.List;
 public class Bootstrap {
 
     private static final String[] basicSvcTags = new String[] {
-            "Application", "Registry", "Config", "Profile", "Log"
+            "Registry", "Config", "Log", "Event", "Behavior"
     };
 
-    static AppServiceLoader appSvcLoader = new AppServiceLoader();
+    static final AppServiceLoader appSvcLoader = new AppServiceLoader();
+    static final Semaphore semaphore = new Semaphore(0);
 
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
@@ -97,34 +103,66 @@ public class Bootstrap {
         cliCfgProvider.parse(args);
 
         // All base service must be activated
-        Looper.on(basicSvcs).foreach(svc -> svc.getIds());
+        Looper.on(basicSvcTags).foreach(svcRegistry::activateTaggedService);
 
-//        svcRegistry.activeAll();
+        // Build responsible and related behavior for application launching
+        IResponsibleRegistry responsibleReg = svcRegistry.findService(IResponsibleRegistry.class);
+        IResponsible responsible = responsibleReg.register("ApplicationLauncher");
+        responsible.newBehavior("test", SystemStartingUpEvent.TOPIC)
+                .then(ActionIdentify.parse(StartUpApplication.class.getName() + "@Action"))
+                .build();
+        responsible.newBehavior("test2", SystemShuttingDownEvent.TOPIC)
+                .then(ActionIdentify.parse(ShutDownApplication.class.getName() + "@Action"))
+                .build();
 
-        // Create profile
-        ProfileManager profileMgr = svcRegistry.findService(ProfileManager.class);
-        if (profileMgr == null) {
-            throw AppException.builder()
-                    .errorCode(AppErrors.SPECIFIC_SERVICE_NOT_FOUND)
-                    .variables(new AppErrors.SpecificServiceNotFound()
-                            .serviceType(ICliConfigProvider.class.getCanonicalName()))
-                    .build();
+        SystemStartingUpEvent sysLaunchedEvent = new SystemStartingUpEvent(startTime, otherSvcs);
+        IEventBus eventBus = svcRegistry.findService(IEventBus.class);
+        eventBus.fire(sysLaunchedEvent);
+
+        Exception ex = null;
+        try {
+            Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownHook()));
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            ex = e;
         }
-        IProfile profile = profileMgr.getActiveProfile();
 
-        // Register other service
-        Looper.on(otherSvcs)
-                .filter(profile::isAllow)
-                .foreach(svcRegistry::register);
+        // Send system shutting down event
+        SystemShuttingDownEvent shuttingDownEvent = new SystemShuttingDownEvent(ex);
+        eventBus.fire(shuttingDownEvent);
 
-//        svcRegistry.activeAll();
+        System.exit(0);
 
-        Application app = svcRegistry.findService(Application.class);
-        if (app == null) {
-            throw AppException.builder()
-                    .errorCode(AppErrors.INIT_APPLICATION_FAILED)
-                    .build();
+//        // Create profile
+//        ProfileManager profileMgr = svcRegistry.findService(ProfileManager.class);
+//        if (profileMgr == null) {
+//            throw AppException.builder()
+//                    .errorCode(AppErrors.SPECIFIC_SERVICE_NOT_FOUND)
+//                    .variables(new AppErrors.SpecificServiceNotFound()
+//                            .serviceType(ICliConfigProvider.class.getCanonicalName()))
+//                    .build();
+//        }
+//        IProfile profile = profileMgr.getActiveProfile();
+//
+//        // Register other service
+//        Looper.on(otherSvcs)
+//                .filter(profile::isAllow)
+//                .foreach(svcRegistry::register);
+//
+//        Application app = svcRegistry.findService(Application.class);
+//        if (app == null) {
+//            throw AppException.builder()
+//                    .errorCode(AppErrors.INIT_APPLICATION_FAILED)
+//                    .build();
+//        }
+//        app.startup(startTime);
+    }
+
+    private static final class ShutdownHook implements Runnable {
+
+        @Override
+        public void run() {
+            semaphore.release();
         }
-        app.startup(startTime);
     }
 }

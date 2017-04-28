@@ -9,7 +9,6 @@
 
 package uapi.behavior.internal;
 
-import uapi.GeneralException;
 import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
 import uapi.common.Guarder;
@@ -30,7 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Registry for responsible
  */
 @Service
-@Tag("BEHAVIOR")
+@Tag("Behavior")
 public class ResponsibleRegistry implements IResponsibleRegistry {
 
     @Inject

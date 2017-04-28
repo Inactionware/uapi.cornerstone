@@ -32,6 +32,7 @@ public class ServiceHolder implements IServiceReference {
     private QualifiedServiceId _qualifiedSvcId;
     private final Multimap<Dependency, ServiceHolder> _dependencies;
     private final ISatisfyHook _satisfyHook;
+    private final String[] _tags;
 
     private final List<ServiceHolder> _injectedSvcs = new LinkedList<>();
     private final IStateTracer<ServiceState> _stateTracer;
@@ -63,6 +64,12 @@ public class ServiceHolder implements IServiceReference {
         this._qualifiedSvcId = new QualifiedServiceId(serviceId, from);
         this._satisfyHook = satisfyHook;
         this._dependencies = LinkedListMultimap.create();
+        if (service instanceof ITagged) {
+            ITagged taggedSvc = (ITagged) service;
+            this._tags = taggedSvc.getTags();
+        } else {
+            this._tags = new String[0];
+        }
 
         Looper.on(dependencies)
                 .foreach(dependency -> this._dependencies.put(dependency, null));
@@ -145,6 +152,10 @@ public class ServiceHolder implements IServiceReference {
     ////////////////////
     // public methods //
     ////////////////////
+
+    public String[] serviceTags() {
+        return this._tags;
+    }
 
     public void resolve() {
         this._stateTracer.shift(OP_RESOLVE);

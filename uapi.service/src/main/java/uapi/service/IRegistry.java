@@ -140,13 +140,11 @@ public interface IRegistry {
      */
     <T> List<T> findServices(final Class<T> serviceType);
 
-
-//    /**
-//     * Invoked when the registry is ready
-//     */
-//    void activeAll();
-
-//    void registerServiceLoader(IServiceLoader serviceLoader);
-
-//    void loadExternalServices();
+    /**
+     * Activate service(s) by specific tag
+     *
+     * @param   tag
+     *          The tag
+     */
+    void activateTaggedService(final String tag);
 }

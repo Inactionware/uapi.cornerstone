@@ -9,6 +9,7 @@
 
 package uapi.app.internal
 
+import org.junit.Ignore
 import spock.lang.Specification
 import uapi.app.AppException
 import uapi.config.ICliConfigProvider
@@ -19,6 +20,7 @@ import uapi.service.ITagged
 /**
  * Unit tests for Bootstrap
  */
+@Ignore
 class BootstrapTest extends Specification {
 
     def 'Test start up with zero registry'() {

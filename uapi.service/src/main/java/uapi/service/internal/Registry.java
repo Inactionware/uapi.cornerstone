@@ -15,6 +15,7 @@ import com.google.common.collect.Multimap;
 import uapi.GeneralException;
 import uapi.InvalidArgumentException;
 import uapi.common.ArgumentChecker;
+import uapi.common.CollectionHelper;
 import uapi.common.Guarder;
 import uapi.common.StringHelper;
 import uapi.log.ConsoleLogger;
@@ -226,10 +227,26 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         return svc;
     }
 
+    @Override
+    public void activateTaggedService(
+            final String tag
+    ) {
+        ArgumentChecker.notEmpty(tag, "tag");
+        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock).runForResult(() ->
+            Looper.on(this._svcRepo.values())
+                    .filter(svcHolder -> CollectionHelper.isContains(svcHolder.serviceTags(), tag))
+                    .toList()
+        );
+        if (svcHolders.size() == 0) {
+            return;
+        }
+        Looper.on(svcHolders).foreach(this._svcActivator::activeService);
+    }
+
     private List<ServiceHolder> findServiceHolders(
             final String serviceId
     ) {
-        List<ServiceHolder> svcHolders = null;
+        List<ServiceHolder> svcHolders;
         try {
             svcHolders = Guarder.by(this._svcRepoLock).runForResult(() ->
                 Looper.on(this._svcRepo.values())
