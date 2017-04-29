@@ -39,8 +39,8 @@ public class ActionHandler extends AnnotationsHandler {
 
     private static final String TEMPLATE_GET_ID         = "template/getId_method.ftl";
     private static final String TEMPLATE_INPUT_TYPE     = "template/inputType_method.ftl";
-    private static final String TEMPLATE_OUTPUT_TYPE    = "template/outputType_method";
-    private static final String TEMPLATE_PROCESS        = "template/process_method";
+    private static final String TEMPLATE_OUTPUT_TYPE    = "template/outputType_method.ftl";
+    private static final String TEMPLATE_PROCESS        = "template/process_method.ftl";
 
     @SuppressWarnings("unchecked")
     private static final Class<? extends Annotation>[] orderedAnnotations =
@@ -124,15 +124,17 @@ public class ActionHandler extends AnnotationsHandler {
             Template tempOutputType = builderContext.loadTemplate(TEMPLATE_OUTPUT_TYPE);
             Template tempProcess = builderContext.loadTemplate(TEMPLATE_PROCESS);
             Map<String, Object> model = new HashMap<>();
-            model.put("actionId", actionName);
+            model.put("actionName", actionName);
             model.put("actionMethodName", actionMethodName);
             model.put("inputType", inputType);
             model.put("outputType", outputType);
             model.put("needContext", needContext);
+            model.put("isVoid", Type.Q_VOID.equals(outputType));
 
             ClassMeta.Builder clsBuilder = builderContext.findClassBuilder(classElement);
             clsBuilder
-                    .addImplement(IAction.class.getCanonicalName())
+                    .addImplement(StringHelper.makeString(
+                            "{}<{}, {}>", IAction.class.getCanonicalName(), inputType, outputType))
                     .addMethodBuilder(MethodMeta.builder()
                             .setName("getId")
                             .addModifier(Modifier.PUBLIC)
