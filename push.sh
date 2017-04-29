@@ -13,12 +13,14 @@ branch=""
 for line in "${lines[@]}"
 do
     isCurrentBranch=false
-    t=`expr substr "$line" 1 1`
+    #t=`expr substr "$line" 1 1`
+    t=${line:0:1}
     if [ "$t" = "*" ]
     then
         isCurrentBranch=true
     fi
-    branch=`expr substr "$line" 3 "${#line}"`
+    #branch=`expr substr "$line" 3 "${#line}"`
+    branch=${line:2}
     if test -z "$1"
     then
         if [ "$isCurrentBranch" = true ]
