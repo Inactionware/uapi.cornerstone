@@ -18,7 +18,7 @@ import java.util.ServiceLoader;
  */
 public class AppServiceLoader {
 
-    Iterable<IService> loadServices() {
+    public Iterable<IService> loadServices() {
         return ServiceLoader.load(IService.class);
     }
 }

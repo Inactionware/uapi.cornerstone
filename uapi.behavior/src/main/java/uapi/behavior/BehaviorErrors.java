@@ -37,6 +37,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int INCONSISTENT_LEAF_ACTIONS       = 13;
     public static final int DUPLICATED_RESPONSIBLE_NAME     = 14;
     public static final int UNSUPPORTED_BEHAVIOR_EVENT_TYPE = 15;
+    public static final int UNSUPPORTED_INJECTED_SERVICE    = 16;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -57,6 +58,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(INCONSISTENT_LEAF_ACTIONS, InconsistentLeafActions.KEY);
         keyCodeMapping.put(DUPLICATED_RESPONSIBLE_NAME, DuplicatedResponsibleName.KEY);
         keyCodeMapping.put(UNSUPPORTED_BEHAVIOR_EVENT_TYPE, UnsupportedBehaviorTraceEventType.KEY);
+        keyCodeMapping.put(UNSUPPORTED_INJECTED_SERVICE, UnsupportedInjectedService.KEY);
     }
 
     public BehaviorErrors() {
@@ -455,6 +457,33 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._eventType };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The service was injected to service {} is not supported - {}
+     */
+    public static final class UnsupportedInjectedService extends IndexedParameters<UnsupportedInjectedService> {
+
+        private static final String KEY = "UnsupportedInjectedService";
+
+        private String _injectedSvc;
+        private String _injectSvc;
+
+        public UnsupportedInjectedService injectedService(String serviceId) {
+            this._injectedSvc = serviceId;
+            return this;
+        }
+
+        public UnsupportedInjectedService injectService(String serviceId) {
+            this._injectSvc = serviceId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._injectSvc, this._injectedSvc };
         }
     }
 }

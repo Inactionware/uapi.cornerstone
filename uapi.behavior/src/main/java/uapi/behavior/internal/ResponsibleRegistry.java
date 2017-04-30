@@ -15,12 +15,13 @@ import uapi.common.Guarder;
 import uapi.common.Repository;
 import uapi.event.IEventBus;
 import uapi.log.ILogger;
-import uapi.service.annotation.Inject;
-import uapi.service.annotation.Optional;
-import uapi.service.annotation.Service;
-import uapi.service.annotation.Tag;
+import uapi.rx.Looper;
+import uapi.service.IInitial;
+import uapi.service.IServiceLifecycle;
+import uapi.service.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -30,7 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 @Service
 @Tag("Behavior")
-public class ResponsibleRegistry implements IResponsibleRegistry {
+public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecycle {
 
     @Inject
     protected ILogger _logger;
@@ -60,6 +61,14 @@ public class ResponsibleRegistry implements IResponsibleRegistry {
         }
     }
 
+    @Inject
+    @Optional
+    public void addConstructor(IResponsibleConstructor constructor) {
+        ArgumentChecker.required(constructor, "constructor");
+        IResponsible responsible = register(constructor.name());
+        constructor.construct(responsible);
+    }
+
     @Override
     public IResponsible register(String name) throws BehaviorException {
         ArgumentChecker.required(name, "name");
@@ -86,6 +95,23 @@ public class ResponsibleRegistry implements IResponsibleRegistry {
     @Override
     public int responsibleCount() {
         return this._responsibles.size();
+    }
+
+    @Override
+    public void onServiceInjected(String serviceId, Object service) {
+        if (service instanceof IAction) {
+            addAction((IAction) service);
+        } else if (service instanceof IResponsibleConstructor) {
+            addConstructor((IResponsibleConstructor) service);
+        } else {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.UNSUPPORTED_INJECTED_SERVICE)
+                    .variables(new BehaviorErrors.UnsupportedInjectedService()
+                            .injectedService(serviceId)
+                            .injectService(ResponsibleRegistry.class.getName()))
+                    .build();
+
+        }
     }
 
     public int actionCount() {

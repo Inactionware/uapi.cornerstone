@@ -17,7 +17,7 @@ import uapi.service.annotation.Tag;
 @Service
 @Action
 @Tag("Application")
-public class StartUpApplication {
+public class StartupApplication {
 
     @Inject
     protected IRegistry _registry;

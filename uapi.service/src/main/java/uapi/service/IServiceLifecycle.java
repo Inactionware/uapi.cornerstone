@@ -24,10 +24,10 @@ public interface IServiceLifecycle {
      */
     void onServiceInjected(String serviceId, Object service);
 
-    /**
-     * Invoked when the service is resolved and all other conditions is satisfied.
-     * Resolved means all dependencies has been set
-     * Satisfied means that like configurations has been set
-     */
-    void onInit();
+//    /**
+//     * Invoked when the service is resolved and all other conditions is satisfied.
+//     * Resolved means all dependencies has been set
+//     * Satisfied means that like configurations has been set
+//     */
+//    void onInit();
 }

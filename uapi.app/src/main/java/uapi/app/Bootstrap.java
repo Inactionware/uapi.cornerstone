@@ -7,10 +7,11 @@
  * use the project into a commercial product
  */
 
-package uapi.app.internal;
+package uapi.app;
 
 import uapi.app.AppErrors;
 import uapi.app.AppException;
+import uapi.app.internal.*;
 import uapi.behavior.ActionIdentify;
 import uapi.behavior.IResponsible;
 import uapi.behavior.IResponsibleRegistry;
@@ -107,14 +108,15 @@ public class Bootstrap {
 
         // Build responsible and related behavior for application launching
         IResponsibleRegistry responsibleReg = svcRegistry.findService(IResponsibleRegistry.class);
-        IResponsible responsible = responsibleReg.register("ApplicationLauncher");
-        responsible.newBehavior("test", SystemStartingUpEvent.TOPIC)
-                .then(ActionIdentify.parse(StartUpApplication.class.getName() + "@Action"))
+        IResponsible responsible = responsibleReg.register("ApplicationHandler");
+        responsible.newBehavior("startUpApplication", SystemStartingUpEvent.TOPIC)
+                .then(ActionIdentify.parse(StartupApplication.class.getName() + "@Action"))
                 .build();
-        responsible.newBehavior("test2", SystemShuttingDownEvent.TOPIC)
+        responsible.newBehavior("shutDownApplication", SystemShuttingDownEvent.TOPIC)
                 .then(ActionIdentify.parse(ShutDownApplication.class.getName() + "@Action"))
                 .build();
 
+        // Send system starting up event
         SystemStartingUpEvent sysLaunchedEvent = new SystemStartingUpEvent(startTime, otherSvcs);
         IEventBus eventBus = svcRegistry.findService(IEventBus.class);
         eventBus.fire(sysLaunchedEvent);

@@ -12,6 +12,7 @@ package uapi.app.internal
 import org.junit.Ignore
 import spock.lang.Specification
 import uapi.app.AppException
+import uapi.app.Bootstrap
 import uapi.config.ICliConfigProvider
 import uapi.service.IRegistry
 import uapi.service.IService
