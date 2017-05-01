@@ -15,19 +15,18 @@ package uapi.service;
 public interface IServiceLifecycle {
 
     /**
+     * Invoked when the service is resolved and all other dependent services are activated.
+     */
+    void onInit();
+
+    /**
      * Invoked when a injectable property is set
+     * This method is invoked only when service is activated and a new service need to be injected to this service,
      *
      * @param   serviceId
      *          The injected service id
      * @param   service
      *          The injected service
      */
-    void onServiceInjected(String serviceId, Object service);
-
-//    /**
-//     * Invoked when the service is resolved and all other conditions is satisfied.
-//     * Resolved means all dependencies has been set
-//     * Satisfied means that like configurations has been set
-//     */
-//    void onInit();
+    void onInject(String serviceId, Object service);
 }

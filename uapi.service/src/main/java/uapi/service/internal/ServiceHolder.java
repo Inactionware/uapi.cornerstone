@@ -2,13 +2,11 @@ package uapi.service.internal;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
-import uapi.GeneralException;
 import uapi.common.ArgumentChecker;
 import uapi.common.CollectionHelper;
 import uapi.rx.Looper;
 import uapi.service.*;
 import uapi.state.IShifter;
-import uapi.state.IStateListener;
 import uapi.state.IStateTracer;
 import uapi.state.StateCreator;
 
@@ -218,10 +216,10 @@ public class ServiceHolder implements IServiceReference {
         this._dependencies.remove(dependency, null);
         this._dependencies.put(dependency, service);
 
-        // if service is activated then it should be notified
         if (! isActivated()) {
             return;
         }
+        // if service is activated then it should be notified
         if (! (this._svc instanceof IServiceLifecycle)) {
             throw ServiceException.builder()
                     .errorCode(ServiceErrors.UNSUPPORTED_DYNAMIC_INJECTION)
@@ -234,7 +232,7 @@ public class ServiceHolder implements IServiceReference {
             // Create service from service factory
             injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
         }
-        ((IServiceLifecycle) _svc).onServiceInjected(service.getId(), injectedSvc);
+        ((IServiceLifecycle) _svc).onInject(service.getId(), injectedSvc);
         this._injectedSvcs.add(service);
     }
 
@@ -276,7 +274,7 @@ public class ServiceHolder implements IServiceReference {
 //                        // Create service from service factory
 //                        injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
 //                    }
-//                    ((IServiceLifecycle) _svc).onServiceInjected(dependSvcHolder.getId(), injectedSvc);
+//                    ((IServiceLifecycle) _svc).onInject(dependSvcHolder.getId(), injectedSvc);
 //                    this._injectedSvcs.add(dependSvcHolder);
 //                });
 //    }

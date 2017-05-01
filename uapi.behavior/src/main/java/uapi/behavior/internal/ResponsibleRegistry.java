@@ -45,10 +45,20 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
 
     private final Map<String, IResponsible> _responsibles;
 
+    @Inject
+    @Optional
+    protected List<IResponsibleConstructor> _respConstructors;
+
     public ResponsibleRegistry() {
         this._actionRepo = new Repository<>();
         this._lock = new ReentrantLock();
         this._responsibles = new HashMap<>();
+    }
+
+    @Override
+    @Init
+    public void onInit() {
+        Looper.on(this._respConstructors).foreach(this::addConstructor);
     }
 
     @Inject
@@ -59,14 +69,6 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
         if (existing != null) {
             this._logger.warn("The existing action {} was overridden by new action {}", existing, action);
         }
-    }
-
-    @Inject
-    @Optional
-    public void addConstructor(IResponsibleConstructor constructor) {
-        ArgumentChecker.required(constructor, "constructor");
-        IResponsible responsible = register(constructor.name());
-        constructor.construct(responsible);
     }
 
     @Override
@@ -98,7 +100,7 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
     }
 
     @Override
-    public void onServiceInjected(String serviceId, Object service) {
+    public void onInject(String serviceId, Object service) {
         if (service instanceof IAction) {
             addAction((IAction) service);
         } else if (service instanceof IResponsibleConstructor) {
@@ -116,5 +118,11 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
 
     public int actionCount() {
         return this._actionRepo.count();
+    }
+
+    private void addConstructor(IResponsibleConstructor constructor) {
+        ArgumentChecker.required(constructor, "constructor");
+        IResponsible responsible = register(constructor.name());
+        constructor.construct(responsible);
     }
 }

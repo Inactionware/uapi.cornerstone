@@ -834,7 +834,7 @@ class ServiceHolderTest extends Specification {
 
         then:
         noExceptionThrown()
-        1 * svc.onServiceInjected('depId', depSvc)
+        1 * svc.onInject('depId', depSvc)
         svcHolder.isResolved()
         svcHolder.isInjected()
         svcHolder.isSatisfied()
@@ -882,7 +882,7 @@ class ServiceHolderTest extends Specification {
 
         then:
         noExceptionThrown()
-        1 * svc.onServiceInjected('depId', realSvc)
+        1 * svc.onInject('depId', realSvc)
         svcHolder.isResolved()
         svcHolder.isInjected()
         svcHolder.isSatisfied()
