@@ -57,7 +57,7 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
 
     @Override
     @Init
-    public void onInit() {
+    public void onActivate() {
         Looper.on(this._respConstructors).foreach(this::addConstructor);
     }
 
@@ -100,7 +100,7 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
     }
 
     @Override
-    public void onInject(String serviceId, Object service) {
+    public void onDependencyInject(String serviceId, Object service) {
         if (service instanceof IAction) {
             addAction((IAction) service);
         } else if (service instanceof IResponsibleConstructor) {

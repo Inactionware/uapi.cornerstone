@@ -232,7 +232,7 @@ public class ServiceHolder implements IServiceReference {
             // Create service from service factory
             injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
         }
-        ((IServiceLifecycle) _svc).onInject(service.getId(), injectedSvc);
+        ((IServiceLifecycle) _svc).onDependencyInject(service.getId(), injectedSvc);
         this._injectedSvcs.add(service);
     }
 
@@ -274,7 +274,7 @@ public class ServiceHolder implements IServiceReference {
 //                        // Create service from service factory
 //                        injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
 //                    }
-//                    ((IServiceLifecycle) _svc).onInject(dependSvcHolder.getId(), injectedSvc);
+//                    ((IServiceLifecycle) _svc).onDependencyInject(dependSvcHolder.getId(), injectedSvc);
 //                    this._injectedSvcs.add(dependSvcHolder);
 //                });
 //    }
@@ -412,8 +412,8 @@ public class ServiceHolder implements IServiceReference {
                     .build();
         }
 
-        if (_svc instanceof IInitial) {
-            ((IInitial) _svc).init();
+        if (_svc instanceof IServiceLifecycle) {
+            ((IServiceLifecycle) _svc).onActivate();
         }
     }
 }

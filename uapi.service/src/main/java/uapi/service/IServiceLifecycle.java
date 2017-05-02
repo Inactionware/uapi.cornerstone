@@ -17,7 +17,7 @@ public interface IServiceLifecycle {
     /**
      * Invoked when the service is resolved and all other dependent services are activated.
      */
-    void onInit();
+    void onActivate();
 
     /**
      * Invoked when a injectable property is set
@@ -28,5 +28,5 @@ public interface IServiceLifecycle {
      * @param   service
      *          The injected service
      */
-    void onInject(String serviceId, Object service);
+    void onDependencyInject(String serviceId, Object service);
 }

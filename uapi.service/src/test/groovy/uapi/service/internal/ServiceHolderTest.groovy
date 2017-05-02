@@ -715,7 +715,8 @@ class ServiceHolderTest extends Specification {
         }
         def svc = Mock(IInjectableInitableLifecycle) {
             isOption('depId') >> true
-            1 * init()
+            1 * onActivate()
+
         }
         def satisfyHook  = Mock(ISatisfyHook) {
             1 * isSatisfied(_ as ServiceHolder) >> true
@@ -762,7 +763,7 @@ class ServiceHolderTest extends Specification {
         }
         def svc = Mock(IInjectableInitableLifecycle) {
             isOption('depId') >> true
-            1 * init()
+            1 * onActivate()
         }
         def satisfyHook  = Mock(ISatisfyHook) {
             1 * isSatisfied(_ as ServiceHolder) >> true
@@ -808,7 +809,7 @@ class ServiceHolderTest extends Specification {
         }
         def svc = Mock(IInjectableInitableLifecycle) {
             isOptional('depId') >> true
-            1 * init()
+            1 * onActivate()
         }
         def satisfyHook  = Mock(ISatisfyHook) {
             1 * isSatisfied(_ as ServiceHolder) >> true
@@ -834,7 +835,7 @@ class ServiceHolderTest extends Specification {
 
         then:
         noExceptionThrown()
-        1 * svc.onInject('depId', depSvc)
+        1 * svc.onDependencyInject('depId', depSvc)
         svcHolder.isResolved()
         svcHolder.isInjected()
         svcHolder.isSatisfied()
@@ -853,7 +854,7 @@ class ServiceHolderTest extends Specification {
         }
         def svc = Mock(IInjectableInitableLifecycle) {
             isOptional('depId') >> true
-            1 * init()
+            1 * onActivate()
         }
         def satisfyHook  = Mock(ISatisfyHook) {
             1 * isSatisfied(_ as ServiceHolder) >> true
@@ -882,7 +883,7 @@ class ServiceHolderTest extends Specification {
 
         then:
         noExceptionThrown()
-        1 * svc.onInject('depId', realSvc)
+        1 * svc.onDependencyInject('depId', realSvc)
         svcHolder.isResolved()
         svcHolder.isInjected()
         svcHolder.isSatisfied()
@@ -901,7 +902,6 @@ class ServiceHolderTest extends Specification {
         }
         def svc = Mock(IInjectableInitable) {
             isOptional('depId') >> true
-            1 * init()
         }
         def satisfyHook  = Mock(ISatisfyHook) {
             1 * isSatisfied(_ as ServiceHolder) >> true
@@ -927,7 +927,7 @@ class ServiceHolderTest extends Specification {
 
         then:
         thrown(ServiceException)
-        0 * svc.onServiceInjected('depId', depSvc)
+//        0 * svc.onServiceInjected('depId', depSvc)
         svcHolder.isResolved()
         svcHolder.isInjected()
         svcHolder.isSatisfied()
