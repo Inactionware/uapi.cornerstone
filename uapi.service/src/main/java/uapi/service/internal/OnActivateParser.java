@@ -11,6 +11,7 @@ import uapi.service.annotation.OnActivate;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import java.util.*;
 
@@ -45,22 +46,24 @@ public class OnActivateParser {
             builderCtx.checkModifiers(element, OnActivate.class, Modifier.PRIVATE, Modifier.STATIC);
             Element classElemt = element.getEnclosingElement();
             builderCtx.checkModifiers(classElemt, OnActivate.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
-            MethodMeta.Builder methodBuilder = MethodMeta.builder(element, builderCtx);
-            if (methodBuilder.getParameterCount() > 0) {
+
+            // Check method
+            String methodName = element.getSimpleName().toString();
+            ExecutableElement methodElement = (ExecutableElement) element;
+            String returnType = methodElement.getReturnType().toString();
+            if (! Type.VOID.equals(returnType)) {
                 throw new GeneralException(
-                        "The method [{}:{}] with OnActivate annotation can not has any parameter",
-                        classElemt.getSimpleName().toString(),
-                        element.getSimpleName().toString());
+                        "Expect the method [{}] with OnActivate annotation should return void, but it return - {}",
+                        methodName, returnType);
+            }
+            List paramElements = methodElement.getParameters();
+            if (paramElements.size() != 0) {
+                throw new GeneralException(
+                        "Expect the method [{}] with OnActivate annotation is allowed 0 parameter, but found - {}",
+                        methodName, paramElements.size());
             }
 
-            String methodName = element.getSimpleName().toString();
             ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
-            List<MethodMeta.Builder> existing = clsBuilder.findMethodBuilders(METHOD_ON_ACTIVATE_NAME);
-            if (existing.size() > 0) {
-                throw new GeneralException(
-                        "Multiple Init annotation was defined in the class {}",
-                        classElemt.getSimpleName().toString());
-            }
             this._helper.addActivateMethod(builderCtx, clsBuilder, "super", methodName);
         });
     }
@@ -90,8 +93,8 @@ public class OnActivateParser {
             ArgumentChecker.required(classBuilder, "classBuilder");
             ArgumentChecker.required(methodNames, "methodNames");
 
-            Map<String, Object> tempInitModel = classBuilder.createTransienceIfAbsent(MODEL_ON_ACTIVATE, HashMap::new);
-            Object existingMethods = tempInitModel.get(VAR_METHODS);
+            Map<String, Object> tempActivateModel = classBuilder.createTransienceIfAbsent(MODEL_ON_ACTIVATE, HashMap::new);
+            Object existingMethods = tempActivateModel.get(VAR_METHODS);
             List<String> methods;
             if (existingMethods == null) {
                 methods = new ArrayList<>();
@@ -99,7 +102,7 @@ public class OnActivateParser {
                 methods = (List<String>) existingMethods;
             }
             Looper.on(methodNames).foreach(methods::add);
-            tempInitModel.put(VAR_METHODS, methods);
+            tempActivateModel.put(VAR_METHODS, methods);
 
             List<MethodMeta.Builder> methodBuilders = classBuilder.findMethodBuilders(METHOD_ON_ACTIVATE_NAME);
             if (methodBuilders.size() > 0) {
@@ -112,7 +115,7 @@ public class OnActivateParser {
                 }
             }
 
-            Template tempInit = builderContext.loadTemplate(TEMP_ON_ACTIVATE);
+            Template tempOnActivate = builderContext.loadTemplate(TEMP_ON_ACTIVATE);
             classBuilder
                     .addImplement(IServiceLifecycle.class.getCanonicalName())
                     .addMethodBuilder(MethodMeta.builder()
@@ -120,7 +123,7 @@ public class OnActivateParser {
                             .setName(METHOD_ON_ACTIVATE_NAME)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName("Override"))
                             .addCodeBuilder(CodeMeta.builder()
-                                    .setTemplate(tempInit)
+                                    .setTemplate(tempOnActivate)
                                     .setModel(classBuilder.getTransience(MODEL_ON_ACTIVATE)))
                             .setReturnTypeName(Type.VOID));
         }
