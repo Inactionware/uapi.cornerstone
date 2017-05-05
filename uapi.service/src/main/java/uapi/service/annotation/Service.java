@@ -34,4 +34,11 @@ public @interface Service {
      * @return  Service ids
      */
     String[] ids() default {};
+
+    /**
+     * Indicate the service should be activated after system launched automatically or not
+     *
+     * @return  True means activated the service otherwise do nothing
+     */
+    boolean autoActive() default false;
 }

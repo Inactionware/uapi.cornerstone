@@ -20,8 +20,10 @@ public interface IService {
 
     String METHOD_GETIDS                        = "getIds";
     String METHOD_GET_DEPENDENCIES              = "getDependencies";
+    String METHOD_AUTOACTIVE                    = "autoActive";
     String METHOD_GETIDS_RETURN_TYPE            = Type.STRING_ARRAY;
     String METHOD_GET_DEPENDENT_ID_RETURN_TYPE  = Type.STRING_ARRAY;
+    String METHOD_AUTOACTIVE_RETURN_TYPE        = Type.BOOLEAN;
 
     /**
      * Return the service identifications
@@ -29,4 +31,11 @@ public interface IService {
      * @return  The service identifications
      */
     String[] getIds();
+
+    /**
+     * Indicate the service should be activated after system launched automatically or not
+     *
+     * @return  True means activated the service otherwise do nothing
+     */
+    boolean autoActive();
 }

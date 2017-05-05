@@ -120,6 +120,11 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     }
 
     @Override
+    public boolean autoActive() {
+        return false;
+    }
+
+    @Override
     public void register(
             final IService service
     ) throws InvalidArgumentException {

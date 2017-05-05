@@ -73,6 +73,7 @@ public final class ServiceHandler extends AnnotationsHandler {
             ClassMeta.Builder classBuilder = builderCtx.findClassBuilder(classElement);
             AnnotationMirror svcAnnoMirror = MoreElements.getAnnotationMirror(classElement, Service.class).get();
             Service service = classElement.getAnnotation(Service.class);
+            boolean autoActive = service.autoActive();
             String[] serviceIds = mergeId(getTypesInAnnotation(svcAnnoMirror, "value"), service.ids());
             if (serviceIds.length == 0) {
                 final StringBuilder svcId = new StringBuilder();
@@ -112,7 +113,15 @@ public final class ServiceHandler extends AnnotationsHandler {
                             .setReturnTypeName(IService.METHOD_GETIDS_RETURN_TYPE)
                             .addCodeBuilder(CodeMeta.builder()
                                     .setTemplate(tempGetIds)
-                                    .setModel(classBuilder.getTransience(MODEL_GET_IDS))));
+                                    .setModel(classBuilder.getTransience(MODEL_GET_IDS))))
+                    .addMethodBuilder(MethodMeta.builder()
+                            .addAnnotationBuilder(AnnotationMeta.builder()
+                                    .setName(AnnotationMeta.OVERRIDE))
+                            .setName(IService.METHOD_AUTOACTIVE)
+                            .addModifier(Modifier.PUBLIC)
+                            .setReturnTypeName(IService.METHOD_AUTOACTIVE_RETURN_TYPE)
+                            .addCodeBuilder(CodeMeta.builder()
+                                    .addRawCode(StringHelper.makeString("return {};", autoActive))));
 //            builderCtx.getLogger().info("End handle annotation {} for class {}",
 //                    annotationType, classElement.getSimpleName().toString());
         });
