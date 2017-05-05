@@ -18,7 +18,9 @@ import java.util.*;
  */
 public class OnInjectParser {
 
-    private static final String METHOD_NAME = "onInject";
+    private static final String METHOD_NAME     = "onDependencyInject";
+    private static final String PARAM_SVC_ID    = "serviceId";
+    private static final String PARAM_SVC       = "service";
 
     private static final String TEMP_ON_INJECT  = "template/onInject_method.ftl";
     private static final String MODEL_ON_INJECT = "Model";
@@ -114,22 +116,33 @@ public class OnInjectParser {
             List<Map<String, String>> methods;
             if (existingMethods == null) {
                 methods = new ArrayList<>();
+                tempInjectModel.put(VAR_METHODS, methods);
             } else {
                 methods = (List<Map<String, String>>) existingMethods;
             }
-            Map<String, String> method = new HashMap<>();
-            method.put(VAR_METHOD_NAME, methodName);
-            method.put(VAR_SVC_ID, serviceId);
-            method.put(VAR_SVC_TYPE, serviceType);
-            methods.add(method);
+            if (methodName != null) {
+                Map<String, String> method = new HashMap<>();
+                method.put(VAR_METHOD_NAME, methodName);
+                method.put(VAR_SVC_ID, serviceId);
+                method.put(VAR_SVC_TYPE, serviceType);
+                builderContext.getLogger().info(StringHelper.makeString(">>>{}::{},{},{}",
+                        classBuilder.getClassName(), methodName, serviceId, serviceType));
+                methods.add(method);
+            }
 
             List<MethodMeta.Builder> methodBuilders = classBuilder.findMethodBuilders(METHOD_NAME);
             if (methodBuilders.size() > 0) {
                 MethodMeta.Builder mbuilder = Looper.on(methodBuilders)
                         .filter(builder -> builder.getReturnTypeName().equals(Type.VOID))
                         .filter(builder -> builder.getParameterCount() == 2)
-                        // todo: check parameter type
-                        //filter(builder -> builder.findParameterBuilder("serviceId") != null)
+                        .filter(builder -> {
+                            ParameterMeta.Builder paramBuilder = builder.findParameterBuilder(PARAM_SVC_ID);
+                            return paramBuilder != null && paramBuilder.getType().equals(Type.Q_STRING);
+                        })
+                        .filter(builder -> {
+                            ParameterMeta.Builder paramBuilder = builder.findParameterBuilder(PARAM_SVC);
+                            return paramBuilder != null && paramBuilder.getType().equals(Type.Q_OBJECT);
+                        })
                         .first();
                 if (mbuilder != null) {
                     return;
@@ -144,10 +157,10 @@ public class OnInjectParser {
                             .setName(METHOD_NAME)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName("Override"))
                             .addParameterBuilder(ParameterMeta.builder()
-                                    .setName("serviceId")
+                                    .setName(PARAM_SVC_ID)
                                     .setType(Type.Q_STRING))
                             .addParameterBuilder(ParameterMeta.builder()
-                                    .setName("serviceType")
+                                    .setName(PARAM_SVC)
                                     .setType(Type.Q_OBJECT))
                             .addCodeBuilder(CodeMeta.builder()
                                     .setTemplate(tempOnInject)

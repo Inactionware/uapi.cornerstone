@@ -31,7 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 @Service
 @Tag("Behavior")
-public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecycle {
+public class ResponsibleRegistry implements IResponsibleRegistry {
 
     @Inject
     protected ILogger _logger;
@@ -55,12 +55,6 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
         this._responsibles = new HashMap<>();
     }
 
-    @Override
-    @Init
-    public void onActivate() {
-        Looper.on(this._respConstructors).foreach(this::addConstructor);
-    }
-
     @Inject
     @Optional
     public void addAction(IAction<?, ?> action) {
@@ -69,6 +63,33 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
         if (existing != null) {
             this._logger.warn("The existing action {} was overridden by new action {}", existing, action);
         }
+    }
+
+    @OnActivate
+    public void constructResponsibles() {
+        Looper.on(this._respConstructors).foreach(this::addConstructor);
+    }
+
+    @OnInject
+    public void injectNewAction(IAction action) {
+        addAction(action);
+    }
+
+    @OnInject
+    public void injectNewConstructor(IResponsibleConstructor constructor) {
+        addConstructor(constructor);
+//        if (service instanceof IAction) {
+//            addAction((IAction) service);
+//        } else if (service instanceof IResponsibleConstructor) {
+//            addConstructor((IResponsibleConstructor) service);
+//        } else {
+//            throw BehaviorException.builder()
+//                    .errorCode(BehaviorErrors.UNSUPPORTED_INJECTED_SERVICE)
+//                    .variables(new BehaviorErrors.UnsupportedInjectedService()
+//                            .injectedService(serviceId)
+//                            .injectService(ResponsibleRegistry.class.getName()))
+//                    .build();
+//        }
     }
 
     @Override
@@ -97,23 +118,6 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
     @Override
     public int responsibleCount() {
         return this._responsibles.size();
-    }
-
-    @Override
-    public void onDependencyInject(String serviceId, Object service) {
-        if (service instanceof IAction) {
-            addAction((IAction) service);
-        } else if (service instanceof IResponsibleConstructor) {
-            addConstructor((IResponsibleConstructor) service);
-        } else {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.UNSUPPORTED_INJECTED_SERVICE)
-                    .variables(new BehaviorErrors.UnsupportedInjectedService()
-                            .injectedService(serviceId)
-                            .injectService(ResponsibleRegistry.class.getName()))
-                    .build();
-
-        }
     }
 
     public int actionCount() {

@@ -2,6 +2,7 @@ package uapi.app.internal;
 
 import uapi.app.AppErrors;
 import uapi.app.AppException;
+import uapi.behavior.ActionIdentify;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
 import uapi.config.ICliConfigProvider;
@@ -12,12 +13,14 @@ import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
 /**
- * Created by xquan on 4/28/2017.
+ * Action to start up application
  */
 @Service
 @Action
 @Tag("Application")
 public class StartupApplication {
+
+    public static final ActionIdentify actionId = ActionIdentify.parse(StartupApplication.class.getName() + "@Action");
 
     @Inject
     protected IRegistry _registry;

@@ -5,6 +5,7 @@ import uapi.GeneralException;
 import uapi.Type;
 import uapi.codegen.*;
 import uapi.common.ArgumentChecker;
+import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.IServiceLifecycle;
 import uapi.service.annotation.OnActivate;
@@ -64,7 +65,7 @@ public class OnActivateParser {
             }
 
             ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
-            this._helper.addActivateMethod(builderCtx, clsBuilder, "super", methodName);
+            this._helper.addActivateMethod(builderCtx, clsBuilder, methodName);
         });
     }
 
@@ -101,7 +102,9 @@ public class OnActivateParser {
             } else {
                 methods = (List<String>) existingMethods;
             }
-            Looper.on(methodNames).foreach(methods::add);
+            Looper.on(methodNames)
+                    .filter(methodName -> ! StringHelper.isNullOrEmpty(methodName))
+                    .foreach(methods::add);
             tempActivateModel.put(VAR_METHODS, methods);
 
             List<MethodMeta.Builder> methodBuilders = classBuilder.findMethodBuilders(METHOD_ON_ACTIVATE_NAME);
