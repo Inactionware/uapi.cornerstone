@@ -124,7 +124,7 @@ public class OnActivateParser {
                     .addMethodBuilder(MethodMeta.builder()
                             .addModifier(Modifier.PUBLIC)
                             .setName(METHOD_ON_ACTIVATE_NAME)
-                            .addAnnotationBuilder(AnnotationMeta.builder().setName("Override"))
+                            .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                             .addCodeBuilder(CodeMeta.builder()
                                     .setTemplate(tempOnActivate)
                                     .setModel(classBuilder.getTransience(MODEL_ON_ACTIVATE)))

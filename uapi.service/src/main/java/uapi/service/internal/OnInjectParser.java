@@ -125,8 +125,6 @@ public class OnInjectParser {
                 method.put(VAR_METHOD_NAME, methodName);
                 method.put(VAR_SVC_ID, serviceId);
                 method.put(VAR_SVC_TYPE, serviceType);
-                builderContext.getLogger().info(StringHelper.makeString(">>>{}::{},{},{}",
-                        classBuilder.getClassName(), methodName, serviceId, serviceType));
                 methods.add(method);
             }
 

@@ -12,6 +12,9 @@ import uapi.service.annotation.Inject;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Action to start up application
  */
@@ -37,9 +40,19 @@ public class StartupApplication {
         }
         IProfile profile = profileMgr.getActiveProfile();
 
+        List<String> autoActiveSvcIds = new ArrayList<>();
+
         // Register other service
         Looper.on(event.applicationServices())
                 .filter(profile::isAllow)
+                .next(svc -> {
+                    if (svc.autoActive()) {
+                        autoActiveSvcIds.add(svc.getIds()[0]);
+                    }
+                })
                 .foreach(this._registry::register);
+
+        // Activate auto active services
+        Looper.on(autoActiveSvcIds).foreach(this._registry::findService);
     }
 }
