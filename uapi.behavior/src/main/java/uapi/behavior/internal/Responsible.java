@@ -183,6 +183,7 @@ public class Responsible implements IResponsible {
 
         @Override
         public void handle(IBehaviorTraceEvent event) {
+            // todo: Ignore event if the event is not belongs to this responsible
             if (event instanceof BehaviorExecutingEvent) {
                 handleExecutingEvent((BehaviorExecutingEvent) event);
             } else if (event instanceof BehaviorFinishedEvent) {

@@ -30,7 +30,6 @@ import java.util.concurrent.Semaphore;
  * The UAPI application entry point
  */
 @Service
-@Tag("Application")
 public class Application implements IApplication {
 
     @Inject

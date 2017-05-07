@@ -18,6 +18,6 @@ public class ShutDownApplication {
 
     @ActionDo
     public void exec(SystemShuttingDownEvent event) {
-
+        // do nothing
     }
 }

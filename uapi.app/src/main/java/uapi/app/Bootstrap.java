@@ -107,14 +107,14 @@ public class Bootstrap {
         Looper.on(basicSvcTags).foreach(svcRegistry::activateTaggedService);
 
         // Build responsible and related behavior for application launching
-        IResponsibleRegistry responsibleReg = svcRegistry.findService(IResponsibleRegistry.class);
-        IResponsible responsible = responsibleReg.register("ApplicationHandler");
-        responsible.newBehavior("startUpApplication", SystemStartingUpEvent.TOPIC)
-                .then(ActionIdentify.parse(StartupApplication.class.getName() + "@Action"))
-                .build();
-        responsible.newBehavior("shutDownApplication", SystemShuttingDownEvent.TOPIC)
-                .then(ActionIdentify.parse(ShutDownApplication.class.getName() + "@Action"))
-                .build();
+//        IResponsibleRegistry responsibleReg = svcRegistry.findService(IResponsibleRegistry.class);
+//        IResponsible responsible = responsibleReg.register("ApplicationHandler");
+//        responsible.newBehavior("startUpApplication", SystemStartingUpEvent.TOPIC)
+//                .then(ActionIdentify.parse(StartupApplication.class.getName() + "@Action"))
+//                .build();
+//        responsible.newBehavior("shutDownApplication", SystemShuttingDownEvent.TOPIC)
+//                .then(ActionIdentify.parse(ShutDownApplication.class.getName() + "@Action"))
+//                .build();
 
         // Send system starting up event
         SystemStartingUpEvent sysLaunchedEvent = new SystemStartingUpEvent(startTime, otherSvcs);

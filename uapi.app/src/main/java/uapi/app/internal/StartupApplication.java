@@ -6,8 +6,10 @@ import uapi.behavior.ActionIdentify;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
 import uapi.config.ICliConfigProvider;
+import uapi.log.ILogger;
 import uapi.rx.Looper;
 import uapi.service.IRegistry;
+import uapi.service.annotation.Init;
 import uapi.service.annotation.Inject;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
@@ -24,6 +26,9 @@ import java.util.List;
 public class StartupApplication {
 
     public static final ActionIdentify actionId = ActionIdentify.parse(StartupApplication.class.getName() + "@Action");
+
+    @Inject
+    protected ILogger _logger;
 
     @Inject
     protected IRegistry _registry;
@@ -54,5 +59,7 @@ public class StartupApplication {
 
         // Activate auto active services
         Looper.on(autoActiveSvcIds).foreach(this._registry::findService);
+
+        this._logger.info("The application is launched");
     }
 }
