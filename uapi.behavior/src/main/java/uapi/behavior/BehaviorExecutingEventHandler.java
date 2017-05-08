@@ -12,5 +12,5 @@ public interface BehaviorExecutingEventHandler {
      * @param   event
      *          The BehaviorExecutingEvent
      */
-    void accept(BehaviorExecutingEvent event);
+    BehaviorEvent accept(BehaviorExecutingEvent event);
 }

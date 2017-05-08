@@ -12,5 +12,5 @@ public interface BehaviorFinishedEventHandler {
      * @param   event
      *          The BehaviorFinishedEvent
      */
-    void accept(BehaviorFinishedEvent event);
+    BehaviorEvent accept(BehaviorFinishedEvent event);
 }

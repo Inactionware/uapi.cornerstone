@@ -19,7 +19,14 @@ import java.util.Map;
  */
 public class BehaviorEvent extends AttributedEvent {
 
+//    private final String _respName;
+
     public BehaviorEvent(final String topic) {
         super(topic);
+//        this._respName = responsibleName;
     }
+
+//    public String responsibleName() {
+//        return this._respName;
+//    }
 }

@@ -1,5 +1,6 @@
 package uapi.app.internal;
 
+import uapi.behavior.BehaviorEvent;
 import uapi.behavior.BehaviorFinishedEventHandler;
 import uapi.behavior.IResponsible;
 import uapi.behavior.IResponsibleRegistry;
@@ -39,9 +40,11 @@ public class ApplicationConstructor {
         BehaviorFinishedEventHandler finishedHandler = event -> {
             if (BEHAVIOR_STARTUP.equals(event.behaviorName())) {
                 // Todo: fire application startup event
+                return new BehaviorEvent("ApplicationStartup");
             } else {
                 this._logger.debug("");
             }
+            return null;
         };
         responsible.on(finishedHandler);
     }

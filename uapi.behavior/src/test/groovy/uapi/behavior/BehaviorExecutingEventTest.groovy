@@ -9,9 +9,7 @@
 
 package uapi.behavior
 
-import spock.lang.Ignore
 import spock.lang.Specification
-import uapi.behavior.BehaviorExecutingEvent
 
 /**
  * Unit test for BehaviorExecutingEvent
@@ -21,11 +19,11 @@ class BehaviorExecutingEventTest extends Specification {
     def 'Test create instance'() {
         when:
         def execId = new ExecutionIdentify(behaviorName, ActionType.BEHAVIOR, sequence)
-        def event = new BehaviorExecutingEvent(execId, oriData, data, actionId)
+        def event = new BehaviorExecutingEvent(execId, oriData, data, actionId, 'respName')
 
         then:
         noExceptionThrown()
-        event.topic() == IBehaviorTraceEvent.TOPIC
+        event.topic() == BehaviorTraceEvent.TOPIC
         event.executionId() == execId
         event.actionId() == actionId
         event.behaviorName() == behaviorName

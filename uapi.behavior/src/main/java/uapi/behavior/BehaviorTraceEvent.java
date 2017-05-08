@@ -1,21 +1,20 @@
 package uapi.behavior;
 
-import uapi.common.IAttributed;
-import uapi.event.IEvent;
+import uapi.event.AttributedEvent;
 
 /**
  * The interface contains methods which should be used for trace behavior execution
  */
-public interface IBehaviorTraceEvent extends IAttributed, IEvent {
+public abstract class BehaviorTraceEvent extends AttributedEvent {
 
-    String TOPIC                = "BehaviorTrace";
-    String KEY_EXECUTION_ID     = "ExecutionId";
-    String KEY_ORIGINAL_DATA    = "OriginalData";
-    String KEY_DATA             = "Data";
+    public static final String TOPIC                 = "BehaviorTrace";
+    public static final String KEY_EXECUTION_ID      = "ExecutionId";
+    public static final String KEY_ORIGINAL_DATA     = "OriginalData";
+    public static final String KEY_DATA              = "Data";
+    public static final String KEY_RESP_NAME         = "ResponsibleName";
 
-    @Override
-    default String topic() {
-        return TOPIC;
+    public BehaviorTraceEvent() {
+        super(TOPIC);
     }
 
     /**
@@ -23,7 +22,7 @@ public interface IBehaviorTraceEvent extends IAttributed, IEvent {
      *
      * @return  The behavior execution id
      */
-    default ExecutionIdentify executionId() {
+    public ExecutionIdentify executionId() {
         return (ExecutionIdentify) get(KEY_EXECUTION_ID);
     }
 
@@ -32,7 +31,7 @@ public interface IBehaviorTraceEvent extends IAttributed, IEvent {
      *
      * @return  The behavior name
      */
-    default String behaviorName() {
+    public String behaviorName() {
         return executionId().getName();
     }
 
@@ -41,7 +40,7 @@ public interface IBehaviorTraceEvent extends IAttributed, IEvent {
      *
      * @return  The original input data
      */
-    default Object originalData() {
+    public Object originalData() {
         return get(KEY_ORIGINAL_DATA);
     }
 
@@ -50,7 +49,11 @@ public interface IBehaviorTraceEvent extends IAttributed, IEvent {
      *
      * @return  The last outputted data
      */
-    default Object data() {
+    public Object data() {
         return get(KEY_DATA);
+    }
+
+    public String responsibleName() {
+        return (String) get(KEY_RESP_NAME);
     }
 }

@@ -13,7 +13,6 @@ import uapi.behavior.*;
 import uapi.common.*;
 import uapi.event.IAttributedEventHandler;
 import uapi.event.IEventBus;
-import uapi.event.IEventHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -169,21 +168,32 @@ public class Responsible implements IResponsible {
         public void handle(BehaviorEvent event) {
             Execution exec = this._behavior.newExecution();
             ExecutionContext exeCtx = new ExecutionContext(Responsible.this._eventBus);
+            exeCtx.put(IExecutionContext.KEY_RESP_NAME, Responsible.this._name, Scope.GLOBAL);
             // Ignore the output data
             exec.execute(event, exeCtx);
         }
     }
 
-    private final class BehaviorTraceEventHandler implements IEventHandler<IBehaviorTraceEvent> {
+    private final class BehaviorTraceEventHandler implements IAttributedEventHandler<BehaviorTraceEvent> {
 
-        @Override
-        public String topic() {
-            return IBehaviorTraceEvent.TOPIC;
+        private final Map<Object, Object> _attributes = new HashMap<>();
+
+        private BehaviorTraceEventHandler() {
+            this._attributes.put(BehaviorTraceEvent.KEY_RESP_NAME, Responsible.this._name);
         }
 
         @Override
-        public void handle(IBehaviorTraceEvent event) {
-            // todo: Ignore event if the event is not belongs to this responsible
+        public String topic() {
+            return BehaviorTraceEvent.TOPIC;
+        }
+
+        @Override
+        public Map<Object, Object> getAttributes() {
+            return this._attributes;
+        }
+
+        @Override
+        public void handle(BehaviorTraceEvent event) {
             if (event instanceof BehaviorExecutingEvent) {
                 handleExecutingEvent((BehaviorExecutingEvent) event);
             } else if (event instanceof BehaviorFinishedEvent) {
@@ -199,13 +209,19 @@ public class Responsible implements IResponsible {
 
         private void handleExecutingEvent(BehaviorExecutingEvent event) {
             if (Responsible.this._behaviorExecutingHandler != null) {
-                Responsible.this._behaviorExecutingHandler.accept(event);
+                BehaviorEvent bEvent = Responsible.this._behaviorExecutingHandler.accept(event);
+                if (bEvent != null) {
+                    Responsible.this._eventBus.fire(bEvent);
+                }
             }
         }
 
         private void handleFinishedEvent(BehaviorFinishedEvent event) {
             if (Responsible.this._behaviorFinishedHandler != null) {
-                Responsible.this._behaviorFinishedHandler.accept(event);
+                BehaviorEvent bEvent = Responsible.this._behaviorFinishedHandler.accept(event);
+                if (bEvent != null) {
+                    Responsible.this._eventBus.fire(bEvent);
+                }
             }
         }
     }

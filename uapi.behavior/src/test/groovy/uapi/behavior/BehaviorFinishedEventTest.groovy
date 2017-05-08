@@ -19,11 +19,11 @@ class BehaviorFinishedEventTest extends Specification {
     def 'Test create instance'() {
         when:
         def exeId = new ExecutionIdentify(behaviorName, ActionType.BEHAVIOR, sequence)
-        def instance = new BehaviorFinishedEvent(exeId, oriData, data)
+        def instance = new BehaviorFinishedEvent(exeId, oriData, data, 'respName')
 
         then:
         noExceptionThrown()
-        instance.topic() == IBehaviorTraceEvent.TOPIC
+        instance.topic() == BehaviorTraceEvent.TOPIC
         instance.executionId() == exeId
         instance.behaviorName() == behaviorName
         instance.originalData() == oriData

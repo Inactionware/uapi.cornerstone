@@ -2,7 +2,7 @@ package uapi.behavior.internal
 
 import spock.lang.Specification
 import uapi.behavior.BehaviorEvent
-import uapi.behavior.IBehaviorTraceEvent
+import uapi.behavior.BehaviorTraceEvent
 import uapi.behavior.Scope
 import uapi.event.IEventBus
 
@@ -81,13 +81,13 @@ class ExecutionContextTest extends Specification {
     def 'Test fire behavior trace event'() {
         given:
         def eventBus = Mock(IEventBus) {
-            1 * fire(_ as IBehaviorTraceEvent)
+            1 * fire(_ as BehaviorTraceEvent)
             0 * fire( _ as BehaviorEvent)
         }
 
         when:
         def ctx = new ExecutionContext(eventBus)
-        ctx.fireEvent(Mock(IBehaviorTraceEvent))
+        ctx.fireEvent(Mock(BehaviorTraceEvent))
 
         then:
         noExceptionThrown()
@@ -96,7 +96,7 @@ class ExecutionContextTest extends Specification {
     def 'Test fire behavior event'() {
         given:
         def eventBus = Mock(IEventBus) {
-            0 * fire(_ as IBehaviorTraceEvent)
+            0 * fire(_ as BehaviorTraceEvent)
             1 * fire(_ as BehaviorEvent)
         }
 

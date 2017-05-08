@@ -19,8 +19,7 @@ import uapi.behavior.BehaviorExecutingEventHandler
 import uapi.behavior.BehaviorFinishedEvent
 import uapi.behavior.BehaviorFinishedEventHandler
 import uapi.behavior.IAction
-import uapi.behavior.IBehaviorTraceEvent
-import uapi.behavior.IExecutionContext
+import uapi.behavior.BehaviorTraceEvent
 import uapi.common.Repository
 import uapi.event.IEvent
 import uapi.event.IEventBus
@@ -192,7 +191,9 @@ class ResponsibleTest extends Specification {
         given:
         def eventBus = new MockEventBus()
         def exeHandler = Mock(BehaviorExecutingEventHandler)
-        def exeEvent = Mock(BehaviorExecutingEvent)
+        def exeEvent = Mock(BehaviorExecutingEvent) {
+            responsibleName() >> 'name'
+        }
 
         when:
         def responsible = new Responsible('name', eventBus, Mock(Repository))
@@ -208,7 +209,9 @@ class ResponsibleTest extends Specification {
         given:
         def eventBus = new MockEventBus()
         def finHandler = Mock(BehaviorFinishedEventHandler)
-        def finEvent = Mock(BehaviorFinishedEvent)
+        def finEvent = Mock(BehaviorFinishedEvent) {
+            responsibleName() >> 'name'
+        }
 
         when:
         def responsible = new Responsible('name', eventBus, Mock(Repository))
@@ -223,7 +226,9 @@ class ResponsibleTest extends Specification {
     def 'Test invoke unsupported behavior event'() {
         given:
         def eventBus = new MockEventBus()
-        def event = Mock(IBehaviorTraceEvent)
+        def event = Mock(BehaviorTraceEvent) {
+            responsibleName() >> 'name'
+        }
 
         when:
         def responsible = new Responsible('name', eventBus, Mock(Repository))
@@ -261,7 +266,7 @@ class ResponsibleTest extends Specification {
 
     class MockEventBus implements IEventBus {
 
-        private IEventHandler _handler;
+        private IEventHandler _handler
 
         @Override
         void fire(String topic) throws NoEventHandlerException {
