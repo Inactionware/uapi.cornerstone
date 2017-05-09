@@ -17,7 +17,7 @@ public class ShutDownApplication {
     public static final ActionIdentify actionId = ActionIdentify.parse(ShutDownApplication.class.getName() + "@Action");
 
     @ActionDo
-    public void exec(SystemShuttingDownEvent event) {
+    public void shutdown(SystemShuttingDownEvent event) {
         // do nothing
     }
 }

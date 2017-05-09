@@ -34,7 +34,7 @@ public class StartupApplication {
     protected IRegistry _registry;
 
     @ActionDo
-    public void exec(SystemStartingUpEvent event) {
+    public void startup(SystemStartingUpEvent event) {
         ProfileManager profileMgr = this._registry.findService(ProfileManager.class);
         if (profileMgr == null) {
             throw AppException.builder()

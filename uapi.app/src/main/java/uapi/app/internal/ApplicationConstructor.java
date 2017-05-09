@@ -1,5 +1,6 @@
 package uapi.app.internal;
 
+import uapi.GeneralException;
 import uapi.behavior.BehaviorEvent;
 import uapi.behavior.BehaviorFinishedEventHandler;
 import uapi.behavior.IResponsible;
@@ -20,6 +21,8 @@ public class ApplicationConstructor {
     private static final String BEHAVIOR_STARTUP    = "startUpApplication";
     private static final String BEHAVIOR_SHUTDOWN   = "shutDownApplication";
 
+    private static final String EVENT_APP_STARTUP   = "ApplicationStartup";
+
     @Inject
     protected ILogger _logger;
 
@@ -38,13 +41,17 @@ public class ApplicationConstructor {
                 .build();
 
         BehaviorFinishedEventHandler finishedHandler = event -> {
+            BehaviorEvent bEvent = null;
             if (BEHAVIOR_STARTUP.equals(event.behaviorName())) {
-                // Todo: fire application startup event
-                return new BehaviorEvent("ApplicationStartup", responsible.name());
+                bEvent = new AppStartupEvent(responsible.name());
+            } else if (BEHAVIOR_SHUTDOWN.equals(event.behaviorName())) {
+                this._logger.debug("Application is going to shutdown");
             } else {
-                this._logger.debug("");
+                // It should not happen
+                throw new GeneralException(
+                        "Unsupported behavior trace event - {}", event.behaviorName());
             }
-            return null;
+            return bEvent;
         };
         responsible.on(finishedHandler);
     }
