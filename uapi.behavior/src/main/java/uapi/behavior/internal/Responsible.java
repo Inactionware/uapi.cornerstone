@@ -179,7 +179,7 @@ public class Responsible implements IResponsible {
         private final Map<Object, Object> _attributes = new HashMap<>();
 
         private BehaviorTraceEventHandler() {
-            this._attributes.put(BehaviorTraceEvent.KEY_RESP_NAME, Responsible.this._name);
+            this._attributes.put(BehaviorTraceEvent.KEY_SOURCE_NAME, Responsible.this._name);
         }
 
         @Override

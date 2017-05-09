@@ -9,6 +9,7 @@
 
 package uapi.behavior;
 
+import uapi.common.ArgumentChecker;
 import uapi.event.AttributedEvent;
 
 import java.util.HashMap;
@@ -19,14 +20,20 @@ import java.util.Map;
  */
 public class BehaviorEvent extends AttributedEvent {
 
-//    private final String _respName;
+    public static final String KEY_SOURCE_NAME  = "SourceName";
 
-    public BehaviorEvent(final String topic) {
+    public BehaviorEvent(final String topic, final String sourceName) {
         super(topic);
-//        this._respName = responsibleName;
+        ArgumentChecker.required(sourceName, "sourceName");
+        set(KEY_SOURCE_NAME, sourceName);
     }
 
-//    public String responsibleName() {
-//        return this._respName;
-//    }
+    /**
+     * Retrieve the source name which indicate which responsible fire this event
+     *
+     * @return  The name of responsible
+     */
+    public String sourceName() {
+        return (String) get(KEY_SOURCE_NAME);
+    }
 }

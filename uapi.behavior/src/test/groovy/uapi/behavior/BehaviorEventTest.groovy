@@ -18,7 +18,7 @@ class BehaviorEventTest extends Specification {
 
     def 'Test create instance'() {
         when:
-        new BehaviorEvent('topic')
+        new BehaviorEvent('topic', 'source')
 
         then:
         noExceptionThrown()

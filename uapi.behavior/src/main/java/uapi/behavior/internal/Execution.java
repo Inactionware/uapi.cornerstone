@@ -44,22 +44,19 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
     ) {
         ArgumentChecker.required(executionContext, "executionContext");
         Object output = input;
+        String sourceRespName = executionContext.get(IExecutionContext.KEY_RESP_NAME);
         do {
             output = this._current.action().process(output, executionContext);
             if (this._traceable) {
                 BehaviorExecutingEvent event = new BehaviorExecutingEvent(
-                        this._id,
-                        input,
-                        output,
-                        this._current.action().getId(),
-                        executionContext.get(IExecutionContext.KEY_RESP_NAME));
+                        this._id, input, output, this._current.action().getId(), sourceRespName);
                 executionContext.fireEvent(event);
             }
             this._current = this._current.findNext(output);
         } while (this._current != null);
         if (this._traceable) {
             BehaviorFinishedEvent event = new BehaviorFinishedEvent(
-                    this._id, input, output, executionContext.get(""));
+                    this._id, input, output, sourceRespName);
             executionContext.fireEvent(event);
         }
         return output;

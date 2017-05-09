@@ -77,6 +77,7 @@ class ExecutionTest extends Specification {
             entranceAction() >> actionHolder
         }
         def execCtx = Mock(IExecutionContext) {
+            get(IExecutionContext.KEY_RESP_NAME) >> 'respName'
             1 * fireEvent(_ as BehaviorExecutingEvent)
             1 * fireEvent(_ as BehaviorFinishedEvent)
         }

@@ -40,7 +40,7 @@ public class ApplicationConstructor {
         BehaviorFinishedEventHandler finishedHandler = event -> {
             if (BEHAVIOR_STARTUP.equals(event.behaviorName())) {
                 // Todo: fire application startup event
-                return new BehaviorEvent("ApplicationStartup");
+                return new BehaviorEvent("ApplicationStartup", responsible.name());
             } else {
                 this._logger.debug("");
             }

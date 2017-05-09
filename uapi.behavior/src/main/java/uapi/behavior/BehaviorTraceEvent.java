@@ -5,16 +5,16 @@ import uapi.event.AttributedEvent;
 /**
  * The interface contains methods which should be used for trace behavior execution
  */
-public abstract class BehaviorTraceEvent extends AttributedEvent {
+public abstract class BehaviorTraceEvent extends BehaviorEvent {
 
     public static final String TOPIC                 = "BehaviorTrace";
     public static final String KEY_EXECUTION_ID      = "ExecutionId";
     public static final String KEY_ORIGINAL_DATA     = "OriginalData";
     public static final String KEY_DATA              = "Data";
-    public static final String KEY_RESP_NAME         = "ResponsibleName";
+//    public static final String KEY_RESP_NAME         = "ResponsibleName";
 
-    public BehaviorTraceEvent() {
-        super(TOPIC);
+    public BehaviorTraceEvent(String sourceName) {
+        super(TOPIC, sourceName);
     }
 
     /**
@@ -53,7 +53,7 @@ public abstract class BehaviorTraceEvent extends AttributedEvent {
         return get(KEY_DATA);
     }
 
-    public String responsibleName() {
-        return (String) get(KEY_RESP_NAME);
-    }
+//    public String responsibleName() {
+//        return (String) get(KEY_RESP_NAME);
+//    }
 }

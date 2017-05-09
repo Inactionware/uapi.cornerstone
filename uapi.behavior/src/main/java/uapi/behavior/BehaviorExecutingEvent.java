@@ -14,16 +14,16 @@ public class BehaviorExecutingEvent extends BehaviorTraceEvent {
             final Object originalData,
             final Object data,
             final ActionIdentify actionId,
-            final String responsibleName
+            final String sourceName
     ) {
-        super();
+        super(sourceName);
         ArgumentChecker.required(executionId, "executionId");
         ArgumentChecker.required(actionId, "actionId");
         set(KEY_EXECUTION_ID, executionId);
         set(KEY_ACTION_ID, actionId);
         set(KEY_ORIGINAL_DATA, originalData);
         set(KEY_DATA, data);
-        set(KEY_RESP_NAME, responsibleName);
+//        set(KEY_RESP_NAME, responsibleName);
     }
 
     public ActionIdentify actionId() {
