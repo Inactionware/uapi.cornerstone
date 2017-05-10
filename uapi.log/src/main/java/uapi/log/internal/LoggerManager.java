@@ -11,6 +11,7 @@ package uapi.log.internal;
 
 import org.slf4j.LoggerFactory;
 import uapi.InvalidArgumentException;
+import uapi.codegen.IGenerated;
 import uapi.log.ILogger;
 import uapi.service.IServiceFactory;
 import uapi.service.annotation.Service;
@@ -25,6 +26,10 @@ public class LoggerManager implements IServiceFactory<ILogger> {
         if (serveFor == null) {
             throw new InvalidArgumentException("servFor", InvalidArgumentException.InvalidArgumentType.EMPTY);
         }
-        return new Logger(LoggerFactory.getLogger(serveFor.getClass()));
+        if (serveFor instanceof IGenerated) {
+            return new Logger(LoggerFactory.getLogger(((IGenerated) serveFor).originalType()));
+        } else {
+            return new Logger(LoggerFactory.getLogger(serveFor.getClass()));
+        }
     }
 }

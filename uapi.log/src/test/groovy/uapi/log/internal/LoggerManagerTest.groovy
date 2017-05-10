@@ -11,6 +11,7 @@ package uapi.log.internal
 
 import spock.lang.Specification
 import uapi.InvalidArgumentException
+import uapi.codegen.IGenerated
 
 /**
  * Unit test for LoggerManager
@@ -23,6 +24,17 @@ class LoggerManagerTest extends Specification {
 
         expect:
         logMgr.createService(new Object()) != null
+    }
+
+    def 'Test createService from IGenerated'() {
+        given:
+        LoggerManager logMgr = new LoggerManager()
+        def generated = Mock(IGenerated) {
+            originalType() >> String.class
+        }
+
+        expect:
+        logMgr.createService(generated) != null
     }
 
     def 'Test createService without objectFor'() {

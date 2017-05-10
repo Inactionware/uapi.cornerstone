@@ -45,7 +45,6 @@ public class ResponsibleRegistry implements IResponsibleRegistry {
         this._actionRepo = new Repository<>();
         this._lock = new ReentrantLock();
         this._responsibles = new HashMap<>();
-//        this._respConstructors = new ArrayList<>();
     }
 
     @Inject
