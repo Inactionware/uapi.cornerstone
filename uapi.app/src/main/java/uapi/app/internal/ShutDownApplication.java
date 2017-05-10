@@ -1,8 +1,10 @@
 package uapi.app.internal;
 
 import uapi.behavior.ActionIdentify;
+import uapi.behavior.ActionType;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
+import uapi.common.StringHelper;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
@@ -14,7 +16,8 @@ import uapi.service.annotation.Tag;
 @Tag("Application")
 public class ShutDownApplication {
 
-    public static final ActionIdentify actionId = ActionIdentify.parse(ShutDownApplication.class.getName() + "@Action");
+    public static final ActionIdentify actionId = ActionIdentify.parse(
+            StringHelper.makeString("{}@{}", ShutDownApplication.class.getName(), ActionType.ACTION));
 
     @ActionDo
     public void shutdown(SystemShuttingDownEvent event) {

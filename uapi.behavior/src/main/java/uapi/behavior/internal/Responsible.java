@@ -12,6 +12,7 @@ package uapi.behavior.internal;
 import uapi.behavior.*;
 import uapi.common.*;
 import uapi.event.IAttributedEventHandler;
+import uapi.event.IEvent;
 import uapi.event.IEventBus;
 
 import java.util.HashMap;
@@ -56,10 +57,12 @@ public class Responsible implements IResponsible {
     @Override
     public IBehaviorBuilder newBehavior(
             final String name,
-            final String topic
+            final Class<? extends IEvent> eventType,
+            final String eventTopic
     ) throws BehaviorException {
-        ArgumentChecker.required(topic, "topic");
-        Behavior behavior = new Behavior(this, this._actionRepo, name, BehaviorEvent.class);
+        ArgumentChecker.required(eventType, "eventType");
+        ArgumentChecker.required(eventTopic, "eventTopic");
+        Behavior behavior = new Behavior(this, this._actionRepo, name, eventType);
         ActionIdentify behaviorId = behavior.getId();
         if (this._behaviors.containsKey(behaviorId)) {
             throw BehaviorException.builder()
@@ -68,7 +71,7 @@ public class Responsible implements IResponsible {
                             .behaviorId(behaviorId).get())
                     .build();
         }
-        this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior, topic));
+        this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior, eventTopic));
         return behavior;
     }
 

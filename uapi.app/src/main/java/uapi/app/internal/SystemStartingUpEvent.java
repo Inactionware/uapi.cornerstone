@@ -1,5 +1,6 @@
 package uapi.app.internal;
 
+import uapi.behavior.BehaviorEvent;
 import uapi.event.IEvent;
 import uapi.service.IService;
 
@@ -8,9 +9,10 @@ import java.util.List;
 /**
  * The event indicate that the system is launched
  */
-public class SystemStartingUpEvent implements IEvent {
+public class SystemStartingUpEvent extends BehaviorEvent {
 
-    public static final String TOPIC = SystemStartingUpEvent.class.getCanonicalName();
+    public static final String SOURCE_NAME  = "_SYSTEM_";
+    public static final String TOPIC        = SystemStartingUpEvent.class.getCanonicalName();
 
     private final long _startTime;
     private final List<IService> _appSvcs;
@@ -19,13 +21,9 @@ public class SystemStartingUpEvent implements IEvent {
             final long startTime,
             final List<IService> applicationServices
     ) {
+        super(TOPIC, SOURCE_NAME);
         this._startTime = startTime;
         this._appSvcs = applicationServices;
-    }
-
-    @Override
-    public String topic() {
-        return TOPIC;
     }
 
     public long startTime() {

@@ -3,13 +3,14 @@ package uapi.app.internal;
 import uapi.app.AppErrors;
 import uapi.app.AppException;
 import uapi.behavior.ActionIdentify;
+import uapi.behavior.ActionType;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
+import uapi.common.StringHelper;
 import uapi.config.ICliConfigProvider;
 import uapi.log.ILogger;
 import uapi.rx.Looper;
 import uapi.service.IRegistry;
-import uapi.service.annotation.Init;
 import uapi.service.annotation.Inject;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
@@ -25,7 +26,8 @@ import java.util.List;
 @Tag("Application")
 public class StartupApplication {
 
-    public static final ActionIdentify actionId = ActionIdentify.parse(StartupApplication.class.getName() + "@Action");
+    public static final ActionIdentify actionId = ActionIdentify.parse(
+            StringHelper.makeString("{}@{}", StartupApplication.class.getName(), ActionType.ACTION));
 
     @Inject
     protected ILogger _logger;

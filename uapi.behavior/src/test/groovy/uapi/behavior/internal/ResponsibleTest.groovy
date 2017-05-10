@@ -43,7 +43,7 @@ class ResponsibleTest extends Specification {
     def 'Test create new behavior by topic'() {
         when:
         def responsible = new Responsible('name', Mock(IEventBus), Mock(Repository))
-        def bBuilder = responsible.newBehavior('bName', 'topic')
+        def bBuilder = responsible.newBehavior('bName', BehaviorEvent.class, 'topic')
 
         then:
         noExceptionThrown()
@@ -53,8 +53,8 @@ class ResponsibleTest extends Specification {
     def 'Test create duplicated name behavior by topic'() {
         when:
         def responsible = new Responsible('name', Mock(IEventBus), Mock(Repository))
-        responsible.newBehavior('bName', 'topic')
-        responsible.newBehavior('bName', 'topic2')
+        responsible.newBehavior('bName', BehaviorEvent.class, 'topic')
+        responsible.newBehavior('bName', BehaviorEvent.class, 'topic2')
 
         then:
         thrown(BehaviorException)
@@ -125,7 +125,7 @@ class ResponsibleTest extends Specification {
 
         when:
         def responsible = new Responsible('name', eventBus, repo)
-        def behaviorBuilder = responsible.newBehavior('bName', 'topic')
+        def behaviorBuilder = responsible.newBehavior('bName', BehaviorEvent.class, 'topic')
         def behavior = behaviorBuilder.then(actionId).build()
 
         then:

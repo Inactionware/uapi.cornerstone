@@ -221,6 +221,9 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         ArgumentChecker.required(serviceId, "serviceId");
         ArgumentChecker.required(serviceFrom, "serviceFrom");
         ServiceHolder svcHolder = findServiceHolder(serviceId, serviceFrom);
+        if (svcHolder == null) {
+            return null;
+        }
         T svc = this._svcActivator.activeService(svcHolder);
         if (svc == null) {
             throw ServiceException.builder()

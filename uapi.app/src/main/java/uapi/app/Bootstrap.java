@@ -35,7 +35,7 @@ import java.util.concurrent.Semaphore;
 public class Bootstrap {
 
     private static final String[] basicSvcTags = new String[] {
-            "Registry", "Config", "Log", "Event", "Behavior"
+            "Registry", "Config", "Log", "Event", "Behavior", "Application", "Profile"
     };
 
     static final AppServiceLoader appSvcLoader = new AppServiceLoader();

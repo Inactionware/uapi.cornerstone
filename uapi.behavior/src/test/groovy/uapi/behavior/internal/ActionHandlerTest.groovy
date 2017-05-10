@@ -19,6 +19,7 @@ import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.MethodMeta
 import uapi.rx.Looper
+import uapi.service.IServiceHandlerHelper
 import uapi.service.annotation.Inject
 import uapi.service.annotation.Service
 
@@ -103,6 +104,9 @@ class ActionHandlerTest extends Specification {
             getSimpleName() >> Mock(Name) {
                 toString() >> 'TestClass'
             }
+            asType() >> Mock(TypeMirror) {
+                toString() >> 'TestClass'
+            }
             getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
             getEnclosedElements() >> []
         }
@@ -122,6 +126,9 @@ class ActionHandlerTest extends Specification {
         def element = Mock(Element) {
             getKind() >> ElementKind.CLASS
             getSimpleName() >> Mock(Name) {
+                toString() >> 'TestClass'
+            }
+            asType() >> Mock(TypeMirror) {
                 toString() >> 'TestClass'
             }
             getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
@@ -148,6 +155,9 @@ class ActionHandlerTest extends Specification {
         def element = Mock(Element) {
             getKind() >> ElementKind.CLASS
             getSimpleName() >> Mock(Name) {
+                toString() >> 'TestClass'
+            }
+            asType() >> Mock(TypeMirror) {
                 toString() >> 'TestClass'
             }
             getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
@@ -177,6 +187,9 @@ class ActionHandlerTest extends Specification {
             getSimpleName() >> Mock(Name) {
                 toString() >> 'TestClass'
             }
+            asType() >> Mock(TypeMirror) {
+                toString() >> 'TestClass'
+            }
             getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
             getEnclosedElements() >> [Mock(ExecutableElement) {
                 getKind() >> ElementKind.METHOD
@@ -202,6 +215,9 @@ class ActionHandlerTest extends Specification {
         def element = Mock(Element) {
             getKind() >> ElementKind.CLASS
             getSimpleName() >> Mock(Name) {
+                toString() >> 'TestClass'
+            }
+            asType() >> Mock(TypeMirror) {
                 toString() >> 'TestClass'
             }
             getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
@@ -245,6 +261,9 @@ class ActionHandlerTest extends Specification {
             getSimpleName() >> Mock(Name) {
                 toString() >> 'TestClass'
             }
+            asType() >> Mock(TypeMirror) {
+                toString() >> 'TestClass'
+            }
             getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
             getEnclosedElements() >> [Mock(ExecutableElement) {
                 getKind() >> ElementKind.METHOD
@@ -271,6 +290,9 @@ class ActionHandlerTest extends Specification {
             checkAnnotations(element, Service.class as Class[]) >> true
             loadTemplate(_) >> Mock(Template)
             findClassBuilder(element) >> clsBuilder
+            1 * getHelper(IServiceHandlerHelper.name) >> Mock(IServiceHandlerHelper) {
+                1 * addServiceId(_, _)
+            }
         }
         1 * clsBuilder.addImplement(_ as String) >> clsBuilder
         4 * clsBuilder.addMethodBuilder(_ as MethodMeta.Builder) >> clsBuilder

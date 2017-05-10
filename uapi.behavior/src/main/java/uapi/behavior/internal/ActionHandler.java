@@ -22,6 +22,7 @@ import uapi.behavior.annotation.ActionDo;
 import uapi.codegen.*;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
+import uapi.service.IServiceHandlerHelper;
 import uapi.service.annotation.Service;
 
 import javax.lang.model.element.*;
@@ -70,7 +71,7 @@ public class ActionHandler extends AnnotationsHandler {
             Action action = classElement.getAnnotation(Action.class);
             String actionName = action.value();
             if (Strings.isNullOrEmpty(actionName)) {
-                actionName = classElement.getSimpleName().toString();
+                actionName = classElement.asType().toString();
             }
             // Check process method
             List actionDoElements = Looper.on(classElement.getEnclosedElements())
@@ -163,6 +164,10 @@ public class ActionHandler extends AnnotationsHandler {
                             .addParameterBuilder(ParameterMeta.builder()
                                     .setName("context").setType(IExecutionContext.class.getCanonicalName()))
                             .addCodeBuilder(CodeMeta.builder().setTemplate(tempProcess).setModel(model)));
+
+            // Add IAction as this service's id
+            IServiceHandlerHelper svcHelper = (IServiceHandlerHelper) builderContext.getHelper(IServiceHandlerHelper.name);
+            svcHelper.addServiceId(clsBuilder, IAction.class.getCanonicalName());
         });
     }
 }

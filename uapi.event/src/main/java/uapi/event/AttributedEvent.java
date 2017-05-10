@@ -41,7 +41,9 @@ public class AttributedEvent extends PlainEvent implements IAttributed {
 
     @Override
     public boolean contains(Map<Object, Object> map) {
-        ArgumentChecker.required(map, "map");
+        if (map == null || map.size() == 0) {
+            return true;
+        }
         int matchedCount = Looper.on(map.entrySet())
                 .filter(entry -> this._attributes.containsKey(entry.getKey()))
                 .filter(entry -> entry.getValue().equals(this._attributes.get(entry.getKey())))

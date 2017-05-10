@@ -15,13 +15,9 @@ import uapi.common.Guarder;
 import uapi.common.Repository;
 import uapi.event.IEventBus;
 import uapi.log.ILogger;
-import uapi.rx.Looper;
-import uapi.service.IInitial;
-import uapi.service.IServiceLifecycle;
 import uapi.service.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -29,7 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Registry for responsible
  */
-@Service
+@Service(IResponsibleRegistry.class)
 @Tag("Behavior")
 public class ResponsibleRegistry implements IResponsibleRegistry {
 
@@ -45,14 +41,11 @@ public class ResponsibleRegistry implements IResponsibleRegistry {
 
     private final Map<String, IResponsible> _responsibles;
 
-    @Inject
-    @Optional
-    protected List<IResponsibleConstructor> _respConstructors;
-
     public ResponsibleRegistry() {
         this._actionRepo = new Repository<>();
         this._lock = new ReentrantLock();
         this._responsibles = new HashMap<>();
+//        this._respConstructors = new ArrayList<>();
     }
 
     @Inject
@@ -65,31 +58,9 @@ public class ResponsibleRegistry implements IResponsibleRegistry {
         }
     }
 
-    @OnActivate
-    public void constructResponsibles() {
-        Looper.on(this._respConstructors).foreach(this::addConstructor);
-    }
-
     @OnInject
     public void injectNewAction(IAction action) {
         addAction(action);
-    }
-
-    @OnInject
-    public void injectNewConstructor(IResponsibleConstructor constructor) {
-        addConstructor(constructor);
-//        if (service instanceof IAction) {
-//            addAction((IAction) service);
-//        } else if (service instanceof IResponsibleConstructor) {
-//            addConstructor((IResponsibleConstructor) service);
-//        } else {
-//            throw BehaviorException.builder()
-//                    .errorCode(BehaviorErrors.UNSUPPORTED_INJECTED_SERVICE)
-//                    .variables(new BehaviorErrors.UnsupportedInjectedService()
-//                            .injectedService(serviceId)
-//                            .injectService(ResponsibleRegistry.class.getName()))
-//                    .build();
-//        }
     }
 
     @Override

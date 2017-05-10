@@ -33,10 +33,10 @@ public class ApplicationConstructor {
     public void activate() {
         // Build responsible and related behavior for application launching
         IResponsible responsible = this._responsibleReg.register("ApplicationHandler");
-        responsible.newBehavior(BEHAVIOR_STARTUP, SystemStartingUpEvent.TOPIC)
+        responsible.newBehavior(BEHAVIOR_STARTUP, SystemStartingUpEvent.class, SystemStartingUpEvent.TOPIC)
                 .then(StartupApplication.actionId)
                 .build();
-        responsible.newBehavior(BEHAVIOR_SHUTDOWN, SystemShuttingDownEvent.TOPIC)
+        responsible.newBehavior(BEHAVIOR_SHUTDOWN, SystemShuttingDownEvent.class, SystemShuttingDownEvent.TOPIC)
                 .then(ShutDownApplication.actionId)
                 .build();
 
