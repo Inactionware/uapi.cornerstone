@@ -37,7 +37,7 @@ public class ApplicationConstructor {
                 .then(StartupApplication.actionId)
                 .build();
         responsible.newBehavior(BEHAVIOR_SHUTDOWN, SystemShuttingDownEvent.class, SystemShuttingDownEvent.TOPIC)
-                .then(ShutDownApplication.actionId)
+                .then(ShutdownApplication.actionId)
                 .build();
 
         BehaviorFinishedEventHandler finishedHandler = event -> {

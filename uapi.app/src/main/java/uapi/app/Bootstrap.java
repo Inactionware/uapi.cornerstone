@@ -113,7 +113,7 @@ public class Bootstrap {
 //                .then(ActionIdentify.parse(StartupApplication.class.getName() + "@Action"))
 //                .build();
 //        responsible.newBehavior("shutDownApplication", SystemShuttingDownEvent.TOPIC)
-//                .then(ActionIdentify.parse(ShutDownApplication.class.getName() + "@Action"))
+//                .then(ActionIdentify.parse(ShutdownApplication.class.getName() + "@Action"))
 //                .build();
 
         // Send system starting up event

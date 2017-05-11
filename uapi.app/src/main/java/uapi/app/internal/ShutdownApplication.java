@@ -14,10 +14,10 @@ import uapi.service.annotation.Tag;
 @Service
 @Action
 @Tag("Application")
-public class ShutDownApplication {
+public class ShutdownApplication {
 
     public static final ActionIdentify actionId = ActionIdentify.parse(
-            StringHelper.makeString("{}@{}", ShutDownApplication.class.getName(), ActionType.ACTION));
+            StringHelper.makeString("{}@{}", ShutdownApplication.class.getName(), ActionType.ACTION));
 
     @ActionDo
     public void shutdown(SystemShuttingDownEvent event) {
