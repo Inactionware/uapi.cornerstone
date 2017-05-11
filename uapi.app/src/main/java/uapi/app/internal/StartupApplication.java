@@ -7,7 +7,6 @@ import uapi.behavior.ActionType;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
 import uapi.common.StringHelper;
-import uapi.config.ICliConfigProvider;
 import uapi.log.ILogger;
 import uapi.rx.Looper;
 import uapi.service.IRegistry;
@@ -42,7 +41,7 @@ public class StartupApplication {
             throw AppException.builder()
                     .errorCode(AppErrors.SPECIFIC_SERVICE_NOT_FOUND)
                     .variables(new AppErrors.SpecificServiceNotFound()
-                            .serviceType(ICliConfigProvider.class.getCanonicalName()))
+                            .serviceType(ProfileManager.class.getCanonicalName()))
                     .build();
         }
         IProfile profile = profileMgr.getActiveProfile();
