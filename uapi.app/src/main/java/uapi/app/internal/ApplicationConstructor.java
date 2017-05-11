@@ -18,10 +18,10 @@ import uapi.service.annotation.Tag;
 @Tag("Application")
 public class ApplicationConstructor {
 
-    private static final String BEHAVIOR_STARTUP    = "startUpApplication";
-    private static final String BEHAVIOR_SHUTDOWN   = "shutDownApplication";
+    private static final String RESPONSIBLE_NAME    = "Application";
 
-    private static final String EVENT_APP_STARTUP   = "ApplicationStartup";
+    private static final String BEHAVIOR_STARTUP    = "startUp";
+    private static final String BEHAVIOR_SHUTDOWN   = "shutdown";
 
     @Inject
     protected ILogger _logger;
@@ -32,7 +32,7 @@ public class ApplicationConstructor {
     @OnActivate
     public void activate() {
         // Build responsible and related behavior for application launching
-        IResponsible responsible = this._responsibleReg.register("ApplicationHandler");
+        IResponsible responsible = this._responsibleReg.register(RESPONSIBLE_NAME);
         responsible.newBehavior(BEHAVIOR_STARTUP, SystemStartingUpEvent.class, SystemStartingUpEvent.TOPIC)
                 .then(StartupApplication.actionId)
                 .build();

@@ -7,13 +7,17 @@
  * use the project into a commercial product
  */
 
-package uapi.app.internal
+package uapi.app
 
 import org.junit.Ignore
 import spock.lang.Specification
 import uapi.app.AppException
 import uapi.app.Bootstrap
+import uapi.app.internal.AppServiceLoader
+import uapi.app.internal.SystemShuttingDownEvent
+import uapi.app.internal.SystemStartingUpEvent
 import uapi.config.ICliConfigProvider
+import uapi.event.IEventBus
 import uapi.service.IRegistry
 import uapi.service.IService
 import uapi.service.ITagged
@@ -21,7 +25,6 @@ import uapi.service.ITagged
 /**
  * Unit tests for Bootstrap
  */
-@Ignore
 class BootstrapTest extends Specification {
 
     def 'Test start up with zero registry'() {
@@ -81,69 +84,62 @@ class BootstrapTest extends Specification {
         thrown(AppException)
     }
 
-    def 'Test start up when profile manager service was not found'() {
+    def 'Test start up'() {
         given:
         def registry = Mock(IRegistryService)
-        registry.findService(IRegistry.class) >> registry
-        registry.findService(ICliConfigProvider.class) >> Mock(ICliConfigProvider)
-        Bootstrap.appSvcLoader = Mock(AppServiceLoader) {
-            loadServices() >> [registry]
+        1 * registry.findService(IRegistry.class) >> registry
+        1 * registry.findService(IEventBus.class) >> Mock(IEventBus) {
+            1 * fire(_ as SystemStartingUpEvent)
+            1 * fire(_ as SystemShuttingDownEvent, true)
         }
-
-        when:
-        Bootstrap.main([] as String[])
-
-        then:
-        thrown(AppException)
-    }
-
-    def 'Test start up when application service was not found'() {
-        given:
-        def registry = Mock(IRegistryService)
-        registry.findService(IRegistry.class) >> registry
-        registry.findService(ICliConfigProvider.class) >> Mock(ICliConfigProvider)
-        registry.findService(ProfileManager.class) >> Mock(ProfileManager) {
-            getActiveProfile() >> Mock(IProfile) {
-                isAllow() >> true
-            }
+        registry.findService(ICliConfigProvider.class) >> Mock(ICliConfigProvider) {
+            1 * parse(_)
         }
         Bootstrap.appSvcLoader = Mock(AppServiceLoader) {
             loadServices() >> [registry]
         }
 
         when:
+        def t = new Thread({
+            Thread.sleep(1000)
+            Bootstrap.semaphore.release()
+        })
+        t.start()
         Bootstrap.main([] as String[])
 
         then:
-        thrown(AppException)
+        noExceptionThrown()
     }
 
-//    def 'Test start up'() {
-//        given:
-//        def cliCfg = Mock(ICliConfigProvider)
-//        def profileMgr = Mock(ProfileManager) {
-//            getActiveProfile() >> Mock(IProfile) {
-//                isAllow() >> true
-//            }
-//        }
-//        def app = Mock(Application)
-//        def registry = Mock(IRegistryService)
-//        registry.findService(IRegistry.class) >> registry
-//        registry.findService(ICliConfigProvider.class) >> cliCfg
-//        registry.findService(ProfileManager.class) >> profileMgr
-//        registry.findService(Application.class) >> app
-//        Bootstrap.appSvcLoader = Mock(AppServiceLoader) {
-//            loadServices() >> [registry]
-//        }
-//
-//        when:
-//        Bootstrap.main([] as String[])
-//
-//        then:
-//        noExceptionThrown()
-//        1 * cliCfg.parse(_)
-//        1 * app.startup(_)
-//    }
+    def 'Test start up with tagged service'() {
+        given:
+        def registry = Mock(IRegistryService)
+        def taggedSvc = Mock(ITaggedService2) {
+            1 * getTags() >> ['tag']
+        }
+        1 * registry.findService(IRegistry.class) >> registry
+        1 * registry.findService(IEventBus.class) >> Mock(IEventBus) {
+            1 * fire(_ as SystemStartingUpEvent)
+            1 * fire(_ as SystemShuttingDownEvent, true)
+        }
+        registry.findService(ICliConfigProvider.class) >> Mock(ICliConfigProvider) {
+            1 * parse(_)
+        }
+        Bootstrap.appSvcLoader = Mock(AppServiceLoader) {
+            loadServices() >> [registry, taggedSvc]
+        }
+
+        when:
+        def t = new Thread({
+            Thread.sleep(1000)
+            Bootstrap.semaphore.release()
+        })
+        t.start()
+        Bootstrap.main([] as String[])
+
+        then:
+        noExceptionThrown()
+    }
 
     interface IRegistryService extends IRegistry, IService {}
 

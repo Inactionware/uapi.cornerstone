@@ -29,8 +29,8 @@ import java.util.concurrent.Semaphore;
 
 /**
  * The UAPI application entry point
- * The Bootstrap's responsibility is load basic services and all other services is loaded by
- * profile definition
+ * The Bootstrap's responsibility is load basic services, parse command line arguments and
+ * send out system startup event
  */
 public class Bootstrap {
 
@@ -38,7 +38,7 @@ public class Bootstrap {
             "Registry", "Config", "Log", "Event", "Behavior", "Application", "Profile"
     };
 
-    static final AppServiceLoader appSvcLoader = new AppServiceLoader();
+    static AppServiceLoader appSvcLoader = new AppServiceLoader();
     static final Semaphore semaphore = new Semaphore(0);
 
     public static void main(String[] args) {
@@ -106,16 +106,6 @@ public class Bootstrap {
         // All base service must be activated
         Looper.on(basicSvcTags).foreach(svcRegistry::activateTaggedService);
 
-        // Build responsible and related behavior for application launching
-//        IResponsibleRegistry responsibleReg = svcRegistry.findService(IResponsibleRegistry.class);
-//        IResponsible responsible = responsibleReg.register("ApplicationHandler");
-//        responsible.newBehavior("startUpApplication", SystemStartingUpEvent.TOPIC)
-//                .then(ActionIdentify.parse(StartupApplication.class.getName() + "@Action"))
-//                .build();
-//        responsible.newBehavior("shutDownApplication", SystemShuttingDownEvent.TOPIC)
-//                .then(ActionIdentify.parse(ShutdownApplication.class.getName() + "@Action"))
-//                .build();
-
         // Send system starting up event
         SystemStartingUpEvent sysLaunchedEvent = new SystemStartingUpEvent(startTime, otherSvcs);
         IEventBus eventBus = svcRegistry.findService(IEventBus.class);
@@ -131,33 +121,7 @@ public class Bootstrap {
 
         // Send system shutting down event
         SystemShuttingDownEvent shuttingDownEvent = new SystemShuttingDownEvent(ex);
-        eventBus.fire(shuttingDownEvent);
-
-        System.exit(0);
-
-//        // Create profile
-//        ProfileManager profileMgr = svcRegistry.findService(ProfileManager.class);
-//        if (profileMgr == null) {
-//            throw AppException.builder()
-//                    .errorCode(AppErrors.SPECIFIC_SERVICE_NOT_FOUND)
-//                    .variables(new AppErrors.SpecificServiceNotFound()
-//                            .serviceType(ICliConfigProvider.class.getCanonicalName()))
-//                    .build();
-//        }
-//        IProfile profile = profileMgr.getActiveProfile();
-//
-//        // Register other service
-//        Looper.on(otherSvcs)
-//                .filter(profile::isAllow)
-//                .foreach(svcRegistry::register);
-//
-//        Application app = svcRegistry.findService(Application.class);
-//        if (app == null) {
-//            throw AppException.builder()
-//                    .errorCode(AppErrors.INIT_APPLICATION_FAILED)
-//                    .build();
-//        }
-//        app.startup(startTime);
+        eventBus.fire(shuttingDownEvent, true);
     }
 
     private static final class ShutdownHook implements Runnable {
@@ -167,4 +131,7 @@ public class Bootstrap {
             semaphore.release();
         }
     }
+
+    // Private constructor
+    private Bootstrap() {}
 }
