@@ -7,15 +7,6 @@ import uapi.common.Functionals;
  */
 public interface IBehaviorBuilder {
 
-//    /**
-//     * Set behavior name
-//     *
-//     * @param   name
-//     *          The behavior name
-//     * @return  The behavior builder self
-//     */
-//    IBehaviorBuilder name(String name);
-
     /**
      * Set this behavior is traceable or not
      *

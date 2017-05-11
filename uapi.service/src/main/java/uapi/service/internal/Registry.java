@@ -331,11 +331,11 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                         // Check whether the new register service depends on existing service
                         Looper.on(this._svcRepo.values())
                                 .filter(existingSvc -> svcHolder.isDependsOn(existingSvc.getQualifiedId()))
-                                .foreach(svcHolder::setDependency);
+                                .foreach(existingSvc -> svcHolder.setDependency(existingSvc, this._svcActivator));
                         // Check whether existing service depends on the new register service
                         Looper.on(this._svcRepo.values())
                                 .filter(existingSvc -> existingSvc.isDependsOn(svcHolder.getQualifiedId()))
-                                .foreach(existingSvc -> existingSvc.setDependency(svcHolder));
+                                .foreach(existingSvc -> existingSvc.setDependency(svcHolder, this._svcActivator));
                         this._svcRepo.put(svcHolder.getId(), svcHolder);
                     });
                 });

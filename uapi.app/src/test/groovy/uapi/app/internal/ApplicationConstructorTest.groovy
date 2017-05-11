@@ -23,9 +23,11 @@ class ApplicationConstructorTest extends Specification {
         def respReg = Mock(IResponsibleRegistry) {
             def startupBehaviorBuilder = Mock(IBehaviorBuilder)
             1 * startupBehaviorBuilder.then(_) >> startupBehaviorBuilder
+            1 * startupBehaviorBuilder.traceable(_) >> startupBehaviorBuilder
             1 * startupBehaviorBuilder.build()
             def shutdownBehaviorBuilder = Mock(IBehaviorBuilder)
             1 * shutdownBehaviorBuilder.then(_) >> shutdownBehaviorBuilder
+            1 * shutdownBehaviorBuilder.traceable(_) >> shutdownBehaviorBuilder
             1 * shutdownBehaviorBuilder.build()
             1 * register(ApplicationConstructor.RESPONSIBLE_NAME) >> Mock(IResponsible) {
                 1 * newBehavior(ApplicationConstructor.BEHAVIOR_STARTUP, _, _) >> startupBehaviorBuilder

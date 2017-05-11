@@ -1,6 +1,7 @@
 package uapi.app.internal;
 
 import uapi.GeneralException;
+import uapi.app.AppStartupEvent;
 import uapi.behavior.BehaviorEvent;
 import uapi.behavior.BehaviorFinishedEventHandler;
 import uapi.behavior.IResponsible;
@@ -35,9 +36,11 @@ public class ApplicationConstructor {
         IResponsible responsible = this._responsibleReg.register(RESPONSIBLE_NAME);
         responsible.newBehavior(BEHAVIOR_STARTUP, SystemStartingUpEvent.class, SystemStartingUpEvent.TOPIC)
                 .then(StartupApplication.actionId)
+                .traceable(true)
                 .build();
         responsible.newBehavior(BEHAVIOR_SHUTDOWN, SystemShuttingDownEvent.class, SystemShuttingDownEvent.TOPIC)
                 .then(ShutdownApplication.actionId)
+                .traceable(true)
                 .build();
 
         BehaviorFinishedEventHandler finishedHandler = event -> {

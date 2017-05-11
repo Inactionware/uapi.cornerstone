@@ -18,6 +18,6 @@ public class HelloWorld {
 
     @OnActivate
     public void activate() {
-        this._logger.info("Hello World!");
+        this._logger.info("Hello World");
     }
 }

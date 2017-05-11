@@ -200,7 +200,7 @@ public class ServiceHolder implements IServiceReference {
         return dep != null;
     }
 
-    public void setDependency(ServiceHolder service) {
+    public void setDependency(ServiceHolder service, ServiceActivator serviceActivator) {
         ArgumentChecker.notNull(service, "service");
 
         // remove null entry first
@@ -227,7 +227,20 @@ public class ServiceHolder implements IServiceReference {
                             .serviceId(this.getId()))
                     .build();
         }
-        Object injectedSvc = service.getService();
+        // The service must be activated before use it
+        Object injectedSvc;
+        if (! service.isActivated()) {
+            injectedSvc = serviceActivator.activeService(service);
+        } else {
+            injectedSvc = service.getService();
+        }
+        if (injectedSvc == null) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
+                    .variables(new ServiceErrors.ServiceActivationFailed()
+                            .serviceId(service.getId()))
+                    .build();
+        }
         if (injectedSvc instanceof IServiceFactory) {
             // Create service from service factory
             injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);

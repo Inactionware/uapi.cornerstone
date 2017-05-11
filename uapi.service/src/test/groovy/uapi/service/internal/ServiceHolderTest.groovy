@@ -70,9 +70,10 @@ class ServiceHolderTest extends Specification {
                 toString() >> 'dep2Id'
             }
         }
+        def svcActivator = Mock(ServiceActivator)
 
         when:
-        svcHolder.setDependency(depSvcHolder)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         then:
         thrown(ServiceException)
@@ -101,9 +102,10 @@ class ServiceHolderTest extends Specification {
                 1 * isAssignTo(_) >> true
             }
         }
+        def svcActivator = Mock(ServiceActivator)
 
         when:
-        svcHolder.setDependency(depSvcHolder)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         then:
         noExceptionThrown()
@@ -176,11 +178,12 @@ class ServiceHolderTest extends Specification {
             getServiceId() >> new QualifiedServiceId('depId2', QualifiedServiceId.FROM_ANY)
         }
         def svc = Mock(IInjectable)
+        def svcActivator = Mock(ServiceActivator)
         def svcHolder = new ServiceHolder(from, svc, svcId, [dependency, dependency2] as Dependency[], satisfiyHook)
         svcHolder.setDependency(Mock(ServiceHolder) {
             isActivated() >> true
             getQualifiedId() >> new QualifiedServiceId('depId2', QualifiedServiceId.FROM_LOCAL)
-        })
+        }, svcActivator)
 
         when:
         def unactivatedSvcs = svcHolder.getUnactivatedServices()
@@ -239,7 +242,8 @@ class ServiceHolderTest extends Specification {
             }
             isResolved() >> false
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.resolve()
@@ -275,7 +279,8 @@ class ServiceHolderTest extends Specification {
             }
             isActivated() >> true
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.resolve()
@@ -311,7 +316,8 @@ class ServiceHolderTest extends Specification {
             }
             isActivated() >> true
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
         svcHolder.resolve()
 
         when:
@@ -349,7 +355,8 @@ class ServiceHolderTest extends Specification {
             isResolved() >> true
             isInjected() >> false
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.inject()
@@ -388,7 +395,8 @@ class ServiceHolderTest extends Specification {
             getService() >> depSvc
             isActivated() >> true
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.inject()
@@ -428,7 +436,8 @@ class ServiceHolderTest extends Specification {
             getService() >> depSvc
             isActivated() >> true
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.inject()
@@ -471,7 +480,8 @@ class ServiceHolderTest extends Specification {
             getService() >> depSvc
             isActivated() >> true
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.inject()
@@ -511,7 +521,8 @@ class ServiceHolderTest extends Specification {
             getService() >> depSvc
             isActivated() >> true
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.satisfy()
@@ -554,7 +565,8 @@ class ServiceHolderTest extends Specification {
             getService() >> depSvc
             isActivated() >> true
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.satisfy()
@@ -597,7 +609,8 @@ class ServiceHolderTest extends Specification {
             getService() >> depSvc
             isActivated() >> true
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.satisfy()
@@ -640,7 +653,8 @@ class ServiceHolderTest extends Specification {
             getService() >> depSvc
             isActivated() >> true
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.satisfy()
@@ -687,7 +701,8 @@ class ServiceHolderTest extends Specification {
             isSatisfied() >> true
             isActivated() >> false
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.activate()
@@ -735,7 +750,8 @@ class ServiceHolderTest extends Specification {
             isSatisfied() >> true
             isActivated() >> true
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.activate()
@@ -782,7 +798,8 @@ class ServiceHolderTest extends Specification {
             isSatisfied() >> true
             isActivated() >> true
         }
-        svcHolder.setDependency(depSvcHolder)
+        def svcActivator = Mock(ServiceActivator)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         when:
         svcHolder.activate()
@@ -828,10 +845,11 @@ class ServiceHolderTest extends Specification {
             isSatisfied() >> true
             isActivated() >> true
         }
+        def svcActivator = Mock(ServiceActivator)
 
         when:
         svcHolder.activate()
-        svcHolder.setDependency(depSvcHolder)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         then:
         noExceptionThrown()
@@ -876,10 +894,11 @@ class ServiceHolderTest extends Specification {
             isSatisfied() >> true
             isActivated() >> true
         }
+        def svcActivator = Mock(ServiceActivator)
 
         when:
         svcHolder.activate()
-        svcHolder.setDependency(depSvcHolder)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         then:
         noExceptionThrown()
@@ -920,10 +939,11 @@ class ServiceHolderTest extends Specification {
             isSatisfied() >> true
             isActivated() >> true
         }
+        def svcActivator = Mock(ServiceActivator)
 
         when:
         svcHolder.activate()
-        svcHolder.setDependency(depSvcHolder)
+        svcHolder.setDependency(depSvcHolder, svcActivator)
 
         then:
         thrown(ServiceException)

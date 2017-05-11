@@ -101,21 +101,12 @@ public class Behavior<I, O>
     // ----------------------------------------------------
     @Override
     public boolean traceable() {
-        ensureBuilt();
         return this._traceable;
     }
 
     // ----------------------------------------------------
     // Methods implement from IBehaviorBuilder interface
     // ----------------------------------------------------
-
-//    @Override
-//    public IBehaviorBuilder name(final String name) {
-//        ensureNotBuilt();
-//        ArgumentChecker.required(name, "name");
-//        this._actionId = new ActionIdentify(name, ActionType.BEHAVIOR);
-//        return this;
-//    }
 
     @Override
     public IBehaviorBuilder traceable(

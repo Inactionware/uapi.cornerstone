@@ -134,6 +134,10 @@ public class Responsible implements IResponsible {
             BehaviorEventHandler handler = new BehaviorEventHandler(topic, behavior);
             this._eventBus.register(handler);
         }
+        // The trace event handler must be registered if any behavior is traceable
+        if (behavior.traceable()) {
+            registerEventHandler();
+        }
         behaviorHolder.setPublished();
     }
 

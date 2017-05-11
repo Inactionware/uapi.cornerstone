@@ -1,4 +1,4 @@
-package uapi.app.internal;
+package uapi.app;
 
 import uapi.behavior.BehaviorEvent;
 
