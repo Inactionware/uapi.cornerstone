@@ -118,32 +118,32 @@ class BootstrapTest extends Specification {
         thrown(AppException)
     }
 
-    def 'Test start up'() {
-        given:
-        def cliCfg = Mock(ICliConfigProvider)
-        def profileMgr = Mock(ProfileManager) {
-            getActiveProfile() >> Mock(IProfile) {
-                isAllow() >> true
-            }
-        }
-        def app = Mock(Application)
-        def registry = Mock(IRegistryService)
-        registry.findService(IRegistry.class) >> registry
-        registry.findService(ICliConfigProvider.class) >> cliCfg
-        registry.findService(ProfileManager.class) >> profileMgr
-        registry.findService(Application.class) >> app
-        Bootstrap.appSvcLoader = Mock(AppServiceLoader) {
-            loadServices() >> [registry]
-        }
-
-        when:
-        Bootstrap.main([] as String[])
-
-        then:
-        noExceptionThrown()
-        1 * cliCfg.parse(_)
-        1 * app.startup(_)
-    }
+//    def 'Test start up'() {
+//        given:
+//        def cliCfg = Mock(ICliConfigProvider)
+//        def profileMgr = Mock(ProfileManager) {
+//            getActiveProfile() >> Mock(IProfile) {
+//                isAllow() >> true
+//            }
+//        }
+//        def app = Mock(Application)
+//        def registry = Mock(IRegistryService)
+//        registry.findService(IRegistry.class) >> registry
+//        registry.findService(ICliConfigProvider.class) >> cliCfg
+//        registry.findService(ProfileManager.class) >> profileMgr
+//        registry.findService(Application.class) >> app
+//        Bootstrap.appSvcLoader = Mock(AppServiceLoader) {
+//            loadServices() >> [registry]
+//        }
+//
+//        when:
+//        Bootstrap.main([] as String[])
+//
+//        then:
+//        noExceptionThrown()
+//        1 * cliCfg.parse(_)
+//        1 * app.startup(_)
+//    }
 
     interface IRegistryService extends IRegistry, IService {}
 
