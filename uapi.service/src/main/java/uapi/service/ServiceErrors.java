@@ -43,6 +43,7 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
     public static final int RESET_SERVICE_IS_DENIED             = 17;
     public static final int MULTIPLE_SERVICE_FOUND              = 18;
     public static final int NO_SERVICE_FOUND                    = 19;
+    public static final int SERVICE_DEACTIVATION_TASK_TIMED_OUT = 20;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -67,6 +68,7 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         keyCodeMapping.put(RESET_SERVICE_IS_DENIED, ResetServiceIsDenied.KEY);
         keyCodeMapping.put(MULTIPLE_SERVICE_FOUND, MultipleServiceFound.KEY);
         keyCodeMapping.put(NO_SERVICE_FOUND, NoServiceFound.KEY);
+        keyCodeMapping.put(SERVICE_DEACTIVATION_TASK_TIMED_OUT, ServiceDeactivationTaskTimedOut.KEY);
     }
 
     @Override
@@ -140,6 +142,26 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         private QualifiedServiceId _svcId;
 
         public ServiceActiveTaskTimedOut serviceId(final QualifiedServiceId serviceId) {
+            this._svcId = serviceId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._svcId };
+        }
+    }
+
+    /**
+     * The task for deactivate service is timed out - {}
+     */
+    public static final class ServiceDeactivationTaskTimedOut extends IndexedParameters<ServiceDeactivationTaskTimedOut> {
+
+        private static final String KEY = "ServiceDeactivationTaskTimedOut";
+
+        private QualifiedServiceId _svcId;
+
+        public ServiceDeactivationTaskTimedOut serviceId(final QualifiedServiceId serviceId) {
             this._svcId = serviceId;
             return this;
         }

@@ -6,6 +6,7 @@ import uapi.codegen.*;
 import uapi.common.ArgumentChecker;
 import uapi.service.IServiceLifecycleHandlerHelper;
 import uapi.service.annotation.OnActivate;
+import uapi.service.annotation.OnDestroy;
 import uapi.service.annotation.OnInject;
 
 import javax.lang.model.element.Element;
@@ -20,22 +21,24 @@ public class ServiceLifecycleHandler extends AnnotationsHandler {
 
     @SuppressWarnings("unchecked")
     private final Class<? extends Annotation>[] orderedAnnotations =
-            new Class[] { OnActivate.class, OnInject.class};
+            new Class[] { OnActivate.class, OnInject.class, OnDestroy.class };
 
     @Override
     protected Class<? extends Annotation>[] getOrderedAnnotations() {
         return orderedAnnotations;
     }
 
-    private OnActivateParser _onActivateParser;
-    private OnInjectParser _onInjectParser;
+    private OnActivateParser    _onActivateParser;
+    private OnInjectParser      _onInjectParser;
+    private OnDestroyParser     _onDestroyParser;
 
     private ServiceLifecycleHandlerHelper _handlerHelper;
 
     public ServiceLifecycleHandler() {
-        this._onActivateParser = new OnActivateParser();
-        this._onInjectParser = new OnInjectParser();
-        this._handlerHelper = new ServiceLifecycleHandlerHelper();
+        this._onActivateParser  = new OnActivateParser();
+        this._onInjectParser    = new OnInjectParser();
+        this._onDestroyParser   = new OnDestroyParser();
+        this._handlerHelper     = new ServiceLifecycleHandlerHelper();
     }
 
     @Override
@@ -55,6 +58,8 @@ public class ServiceLifecycleHandler extends AnnotationsHandler {
             this._onActivateParser.parse(builderContext, elements);
         } else if (annotationType.equals(OnInject.class)) {
             this._onInjectParser.parse(builderContext, elements);
+        } else if (annotationType.equals(OnDestroy.class)) {
+            this._onDestroyParser.parse(builderContext, elements);
         } else {
             throw new GeneralException("Unsupported annotation - {}", annotationType.getClass().getName());
         }
@@ -62,6 +67,7 @@ public class ServiceLifecycleHandler extends AnnotationsHandler {
         // Ensure all classes should implement all methods which are defined in IServiceLifecycle interface
         this._onActivateParser.addOnActivateMethodIfAbsent(builderContext, elements);
         this._onInjectParser.addInjectMethodIfAbsent(builderContext, elements);
+        this._onDestroyParser.addOnDestroyMethodIfAbsent(builderContext, elements);
     }
 
     private class ServiceLifecycleHandlerHelper implements IServiceLifecycleHandlerHelper {

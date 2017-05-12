@@ -147,4 +147,20 @@ public interface IRegistry {
      *          The tag
      */
     void activateTaggedService(final String tag);
+
+    /**
+     * Deactivate service(s) by specific tag
+     *
+     * @param   tag
+     *          The tags
+     */
+    void deactivateTaggedService(final String tag);
+
+    /**
+     * Deactivate service(s) by specific id
+     *
+     * @param   serviceIds
+     *          Service id array
+     */
+    void deactivateServices(String[] serviceIds);
 }

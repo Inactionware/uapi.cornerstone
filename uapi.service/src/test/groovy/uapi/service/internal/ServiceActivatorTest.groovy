@@ -38,7 +38,7 @@ class ServiceActivatorTest extends Specification {
         def svcActivator = new ServiceActivator(Mock(IExternalServiceLoader))
 
         when:
-        def result = svcActivator.activeService(svcHolder)
+        def result = svcActivator.activateService(svcHolder)
 
         then:
         noExceptionThrown()
@@ -57,7 +57,7 @@ class ServiceActivatorTest extends Specification {
         def svcActivator = new ServiceActivator(Mock(IExternalServiceLoader))
 
         when:
-        def result = svcActivator.activeService(svcHolder)
+        def result = svcActivator.activateService(svcHolder)
 
         then:
         noExceptionThrown()
@@ -85,7 +85,7 @@ class ServiceActivatorTest extends Specification {
         def svcActivator = new ServiceActivator(extSvcLoader)
 
         when:
-        def result = svcActivator.activeService(svcHolder)
+        def result = svcActivator.activateService(svcHolder)
 
         then:
         noExceptionThrown()
@@ -112,7 +112,7 @@ class ServiceActivatorTest extends Specification {
         def svcActivator = new ServiceActivator(extSvcLoader)
 
         when:
-        def result = svcActivator.activeService(svcHolder)
+        def result = svcActivator.activateService(svcHolder)
 
         then:
         thrown(ServiceException)
@@ -140,7 +140,7 @@ class ServiceActivatorTest extends Specification {
         def svcActivator = new ServiceActivator(extSvcLoader)
 
         when:
-        def result = svcActivator.activeService(svcHolder)
+        def result = svcActivator.activateService(svcHolder)
 
         then:
         thrown(ServiceException)
@@ -179,7 +179,7 @@ class ServiceActivatorTest extends Specification {
         def svcActivator = new ServiceActivator(extSvcLoader)
 
         when:
-        svcActivator.activeService(svcHolder, IntervalTime.parse('1s'))
+        svcActivator.activateService(svcHolder, IntervalTime.parse('1s'))
         extSvcLoader.unlocked = true
         synchronized (lock) {
             lock.notifyAll()
@@ -243,14 +243,14 @@ class ServiceActivatorTest extends Specification {
         new Thread(new Runnable() {
             @Override
             void run() {
-                result = svcActivator.activeService(svcHolder)
+                result = svcActivator.activateService(svcHolder)
             }
         }).start()
         def result2 = null
         new Thread(new Runnable() {
             @Override
             void run() {
-                result2 = svcActivator.activeService(svcHolder2)
+                result2 = svcActivator.activateService(svcHolder2)
             }
         }).start()
         Thread.sleep(500)

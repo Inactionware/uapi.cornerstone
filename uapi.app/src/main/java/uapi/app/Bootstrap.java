@@ -9,15 +9,12 @@
 
 package uapi.app;
 
-import uapi.app.AppErrors;
-import uapi.app.AppException;
+import uapi.UapiException;
 import uapi.app.internal.*;
-import uapi.behavior.ActionIdentify;
-import uapi.behavior.IResponsible;
-import uapi.behavior.IResponsibleRegistry;
 import uapi.config.ICliConfigProvider;
 import uapi.common.CollectionHelper;
 import uapi.event.IEventBus;
+import uapi.event.IEventHandler;
 import uapi.rx.Looper;
 import uapi.service.IRegistry;
 import uapi.service.IService;
@@ -109,6 +106,7 @@ public class Bootstrap {
         // Send system starting up event
         SystemStartingUpEvent sysLaunchedEvent = new SystemStartingUpEvent(startTime, otherSvcs);
         IEventBus eventBus = svcRegistry.findService(IEventBus.class);
+        eventBus.register(new ExitSystemRequestHandler());
         eventBus.fire(sysLaunchedEvent);
 
         Exception ex = null;
@@ -120,7 +118,7 @@ public class Bootstrap {
         }
 
         // Send system shutting down event
-        SystemShuttingDownEvent shuttingDownEvent = new SystemShuttingDownEvent(ex);
+        SystemShuttingDownEvent shuttingDownEvent = new SystemShuttingDownEvent(otherSvcs, ex);
         eventBus.fire(shuttingDownEvent, true);
     }
 
@@ -129,6 +127,19 @@ public class Bootstrap {
         @Override
         public void run() {
             semaphore.release();
+        }
+    }
+
+    private static final class ExitSystemRequestHandler implements IEventHandler<ExitSystemRequest> {
+
+        @Override
+        public String topic() {
+            return ExitSystemRequest.TOPIC;
+        }
+
+        @Override
+        public void handle(ExitSystemRequest event) throws UapiException {
+            Bootstrap.semaphore.release();
         }
     }
 

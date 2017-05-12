@@ -19,10 +19,11 @@ import java.util.Map;
  */
 public class ServiceHolder implements IServiceReference {
 
-    private static final String OP_RESOLVE  = "resolve";
-    private static final String OP_INJECT   = "inject";
-    private static final String OP_SATISFY  = "satisfy";
-    private static final String OP_ACTIVATE = "activate";
+    private static final String OP_RESOLVE      = "resolve";
+    private static final String OP_INJECT       = "inject";
+    private static final String OP_SATISFY      = "satisfy";
+    private static final String OP_ACTIVATE     = "activate";
+    private static final String OP_DEACTIVATE   = "deactivate";
 
     private final Object _svc;
     private final String _svcId;
@@ -106,6 +107,9 @@ public class ServiceHolder implements IServiceReference {
                     innerActivate();
                     newState = ServiceState.Activated;
                     break;
+                case OP_DEACTIVATE:
+                    innerDeactivate();
+                    newState = ServiceState.Deactivated;
                 default:
                     throw ServiceException.builder()
                             .errorCode(ServiceErrors.UNSUPPORTED_SERVICE_HOLDER_STATE)
@@ -171,6 +175,10 @@ public class ServiceHolder implements IServiceReference {
         this._stateTracer.shift(OP_ACTIVATE);
     }
 
+    public void deactivate() {
+        this._stateTracer.shift(OP_DEACTIVATE);
+    }
+
     public boolean isResolved() {
         return this._stateTracer.get().value() >= ServiceState.Resolved.value();
     }
@@ -185,6 +193,10 @@ public class ServiceHolder implements IServiceReference {
 
     public boolean isActivated() {
         return this._stateTracer.get().value() >= ServiceState.Activated.value();
+    }
+
+    public boolean isDeactivated() {
+        return this._stateTracer.get().value() >= ServiceState.Deactivated.value();
     }
 
     public boolean isDependsOn(QualifiedServiceId qualifiedServiceId) {
@@ -230,7 +242,7 @@ public class ServiceHolder implements IServiceReference {
         // The service must be activated before use it
         Object injectedSvc;
         if (! service.isActivated()) {
-            injectedSvc = serviceActivator.activeService(service);
+            injectedSvc = serviceActivator.activateService(service);
         } else {
             injectedSvc = service.getService();
         }
@@ -425,8 +437,18 @@ public class ServiceHolder implements IServiceReference {
                     .build();
         }
 
-        if (_svc instanceof IServiceLifecycle) {
-            ((IServiceLifecycle) _svc).onActivate();
+        if (this._svc instanceof IServiceLifecycle) {
+            ((IServiceLifecycle) this._svc).onActivate();
+        }
+    }
+
+    private void innerDeactivate() {
+        if (! isActivated()) {
+            return;
+        }
+
+        if (this._svc instanceof IServiceLifecycle) {
+            ((IServiceLifecycle) this._svc).onDestroy();
         }
     }
 }

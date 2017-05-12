@@ -208,7 +208,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             return Collections.emptyList();
         }
         return (List<T>) Looper.on(svcHolders)
-                .map(this._svcActivator::activeService)
+                .map(this._svcActivator::activateService)
                 .filter(svc -> svc != null)
                 .toList();
     }
@@ -224,7 +224,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         if (svcHolder == null) {
             return null;
         }
-        T svc = this._svcActivator.activeService(svcHolder);
+        T svc = this._svcActivator.activateService(svcHolder);
         if (svc == null) {
             throw ServiceException.builder()
                     .errorCode(ServiceErrors.NO_SERVICE_FOUND)
@@ -248,7 +248,37 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         if (svcHolders.size() == 0) {
             return;
         }
-        Looper.on(svcHolders).foreach(this._svcActivator::activeService);
+        Looper.on(svcHolders).foreach(this._svcActivator::activateService);
+    }
+
+    @Override
+    public void deactivateTaggedService(
+            final String tag
+    ) {
+        ArgumentChecker.notEmpty(tag, "tag");
+        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock).runForResult(() ->
+                Looper.on(this._svcRepo.values())
+                        .filter(svcHolder -> CollectionHelper.isContains(svcHolder.serviceTags(), tag))
+                        .toList()
+        );
+        if (svcHolders.size() == 0) {
+            return;
+        }
+        Looper.on(svcHolders).foreach(this._svcActivator::deactivateService);
+    }
+
+    @Override
+    public void deactivateServices(String[] serviceIds) {
+        ArgumentChecker.required(serviceIds, "serviceIds");
+        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock).runForResult(() ->
+            Looper.on(this._svcRepo.values())
+                .filter(svcHolder -> CollectionHelper.isContains(serviceIds, svcHolder.getId()))
+                .toList()
+        );
+        if (svcHolders.size() == 0) {
+            return;
+        }
+        Looper.on(svcHolders).foreach(this._svcActivator::deactivateService);
     }
 
     private List<ServiceHolder> findServiceHolders(
@@ -324,7 +354,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                 .map(svcId -> new ServiceHolder(svcFrom, svc, svcId, dependencies, this._satisfyDecider))
                 .next(svcHolder -> {
                     if (svcHolder.getQualifiedId().isExternalService()) {
-                        this._svcActivator.activeService(svcHolder);
+                        this._svcActivator.activateService(svcHolder);
                     }
                 }).foreach(svcHolder -> {
                     Guarder.by(this._svcRepoLock).run(() -> {

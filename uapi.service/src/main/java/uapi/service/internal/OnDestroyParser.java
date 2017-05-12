@@ -8,7 +8,7 @@ import uapi.common.ArgumentChecker;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.IServiceLifecycle;
-import uapi.service.annotation.OnActivate;
+import uapi.service.annotation.OnDestroy;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -17,36 +17,36 @@ import javax.lang.model.element.Modifier;
 import java.util.*;
 
 /**
- * The parser is used to parse OnActivate annotation
+ * The method with this annotation must be invoked when the service need to be destroyed
  */
-public class OnActivateParser {
+public class OnDestroyParser {
 
-    private static final String METHOD_ON_ACTIVATE_NAME = "onActivate";
+    private static final String METHOD_ON_DESTROY_NAME  = "onDestroy";
 
-    private static final String TEMP_ON_ACTIVATE        = "template/onActivate_method.ftl";
-    private static final String MODEL_ON_ACTIVATE       = "ModelInit";
+    private static final String TEMP_ON_DESTROY         = "template/onDestroy_method.ftl";
+    private static final String MODEL_ON_DESTROY        = "ModelDestroy";
     private static final String VAR_METHODS             = "methods";
 
-    private final OnActivateHelper _helper;
+    private final OnDestroyHelper _helper;
 
-    public OnActivateParser() {
-        this._helper = new OnActivateHelper();
+    public OnDestroyParser() {
+        this._helper = new OnDestroyHelper();
     }
 
     public void parse(
             final IBuilderContext builderCtx,
             final Set<? extends Element> elements
     ) {
-        builderCtx.getLogger().info("Start processing OnActivate annotation");
+        builderCtx.getLogger().info("Start processing OnDestroy annotation");
         Looper.on(elements).foreach(element -> {
             if (element.getKind() != ElementKind.METHOD) {
                 throw new GeneralException(
-                        "The OnActivate annotation only can be applied on method",
+                        "The OnDestroy annotation only can be applied on method",
                         element.getSimpleName().toString());
             }
-            builderCtx.checkModifiers(element, OnActivate.class, Modifier.PRIVATE, Modifier.STATIC);
+            builderCtx.checkModifiers(element, OnDestroy.class, Modifier.PRIVATE, Modifier.STATIC);
             Element classElemt = element.getEnclosingElement();
-            builderCtx.checkModifiers(classElemt, OnActivate.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            builderCtx.checkModifiers(classElemt, OnDestroy.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
             // Check method
             String methodName = element.getSimpleName().toString();
@@ -65,36 +65,37 @@ public class OnActivateParser {
             }
 
             ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
-            this._helper.addActivateMethod(builderCtx, clsBuilder, methodName);
+            this._helper.addDestroyMethod(builderCtx, clsBuilder, methodName);
         });
     }
 
-    public void addOnActivateMethodIfAbsent(
+    public void addOnDestroyMethodIfAbsent(
             final IBuilderContext builderCtx,
             final Set<? extends Element> elements
     ) {
         Looper.on(elements).foreach(element -> {
             Element classElemt = element.getEnclosingElement();
             ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
-            this._helper.addActivateMethod(builderCtx, clsBuilder);
+            this._helper.addDestroyMethod(builderCtx, clsBuilder);
         });
     }
 
-    public OnActivateHelper getHelper() {
+    public OnDestroyHelper getHelper() {
         return this._helper;
     }
 
-    class OnActivateHelper {
+    class OnDestroyHelper {
 
-        public void addActivateMethod(
+        public void addDestroyMethod(
                 final IBuilderContext builderContext,
                 final ClassMeta.Builder classBuilder,
-                final String... methodNames) {
+                final String... methodNames
+        ) {
             ArgumentChecker.required(builderContext, "builderContext");
             ArgumentChecker.required(classBuilder, "classBuilder");
             ArgumentChecker.required(methodNames, "methodNames");
 
-            Map<String, Object> tempActivateModel = classBuilder.createTransienceIfAbsent(MODEL_ON_ACTIVATE, HashMap::new);
+            Map<String, Object> tempActivateModel = classBuilder.createTransienceIfAbsent(MODEL_ON_DESTROY, HashMap::new);
             Object existingMethods = tempActivateModel.get(VAR_METHODS);
             List<String> methods;
             if (existingMethods == null) {
@@ -107,7 +108,7 @@ public class OnActivateParser {
                     .foreach(methods::add);
             tempActivateModel.put(VAR_METHODS, methods);
 
-            List<MethodMeta.Builder> methodBuilders = classBuilder.findMethodBuilders(METHOD_ON_ACTIVATE_NAME);
+            List<MethodMeta.Builder> methodBuilders = classBuilder.findMethodBuilders(METHOD_ON_DESTROY_NAME);
             if (methodBuilders.size() > 0) {
                 MethodMeta.Builder mbuilder = Looper.on(methodBuilders)
                         .filter(builder -> builder.getReturnTypeName().equals(Type.VOID))
@@ -118,16 +119,16 @@ public class OnActivateParser {
                 }
             }
 
-            Template tempOnActivate = builderContext.loadTemplate(TEMP_ON_ACTIVATE);
+            Template tempOnActivate = builderContext.loadTemplate(TEMP_ON_DESTROY);
             classBuilder
                     .addImplement(IServiceLifecycle.class.getCanonicalName())
                     .addMethodBuilder(MethodMeta.builder()
                             .addModifier(Modifier.PUBLIC)
-                            .setName(METHOD_ON_ACTIVATE_NAME)
+                            .setName(METHOD_ON_DESTROY_NAME)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                             .addCodeBuilder(CodeMeta.builder()
                                     .setTemplate(tempOnActivate)
-                                    .setModel(classBuilder.getTransience(MODEL_ON_ACTIVATE)))
+                                    .setModel(classBuilder.getTransience(MODEL_ON_DESTROY)))
                             .setReturnTypeName(Type.VOID));
         }
     }

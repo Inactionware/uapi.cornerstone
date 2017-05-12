@@ -48,11 +48,11 @@ public class ServiceActivator {
         this._extSvcLoader = externalServiceLoader;
     }
 
-    public <T> T activeService(final ServiceHolder serviceHolder) {
-        return activeService(serviceHolder, DEFAULT_TIME_OUT);
+    public <T> T activateService(final ServiceHolder serviceHolder) {
+        return activateService(serviceHolder, DEFAULT_TIME_OUT);
     }
 
-    public <T> T activeService(final ServiceHolder serviceHolder, IntervalTime timeout) {
+    public <T> T activateService(final ServiceHolder serviceHolder, IntervalTime timeout) {
         ArgumentChecker.required(serviceHolder, "serviceHolder");
         if (timeout == null) {
             timeout = DEFAULT_TIME_OUT;
@@ -108,6 +108,33 @@ public class ServiceActivator {
         }
     }
 
+    public void deactivateService(final ServiceHolder serviceHolder) {
+        deactivateService(serviceHolder, DEFAULT_TIME_OUT);
+    }
+
+    public void deactivateService(final ServiceHolder serviceHolder, IntervalTime timeout) {
+        ArgumentChecker.required(serviceHolder, "serviceHolder");
+        if (timeout == null) {
+            timeout = DEFAULT_TIME_OUT;
+        }
+        if (serviceHolder.isDeactivated()) {
+            return;
+        }
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(new ServiceDeactivateTask(serviceHolder));
+        try {
+            future.get(timeout.milliseconds(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new GeneralException(ex);
+        } catch (TimeoutException ex) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.SERVICE_DEACTIVATION_TASK_TIMED_OUT)
+                    .variables(new ServiceErrors.ServiceDeactivationTaskTimedOut()
+                        .serviceId(serviceHolder.getQualifiedId()))
+                    .build();
+        }
+    }
+
     private void constructServiceStack(final UnactivatedService service, final List<UnactivatedService> svcList) {
         svcList.add(0, service);
         if (service.isExternalService()) {
@@ -144,13 +171,6 @@ public class ServiceActivator {
                     // load external service
                     ServiceHolder svcHolder =
                             ServiceActivator.this._extSvcLoader.loadService(unactivatedSvc.dependency());
-//                    if (svcHolder == null) {
-//                        throw ServiceException.builder()
-//                                .errorCode(ServiceErrors.LOAD_EXTERNAL_SERVICE_FAILED)
-//                                .variables(new ServiceErrors.LoadExternalServiceFailed()
-//                                    .serviceId(unactivatedSvc.serviceId()).get())
-//                                .build();
-//                    }
                     if (svcHolder != null) {
                         unactivatedSvc.activate(svcHolder);
                     }
@@ -188,6 +208,20 @@ public class ServiceActivator {
             } else {
                 return this._svcList.get(foundIdx);
             }
+        }
+    }
+
+    private final class ServiceDeactivateTask implements Runnable {
+
+        private final ServiceHolder _svcHolder;
+
+        ServiceDeactivateTask(final ServiceHolder serviceHolder) {
+            this._svcHolder = serviceHolder;
+        }
+
+        @Override
+        public void run() {
+            this._svcHolder.deactivate();
         }
     }
 }

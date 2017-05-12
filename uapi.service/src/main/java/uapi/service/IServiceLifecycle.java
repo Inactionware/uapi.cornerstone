@@ -15,9 +15,14 @@ package uapi.service;
 public interface IServiceLifecycle {
 
     /**
-     * Invoked when the service is resolved and all other dependent services are activated.
+     * It is invoked when the service is resolved and all other dependent services are activated.
      */
     void onActivate();
+
+    /**
+     * It is invoked when the system/app will be shut down.
+     */
+    void onDestroy();
 
     /**
      * Invoked when a injectable property is set
