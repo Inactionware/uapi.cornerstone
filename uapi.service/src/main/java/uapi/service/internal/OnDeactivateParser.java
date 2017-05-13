@@ -20,11 +20,11 @@ import java.util.*;
  */
 public class OnDeactivateParser {
 
-    private static final String METHOD_ON_DESTROY_NAME  = "onDeactivate";
+    private static final String METHOD_ON_DEACTIVATE_NAME   = "onDeactivate";
 
-    private static final String TEMP_ON_DESTROY         = "template/onDeactivate_method.ftl";
-    private static final String MODEL_ON_DESTROY        = "ModelDestroy";
-    private static final String VAR_METHODS             = "methods";
+    private static final String TEMP_ON_DEACTIVATE          = "template/onDeactivate_method.ftl";
+    private static final String MODEL_ON_DEACTIVATE         = "ModelDestroy";
+    private static final String VAR_METHODS                 = "methods";
 
     private final OnDeactivateHelper _helper;
 
@@ -68,7 +68,7 @@ public class OnDeactivateParser {
         });
     }
 
-    public void addOnDestroyMethodIfAbsent(
+    public void addOnDeactivateMethodIfAbsent(
             final IBuilderContext builderCtx,
             final Set<? extends Element> elements
     ) {
@@ -94,7 +94,7 @@ public class OnDeactivateParser {
             ArgumentChecker.required(classBuilder, "classBuilder");
             ArgumentChecker.required(methodNames, "methodNames");
 
-            Map<String, Object> tempActivateModel = classBuilder.createTransienceIfAbsent(MODEL_ON_DESTROY, HashMap::new);
+            Map<String, Object> tempActivateModel = classBuilder.createTransienceIfAbsent(MODEL_ON_DEACTIVATE, HashMap::new);
             Object existingMethods = tempActivateModel.get(VAR_METHODS);
             List<String> methods;
             if (existingMethods == null) {
@@ -107,7 +107,7 @@ public class OnDeactivateParser {
                     .foreach(methods::add);
             tempActivateModel.put(VAR_METHODS, methods);
 
-            List<MethodMeta.Builder> methodBuilders = classBuilder.findMethodBuilders(METHOD_ON_DESTROY_NAME);
+            List<MethodMeta.Builder> methodBuilders = classBuilder.findMethodBuilders(METHOD_ON_DEACTIVATE_NAME);
             if (methodBuilders.size() > 0) {
                 MethodMeta.Builder mbuilder = Looper.on(methodBuilders)
                         .filter(builder -> builder.getReturnTypeName().equals(Type.VOID))
@@ -118,16 +118,16 @@ public class OnDeactivateParser {
                 }
             }
 
-            Template tempOnActivate = builderContext.loadTemplate(TEMP_ON_DESTROY);
+            Template tempOnActivate = builderContext.loadTemplate(TEMP_ON_DEACTIVATE);
             classBuilder
                     .addImplement(IServiceLifecycle.class.getCanonicalName())
                     .addMethodBuilder(MethodMeta.builder()
                             .addModifier(Modifier.PUBLIC)
-                            .setName(METHOD_ON_DESTROY_NAME)
+                            .setName(METHOD_ON_DEACTIVATE_NAME)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                             .addCodeBuilder(CodeMeta.builder()
                                     .setTemplate(tempOnActivate)
-                                    .setModel(classBuilder.getTransience(MODEL_ON_DESTROY)))
+                                    .setModel(classBuilder.getTransience(MODEL_ON_DEACTIVATE)))
                             .setReturnTypeName(Type.VOID));
         }
     }

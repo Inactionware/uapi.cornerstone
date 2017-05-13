@@ -66,7 +66,7 @@ public class ServiceLifecycleHandler extends AnnotationsHandler {
         // Ensure all classes should implement all methods which are defined in IServiceLifecycle interface
         this._onActivateParser.addOnActivateMethodIfAbsent(builderContext, elements);
         this._onInjectParser.addInjectMethodIfAbsent(builderContext, elements);
-        this._onDeactivateParser.addOnDestroyMethodIfAbsent(builderContext, elements);
+        this._onDeactivateParser.addOnDeactivateMethodIfAbsent(builderContext, elements);
     }
 
     private class ServiceLifecycleHandlerHelper implements IServiceLifecycleHandlerHelper {
