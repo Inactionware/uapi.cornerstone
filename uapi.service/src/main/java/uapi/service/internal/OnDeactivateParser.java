@@ -8,7 +8,6 @@ import uapi.common.ArgumentChecker;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.IServiceLifecycle;
-import uapi.service.annotation.OnDestroy;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -19,34 +18,34 @@ import java.util.*;
 /**
  * The method with this annotation must be invoked when the service need to be destroyed
  */
-public class OnDestroyParser {
+public class OnDeactivateParser {
 
-    private static final String METHOD_ON_DESTROY_NAME  = "onDestroy";
+    private static final String METHOD_ON_DESTROY_NAME  = "onDeactivate";
 
-    private static final String TEMP_ON_DESTROY         = "template/onDestroy_method.ftl";
+    private static final String TEMP_ON_DESTROY         = "template/onDeactivate_method.ftl";
     private static final String MODEL_ON_DESTROY        = "ModelDestroy";
     private static final String VAR_METHODS             = "methods";
 
-    private final OnDestroyHelper _helper;
+    private final OnDeactivateHelper _helper;
 
-    public OnDestroyParser() {
-        this._helper = new OnDestroyHelper();
+    public OnDeactivateParser() {
+        this._helper = new OnDeactivateHelper();
     }
 
     public void parse(
             final IBuilderContext builderCtx,
             final Set<? extends Element> elements
     ) {
-        builderCtx.getLogger().info("Start processing OnDestroy annotation");
+        builderCtx.getLogger().info("Start processing OnDeactivateParser annotation");
         Looper.on(elements).foreach(element -> {
             if (element.getKind() != ElementKind.METHOD) {
                 throw new GeneralException(
-                        "The OnDestroy annotation only can be applied on method",
+                        "The OnDeactivateParser annotation only can be applied on method",
                         element.getSimpleName().toString());
             }
-            builderCtx.checkModifiers(element, OnDestroy.class, Modifier.PRIVATE, Modifier.STATIC);
+            builderCtx.checkModifiers(element, uapi.service.annotation.OnDeactivate.class, Modifier.PRIVATE, Modifier.STATIC);
             Element classElemt = element.getEnclosingElement();
-            builderCtx.checkModifiers(classElemt, OnDestroy.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            builderCtx.checkModifiers(classElemt, uapi.service.annotation.OnDeactivate.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
             // Check method
             String methodName = element.getSimpleName().toString();
@@ -80,11 +79,11 @@ public class OnDestroyParser {
         });
     }
 
-    public OnDestroyHelper getHelper() {
+    public OnDeactivateHelper getHelper() {
         return this._helper;
     }
 
-    class OnDestroyHelper {
+    class OnDeactivateHelper {
 
         public void addDestroyMethod(
                 final IBuilderContext builderContext,

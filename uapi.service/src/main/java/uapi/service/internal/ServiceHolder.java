@@ -448,7 +448,7 @@ public class ServiceHolder implements IServiceReference {
         }
 
         if (this._svc instanceof IServiceLifecycle) {
-            ((IServiceLifecycle) this._svc).onDestroy();
+            ((IServiceLifecycle) this._svc).onDeactivate();
         }
     }
 }

@@ -22,7 +22,7 @@ public interface IServiceLifecycle {
     /**
      * It is invoked when the system/app will be shut down.
      */
-    void onDestroy();
+    void onDeactivate();
 
     /**
      * Invoked when a injectable property is set
