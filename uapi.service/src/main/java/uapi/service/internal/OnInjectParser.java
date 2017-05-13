@@ -100,7 +100,7 @@ public class OnInjectParser {
         });
     }
 
-    private final class OnInjectHelper {
+    public class OnInjectHelper {
 
         public void addInjectMethod(
                 final IBuilderContext builderContext,

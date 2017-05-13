@@ -60,7 +60,7 @@ public class ServiceLifecycleHandler extends AnnotationsHandler {
         } else if (annotationType.equals(uapi.service.annotation.OnDeactivate.class)) {
             this._onDeactivateParser.parse(builderContext, elements);
         } else {
-            throw new GeneralException("Unsupported annotation - {}", annotationType.getClass().getName());
+            throw new GeneralException("Unsupported annotation - {}", annotationType.getName());
         }
 
         // Ensure all classes should implement all methods which are defined in IServiceLifecycle interface
@@ -72,13 +72,33 @@ public class ServiceLifecycleHandler extends AnnotationsHandler {
     private class ServiceLifecycleHandlerHelper implements IServiceLifecycleHandlerHelper {
 
         @Override
-        public void addInitMethod(
+        public void addActivateMethod(
                 final IBuilderContext builderContext,
                 final ClassMeta.Builder classBuilder,
                 final String... methodNames
         ) {
             ServiceLifecycleHandler.this._onActivateParser.getHelper()
                     .addActivateMethod(builderContext, classBuilder, methodNames);
+        }
+
+        @Override
+        public void addInjectMethod(
+                final IBuilderContext builderContext,
+                final ClassMeta.Builder classBuilder,
+                final String methodName,
+                final String serviceId,
+                final String serviceType) {
+            ServiceLifecycleHandler.this._onInjectParser.getHelper()
+                    .addInjectMethod(builderContext, classBuilder, methodName, serviceId, serviceType);
+        }
+
+        @Override
+        public void addDeactivateMethod(
+                final IBuilderContext builderContext,
+                final ClassMeta.Builder classBuilder,
+                final String... methodNames) {
+            ServiceLifecycleHandler.this._onDeactivateParser.getHelper()
+                    .addDeactivateMethod(builderContext, classBuilder, methodNames);
         }
     }
 }

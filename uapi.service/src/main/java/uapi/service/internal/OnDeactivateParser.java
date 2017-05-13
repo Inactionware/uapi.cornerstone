@@ -64,7 +64,7 @@ public class OnDeactivateParser {
             }
 
             ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
-            this._helper.addDestroyMethod(builderCtx, clsBuilder, methodName);
+            this._helper.addDeactivateMethod(builderCtx, clsBuilder, methodName);
         });
     }
 
@@ -75,7 +75,7 @@ public class OnDeactivateParser {
         Looper.on(elements).foreach(element -> {
             Element classElemt = element.getEnclosingElement();
             ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
-            this._helper.addDestroyMethod(builderCtx, clsBuilder);
+            this._helper.addDeactivateMethod(builderCtx, clsBuilder);
         });
     }
 
@@ -85,7 +85,7 @@ public class OnDeactivateParser {
 
     class OnDeactivateHelper {
 
-        public void addDestroyMethod(
+        public void addDeactivateMethod(
                 final IBuilderContext builderContext,
                 final ClassMeta.Builder classBuilder,
                 final String... methodNames
