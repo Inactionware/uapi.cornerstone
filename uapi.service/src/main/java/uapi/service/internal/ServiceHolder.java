@@ -75,13 +75,13 @@ public class ServiceHolder implements IServiceReference {
 
         // Create state convert rule
         IShifter<ServiceState> stateShifter = (currentState, operation) -> {
-            if (currentState == ServiceState.Destroyed) {
-                throw ServiceException.builder()
-                        .errorCode(ServiceErrors.DESTROYED_SERVICE)
-                        .variables(new ServiceErrors.DestroyedService()
-                            .serviceId(this._qualifiedSvcId))
-                        .build();
-            }
+//            if (currentState == ServiceState.Destroyed) {
+//                throw ServiceException.builder()
+//                        .errorCode(ServiceErrors.DESTROYED_SERVICE)
+//                        .variables(new ServiceErrors.DestroyedService()
+//                            .serviceId(this._qualifiedSvcId))
+//                        .build();
+//            }
 
             ServiceState newState;
             switch(operation.type()) {
@@ -110,6 +110,7 @@ public class ServiceHolder implements IServiceReference {
                 case OP_DEACTIVATE:
                     innerDeactivate();
                     newState = ServiceState.Deactivated;
+                    break;
                 default:
                     throw ServiceException.builder()
                             .errorCode(ServiceErrors.UNSUPPORTED_SERVICE_HOLDER_STATE)
@@ -279,30 +280,6 @@ public class ServiceHolder implements IServiceReference {
                 .map(entry -> new UnactivatedService(entry.getKey(), entry.getValue()))
                 .toList();
     }
-
-//    public void injectNewDependencies() {
-//        if (! isActivated()) {
-//            return;
-//        }
-//        if (! (this._svc instanceof IServiceLifecycle)) {
-//            throw ServiceException.builder()
-//                    .errorCode(ServiceErrors.UNSUPPORTED_DYNAMIC_INJECTION)
-//                    .variables(new ServiceErrors.UnsupportedDynamicInjection()
-//                        .serviceId(this.getId()))
-//                    .build();
-//        }
-//        Looper.on(this._dependencies.values())
-//                .filter(dependSvcHolder -> ! this._injectedSvcs.contains(dependSvcHolder))
-//                .foreach(dependSvcHolder -> {
-//                    Object injectedSvc = dependSvcHolder.getService();
-//                    if (injectedSvc instanceof IServiceFactory) {
-//                        // Create service from service factory
-//                        injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
-//                    }
-//                    ((IServiceLifecycle) _svc).onDependencyInject(dependSvcHolder.getId(), injectedSvc);
-//                    this._injectedSvcs.add(dependSvcHolder);
-//                });
-//    }
 
     /////////////////////
     // Private methods //

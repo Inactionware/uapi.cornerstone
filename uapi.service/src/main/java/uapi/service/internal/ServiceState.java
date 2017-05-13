@@ -18,8 +18,8 @@ enum ServiceState {
     Injected(20),
     Satisfied(30),
     Activated(40),
-    Deactivated(50),
-    Destroyed(-1);
+    Deactivated(-1),
+    Destroyed(-2);
 
     private int _value;
 

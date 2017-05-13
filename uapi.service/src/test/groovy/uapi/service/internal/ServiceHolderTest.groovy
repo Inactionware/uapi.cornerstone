@@ -5,8 +5,10 @@ import uapi.service.Dependency
 import uapi.service.IInitial
 import uapi.service.IInjectable
 import uapi.service.ISatisfyHook
+import uapi.service.IService
 import uapi.service.IServiceFactory
 import uapi.service.IServiceLifecycle
+import uapi.service.ITagged
 import uapi.service.Injection
 import uapi.service.QualifiedServiceId
 import uapi.service.ServiceException
@@ -958,7 +960,77 @@ class ServiceHolderTest extends Specification {
         'local' | 'svcId'
     }
 
+    def 'Test deactivate service which is not activated'() {
+        given:
+        def svc = Mock(IInjectableInitableLifecycle)
+        def satisfyHook  = Mock(ISatisfyHook)
+        def svcHolder = new ServiceHolder(from, svc, svcId, [] as Dependency[], satisfyHook)
+
+        when:
+        svcHolder.deactivate()
+
+        then:
+        noExceptionThrown()
+        ! svcHolder.isResolved()
+        ! svcHolder.isInjected()
+        ! svcHolder.isSatisfied()
+        ! svcHolder.isActivated()
+        svcHolder.isDeactivated()
+
+        where:
+        from    | svcId
+        'local' | 'svcId'
+    }
+
+    def 'Test deactivate service'() {
+        given:
+        def svc = Mock(IInjectableInitableLifecycle) {
+            1 * onDeactivate()
+        }
+        def satisfyHook  = Mock(ISatisfyHook) {
+            1 * isSatisfied(_) >> true
+        }
+        def svcHolder = new ServiceHolder(from, svc, svcId, [] as Dependency[], satisfyHook)
+        svcHolder.activate()
+
+        when:
+        svcHolder.deactivate()
+
+        then:
+        noExceptionThrown()
+        ! svcHolder.isResolved()
+        ! svcHolder.isInjected()
+        ! svcHolder.isSatisfied()
+        ! svcHolder.isActivated()
+        svcHolder.isDeactivated()
+
+        where:
+        from    | svcId
+        'local' | 'svcId'
+    }
+
+    def 'Test tagged service'() {
+        given:
+        def svc = Mock(ITaggedService) {
+            1 * getTags() >> ['tag']
+        }
+        def satisfyHook  = Mock(ISatisfyHook)
+        def svcHolder = new ServiceHolder(from, svc, svcId, [] as Dependency[], satisfyHook)
+
+        when:
+        svcHolder.serviceTags() == ['tag'] as String[]
+
+        then:
+        noExceptionThrown()
+
+        where:
+        from    | svcId
+        'local' | 'svcId'
+    }
+
     interface IInjectableInitable extends IInitial, IInjectable {}
 
     interface IInjectableInitableLifecycle extends IInitial, IInjectable, IServiceLifecycle {}
+
+    interface ITaggedService extends ITagged, IService {}
 }
