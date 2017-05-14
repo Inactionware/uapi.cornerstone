@@ -197,7 +197,7 @@ public class ServiceHolder implements IServiceReference {
     }
 
     public boolean isDeactivated() {
-        return this._stateTracer.get().value() >= ServiceState.Deactivated.value();
+        return this._stateTracer.get().value() == ServiceState.Deactivated.value();
     }
 
     public boolean isDependsOn(QualifiedServiceId qualifiedServiceId) {

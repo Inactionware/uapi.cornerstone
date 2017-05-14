@@ -9,9 +9,7 @@
 
 package uapi.service.internal
 
-import spock.lang.Ignore
 import spock.lang.Specification
-import uapi.GeneralException
 import uapi.InvalidArgumentException
 import uapi.service.Dependency
 import uapi.service.IInitial
@@ -19,7 +17,9 @@ import uapi.service.IInjectable
 import uapi.service.IRegistry
 import uapi.service.ISatisfyHook
 import uapi.service.IService
+import uapi.service.IServiceLifecycle
 import uapi.service.IServiceLoader
+import uapi.service.ITagged
 import uapi.service.Injection
 import uapi.service.QualifiedServiceId
 import uapi.log.ILogger
@@ -39,6 +39,11 @@ class RegistryTest extends Specification {
     def "Test get id"() {
         expect:
         registry.getIds() == [IRegistry.canonicalName] as String[]
+    }
+
+    def 'Test auto active'() {
+        expect:
+        ! registry.autoActive()
     }
 
     def "Register a normal service with id"() {
@@ -576,7 +581,71 @@ class RegistryTest extends Specification {
         found2 == null
     }
 
+    def 'Test activate tagged service'() {
+        given:
+        def svc = Mock(TaggedService) {
+            getIds() >> ['1']
+            getTags() >> ['tag']
+            1 * onActivate()
+            0 * onDeactivate()
+            0 * onDependencyInject(_, _)
+        }
+        def logger = Mock(ILogger)
+        registry._logger = logger
+        registry.register(svc)
+
+        when:
+        registry.activateTaggedService('tag')
+
+        then:
+        noExceptionThrown()
+    }
+
+    def 'Test deactivate tagged service'() {
+        given:
+        def svc = Mock(TaggedService) {
+            getIds() >> ['1']
+            getTags() >> ['tag']
+            1 * onActivate()
+            1 * onDeactivate()
+            0 * onDependencyInject(_, _)
+        }
+        def logger = Mock(ILogger)
+        registry._logger = logger
+        registry.register(svc)
+
+        when:
+        registry.activateTaggedService('tag')
+        registry.deactivateTaggedService('tag')
+
+        then:
+        noExceptionThrown()
+    }
+
+    def 'Test deactivate service by id'() {
+        given:
+        def svc = Mock(TaggedService) {
+            getIds() >> ['1']
+            getTags() >> []
+            1 * onActivate()
+            1 * onDeactivate()
+            0 * onDependencyInject(_, _)
+        }
+        def logger = Mock(ILogger)
+        registry._logger = logger
+        registry.register(svc)
+        registry.findService('1')
+
+        when:
+        registry.deactivateServices(['1'] as String[])
+
+        then:
+        noExceptionThrown()
+    }
+
     static interface IInitialService extends IService, IInitial {}
 
     static interface IInjectableService extends IService, IInjectable, IInitial {}
+
+    static interface TaggedService extends IService, ITagged, IServiceLifecycle {}
 }
