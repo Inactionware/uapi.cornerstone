@@ -59,7 +59,14 @@ public class CliConfigProvider implements ICliConfigProvider {
         }
         Looper.on(args)
                 .filter(option -> ! Strings.isNullOrEmpty(option))
-                .filter(option -> option.startsWith(this._optionPrefix))
+                .filter(option -> {
+                    if (option.startsWith(this._optionPrefix)) {
+                        return true;
+                    } else {
+                        this._logger.warn("The command line option is invalid - {}", option);
+                        return false;
+                    }
+                })
                 .map(option -> option.substring(this._optionPrefix.length()))
                 .map(option -> Pair.splitTo(option, this._optionValueSeparator))
                 .flatmap(pair -> {

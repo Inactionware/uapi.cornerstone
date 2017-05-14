@@ -49,9 +49,9 @@ public interface IExecutionContext {
      */
     <T> T get(Object key);
 
-//    default String responsibleName() {
-//        return get(KEY_RESP_NAME);
-//    }
+    default String responsibleName() {
+        return get(KEY_RESP_NAME);
+    }
 
     void fireEvent(BehaviorTraceEvent event);
 

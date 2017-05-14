@@ -24,7 +24,7 @@ public class BabyCreator {
 
     @OnActivate
     public void activate() {
-        IResponsible baby = this._responsibleReg.register("HelloApp");
+        IResponsible baby = this._responsibleReg.register("Baby");
         baby.newBehavior("Say Hello", AppStartupEvent.class, AppStartupEvent.TOPIC)
                 .then(Speaker.actionId)
                 .traceable(true)

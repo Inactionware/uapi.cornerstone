@@ -13,6 +13,7 @@ import spock.lang.Specification
 import uapi.event.IEvent
 import uapi.event.IEventHandler
 import uapi.event.NoEventHandlerException
+import uapi.log.ILogger
 
 class EventBusTest extends Specification{
 
@@ -22,6 +23,7 @@ class EventBusTest extends Specification{
             topic() >> eventTopic
         }
         EventBus eventBus = new EventBus()
+        eventBus._logger = Mock(ILogger)
         eventBus.init()
 
         when:
@@ -29,7 +31,7 @@ class EventBusTest extends Specification{
         eventBus.destroy()
 
         then:
-        thrown(NoEventHandlerException)
+        noExceptionThrown()
 
         where:
         eventTopic  | none

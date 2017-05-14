@@ -3,6 +3,7 @@ package uapi.example.quickstart.app;
 import uapi.app.AppStartupEvent;
 import uapi.behavior.ActionIdentify;
 import uapi.behavior.ActionType;
+import uapi.behavior.IExecutionContext;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
 import uapi.common.StringHelper;
@@ -26,7 +27,7 @@ public class Speaker {
     protected ILogger _logger;
 
     @ActionDo
-    public void say(AppStartupEvent event) {
-        this._logger.info("Hello World");
+    public void say(AppStartupEvent event, IExecutionContext execCtx) {
+        this._logger.info("Hello World form {}", execCtx.responsibleName());
     }
 }

@@ -96,7 +96,7 @@ public class EventBus implements IEventBus {
                     .toList();
         }
         if (handlers.size() == 0) {
-            throw new NoEventHandlerException(topic);
+            this._logger.warn("There are no event handler for event topic - {}", topic);
         }
 
         HandleEventAction action = new HandleEventAction(handlers, event, syncable);
