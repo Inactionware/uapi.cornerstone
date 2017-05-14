@@ -24,7 +24,7 @@ import uapi.service.annotation.Tag;
 public class IntervalTimeParser implements IConfigValueParser {
 
     private static final String[] supportTypesIn = new String[] { String.class.getCanonicalName() };
-    private static final String[] supportTypesOut = new String[] {IntervalTime.class.getCanonicalName() };
+    private static final String[] supportTypesOut = new String[] { IntervalTime.class.getCanonicalName() };
 
     @Override
     public boolean isSupport(String inType, String outType) {
