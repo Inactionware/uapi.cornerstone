@@ -1,6 +1,7 @@
 package uapi.app.internal;
 
-import uapi.GeneralException;
+import uapi.app.AppErrors;
+import uapi.app.AppException;
 import uapi.app.AppStartupEvent;
 import uapi.behavior.BehaviorEvent;
 import uapi.behavior.BehaviorFinishedEventHandler;
@@ -51,8 +52,12 @@ public class ApplicationConstructor {
                 this._logger.debug("Application is going to shutdown");
             } else {
                 // It should not happen
-                throw new GeneralException(
-                        "Unsupported behavior trace event - {}", event.behaviorName());
+                throw AppException.builder()
+                        .errorCode(AppErrors.UNSUPPORTED_RESPONSIBLE_BEHAVIOR)
+                        .variables(new AppErrors.UnsupportedResponsibleBehavior()
+                                .behaviorName(event.behaviorName())
+                                .responsibleName(responsible.name()))
+                        .build();
             }
             return bEvent;
         };

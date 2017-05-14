@@ -1,9 +1,17 @@
 package uapi.app.internal
 
 import spock.lang.Specification
+import uapi.app.AppException
+import uapi.app.AppStartupEvent
+import uapi.behavior.BehaviorException
+import uapi.behavior.BehaviorExecutingEventHandler
+import uapi.behavior.BehaviorFinishedEvent
+import uapi.behavior.BehaviorFinishedEventHandler
 import uapi.behavior.IBehaviorBuilder
 import uapi.behavior.IResponsible
 import uapi.behavior.IResponsibleRegistry
+import uapi.event.IEvent
+import uapi.log.ILogger
 
 /**
  * Unit tests for ApplicationConstructor
@@ -43,5 +51,113 @@ class ApplicationConstructorTest extends Specification {
 
         then:
         noExceptionThrown()
+    }
+
+    def 'Test startup behavior finished event handler'() {
+        given:
+        def bBuilder = Mock(IBehaviorBuilder)
+        bBuilder.then(_) >> bBuilder
+        bBuilder.traceable(_) >> bBuilder
+        def mockResp = new MockResponsible(bBuilder)
+        def respReg = Mock(IResponsibleRegistry) {
+            1 * register(ApplicationConstructor.RESPONSIBLE_NAME) >> mockResp
+        }
+        def appConstructor = new ApplicationConstructor()
+        appConstructor._responsibleReg = respReg
+        appConstructor.activate()
+
+        when:
+        def event = mockResp._finishedHandler.accept(Mock(BehaviorFinishedEvent) {
+            1 * behaviorName() >> ApplicationConstructor.BEHAVIOR_STARTUP
+        })
+
+        then:
+        noExceptionThrown()
+        event != null
+        event instanceof AppStartupEvent
+    }
+
+    def 'Test shutdown behavior finished event handler'() {
+        given:
+        def bBuilder = Mock(IBehaviorBuilder)
+        bBuilder.then(_) >> bBuilder
+        bBuilder.traceable(_) >> bBuilder
+        def mockResp = new MockResponsible(bBuilder)
+        def respReg = Mock(IResponsibleRegistry) {
+            1 * register(ApplicationConstructor.RESPONSIBLE_NAME) >> mockResp
+        }
+        def appConstructor = new ApplicationConstructor()
+        appConstructor._responsibleReg = respReg
+        appConstructor._logger = Mock(ILogger)
+        appConstructor.activate()
+
+        when:
+        def event = mockResp._finishedHandler.accept(Mock(BehaviorFinishedEvent) {
+            2 * behaviorName() >> ApplicationConstructor.BEHAVIOR_SHUTDOWN
+        })
+
+        then:
+        noExceptionThrown()
+        event == null
+    }
+
+    def 'Test unsupported behavior event'() {
+        given:
+        def bBuilder = Mock(IBehaviorBuilder)
+        bBuilder.then(_) >> bBuilder
+        bBuilder.traceable(_) >> bBuilder
+        def mockResp = new MockResponsible(bBuilder)
+        def respReg = Mock(IResponsibleRegistry) {
+            1 * register(ApplicationConstructor.RESPONSIBLE_NAME) >> mockResp
+        }
+        def appConstructor = new ApplicationConstructor()
+        appConstructor._responsibleReg = respReg
+        appConstructor._logger = Mock(ILogger)
+        appConstructor.activate()
+
+        when:
+        def event = mockResp._finishedHandler.accept(Mock(BehaviorFinishedEvent) {
+            3 * behaviorName() >> 'test behavior'
+        })
+
+        then:
+        thrown(AppException)
+        event == null
+    }
+
+    class MockResponsible implements IResponsible {
+
+        BehaviorFinishedEventHandler _finishedHandler
+
+        IBehaviorBuilder _behavior
+
+        MockResponsible(IBehaviorBuilder bBuilder) {
+            this._behavior = bBuilder
+        }
+
+        @Override
+        String name() {
+            return 'respName'
+        }
+
+        @Override
+        IBehaviorBuilder newBehavior(String name, Class<? extends IEvent> eventType, String topic) throws BehaviorException {
+            return this._behavior
+        }
+
+        @Override
+        IBehaviorBuilder newBehavior(String name, Class<?> type) throws BehaviorException {
+            return this._behavior
+        }
+
+        @Override
+        void on(BehaviorExecutingEventHandler handler) {
+
+        }
+
+        @Override
+        void on(BehaviorFinishedEventHandler handler) {
+            this._finishedHandler = handler
+        }
     }
 }

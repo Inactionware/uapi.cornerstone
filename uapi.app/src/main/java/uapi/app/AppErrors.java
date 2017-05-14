@@ -24,15 +24,16 @@ public class AppErrors extends FileBasedExceptionErrors<AppException> {
 
     public static final int CATEGORY = 0x0105;
 
-    public static final int REGISTRY_IS_REQUIRED            = 1;
-    public static final int MORE_REGISTRY                   = 2;
-    public static final int REGISTRY_IS_UNSATISFIED         = 3;
-    public static final int INIT_APPLICATION_FAILED         = 4;
-    public static final int UNSUPPORTED_PROFILE_MATCHING    = 5;
-    public static final int UNSUPPORTED_PROFILE_MODEL       = 6;
-    public static final int DUPLICATED_PROFILE              = 7;
-    public static final int TAG_CONFIG_IS_NOT_LIST          = 8;
-    public static final int SPECIFIC_SERVICE_NOT_FOUND      = 9;
+    public static final int REGISTRY_IS_REQUIRED                = 1;
+    public static final int MORE_REGISTRY                       = 2;
+    public static final int REGISTRY_IS_UNSATISFIED             = 3;
+    public static final int INIT_APPLICATION_FAILED             = 4;
+    public static final int UNSUPPORTED_PROFILE_MATCHING        = 5;
+    public static final int UNSUPPORTED_PROFILE_MODEL           = 6;
+    public static final int DUPLICATED_PROFILE                  = 7;
+    public static final int TAG_CONFIG_IS_NOT_LIST              = 8;
+    public static final int SPECIFIC_SERVICE_NOT_FOUND          = 9;
+    public static final int UNSUPPORTED_RESPONSIBLE_BEHAVIOR    = 10;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -47,6 +48,7 @@ public class AppErrors extends FileBasedExceptionErrors<AppException> {
         keyCodeMapping.put(DUPLICATED_PROFILE, DuplicatedProfile.KEY);
         keyCodeMapping.put(TAG_CONFIG_IS_NOT_LIST, TagConfigIsNotList.KEY);
         keyCodeMapping.put(SPECIFIC_SERVICE_NOT_FOUND, SpecificServiceNotFound.KEY);
+        keyCodeMapping.put(UNSUPPORTED_RESPONSIBLE_BEHAVIOR, UnsupportedResponsibleBehavior.KEY);
     }
 
     @Override
@@ -212,6 +214,32 @@ public class AppErrors extends FileBasedExceptionErrors<AppException> {
         @Override
         public Object[] get() {
             return new Object[] { this._svcType };
+        }
+    }
+
+    /**
+     * Unsupported behavior trace event - {} on responsible - {}
+     */
+    public static final class UnsupportedResponsibleBehavior extends IndexedParameters<UnsupportedResponsibleBehavior> {
+
+        private static final String KEY = "UnsupportedResponsibleBehavior";
+
+        private String _behaviorName;
+        private String _respName;
+
+        public UnsupportedResponsibleBehavior behaviorName(String behaviorName) {
+            this._behaviorName = behaviorName;
+            return this;
+        }
+
+        public UnsupportedResponsibleBehavior responsibleName(String responsibleName) {
+            this._respName = responsibleName;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._behaviorName, this._respName };
         }
     }
 }
