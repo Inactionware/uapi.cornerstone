@@ -12,7 +12,6 @@ package uapi.service.internal
 import spock.lang.Specification
 import uapi.InvalidArgumentException
 import uapi.service.Dependency
-import uapi.service.IInitial
 import uapi.service.IInjectable
 import uapi.service.IRegistry
 import uapi.service.ISatisfyHook
@@ -643,9 +642,9 @@ class RegistryTest extends Specification {
         noExceptionThrown()
     }
 
-    static interface IInitialService extends IService, IInitial {}
+    static interface IInitialService extends IService {}
 
-    static interface IInjectableService extends IService, IInjectable, IInitial {}
+    static interface IInjectableService extends IService, IInjectable {}
 
     static interface TaggedService extends IService, ITagged, IServiceLifecycle {}
 }

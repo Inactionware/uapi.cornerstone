@@ -46,7 +46,7 @@ public class EventBus implements IEventBus {
 
     private ForkJoinPool _fjPoll = new ForkJoinPool();
 
-    @Init
+    @OnActivate
     protected void init() {
         if (this._awaitTime == null) {
             this._awaitTime = DEFAULT_AWAIT_TIME;

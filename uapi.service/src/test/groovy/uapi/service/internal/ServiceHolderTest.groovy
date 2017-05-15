@@ -2,7 +2,6 @@ package uapi.service.internal
 
 import spock.lang.Specification
 import uapi.service.Dependency
-import uapi.service.IInitial
 import uapi.service.IInjectable
 import uapi.service.ISatisfyHook
 import uapi.service.IService
@@ -1028,9 +1027,9 @@ class ServiceHolderTest extends Specification {
         'local' | 'svcId'
     }
 
-    interface IInjectableInitable extends IInitial, IInjectable {}
+    interface IInjectableInitable extends IInjectable {}
 
-    interface IInjectableInitableLifecycle extends IInitial, IInjectable, IServiceLifecycle {}
+    interface IInjectableInitableLifecycle extends IInjectable, IServiceLifecycle {}
 
     interface ITaggedService extends ITagged, IService {}
 }

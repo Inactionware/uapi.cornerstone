@@ -14,10 +14,7 @@ import uapi.common.ArgumentChecker;
 import uapi.config.IConfigFileParser;
 import uapi.config.IConfigTracer;
 import uapi.config.IConfigurable;
-import uapi.service.annotation.Init;
-import uapi.service.annotation.Inject;
-import uapi.service.annotation.Service;
-import uapi.service.annotation.Tag;
+import uapi.service.annotation.*;
 import uapi.log.ILogger;
 
 import java.io.File;
@@ -43,7 +40,7 @@ public class FileBasedConfigProvider implements IConfigurable {
 
     private String _configPath;
 
-    @Init
+    @OnActivate
     protected void init() {
         this._logger.info("Config path is {}", this._configPath);
     }
