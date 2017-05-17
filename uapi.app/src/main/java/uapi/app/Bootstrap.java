@@ -13,6 +13,7 @@ import uapi.UapiException;
 import uapi.app.internal.*;
 import uapi.config.ICliConfigProvider;
 import uapi.common.CollectionHelper;
+import uapi.event.IAttributedEventHandler;
 import uapi.event.IEventBus;
 import uapi.event.IEventHandler;
 import uapi.rx.Looper;
@@ -22,6 +23,7 @@ import uapi.service.ITagged;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -130,7 +132,7 @@ public class Bootstrap {
         }
     }
 
-    private static final class ExitSystemRequestHandler implements IEventHandler<ExitSystemRequest> {
+    private static final class ExitSystemRequestHandler implements IAttributedEventHandler<ExitSystemRequest> {
 
         @Override
         public String topic() {
@@ -140,6 +142,11 @@ public class Bootstrap {
         @Override
         public void handle(ExitSystemRequest event) throws UapiException {
             Bootstrap.semaphore.release();
+        }
+
+        @Override
+        public Map<Object, Object> getAttributes() {
+            return null;
         }
     }
 
