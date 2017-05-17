@@ -65,7 +65,7 @@ public final class ServiceHandler extends AnnotationsHandler {
                         "The Service annotation only can be applied on class - {}",
                         classElement.getSimpleName().toString());
             }
-            builderCtx.checkModifiers(classElement, Service.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            builderCtx.checkModifiers(classElement, Service.class, Modifier.PRIVATE, Modifier.FINAL);
 
 //            builderCtx.getLogger().info("Start handle annotation {} for class {}",
 //                    annotationType, classElement.getSimpleName().toString());

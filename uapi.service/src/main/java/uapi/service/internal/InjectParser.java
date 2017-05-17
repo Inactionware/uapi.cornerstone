@@ -59,7 +59,7 @@ class InjectParser {
             }
             builderCtx.checkModifiers(annotatedElement, Inject.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
             Element classElemt = annotatedElement.getEnclosingElement();
-            builderCtx.checkModifiers(classElemt, Inject.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            builderCtx.checkModifiers(classElemt, Inject.class, Modifier.PRIVATE, Modifier.FINAL);
 
             Inject inject = annotatedElement.getAnnotation(Inject.class);
             String injectId = inject.value();

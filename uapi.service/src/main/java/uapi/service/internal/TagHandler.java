@@ -53,7 +53,7 @@ public class TagHandler extends AnnotationsHandler {
                         "The Tag annotation only can be applied on class - {}",
                         classElement.getSimpleName().toString());
             }
-            builderContext.checkModifiers(classElement, Tag.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            builderContext.checkModifiers(classElement, Tag.class, Modifier.PRIVATE, Modifier.FINAL);
 
             Template tempGetIds = builderContext.loadTemplate(TEMPLATE_GET_TAGS);
             Tag tag = classElement.getAnnotation(Tag.class);

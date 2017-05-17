@@ -45,7 +45,7 @@ public class OnDeactivateParser {
             }
             builderCtx.checkModifiers(element, uapi.service.annotation.OnDeactivate.class, Modifier.PRIVATE, Modifier.STATIC);
             Element classElemt = element.getEnclosingElement();
-            builderCtx.checkModifiers(classElemt, uapi.service.annotation.OnDeactivate.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            builderCtx.checkModifiers(classElemt, uapi.service.annotation.OnDeactivate.class, Modifier.PRIVATE, Modifier.FINAL);
 
             // Check method
             String methodName = element.getSimpleName().toString();

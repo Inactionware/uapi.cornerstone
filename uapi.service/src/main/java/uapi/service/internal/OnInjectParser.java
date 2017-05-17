@@ -52,7 +52,7 @@ public class OnInjectParser {
             }
             builderCtx.checkModifiers(element, OnInject.class, Modifier.PRIVATE, Modifier.STATIC);
             Element classElemt = element.getEnclosingElement();
-            builderCtx.checkModifiers(classElemt, OnInject.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            builderCtx.checkModifiers(classElemt, OnInject.class, Modifier.PRIVATE, Modifier.FINAL);
 
             // Check method
             String methodName = element.getSimpleName().toString();

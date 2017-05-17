@@ -46,7 +46,7 @@ public class OnActivateParser {
             }
             builderCtx.checkModifiers(element, OnActivate.class, Modifier.PRIVATE, Modifier.STATIC);
             Element classElemt = element.getEnclosingElement();
-            builderCtx.checkModifiers(classElemt, OnActivate.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            builderCtx.checkModifiers(classElemt, OnActivate.class, Modifier.PRIVATE, Modifier.FINAL);
 
             // Check method
             String methodName = element.getSimpleName().toString();

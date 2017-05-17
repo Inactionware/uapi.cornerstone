@@ -48,7 +48,7 @@ class OptionalParser {
             builderCtx.checkAnnotations(element, uapi.service.annotation.Inject.class);
             Element classElemt = element.getEnclosingElement();
             builderCtx.checkModifiers(classElemt, uapi.service.annotation.Optional.class,
-                    Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+                    Modifier.PRIVATE, Modifier.FINAL);
 
             if (element.getKind() == ElementKind.FIELD) {
                 String fieldName = element.getSimpleName().toString();
