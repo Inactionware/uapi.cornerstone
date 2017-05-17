@@ -34,6 +34,13 @@ public class ActionIdentify implements IPartibleIdentify<String> {
         }
     }
 
+    public static ActionIdentify toActionId(Class<?> actionType) {
+        ArgumentChecker.required(actionType, "actionType");
+        String className = actionType.getCanonicalName();
+        className = className.replace('$', (char) 0);
+        return new ActionIdentify(className, ActionType.ACTION);
+    }
+
     public ActionIdentify(
             final String name,
             final ActionType type

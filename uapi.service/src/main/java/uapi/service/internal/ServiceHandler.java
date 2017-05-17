@@ -78,10 +78,6 @@ public final class ServiceHandler extends AnnotationsHandler {
             if (serviceIds.length == 0) {
                 final StringBuilder svcId = new StringBuilder();
                 // Check service factory type argument first
-//                Observable.from(((TypeElement) classElement).getInterfaces())
-//                        .filter(declareType -> declareType.toString().startsWith(IServiceFactory.class.getName()))
-//                        .map(declareType -> ((DeclaredType) declareType).getTypeArguments().get(0))
-//                        .subscribe(svcId::append);
                 Looper.on(((TypeElement) classElement).getInterfaces())
                         .filter(declareType -> declareType.toString().startsWith(IServiceFactory.class.getName()))
                         .map(declareType -> ((DeclaredType) declareType).getTypeArguments().get(0))
@@ -129,8 +125,6 @@ public final class ServiceHandler extends AnnotationsHandler {
 
     private String[] mergeId(List<String> serviceTypes, String[] serviceIds) {
         List<String> ids = new ArrayList<>();
-//        Observable.from(serviceTypes).subscribe(ids::add);
-//        Observable.from(serviceIds).subscribe(ids::add);
         Looper.on(serviceTypes).foreach(ids::add);
         Looper.on(serviceIds).foreach(ids::add);
         return ids.toArray(new String[ids.size()]);
@@ -176,8 +170,6 @@ public final class ServiceHandler extends AnnotationsHandler {
                 idArr = serviceIds;
             } else {
                 List<String> idList = new ArrayList<>();
-//                Observable.from(idArr).subscribe(idList::add);
-//                Observable.from(serviceIds).filter(id -> ! idList.contains(id)).subscribe(idList::add);
                 Looper.on(idArr).foreach(idList::add);
                 Looper.on(serviceIds).filter(id -> ! idList.contains(id)).foreach(idList::add);
                 idArr = idList.toArray(new String[idList.size()]);

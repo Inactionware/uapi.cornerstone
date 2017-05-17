@@ -36,6 +36,22 @@ class ActionIdentifyTest extends Specification {
         '2@BEHAVIOR'    | '2'   | ActionType.BEHAVIOR   | ['2', ActionType.BEHAVIOR] as Object[]
     }
 
+    def 'Test to action id'() {
+        when:
+        def actionId = ActionIdentify.toActionId(classType)
+
+        then:
+        noExceptionThrown()
+        actionId.id == id
+        actionId.name == name
+        actionId.type == type
+
+        where:
+        classType       | id                                                | name                                      | type
+        String.class    | 'java.lang.String@ACTION'                         | 'java.lang.String'                        | ActionType.ACTION
+        Test.class      | 'uapi.behavior.ActionIdentifyTest.Test@ACTION'    | 'uapi.behavior.ActionIdentifyTest.Test'   | ActionType.ACTION
+    }
+
     def 'Test create instance with incorrect id'() {
         when:
         def actionId = ActionIdentify.parse(id)
@@ -91,5 +107,7 @@ class ActionIdentifyTest extends Specification {
         '1@ACTION'      | '1@ACTION'    | true
         '1@BEHAVIOR'    | '1@BEHAVIOR'  | true
     }
+
+    public class Test {}
 }
 
