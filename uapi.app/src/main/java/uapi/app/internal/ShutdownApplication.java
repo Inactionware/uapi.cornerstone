@@ -5,6 +5,7 @@ import uapi.behavior.ActionType;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
 import uapi.common.StringHelper;
+import uapi.log.ILogger;
 import uapi.rx.Looper;
 import uapi.service.IRegistry;
 import uapi.service.IService;
@@ -22,14 +23,17 @@ import java.util.List;
 @Tag("Application")
 public class ShutdownApplication {
 
-    public static final ActionIdentify actionId = ActionIdentify.parse(
-            StringHelper.makeString("{}@{}", ShutdownApplication.class.getName(), ActionType.ACTION));
+    public static final ActionIdentify actionId = ActionIdentify.toActionId(ShutdownApplication.class);
+
+    @Inject
+    protected ILogger _logger;
 
     @Inject
     protected IRegistry _registry;
 
     @ActionDo
     public void shutdown(SystemShuttingDownEvent event) {
+        this._logger.info("Application is going to shutdown...");
         List<IService> svcs = event.applicationServices();
         List<String[]> svcIds = Looper.on(svcs).map(IService::getIds).toList();
         Looper.on(svcIds).foreach(this._registry::deactivateServices);

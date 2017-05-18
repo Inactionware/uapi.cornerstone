@@ -1,6 +1,7 @@
 package uapi.app.internal
 
 import spock.lang.Specification
+import uapi.log.ILogger
 import uapi.service.IRegistry
 import uapi.service.IService
 
@@ -29,6 +30,7 @@ class ShutdownApplicationTest extends Specification {
         }
         def shutdownApp = new ShutdownApplication()
         shutdownApp._registry = registry
+        shutdownApp._logger = Mock(ILogger)
 
         when:
         shutdownApp.shutdown(event)

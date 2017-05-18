@@ -36,6 +36,7 @@ public class StartupApplication {
 
     @ActionDo
     public void startup(SystemStartingUpEvent event) {
+        this._logger.info("Application is going to startup...");
         ProfileManager profileMgr = this._registry.findService(ProfileManager.class);
         if (profileMgr == null) {
             throw AppException.builder()

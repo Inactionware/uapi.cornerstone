@@ -93,7 +93,7 @@ public class Behavior<I, O>
             final IExecutionContext context
     ) {
         Execution execution = newExecution();
-        return (O) execution.execute(input, context);
+        return (O) execution.execute(input, (ExecutionContext) context);
     }
 
     // ----------------------------------------------------

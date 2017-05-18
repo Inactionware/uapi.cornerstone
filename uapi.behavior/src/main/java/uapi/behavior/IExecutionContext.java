@@ -53,7 +53,7 @@ public interface IExecutionContext {
         return get(KEY_RESP_NAME);
     }
 
-    void fireEvent(BehaviorTraceEvent event);
-
-    void fireEvent(BehaviorEvent event);
+//    void fireEvent(BehaviorTraceEvent event);
+//
+//    void fireEvent(BehaviorEvent event);
 }

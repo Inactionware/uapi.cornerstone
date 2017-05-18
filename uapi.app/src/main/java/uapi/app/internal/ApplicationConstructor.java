@@ -48,8 +48,9 @@ public class ApplicationConstructor {
             BehaviorEvent bEvent = null;
             if (BEHAVIOR_STARTUP.equals(event.behaviorName())) {
                 bEvent = new AppStartupEvent(responsible.name());
+                this._logger.info("Startup Application success.");
             } else if (BEHAVIOR_SHUTDOWN.equals(event.behaviorName())) {
-                this._logger.debug("Application is going to shutdown");
+                this._logger.debug("Application shutdown success.");
             } else {
                 // It should not happen
                 throw AppException.builder()

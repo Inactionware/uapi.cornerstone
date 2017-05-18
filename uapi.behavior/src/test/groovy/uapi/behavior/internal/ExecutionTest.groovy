@@ -50,7 +50,7 @@ class ExecutionTest extends Specification {
 
         when:
         def execution = new Execution(behavior, 1)
-        def result = execution.execute(input, Mock(IExecutionContext))
+        def result = execution.execute(input, Mock(ExecutionContext))
 
         then:
         noExceptionThrown()
@@ -76,7 +76,7 @@ class ExecutionTest extends Specification {
             traceable() >> true
             entranceAction() >> actionHolder
         }
-        def execCtx = Mock(IExecutionContext) {
+        def execCtx = Mock(ExecutionContext) {
             get(IExecutionContext.KEY_RESP_NAME) >> 'respName'
             1 * fireEvent(_ as BehaviorExecutingEvent)
             1 * fireEvent(_ as BehaviorFinishedEvent)

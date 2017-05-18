@@ -64,6 +64,7 @@ class ApplicationConstructorTest extends Specification {
         }
         def appConstructor = new ApplicationConstructor()
         appConstructor._responsibleReg = respReg
+        appConstructor._logger = Mock(ILogger)
         appConstructor.activate()
 
         when:

@@ -19,10 +19,8 @@ public interface IEventBus {
      *
      * @param   topic
      *          The event topic
-     * @throws  NoEventHandlerException
-     *          No event handler can handle the event
      */
-    void fire(String topic) throws NoEventHandlerException;
+    void fire(String topic);
 
     /**
      * Fire a event which only contains topic, the event will be handled by syncable tag
@@ -31,32 +29,36 @@ public interface IEventBus {
      *          The event topic
      * @param   syncable
      *          Synchronous or asynchronous to fire
-     * @throws  NoEventHandlerException
-     *          No event handler can handle the event
      */
-    void fire(String topic, boolean syncable) throws  NoEventHandlerException;
+    void fire(String topic, boolean syncable);
 
     /**
      * Fire event, the event will be handled in async
      *
      * @param   event
      *          Fired event
-     * @throws  NoEventHandlerException
-     *          No event handler can handle the event
      */
-    void fire(IEvent event) throws NoEventHandlerException;
+    void fire(IEvent event);
 
     /**
-     * Fire event which
+     * Fire event, if the syncable set to true, the caller will be blocked until the event is handled
      *
      * @param   event
      *          Fired event
      * @param   syncable
      *          Synchronous or asynchronous to fire
-     * @throws  NoEventHandlerException
-     *          No event handler can handle the event
      */
-    void fire(IEvent event, boolean syncable) throws NoEventHandlerException;
+    void fire(IEvent event, boolean syncable);
+
+    /**
+     * Fire event, the callback will be invoked when the event is handled
+     *
+     * @param   event
+     *          The event will be fired
+     * @param   callback
+     *          The callback which will be invoked when the event is handled
+     */
+    void fire(IEvent event, IEventFinishCallback callback);
 
     /**
      * Register a event handler

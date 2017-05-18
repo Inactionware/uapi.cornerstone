@@ -12,7 +12,6 @@ package uapi.event.internal
 import spock.lang.Specification
 import uapi.event.IEvent
 import uapi.event.IEventHandler
-import uapi.event.NoEventHandlerException
 import uapi.log.ILogger
 
 class EventBusTest extends Specification{

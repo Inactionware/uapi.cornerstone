@@ -27,7 +27,6 @@ import java.util.concurrent.*;
 /**
  * Event bus implementation
  */
-//@ThreadSafe
 @Service(IEventBus.class)
 @Tag("Event")
 public class EventBus implements IEventBus {
@@ -53,10 +52,16 @@ public class EventBus implements IEventBus {
         }
     }
 
+    @OnDeactivate
+    public void destroy() throws InterruptedException {
+        this._fjPoll.shutdown();
+        this._fjPoll.awaitTermination(this._awaitTime.seconds(), TimeUnit.SECONDS);
+    }
+
     @Override
     public void fire(
             final String topic
-    ) throws NoEventHandlerException {
+    ) {
         this.fire(new PlainEvent(topic));
     }
 
@@ -64,14 +69,14 @@ public class EventBus implements IEventBus {
     public void fire(
             final String topic,
             boolean syncable
-    ) throws NoEventHandlerException {
+    ) {
         this.fire(new PlainEvent(topic), syncable);
     }
 
     @Override
     public void fire(
             final IEvent event
-    ) throws NoEventHandlerException {
+    ) {
         fire(event, false);
     }
 
@@ -79,24 +84,13 @@ public class EventBus implements IEventBus {
     public void fire(
             final IEvent event,
             final boolean syncable
-    ) throws NoEventHandlerException {
+    ) {
         ArgumentChecker.required(event, "event");
 
-        String topic = event.topic();
-        List<IEventHandler> handlers = Looper.on(this._eventHandlers)
-                .filter(handler -> handler.topic().equals(topic))
-                .toList();
-        if (event instanceof IAttributed) {
-            final IAttributed attributed = (IAttributed) event;
-            handlers = Looper.on(handlers)
-                    .filter(handler -> (handler instanceof IAttributedEventHandler))
-                    .map(handler -> (IAttributedEventHandler) handler)
-                    .filter(handler -> attributed.contains(handler.getAttributes()))
-                    .map(handler -> (IEventHandler) handler)
-                    .toList();
-        }
+        List<IEventHandler> handlers = findHandlers(event);
         if (handlers.size() == 0) {
-            this._logger.warn("There are no event handler for event topic - {}", topic);
+            this._logger.warn("There are no event handler for event topic - {}", event.topic());
+            return;
         }
 
         HandleEventAction action = new HandleEventAction(handlers, event, syncable);
@@ -113,6 +107,24 @@ public class EventBus implements IEventBus {
     }
 
     @Override
+    public void fire(
+            final IEvent event,
+            final IEventFinishCallback callback
+    ) {
+        ArgumentChecker.required(event, "event");
+        ArgumentChecker.required(callback, "callback");
+
+        List<IEventHandler> handlers = findHandlers(event);
+        if (handlers.size() == 0) {
+            this._logger.warn("There are no event handler for event topic - {}", event.topic());
+            return;
+        }
+
+        HandleEventAction action = new HandleEventAction(handlers, event, callback);
+        this._fjPoll.submit(action);
+    }
+
+    @Override
     public void register(IEventHandler eventHandler) {
         ArgumentChecker.required(eventHandler, "eventHandler");
         this._eventHandlers.add(eventHandler);
@@ -124,28 +136,54 @@ public class EventBus implements IEventBus {
         return this._eventHandlers.remove(eventHandler);
     }
 
-    public void destroy() throws InterruptedException {
-        this._fjPoll.shutdown();
-        this._fjPoll.awaitTermination(this._awaitTime.seconds(), TimeUnit.SECONDS);
+    private List<IEventHandler> findHandlers(IEvent event) {
+        String topic = event.topic();
+        List<IEventHandler> handlers = Looper.on(this._eventHandlers)
+                .filter(handler -> handler.topic().equals(topic))
+                .toList();
+        if (event instanceof IAttributed) {
+            final IAttributed attributed = (IAttributed) event;
+            handlers = Looper.on(handlers)
+                    .filter(handler -> (handler instanceof IAttributedEventHandler))
+                    .map(handler -> (IAttributedEventHandler) handler)
+                    .filter(handler -> attributed.contains(handler.getAttributes()))
+                    .map(handler -> (IEventHandler) handler)
+                    .toList();
+        }
+        return handlers;
     }
 
     private class HandleEventAction extends RecursiveAction {
 
         private final IEvent _event;
         private final List<IEventHandler> _handlers;
-        private final boolean _blocked;
+        private final WaitType _waitType;
+        private final IEventFinishCallback _finCallback;
 
         private HandleEventAction(IEventHandler handler, IEvent event) {
             this._event = event;
             this._handlers = new LinkedList<>();
             this._handlers.add(handler);
-            this._blocked = false;
+            this._waitType = WaitType.NO_WAIT;
+            this._finCallback = null;
         }
 
         private HandleEventAction(List<IEventHandler> handlers, IEvent event, boolean blocked) {
             this._event = event;
             this._handlers = handlers;
-            this._blocked = blocked;
+            if (blocked) {
+                this._waitType = WaitType.BLOCKED;
+            } else {
+                this._waitType = WaitType.NO_WAIT;
+            }
+            this._finCallback = null;
+        }
+
+        private HandleEventAction(List<IEventHandler> handlers, IEvent event, IEventFinishCallback callback) {
+            this._event = event;
+            this._handlers = handlers;
+            this._waitType = WaitType.CALLBACK;
+            this._finCallback = callback;
         }
 
         @Override
@@ -159,12 +197,19 @@ public class EventBus implements IEventBus {
                 return;
             }
 
-            List<ForkJoinTask<Void>> tasks = Looper.on(this._handlers)
-                    .map(handler -> new HandleEventAction(handler, this._event))
-                    .map(action -> EventBus.this._fjPoll.submit(action))
-                    .toList();
-            if (this._blocked) {
+            if (this._waitType == WaitType.NO_WAIT) {
+                Looper.on(this._handlers)
+                        .map(handler -> new HandleEventAction(handler, this._event))
+                        .foreach(action -> EventBus.this._fjPoll.submit(action));
+            } else {
+                List<ForkJoinTask<Void>> tasks = Looper.on(this._handlers)
+                        .map(handler -> new HandleEventAction(handler, this._event))
+                        .map(action -> EventBus.this._fjPoll.submit(action))
+                        .toList();
                 Looper.on(tasks).foreach(ForkJoinTask::join);
+                if (this._waitType == WaitType.CALLBACK) {
+                    this._finCallback.callback();
+                }
             }
         }
     }

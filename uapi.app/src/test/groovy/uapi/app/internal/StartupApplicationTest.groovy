@@ -59,7 +59,7 @@ class StartupApplicationTest extends Specification {
 
         then:
         noExceptionThrown()
-        1 * logger.info(_)
+        2 * logger.info(_)
     }
 
     def 'Test start up while contains auto active service'() {
@@ -89,6 +89,6 @@ class StartupApplicationTest extends Specification {
 
         then:
         noExceptionThrown()
-        1 * logger.info(_)
+        2 * logger.info(_)
     }
 }

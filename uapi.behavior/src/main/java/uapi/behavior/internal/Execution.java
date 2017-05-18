@@ -40,7 +40,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
      */
     Object execute(
             final Object input,
-            final IExecutionContext executionContext
+            final ExecutionContext executionContext
     ) {
         ArgumentChecker.required(executionContext, "executionContext");
         Object output = input;

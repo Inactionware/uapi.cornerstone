@@ -23,8 +23,8 @@ import uapi.behavior.BehaviorTraceEvent
 import uapi.common.Repository
 import uapi.event.IEvent
 import uapi.event.IEventBus
+import uapi.event.IEventFinishCallback
 import uapi.event.IEventHandler
-import uapi.event.NoEventHandlerException
 
 /**
  * Unit test for Responsible
@@ -269,22 +269,27 @@ class ResponsibleTest extends Specification {
         private IEventHandler _handler
 
         @Override
-        void fire(String topic) throws NoEventHandlerException {
+        void fire(String topic) {
 
         }
 
         @Override
-        void fire(String topic, boolean syncable) throws NoEventHandlerException {
+        void fire(String topic, boolean syncable) {
 
         }
 
         @Override
-        void fire(IEvent event) throws NoEventHandlerException {
+        void fire(IEvent event) {
 
         }
 
         @Override
-        void fire(IEvent event, boolean syncable) throws NoEventHandlerException {
+        void fire(IEvent event, boolean syncable) {
+
+        }
+
+        @Override
+        void fire(IEvent event, IEventFinishCallback callback) {
 
         }
 
