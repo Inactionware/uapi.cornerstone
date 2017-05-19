@@ -105,7 +105,12 @@ public class ActionHandler extends AnnotationsHandler {
             } else {
                 VariableElement inputParamElement = (VariableElement) paramElements.get(0);
                 inputType = inputParamElement.asType().toString();
-                if (paramElements.size() == 2) {
+                if (paramElements.size() == 1) {
+                    if (IExecutionContext.class.getCanonicalName().equals(inputType)) {
+                        inputType = Type.VOID;
+                        needContext = true;
+                    }
+                } else if (paramElements.size() == 2) {
                     VariableElement contextParamElement = (VariableElement) paramElements.get(1);
                     if (! IExecutionContext.class.getCanonicalName().equals(contextParamElement.asType().toString())) {
                         throw new GeneralException(
@@ -130,7 +135,8 @@ public class ActionHandler extends AnnotationsHandler {
             model.put("inputType", inputType);
             model.put("outputType", outputType);
             model.put("needContext", needContext);
-            model.put("isVoid", Type.Q_VOID.equals(outputType));
+            model.put("isInVoid", Type.Q_VOID.equals(inputType));
+            model.put("isOutVoid", Type.Q_VOID.equals(outputType));
 
             ClassMeta.Builder clsBuilder = builderContext.findClassBuilder(classElement);
             clsBuilder
