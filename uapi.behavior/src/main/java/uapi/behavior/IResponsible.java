@@ -28,6 +28,22 @@ public interface IResponsible {
      *
      * @param   name
      *          The name of behavior, the name must be unique
+     * @param   topic
+     *          The event topic
+     * @return  The behavior builder which can build a specific behavior which can handle specific event
+     * @throws  BehaviorException
+     *          The name is used in registered behavior, error code see {@link BehaviorErrors.BEHAVIOR_ID_IS_USED}
+     */
+    IBehaviorBuilder newBehavior(
+            String name,
+            String topic
+    ) throws BehaviorException;
+
+    /**
+     * Create new behavior builder on specific event topic.
+     *
+     * @param   name
+     *          The name of behavior, the name must be unique
      * @param   eventType
      *          The event type
      * @param   topic

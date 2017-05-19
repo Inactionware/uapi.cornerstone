@@ -251,7 +251,7 @@ public class Behavior<I, O>
     private final class EndpointAction implements IAction {
 
         private final EndpointType _type;
-        private final Class<?> _intputType;
+        private final Class<?> _inputType;
         private final Class<?> _outputType;
 
         private EndpointAction(
@@ -259,7 +259,7 @@ public class Behavior<I, O>
                 final Class inputType
         ) {
             ArgumentChecker.required(inputType, "inputType");
-            this._intputType = inputType;
+            this._inputType = inputType;
             this._outputType = inputType;
             this._type = type;
         }
@@ -271,7 +271,7 @@ public class Behavior<I, O>
 
         @Override
         public Class inputType() {
-            return this._intputType;
+            return this._inputType;
         }
 
         @Override
