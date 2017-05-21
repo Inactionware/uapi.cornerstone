@@ -26,4 +26,9 @@ public interface IBehavior<I, O> extends IAction<I, O> {
      * @return  True means the behavior is traceable otherwise means it is untraceable
      */
     boolean traceable();
+
+    @Override
+    default boolean isAnonymous() {
+        return false;
+    }
 }

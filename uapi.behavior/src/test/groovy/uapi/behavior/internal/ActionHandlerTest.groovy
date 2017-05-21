@@ -295,7 +295,7 @@ class ActionHandlerTest extends Specification {
             }
         }
         1 * clsBuilder.addImplement(_ as String) >> clsBuilder
-        4 * clsBuilder.addMethodBuilder(_ as MethodMeta.Builder) >> clsBuilder
+        5 * clsBuilder.addMethodBuilder(_ as MethodMeta.Builder) >> clsBuilder
         handler.handleAnnotatedElements(builderCtx, Action.class, [ element ] as Set)
 
         then:

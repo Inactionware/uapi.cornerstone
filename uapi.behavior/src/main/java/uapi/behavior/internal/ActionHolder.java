@@ -48,8 +48,6 @@ class ActionHolder {
      *
      * @param   actionHolder
      *          The next action
-//     * @param   evaluator
-//     *          The evaluator which will be evaluated when decide which next action is used by output from last action
      * @throws  BehaviorException
      *          If this action's output type is not matched next action's input type,
      *          see {@link BehaviorErrors.UnmatchedAction}
@@ -57,16 +55,16 @@ class ActionHolder {
     void next(
             final ActionHolder actionHolder
     ) throws BehaviorException {
-        if (! this._action.outputType().equals(actionHolder.action().inputType())) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.UNMATCHED_ACTION)
-                    .variables(new BehaviorErrors.UnmatchedAction()
-                            .outputType(this._action.outputType().getCanonicalName())
-                            .outputAction(this._action.getId())
-                            .inputType(actionHolder.action().inputType().getCanonicalName())
-                            .inputAction(actionHolder.action().getId()))
-                    .build();
-        }
+//        if (! this._action.outputType().equals(actionHolder.action().inputType())) {
+//            throw BehaviorException.builder()
+//                    .errorCode(BehaviorErrors.UNMATCHED_ACTION)
+//                    .variables(new BehaviorErrors.UnmatchedAction()
+//                            .outputType(this._action.outputType().getCanonicalName())
+//                            .outputAction(this._action.getId())
+//                            .inputType(actionHolder.action().inputType().getCanonicalName())
+//                            .inputAction(actionHolder.action().getId()))
+//                    .build();
+//        }
         this._nextActions.add(actionHolder);
     }
 

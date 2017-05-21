@@ -14,6 +14,7 @@ import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
+import uapi.behavior.IAnonymousAction
 import uapi.common.IAttributed
 import uapi.common.Repository
 
@@ -75,7 +76,8 @@ class BehaviorTest extends Specification {
         behavior.then(actionId).build()
 
         then:
-        thrown(BehaviorException)
+//        thrown(BehaviorException)
+        noExceptionThrown()
 
         where:
         behaviorName    | behaviorInputType     | behaviorOutputType    | actionInputType   | actionOutputType
@@ -276,5 +278,17 @@ class BehaviorTest extends Specification {
         where:
         bName   | bInput        | a1IType       | a1OType       | a2IType       | a2OType
         'bName' | String.class  | String.class  | Integer.class | Integer.class | String.class
+    }
+
+    def 'Test anonymous action'() {
+        given:
+        def repo = Mock(Repository)
+
+        when:
+        def behavior = new Behavior(Mock(Responsible), repo, 'aaa', String.class)
+        behavior.then({str, execCtx -> 'string'} as IAnonymousAction)
+
+        then:
+        noExceptionThrown()
     }
 }

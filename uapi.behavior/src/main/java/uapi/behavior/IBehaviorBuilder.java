@@ -51,6 +51,10 @@ public interface IBehaviorBuilder {
      */
     IBehaviorBuilder then(ActionIdentify id, String label) throws BehaviorException;
 
+    IBehaviorBuilder then(IAnonymousAction action) throws BehaviorException;
+
+    IBehaviorBuilder then(IAnonymousAction action, String label) throws BehaviorException;
+
     /**
      * Get navigator which associated with this behavior builder
      *

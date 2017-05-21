@@ -61,8 +61,9 @@ class ActionHolderTest extends Specification {
         instance.next(new ActionHolder(new TestAction2()))
 
         then:
-        thrown(BehaviorException)
-        ! instance.hasNext()
+//        thrown(BehaviorException)
+        noExceptionThrown()
+        instance.hasNext()
     }
 
     def 'Test set next action'() {
@@ -180,6 +181,11 @@ class ActionHolderTest extends Specification {
         }
 
         @Override
+        boolean isAnonymous() {
+            return false
+        }
+
+        @Override
         ActionIdentify getId() {
             return ActionIdentify.parse('1@ACTION')
         }
@@ -200,6 +206,11 @@ class ActionHolderTest extends Specification {
         @Override
         Class<Void> outputType() {
             return Void.class
+        }
+
+        @Override
+        boolean isAnonymous() {
+            return false
         }
 
         @Override
@@ -226,6 +237,11 @@ class ActionHolderTest extends Specification {
         }
 
         @Override
+        boolean isAnonymous() {
+            return false
+        }
+
+        @Override
         ActionIdentify getId() {
             return ActionIdentify.parse('1@ACTION')
         }
@@ -246,6 +262,11 @@ class ActionHolderTest extends Specification {
         @Override
         Class<Void> outputType() {
             return Void.class
+        }
+
+        @Override
+        boolean isAnonymous() {
+            return false
         }
 
         @Override

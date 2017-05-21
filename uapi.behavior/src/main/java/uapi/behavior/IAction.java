@@ -47,6 +47,13 @@ public interface IAction<I, O> extends IIdentifiable<ActionIdentify> {
      */
     Class<O> outputType();
 
+    /**
+     * Is this action anonymous or not
+     *
+     * @return  Return true if the action is anonymous otherwise return false
+     */
+    boolean isAnonymous();
+
     @Override
     ActionIdentify getId();
 }

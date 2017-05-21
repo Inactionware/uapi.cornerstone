@@ -162,6 +162,26 @@ public class Behavior<I, O>
     }
 
     @Override
+    public IBehaviorBuilder then(
+            final IAnonymousAction action
+    ) throws BehaviorException {
+        return then(action, null);
+    }
+
+    @Override
+    public IBehaviorBuilder then(
+            final IAnonymousAction action,
+            final String label
+    ) throws BehaviorException {
+        ensureNotBuilt();
+        ArgumentChecker.required(action, "action");
+        AnonymousAction aAction = new AnonymousAction(action);
+        this._navigator.newNextAction(aAction, this._lastEvaluator, label);
+        this._lastEvaluator = null;
+        return this;
+    }
+
+    @Override
     public INavigator navigator() {
         ensureNotBuilt();
         return this._navigator;
@@ -280,6 +300,11 @@ public class Behavior<I, O>
         }
 
         @Override
+        public boolean isAnonymous() {
+            return true;
+        }
+
+        @Override
         public Object process(Object input, IExecutionContext context) {
             return input;
         }
@@ -331,15 +356,18 @@ public class Behavior<I, O>
         ) throws BehaviorException {
             ActionHolder newAction = new ActionHolder(action, evaluator);
             // Check new action input is matched to current action output
-            if (! this._current.action().outputType().equals(action.inputType())) {
-                throw BehaviorException.builder()
-                        .errorCode(BehaviorErrors.ACTION_IO_MISMATCH)
-                        .variables(new BehaviorErrors.ActionIOMismatch()
-                                .outputAction(this._current.action().getId())
-                                .outputType(this._current.action().outputType())
-                                .inputAction(action.getId())
-                                .inputType(action.inputType()))
-                        .build();
+            // The check only on non-anonymous action
+            if (! this._current.action().isAnonymous() && ! action.isAnonymous()) {
+                if (!this._current.action().outputType().equals(action.inputType())) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.ACTION_IO_MISMATCH)
+                            .variables(new BehaviorErrors.ActionIOMismatch()
+                                    .outputAction(this._current.action().getId())
+                                    .outputType(this._current.action().outputType())
+                                    .inputAction(action.getId())
+                                    .inputType(action.inputType()))
+                            .build();
+                }
             }
             // Check action label
             if (! ArgumentChecker.isEmpty(label)) {
