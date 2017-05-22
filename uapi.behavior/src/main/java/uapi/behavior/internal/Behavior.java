@@ -14,6 +14,7 @@ import uapi.common.ArgumentChecker;
 import uapi.common.Builder;
 import uapi.common.Functionals;
 import uapi.common.Repository;
+import uapi.event.IEventFinishCallback;
 import uapi.rx.Looper;
 
 import java.util.HashMap;
@@ -44,6 +45,7 @@ public class Behavior<I, O>
 
     private IAnonymousAction<Object, BehaviorEvent> _successAction;
     private IAnonymousAction<Exception, BehaviorEvent> _failureAction;
+    private IEventFinishCallback _successEventCallback;
 
     Behavior(
             final Responsible responsible,
@@ -205,6 +207,14 @@ public class Behavior<I, O>
     }
 
     @Override
+    public IBehaviorBuilder onSuccessEventCallback(IEventFinishCallback callback) {
+        ensureNotBuilt();
+        ArgumentChecker.required(callback, "callback");
+        this._successEventCallback = callback;
+        return this;
+    }
+
+    @Override
     public INavigator navigator() {
         ensureNotBuilt();
         return this._navigator;
@@ -254,6 +264,7 @@ public class Behavior<I, O>
                 }
             });
         }
+
         // Make all leaf action's next to a exit action
         Class outputType = leafActions.get(0).action().outputType();
         IAction exit = new EndpointAction(EndpointType.EXIT, outputType);
@@ -287,7 +298,8 @@ public class Behavior<I, O>
                 this,
                 this._sequence.incrementAndGet(),
                 this._successAction,
-                this._failureAction);
+                this._failureAction,
+                this._successEventCallback);
     }
 
     ActionHolder entranceAction() {

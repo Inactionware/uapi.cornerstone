@@ -3,6 +3,7 @@ package uapi.behavior.internal;
 import uapi.IIdentifiable;
 import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
+import uapi.event.IEventFinishCallback;
 
 /**
  * The class represent a execution of one behavior
@@ -15,12 +16,14 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
 
     private final IAnonymousAction<Object, BehaviorEvent> _successAction;
     private final IAnonymousAction<Exception, BehaviorEvent> _failureAction;
+    private final IEventFinishCallback _successEventCallback;
 
     Execution(
             final Behavior behavior,
             final int sequence,
             final IAnonymousAction<Object, BehaviorEvent> successAction,
-            final IAnonymousAction<Exception, BehaviorEvent> failureAction
+            final IAnonymousAction<Exception, BehaviorEvent> failureAction,
+            final IEventFinishCallback successEventCallback
     ) {
         ArgumentChecker.required(behavior, "behavior");
         this._id = new ExecutionIdentify(behavior.getId(), sequence);
@@ -28,6 +31,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         this._current = behavior.entranceAction();
         this._successAction = successAction;
         this._failureAction = failureAction;
+        this._successEventCallback = successEventCallback;
     }
 
     @Override
@@ -72,7 +76,11 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         if (this._successAction != null) {
             BehaviorEvent bEvent = this._successAction.accept(output, executionContext);
             if (bEvent != null) {
-                executionContext.fireEvent(bEvent);
+                if (this._successEventCallback != null) {
+                    executionContext.fireEvent(bEvent, this._successEventCallback);
+                } else {
+                    executionContext.fireEvent(bEvent);
+                }
             }
         }
         if (this._traceable) {

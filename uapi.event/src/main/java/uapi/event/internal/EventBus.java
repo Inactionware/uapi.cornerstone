@@ -208,7 +208,7 @@ public class EventBus implements IEventBus {
                         .toList();
                 Looper.on(tasks).foreach(ForkJoinTask::join);
                 if (this._waitType == WaitType.CALLBACK) {
-                    this._finCallback.callback();
+                    this._finCallback.callback(this._event);
                 }
             }
         }

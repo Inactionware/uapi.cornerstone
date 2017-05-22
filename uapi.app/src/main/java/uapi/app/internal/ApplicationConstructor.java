@@ -28,7 +28,6 @@ public class ApplicationConstructor {
 
     private static final String BEHAVIOR_STARTUP            = "startUp";
     private static final String BEHAVIOR_SHUTDOWN           = "shutdown";
-    private static final String BEHAVIOR_NOTIFY_SHUTDOWN    = "notifyShutdown";
 
     private final IAnonymousAction<Exception, BehaviorEvent> DEFAULT_FAILURE_ACTION = (ex, ctx) -> {
         this._logger.error(ex, "Fail to process behavior - {}", ctx.behaviorName());
@@ -56,21 +55,18 @@ public class ApplicationConstructor {
                 })
                 .onFailure(DEFAULT_FAILURE_ACTION)
                 .build();
-        responsible.newBehavior(BEHAVIOR_NOTIFY_SHUTDOWN, SystemShuttingDownEvent.class, SystemShuttingDownEvent.TOPIC)
-                .onSuccess((input, ctx) -> new AppShutdownEvent(responsible.name()))
-                .onFailure(DEFAULT_FAILURE_ACTION)
-                .build();
-        responsible.newBehavior(BEHAVIOR_SHUTDOWN, EventHandlingFinishedEvent.class, EventHandlingFinishedEvent.TOPIC)
-                .then((event, ctx) -> {
+        responsible.newBehavior(BEHAVIOR_SHUTDOWN, SystemShuttingDownEvent.class, SystemShuttingDownEvent.TOPIC)
+                .then((input, ctx) -> {
                     this._logger.info("Application is going to shutdown...");
-                    List<IService> svcs = ((SystemShuttingDownEvent) event).applicationServices();
+                    return input;
+                })
+                .onSuccess((input, ctx) ->
+                        new AppShutdownEvent(responsible.name(), ((SystemShuttingDownEvent) input).applicationServices()))
+                .onSuccessEventCallback(event -> {
+                    List<IService> svcs = ((AppShutdownEvent) event).applicationServices();
                     List<String[]> svcIds = Looper.on(svcs).map(IService::getIds).toList();
                     Looper.on(svcIds).foreach(this._registry::deactivateServices);
-                    return null;
-                })
-                .onSuccess((input, execCtx) -> {
                     this._logger.debug("Application shutdown success.");
-                    return null;
                 })
                 .onFailure(DEFAULT_FAILURE_ACTION)
                 .build();

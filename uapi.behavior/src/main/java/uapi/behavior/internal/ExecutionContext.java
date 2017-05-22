@@ -15,6 +15,7 @@ import uapi.behavior.IExecutionContext;
 import uapi.behavior.Scope;
 import uapi.common.ArgumentChecker;
 import uapi.event.IEventBus;
+import uapi.event.IEventFinishCallback;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -82,5 +83,11 @@ public class ExecutionContext implements IExecutionContext {
     public void fireEvent(final BehaviorEvent event) {
         ArgumentChecker.required(event, "event");
         this._eventBus.fire(event);
+    }
+
+    public void fireEvent(final BehaviorEvent event, final IEventFinishCallback callback) {
+        ArgumentChecker.required(event, "event");
+        ArgumentChecker.required(callback, "callback");
+        this._eventBus.fire(event, callback);
     }
 }

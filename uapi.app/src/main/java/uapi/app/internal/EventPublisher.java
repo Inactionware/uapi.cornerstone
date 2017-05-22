@@ -49,7 +49,7 @@ public class EventPublisher {
                 final IExecutionContext execCtx
         ) {
             if (event.needNotify()) {
-                this._eventBus.fire(event, () -> {
+                this._eventBus.fire(event, (oEvent) -> {
                     EventHandlingFinishedEvent finEvent = new EventHandlingFinishedEvent(execCtx.responsibleName());
                     this._eventBus.fire(finEvent);
                 });

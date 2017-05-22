@@ -1,6 +1,7 @@
 package uapi.behavior;
 
 import uapi.common.Functionals;
+import uapi.event.IEventFinishCallback;
 
 /**
  * A builder for behavior creation
@@ -92,6 +93,8 @@ public interface IBehaviorBuilder {
      * @return  The behavior builder self
      */
     IBehaviorBuilder onFailure(IAnonymousAction<Exception, BehaviorEvent> action);
+
+    IBehaviorBuilder onSuccessEventCallback(IEventFinishCallback callback);
 
     /**
      * Get navigator which associated with this behavior builder
