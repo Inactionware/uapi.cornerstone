@@ -10,35 +10,35 @@ import uapi.common.ArgumentChecker;
 /**
  * Created by min on 2017/5/21.
  */
-public class AnonymousAction implements IAction<Object, Object> {
+public class AnonymousAction<I, O> implements IAction<I, O> {
 
-    private final IAnonymousAction _action;
+    private final IAnonymousAction<I, O> _action;
 
-    public AnonymousAction(IAnonymousAction action) {
+    public AnonymousAction(IAnonymousAction<I, O> action) {
         ArgumentChecker.required(action, "action");
         this._action = action;
     }
 
     @Override
-    public Object process(Object input, IExecutionContext context) {
-        Object output = null;
-        if (this._action instanceof IAnonymousAction.IContextIgnorant) {
-            output = ((IAnonymousAction.IContextIgnorant) this._action).accept(input);
-        } else if (this._action instanceof IAnonymousAction.IContextAware) {
-            output = ((IAnonymousAction.IContextAware) this._action).accept(input, context);
-        } else {
-            throw new GeneralException("error");
-        }
+    public O process(I input, IExecutionContext context) {
+        O output = this._action.accept(input, context);
+//        if (this._action instanceof IAnonymousAction.IContextIgnorant) {
+//            output = ((IAnonymousAction.IContextIgnorant) this._action).accept(input);
+//        } else if (this._action instanceof IAnonymousAction.IContextAware) {
+//            output = ((IAnonymousAction.IContextAware) this._action).accept(input, context);
+//        } else {
+//            throw new GeneralException("error");
+//        }
         return output;
     }
 
     @Override
-    public Class<Object> inputType() {
+    public Class inputType() {
         return Object.class;
     }
 
     @Override
-    public Class<Object> outputType() {
+    public Class outputType() {
         return Object.class;
     }
 

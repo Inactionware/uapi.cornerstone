@@ -286,7 +286,7 @@ class BehaviorTest extends Specification {
 
         when:
         def behavior = new Behavior(Mock(Responsible), repo, 'aaa', String.class)
-        behavior.then({str, execCtx -> 'string'} as IAnonymousAction)
+        behavior.then({str, execCtx -> 'string'})
 
         then:
         noExceptionThrown()

@@ -1,11 +1,7 @@
 package uapi.behavior.internal;
 
 import uapi.IIdentifiable;
-import uapi.behavior.ActionIdentify;
-import uapi.behavior.BehaviorExecutingEvent;
-import uapi.behavior.BehaviorFinishedEvent;
-import uapi.behavior.ExecutionIdentify;
-import uapi.behavior.IExecutionContext;
+import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
 
 /**
@@ -17,11 +13,21 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
     private final boolean _traceable;
     private ActionHolder _current;
 
-    Execution(final Behavior behavior, final int sequence) {
+    private final IAnonymousAction<Object, BehaviorEvent> _successAction;
+    private final IAnonymousAction<Exception, BehaviorEvent> _failureAction;
+
+    Execution(
+            final Behavior behavior,
+            final int sequence,
+            final IAnonymousAction<Object, BehaviorEvent> successAction,
+            final IAnonymousAction<Exception, BehaviorEvent> failureAction
+    ) {
         ArgumentChecker.required(behavior, "behavior");
         this._id = new ExecutionIdentify(behavior.getId(), sequence);
         this._traceable = behavior.traceable();
         this._current = behavior.entranceAction();
+        this._successAction = successAction;
+        this._failureAction = failureAction;
     }
 
     @Override
@@ -45,15 +51,30 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         ArgumentChecker.required(executionContext, "executionContext");
         Object output = input;
         String sourceRespName = executionContext.get(IExecutionContext.KEY_RESP_NAME);
-        do {
-            output = this._current.action().process(output, executionContext);
-            if (this._traceable) {
-                BehaviorExecutingEvent event = new BehaviorExecutingEvent(
-                        this._id, input, output, this._current.action().getId(), sourceRespName);
-                executionContext.fireEvent(event);
+        try {
+            do {
+                output = this._current.action().process(output, executionContext);
+                if (this._traceable) {
+                    BehaviorExecutingEvent event = new BehaviorExecutingEvent(
+                            this._id, input, output, this._current.action().getId(), sourceRespName);
+                    executionContext.fireEvent(event);
+                }
+                this._current = this._current.findNext(output);
+            } while (this._current != null);
+        } catch (Exception ex) {
+            if (this._failureAction != null) {
+                BehaviorEvent bEvent = this._failureAction.accept(ex, executionContext);
+                if (bEvent != null) {
+                    executionContext.fireEvent(bEvent);
+                }
             }
-            this._current = this._current.findNext(output);
-        } while (this._current != null);
+        }
+        if (this._successAction != null) {
+            BehaviorEvent bEvent = this._successAction.accept(output, executionContext);
+            if (bEvent != null) {
+                executionContext.fireEvent(bEvent);
+            }
+        }
         if (this._traceable) {
             BehaviorFinishedEvent event = new BehaviorFinishedEvent(
                     this._id, input, output, sourceRespName);

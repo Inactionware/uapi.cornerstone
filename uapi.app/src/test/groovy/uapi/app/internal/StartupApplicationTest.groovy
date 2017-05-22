@@ -13,7 +13,7 @@ class StartupApplicationTest extends Specification {
 
     def 'Test create instance'() {
         when:
-        def startupApp = new StartupApplication()
+        def startupApp = new ApplicationConstructor.StartupApplication()
 
         then:
         noExceptionThrown()
@@ -25,7 +25,7 @@ class StartupApplicationTest extends Specification {
         def registry = Mock(IRegistry) {
             findService(ProfileManager.class) >> null
         }
-        def startupApp = new StartupApplication()
+        def startupApp = new ApplicationConstructor.StartupApplication()
         startupApp._logger = logger
         startupApp._registry = registry
         def event = Mock(SystemStartingUpEvent)
@@ -47,7 +47,7 @@ class StartupApplicationTest extends Specification {
                 }
             }
         }
-        def startupApp = new StartupApplication()
+        def startupApp = new ApplicationConstructor.StartupApplication()
         startupApp._logger = logger
         startupApp._registry = registry
         def event = Mock(SystemStartingUpEvent) {
@@ -73,7 +73,7 @@ class StartupApplicationTest extends Specification {
             }
             1 * findService('svc')
         }
-        def startupApp = new StartupApplication()
+        def startupApp = new ApplicationConstructor.StartupApplication()
         startupApp._logger = logger
         startupApp._registry = registry
         def service = Mock(IService) {

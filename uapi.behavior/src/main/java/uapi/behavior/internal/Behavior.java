@@ -42,6 +42,9 @@ public class Behavior<I, O>
 
     private Functionals.Evaluator _lastEvaluator;
 
+    private IAnonymousAction<Object, BehaviorEvent> _successAction;
+    private IAnonymousAction<Exception, BehaviorEvent> _failureAction;
+
     Behavior(
             final Responsible responsible,
             final Repository<ActionIdentify, IAction<?, ?>> actionRepository,
@@ -163,21 +166,41 @@ public class Behavior<I, O>
 
     @Override
     public IBehaviorBuilder then(
-            final IAnonymousAction action
-    ) throws BehaviorException {
+            final IAnonymousAction<?, ?> action
+    ) {
         return then(action, null);
     }
 
     @Override
     public IBehaviorBuilder then(
-            final IAnonymousAction action,
+            final IAnonymousAction<?, ?> action,
             final String label
-    ) throws BehaviorException {
+    ) {
         ensureNotBuilt();
         ArgumentChecker.required(action, "action");
         AnonymousAction aAction = new AnonymousAction(action);
         this._navigator.newNextAction(aAction, this._lastEvaluator, label);
         this._lastEvaluator = null;
+        return this;
+    }
+
+    @Override
+    public IBehaviorBuilder onSuccess(
+            final IAnonymousAction<Object, BehaviorEvent> action
+    ) {
+        ensureNotBuilt();
+        ArgumentChecker.required(action, "action");
+        this._successAction = action;
+        return this;
+    }
+
+    @Override
+    public IBehaviorBuilder onFailure(
+            final IAnonymousAction<Exception, BehaviorEvent> action
+    ) {
+        ensureNotBuilt();
+        ArgumentChecker.required(action, "action");
+        this._failureAction = action;
         return this;
     }
 
@@ -260,7 +283,11 @@ public class Behavior<I, O>
     // ----------------------------------------------------
     Execution newExecution() {
         ensureBuilt();
-        return new Execution(this, this._sequence.incrementAndGet());
+        return new Execution(
+                this,
+                this._sequence.incrementAndGet(),
+                this._successAction,
+                this._failureAction);
     }
 
     ActionHolder entranceAction() {

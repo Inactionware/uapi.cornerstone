@@ -184,6 +184,7 @@ public class Responsible implements IResponsible {
             Execution exec = this._behavior.newExecution();
             ExecutionContext exeCtx = new ExecutionContext(Responsible.this._eventBus);
             exeCtx.put(IExecutionContext.KEY_RESP_NAME, Responsible.this._name, Scope.GLOBAL);
+            exeCtx.put(IExecutionContext.KEY_BEHA_NAME, this._behavior.getId().getName(), Scope.GLOBAL);
             // Ignore the output data
             exec.execute(event, exeCtx);
         }

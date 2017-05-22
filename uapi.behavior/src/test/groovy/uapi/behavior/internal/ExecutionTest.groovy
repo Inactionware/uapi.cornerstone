@@ -22,7 +22,7 @@ class ExecutionTest extends Specification {
         }
 
         when:
-        def execution = new Execution(behavior, seq)
+        def execution = new Execution(behavior, seq, null, null)
 
         then:
         noExceptionThrown()
@@ -49,7 +49,7 @@ class ExecutionTest extends Specification {
         }
 
         when:
-        def execution = new Execution(behavior, 1)
+        def execution = new Execution(behavior, 1, null, null)
         def result = execution.execute(input, Mock(ExecutionContext))
 
         then:
@@ -83,7 +83,7 @@ class ExecutionTest extends Specification {
         }
 
         when:
-        def execution = new Execution(behavior, 1)
+        def execution = new Execution(behavior, 1, null, null)
         def result = execution.execute(input, execCtx)
 
         then:

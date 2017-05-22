@@ -16,7 +16,8 @@ import java.util.Map;
  */
 public interface IExecutionContext {
 
-    String KEY_RESP_NAME   = "ResponsibleName";
+    String KEY_RESP_NAME    = "ResponsibleName";
+    String KEY_BEHA_NAME    = "BehaviorName";
 
     /**
      * Put single k/v data under specific scope
@@ -51,6 +52,10 @@ public interface IExecutionContext {
 
     default String responsibleName() {
         return get(KEY_RESP_NAME);
+    }
+
+    default String behaviorName() {
+        return get(KEY_BEHA_NAME);
     }
 
 //    void fireEvent(BehaviorTraceEvent event);
