@@ -32,7 +32,7 @@ import java.util.concurrent.*;
 @Tag(Tags.EVENT)
 public class EventBus implements IEventBus {
 
-    private static final IntervalTime DEFAULT_AWAIT_TIME = IntervalTime.parse("10s");
+    private static final IntervalTime DEFAULT_AWAIT_TIME = IntervalTime.parse("100s");
 
     @Config(path="event.await-time", parser=IntervalTimeParser.class, optional=true)
     IntervalTime _awaitTime;
@@ -194,6 +194,9 @@ public class EventBus implements IEventBus {
                     this._handlers.get(0).handle(this._event);
                 } catch (Exception ex) {
                     EventBus.this._logger.error(ex);
+                }
+                if (this._waitType == WaitType.CALLBACK) {
+                    this._finCallback.callback(this._event);
                 }
                 return;
             }

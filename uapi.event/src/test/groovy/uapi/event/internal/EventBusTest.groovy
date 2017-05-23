@@ -10,7 +10,10 @@
 package uapi.event.internal
 
 import spock.lang.Specification
+import uapi.common.IAttributed
+import uapi.event.IAttributedEventHandler
 import uapi.event.IEvent
+import uapi.event.IEventFinishCallback
 import uapi.event.IEventHandler
 import uapi.log.ILogger
 
@@ -117,7 +120,7 @@ class EventBusTest extends Specification{
         'Topic'     | null
     }
 
-    def 'Test unregister handler'() {
+    def 'Test unregistered handler'() {
         given:
         IEventHandler handler = Mock(IEventHandler) {
             topic() >> eventTopic
@@ -137,4 +140,91 @@ class EventBusTest extends Specification{
         eventTopic  | none
         'Topic'     | null
     }
+
+    def 'Test event finish callback'() {
+        given:
+        IEvent event = Mock(IEvent) {
+            topic() >> eventTopic
+        }
+        IEventHandler handler = Mock(IEventHandler) {
+            topic() >> eventTopic
+        }
+        IEventFinishCallback callback = Mock(IEventFinishCallback)
+        EventBus eventBus = new EventBus()
+        eventBus.init()
+        eventBus.register(handler)
+
+        when:
+        eventBus.fire(event, callback)
+        eventBus.destroy()
+
+        then:
+        noExceptionThrown()
+        1 * handler.handle(event)
+        1 * callback.callback(event)
+
+        where:
+        eventTopic  | none
+        'Topic'     | null
+    }
+
+    def 'Test event finish callback by multiple handler'() {
+        given:
+        IEvent event = Mock(IEvent) {
+            topic() >> eventTopic
+        }
+        IEventHandler handler1 = Mock(IEventHandler) {
+            topic() >> eventTopic
+        }
+        IEventHandler handler2 = Mock(IEventHandler) {
+            topic() >> eventTopic
+        }
+        IEventFinishCallback callback = Mock(IEventFinishCallback)
+        EventBus eventBus = new EventBus()
+        eventBus.init()
+        eventBus.register(handler1)
+        eventBus.register(handler2)
+
+        when:
+        eventBus.fire(event, callback)
+        Thread.sleep(500)
+        eventBus.destroy()
+
+        then:
+        noExceptionThrown()
+        1 * handler1.handle(event)
+        1 * handler2.handle(event)
+        1 * callback.callback(event)
+
+        where:
+        eventTopic  | none
+        'Topic'     | null
+    }
+
+    def 'Test find attributed handlers'() {
+        given:
+        IEventHandler handler = Mock(IAttributedEventHandler) {
+            1 * getAttributes() >> [1: '1']
+            topic() >> eventTopic
+        }
+        IEvent event = Mock(IAttributedEvent) {
+            1 * contains([1: '1']) >> true
+            topic() >> eventTopic
+        }
+        EventBus eventBus = new EventBus()
+        eventBus.register(handler)
+
+        when:
+        def found = eventBus.findHandlers(event)
+
+        then:
+        found.size() == 1
+        found.get(0) == handler
+
+        where:
+        eventTopic  | none
+        'Topic'     | null
+    }
+
+    interface IAttributedEvent extends IEvent, IAttributed {}
 }

@@ -27,22 +27,26 @@ class ApplicationConstructorTest extends Specification {
         noExceptionThrown()
     }
 
-    @Ignore
     def 'Test activate'() {
         given:
         def respReg = Mock(IResponsibleRegistry) {
             def startupBehaviorBuilder = Mock(IBehaviorBuilder)
             1 * startupBehaviorBuilder.then(_) >> startupBehaviorBuilder
-            1 * startupBehaviorBuilder.traceable(_) >> startupBehaviorBuilder
+            1 * startupBehaviorBuilder.onSuccess(_) >> startupBehaviorBuilder
+            1 * startupBehaviorBuilder.onFailure(_) >> startupBehaviorBuilder
+            0 * startupBehaviorBuilder.traceable(_) >> startupBehaviorBuilder
             1 * startupBehaviorBuilder.build()
             def shutdownBehaviorBuilder = Mock(IBehaviorBuilder)
             1 * shutdownBehaviorBuilder.then(_) >> shutdownBehaviorBuilder
-            1 * shutdownBehaviorBuilder.traceable(_) >> shutdownBehaviorBuilder
+            1 * shutdownBehaviorBuilder.onSuccess(_) >> shutdownBehaviorBuilder
+            1 * shutdownBehaviorBuilder.onFailure(_) >> shutdownBehaviorBuilder
+            1 * shutdownBehaviorBuilder.onSuccessEventCallback(_) >> shutdownBehaviorBuilder
+            0 * shutdownBehaviorBuilder.traceable(_) >> shutdownBehaviorBuilder
             1 * shutdownBehaviorBuilder.build()
             1 * register(ApplicationConstructor.RESPONSIBLE_NAME) >> Mock(IResponsible) {
                 1 * newBehavior(ApplicationConstructor.BEHAVIOR_STARTUP, _, _) >> startupBehaviorBuilder
                 1 * newBehavior(ApplicationConstructor.BEHAVIOR_SHUTDOWN, _, _) >> shutdownBehaviorBuilder
-                1 * on(_)
+                0 * on(_)
             }
         }
         def appConstructor = new ApplicationConstructor()
@@ -62,6 +66,7 @@ class ApplicationConstructorTest extends Specification {
         bBuilder.then(_) >> bBuilder
         bBuilder.traceable(_) >> bBuilder
         bBuilder.onSuccess(_) >> bBuilder
+        bBuilder.onSuccessEventCallback(_) >> bBuilder
         bBuilder.onFailure(_) >> bBuilder
         def mockResp = new MockResponsible(bBuilder)
         def respReg = Mock(IResponsibleRegistry) {
