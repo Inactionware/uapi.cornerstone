@@ -11,21 +11,22 @@ package uapi.log.internal;
 
 import org.slf4j.LoggerFactory;
 import uapi.InvalidArgumentException;
+import uapi.Tags;
 import uapi.codegen.IGenerated;
+import uapi.common.ArgumentChecker;
 import uapi.log.ILogger;
 import uapi.service.IServiceFactory;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
 @Service
-@Tag("Log")
+@Tag(Tags.LOG)
 public class LoggerManager implements IServiceFactory<ILogger> {
 
     @Override
     public ILogger createService(Object serveFor) {
-        if (serveFor == null) {
-            throw new InvalidArgumentException("servFor", InvalidArgumentException.InvalidArgumentType.EMPTY);
-        }
+        ArgumentChecker.required(serveFor, "serveFor");
+
         if (serveFor instanceof IGenerated) {
             return new Logger(LoggerFactory.getLogger(((IGenerated) serveFor).originalType()));
         } else {

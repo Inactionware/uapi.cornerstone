@@ -10,6 +10,7 @@
 package uapi.config.internal;
 
 import com.google.common.base.Strings;
+import uapi.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.common.Pair;
 import uapi.config.ICliConfigProvider;
@@ -30,7 +31,7 @@ import java.util.List;
  * "-xtrf" : x, t, r, f option which boolean value which always set to true
  */
 @Service({ ICliConfigProvider.class })
-@Tag("Config")
+@Tag(Tags.CONFIG)
 public class CliConfigProvider implements ICliConfigProvider {
 
     public static final String QUALIFY                         = "cli.";

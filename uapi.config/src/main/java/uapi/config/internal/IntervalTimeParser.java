@@ -9,6 +9,7 @@
 
 package uapi.config.internal;
 
+import uapi.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.common.CollectionHelper;
 import uapi.common.IntervalTime;
@@ -20,7 +21,7 @@ import uapi.service.annotation.Tag;
  * Value parse for {@code IntervalTime}
  */
 @Service({ IConfigValueParser.class })
-@Tag("Config")
+@Tag(Tags.CONFIG)
 public class IntervalTimeParser implements IConfigValueParser {
 
     private static final String[] supportTypesIn = new String[] { String.class.getCanonicalName() };

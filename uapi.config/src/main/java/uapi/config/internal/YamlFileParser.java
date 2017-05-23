@@ -10,6 +10,7 @@
 package uapi.config.internal;
 
 import com.esotericsoftware.yamlbeans.YamlReader;
+import uapi.Tags;
 import uapi.common.Functionals;
 import uapi.config.IConfigFileParser;
 import uapi.service.annotation.Inject;
@@ -26,7 +27,7 @@ import java.util.Map;
  * The parser used to parse YAML format file
  */
 @Service({ IConfigFileParser.class })
-@Tag("Config")
+@Tag(Tags.CONFIG)
 public class YamlFileParser implements IConfigFileParser {
 
     private static final String YML_FILE_EXT    = "yml";

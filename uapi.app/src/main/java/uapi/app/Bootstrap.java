@@ -9,6 +9,7 @@
 
 package uapi.app;
 
+import uapi.Tags;
 import uapi.UapiException;
 import uapi.app.internal.*;
 import uapi.config.ICliConfigProvider;
@@ -34,7 +35,8 @@ import java.util.concurrent.Semaphore;
 public class Bootstrap {
 
     private static final String[] basicSvcTags = new String[] {
-            "Registry", "Config", "Log", "Event", "Behavior", "Application", "Profile"
+            Tags.REGISTRY, Tags.CONFIG, Tags.LOG, Tags.EVENT, Tags.BEHAVIOR,
+            Tags.PROFILE, Tags.APPLICATION
     };
 
     static AppServiceLoader appSvcLoader = new AppServiceLoader();

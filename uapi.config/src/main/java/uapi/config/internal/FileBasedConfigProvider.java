@@ -10,6 +10,7 @@
 package uapi.config.internal;
 
 import uapi.GeneralException;
+import uapi.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.config.IConfigFileParser;
 import uapi.config.IConfigTracer;
@@ -24,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-@Tag("Config")
+@Tag(Tags.CONFIG)
 public class FileBasedConfigProvider implements IConfigurable {
 
     static final String CFG_FILE_PATH  = "cli.config";

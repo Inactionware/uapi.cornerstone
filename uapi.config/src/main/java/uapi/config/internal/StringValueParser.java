@@ -9,6 +9,7 @@
 
 package uapi.config.internal;
 
+import uapi.Tags;
 import uapi.common.CollectionHelper;
 import uapi.config.IConfigValueParser;
 import uapi.service.annotation.Service;
@@ -18,7 +19,7 @@ import uapi.service.annotation.Tag;
  * The parser used to parse config value which can be convert to String
  */
 @Service({ IConfigValueParser.class })
-@Tag("Config")
+@Tag(Tags.CONFIG)
 public class StringValueParser implements IConfigValueParser {
 
     private static final String[] supportedInTypes  = new String[] {

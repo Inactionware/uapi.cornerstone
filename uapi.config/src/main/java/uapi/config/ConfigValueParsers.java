@@ -10,6 +10,7 @@
 package uapi.config;
 
 import uapi.GeneralException;
+import uapi.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.rx.Looper;
 import uapi.service.annotation.Inject;
@@ -23,7 +24,7 @@ import java.util.List;
  * The service hold one or more than one parsers
  */
 @Service
-@Tag("Config")
+@Tag(Tags.CONFIG)
 public class ConfigValueParsers {
 
     @Inject

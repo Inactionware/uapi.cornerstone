@@ -9,6 +9,7 @@
 
 package uapi.config.internal;
 
+import uapi.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.config.Configuration;
 import uapi.config.IConfigTracer;
@@ -25,7 +26,7 @@ import java.util.Map;
  * set configuration into related configurable config.
  */
 @Service({ ISatisfyHook.class, IConfigTracer.class })
-@Tag("Config")
+@Tag(Tags.CONFIG)
 class Configurator implements ISatisfyHook, IConfigTracer {
 
     private final Configuration _rootConfig;

@@ -10,6 +10,7 @@
 package uapi.event.internal;
 
 import uapi.GeneralException;
+import uapi.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.common.IAttributed;
 import uapi.common.IntervalTime;
@@ -28,7 +29,7 @@ import java.util.concurrent.*;
  * Event bus implementation
  */
 @Service(IEventBus.class)
-@Tag("Event")
+@Tag(Tags.EVENT)
 public class EventBus implements IEventBus {
 
     private static final IntervalTime DEFAULT_AWAIT_TIME = IntervalTime.parse("10s");

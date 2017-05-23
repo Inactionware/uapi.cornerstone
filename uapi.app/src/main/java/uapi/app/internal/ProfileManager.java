@@ -9,6 +9,7 @@
 
 package uapi.app.internal;
 
+import uapi.Tags;
 import uapi.common.StringHelper;
 import uapi.config.annotation.Config;
 import uapi.log.ILogger;
@@ -23,7 +24,7 @@ import java.util.Map;
  * Manage multiple service profiles
  */
 @Service
-@Tag("Profile")
+@Tag(Tags.PROFILE)
 class ProfileManager {
 
     static final IProfile DEFAULT_PROFILE   = new IncludeAllProfile();

@@ -14,6 +14,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import uapi.GeneralException;
 import uapi.InvalidArgumentException;
+import uapi.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.common.CollectionHelper;
 import uapi.common.Guarder;
@@ -36,7 +37,7 @@ import java.util.stream.Stream;
 @AutoService(IService.class)
 public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
-    private static final String[] tags = new String[] { "Registry" };
+    private static final String[] tags = new String[] {Tags.REGISTRY };
 
     private final Lock _svcRepoLock;
     private final SatisfyDecider _satisfyDecider;

@@ -9,6 +9,7 @@
 
 package uapi.config.internal;
 
+import uapi.Tags;
 import uapi.Type;
 import uapi.common.CollectionHelper;
 import uapi.config.IConfigValueParser;
@@ -23,7 +24,7 @@ import java.util.List;
  * A configuration value parser for string list
  */
 @Service({ IConfigValueParser.class })
-@Tag("Config")
+@Tag(Tags.CONFIG)
 public class StringListValueParser implements IConfigValueParser {
 
     private static final String[] supportedTypesIn = new String[] {

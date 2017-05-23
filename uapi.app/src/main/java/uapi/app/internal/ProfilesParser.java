@@ -10,6 +10,7 @@
 package uapi.app.internal;
 
 import uapi.GeneralException;
+import uapi.Tags;
 import uapi.app.AppErrors;
 import uapi.app.AppException;
 import uapi.config.IConfigValueParser;
@@ -26,7 +27,7 @@ import java.util.Map;
  * Parse profile configuration list to profile
  */
 @Service(IConfigValueParser.class)
-@Tag("Profile")
+@Tag(Tags.PROFILE)
 public class ProfilesParser implements IConfigValueParser {
 
     private static final String NAME        = "name";

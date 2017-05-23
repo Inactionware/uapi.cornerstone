@@ -1,5 +1,6 @@
 package uapi.app.internal;
 
+import uapi.Tags;
 import uapi.app.*;
 import uapi.behavior.*;
 import uapi.behavior.annotation.Action;
@@ -21,7 +22,7 @@ import java.util.List;
  * The constructor is used to construct application's behavior
  */
 @Service(autoActive = true)
-@Tag("Application")
+@Tag(Tags.APPLICATION)
 public class ApplicationConstructor {
 
     private static final String RESPONSIBLE_NAME            = "Application";
@@ -77,7 +78,7 @@ public class ApplicationConstructor {
      */
     @Service
     @Action
-    @Tag("Application")
+    @Tag(Tags.APPLICATION)
     public static class StartupApplication {
 
         public static final ActionIdentify actionId = ActionIdentify.toActionId(StartupApplication.class);
