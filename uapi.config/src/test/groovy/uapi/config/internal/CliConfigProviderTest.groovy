@@ -28,7 +28,7 @@ class CliConfigProviderTest extends Specification {
         provider.parse(args)
 
         then:
-        1 * mockCfgTracer.onChange(CliConfigProvider.QUALIFY + cfgKey, cfgValue)
+        1 * mockCfgTracer.onChange(CliConfigProvider.QUALIFY_SYSTEM + cfgKey, cfgValue)
 
         where:
         args                        | cfgKey    | cfgValue
@@ -47,10 +47,10 @@ class CliConfigProviderTest extends Specification {
         provider.parse(args)
 
         then:
-        1 * mockCfgTracer.onChange(CliConfigProvider.QUALIFY + cfgKey1, cfgValue)
-        1 * mockCfgTracer.onChange(CliConfigProvider.QUALIFY + cfgKey2, cfgValue)
-        1 * mockCfgTracer.onChange(CliConfigProvider.QUALIFY + cfgKey3, cfgValue)
-        1 * mockCfgTracer.onChange(CliConfigProvider.QUALIFY + cfgKey4, cfgValue)
+        1 * mockCfgTracer.onChange(CliConfigProvider.QUALIFY_SYSTEM + cfgKey1, cfgValue)
+        1 * mockCfgTracer.onChange(CliConfigProvider.QUALIFY_SYSTEM + cfgKey2, cfgValue)
+        1 * mockCfgTracer.onChange(CliConfigProvider.QUALIFY_SYSTEM + cfgKey3, cfgValue)
+        1 * mockCfgTracer.onChange(CliConfigProvider.QUALIFY_SYSTEM + cfgKey4, cfgValue)
 
 
         where:

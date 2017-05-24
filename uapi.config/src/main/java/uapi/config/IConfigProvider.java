@@ -11,5 +11,7 @@ package uapi.config;
 
 public interface IConfigProvider {
 
-    void setTracer(IConfigTracer tracer);
+    String QUALIFY_SYSTEM   = "system.";
+
+//    void setTracer(IConfigTracer tracer);
 }

@@ -12,7 +12,7 @@ package uapi.config;
 /**
  * The interface used for parse command line arguments and provide configurations
  */
-public interface ICliConfigProvider {
+public interface ICliConfigProvider extends IConfigProvider {
 
     String DEFAULT_OPTION_PREFIX           = "-";
     String DEFAULT_OPTION_VALUE_SEPARATOR  = "=";

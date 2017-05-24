@@ -13,6 +13,7 @@ import com.google.common.base.Strings;
 import uapi.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.common.Pair;
+import uapi.config.Configuration;
 import uapi.config.ICliConfigProvider;
 import uapi.config.IConfigTracer;
 import uapi.rx.Looper;
@@ -34,7 +35,7 @@ import java.util.List;
 @Tag(Tags.CONFIG)
 public class CliConfigProvider implements ICliConfigProvider {
 
-    public static final String QUALIFY                         = "cli.";
+//    public static final String QUALIFY                         = "system.";
 
     @Inject
     protected ILogger _logger;
@@ -82,6 +83,7 @@ public class CliConfigProvider implements ICliConfigProvider {
                     }
                 })
                 .foreach(
-                        pair -> this._configTracer.onChange(QUALIFY + pair.getLeftValue(), pair.getRightValue()));
+                        pair -> this._configTracer.onChange(
+                                QUALIFY_SYSTEM + pair.getLeftValue(), pair.getRightValue()));
     }
 }

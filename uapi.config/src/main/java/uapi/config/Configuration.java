@@ -7,7 +7,9 @@
  * use the project into a commercial product
  */
 
-package uapi.config;import uapi.GeneralException;
+package uapi.config;
+
+import uapi.GeneralException;
 import uapi.InvalidArgumentException;
 import uapi.common.ArgumentChecker;
 import uapi.common.StringHelper;

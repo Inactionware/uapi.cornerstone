@@ -12,9 +12,7 @@ package uapi.config.internal;
 import uapi.GeneralException;
 import uapi.Tags;
 import uapi.common.ArgumentChecker;
-import uapi.config.IConfigFileParser;
-import uapi.config.IConfigTracer;
-import uapi.config.IConfigurable;
+import uapi.config.*;
 import uapi.service.annotation.*;
 import uapi.log.ILogger;
 
@@ -26,9 +24,9 @@ import java.util.Optional;
 
 @Service
 @Tag(Tags.CONFIG)
-public class FileBasedConfigProvider implements IConfigurable {
+public class FileBasedConfigProvider implements IConfigurable, IConfigProvider {
 
-    static final String CFG_FILE_PATH  = "cli.config";
+    static final String CFG_FILE_PATH  = QUALIFY_SYSTEM + "config";
 
     @Inject
     protected ILogger _logger;
