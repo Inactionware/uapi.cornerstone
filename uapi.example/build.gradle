@@ -23,6 +23,7 @@ dependencies {
     compile project(':uapi.event')
     compile project(':uapi.behavior')
     compile project(':uapi.app')
+    runtime "uapi:uapi.app.terminal:1.0.0+"
 }
 
 mainClassName = 'uapi.app.internal.Bootstrap'
