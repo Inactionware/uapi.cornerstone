@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Service(autoActive = true)
 @Tag(Tags.APPLICATION)
-public class ApplicationConstructor {
+public class Application {
 
     private static final String RESPONSIBLE_NAME            = "Application";
 

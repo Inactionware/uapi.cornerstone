@@ -15,13 +15,13 @@ import uapi.event.IEvent
 import uapi.log.ILogger
 
 /**
- * Unit tests for ApplicationConstructor
+ * Unit tests for Application
  */
-class ApplicationConstructorTest extends Specification {
+class ApplicationTest extends Specification {
 
     def 'Test create instance'() {
         when:
-        new ApplicationConstructor()
+        new Application()
 
         then:
         noExceptionThrown()
@@ -43,13 +43,13 @@ class ApplicationConstructorTest extends Specification {
             1 * shutdownBehaviorBuilder.onSuccessEventCallback(_) >> shutdownBehaviorBuilder
             0 * shutdownBehaviorBuilder.traceable(_) >> shutdownBehaviorBuilder
             1 * shutdownBehaviorBuilder.build()
-            1 * register(ApplicationConstructor.RESPONSIBLE_NAME) >> Mock(IResponsible) {
-                1 * newBehavior(ApplicationConstructor.BEHAVIOR_STARTUP, _, _) >> startupBehaviorBuilder
-                1 * newBehavior(ApplicationConstructor.BEHAVIOR_SHUTDOWN, _, _) >> shutdownBehaviorBuilder
+            1 * register(Application.RESPONSIBLE_NAME) >> Mock(IResponsible) {
+                1 * newBehavior(Application.BEHAVIOR_STARTUP, _, _) >> startupBehaviorBuilder
+                1 * newBehavior(Application.BEHAVIOR_SHUTDOWN, _, _) >> shutdownBehaviorBuilder
                 0 * on(_)
             }
         }
-        def appConstructor = new ApplicationConstructor()
+        def appConstructor = new Application()
         appConstructor._responsibleReg = respReg
 
         when:
@@ -70,16 +70,16 @@ class ApplicationConstructorTest extends Specification {
         bBuilder.onFailure(_) >> bBuilder
         def mockResp = new MockResponsible(bBuilder)
         def respReg = Mock(IResponsibleRegistry) {
-            1 * register(ApplicationConstructor.RESPONSIBLE_NAME) >> mockResp
+            1 * register(Application.RESPONSIBLE_NAME) >> mockResp
         }
-        def appConstructor = new ApplicationConstructor()
+        def appConstructor = new Application()
         appConstructor._responsibleReg = respReg
         appConstructor._logger = Mock(ILogger)
         appConstructor.activate()
 
         when:
         def event = mockResp._finishedHandler.accept(Mock(BehaviorFinishedEvent) {
-            1 * behaviorName() >> ApplicationConstructor.BEHAVIOR_STARTUP
+            1 * behaviorName() >> Application.BEHAVIOR_STARTUP
         })
 
         then:
@@ -96,16 +96,16 @@ class ApplicationConstructorTest extends Specification {
         bBuilder.traceable(_) >> bBuilder
         def mockResp = new MockResponsible(bBuilder)
         def respReg = Mock(IResponsibleRegistry) {
-            1 * register(ApplicationConstructor.RESPONSIBLE_NAME) >> mockResp
+            1 * register(Application.RESPONSIBLE_NAME) >> mockResp
         }
-        def appConstructor = new ApplicationConstructor()
+        def appConstructor = new Application()
         appConstructor._responsibleReg = respReg
         appConstructor._logger = Mock(ILogger)
         appConstructor.activate()
 
         when:
         def event = mockResp._finishedHandler.accept(Mock(BehaviorFinishedEvent) {
-            3 * behaviorName() >> ApplicationConstructor.BEHAVIOR_SHUTDOWN
+            3 * behaviorName() >> Application.BEHAVIOR_SHUTDOWN
         })
 
         then:
@@ -121,9 +121,9 @@ class ApplicationConstructorTest extends Specification {
         bBuilder.traceable(_) >> bBuilder
         def mockResp = new MockResponsible(bBuilder)
         def respReg = Mock(IResponsibleRegistry) {
-            1 * register(ApplicationConstructor.RESPONSIBLE_NAME) >> mockResp
+            1 * register(Application.RESPONSIBLE_NAME) >> mockResp
         }
-        def appConstructor = new ApplicationConstructor()
+        def appConstructor = new Application()
         appConstructor._responsibleReg = respReg
         appConstructor._logger = Mock(ILogger)
         appConstructor.activate()
