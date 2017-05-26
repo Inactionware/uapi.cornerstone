@@ -18,7 +18,7 @@ import java.util.List;
  */
 public abstract class SystemBootstrap {
 
-    private static final String[] basicSvcTags = new String[] {
+    private static final String[] sysSvcTags = new String[] {
             Tags.REGISTRY,
             Tags.CONFIG,
             Tags.LOG,
@@ -58,7 +58,7 @@ public abstract class SystemBootstrap {
                     if (svc instanceof ITagged) {
                         ITagged taggedSvc = (ITagged) svc;
                         String[] tags = taggedSvc.getTags();
-                        if (CollectionHelper.contains(tags, basicSvcTags) != null) {
+                        if (CollectionHelper.contains(tags, sysSvcTags) != null) {
                             sysSvcs.add(svc);
                         } else {
                             appSvcs.add(svc);
@@ -95,24 +95,24 @@ public abstract class SystemBootstrap {
         }
         this._registry = svcRegistry;
 
-        loadConfig();
+        loadConfig(svcRegistry);
 
         // All base service must be activated
-        Looper.on(basicSvcTags).foreach(svcRegistry::activateTaggedService);
+        Looper.on(sysSvcTags).foreach(svcRegistry::activateTaggedService);
 
-        beforeSystemLaunching();
+        beforeSystemLaunching(svcRegistry, appSvcs);
 
         // Send system starting up event
         SystemStartingUpEvent sysLaunchedEvent = new SystemStartingUpEvent(startTime, appSvcs);
         IEventBus eventBus = svcRegistry.findService(IEventBus.class);
         eventBus.fire(sysLaunchedEvent);
 
-        afterSystemLaunching();
+        afterSystemLaunching(svcRegistry, appSvcs);
     }
 
-    protected abstract void loadConfig();
+    protected abstract void loadConfig(IRegistry registry);
 
-    protected abstract void beforeSystemLaunching();
+    protected abstract void beforeSystemLaunching(IRegistry registry, List<IService> appServices);
 
-    protected abstract void afterSystemLaunching();
+    protected abstract void afterSystemLaunching(IRegistry registry, List<IService> appServices);
 }

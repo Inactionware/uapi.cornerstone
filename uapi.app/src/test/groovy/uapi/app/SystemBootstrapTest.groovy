@@ -123,17 +123,17 @@ class SystemBootstrapTest extends Specification {
         }
 
         @Override
-        protected void loadConfig() {
+        protected void loadConfig(IRegistry registry) {
             loadConfigCount++
         }
 
         @Override
-        protected void beforeSystemLaunching() {
+        protected void beforeSystemLaunching(IRegistry registry, List<IService> appSvcs) {
             beforeLaunchingCount++
         }
 
         @Override
-        protected void afterSystemLaunching() {
+        protected void afterSystemLaunching(IRegistry registry, List<IService> appSvcs) {
             afterLaunchingCount++
         }
     }
