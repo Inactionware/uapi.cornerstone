@@ -30,6 +30,12 @@ public abstract class SystemBootstrap {
 
     private static AppServiceLoader appSvcLoader = new AppServiceLoader();
 
+    private IRegistry _registry;
+
+    protected IRegistry registry() {
+        return this._registry;
+    }
+
     /**
      * Load all service and activate system services and return application service list
      *
@@ -87,6 +93,7 @@ public abstract class SystemBootstrap {
                             .serviceRegistryType(svcRegType))
                     .build();
         }
+        this._registry = svcRegistry;
 
         loadConfig();
 
@@ -98,7 +105,6 @@ public abstract class SystemBootstrap {
         // Send system starting up event
         SystemStartingUpEvent sysLaunchedEvent = new SystemStartingUpEvent(startTime, appSvcs);
         IEventBus eventBus = svcRegistry.findService(IEventBus.class);
-//        eventBus.register(new ExitSystemRequestHandler());
         eventBus.fire(sysLaunchedEvent);
 
         afterSystemLaunching();
