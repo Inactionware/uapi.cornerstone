@@ -7,10 +7,11 @@ import uapi.event.AttributedEvent;
  */
 public abstract class BehaviorTraceEvent extends BehaviorEvent {
 
-    public static final String TOPIC                 = "BehaviorTrace";
-    public static final String KEY_EXECUTION_ID      = "ExecutionId";
-    public static final String KEY_ORIGINAL_DATA     = "OriginalData";
-    public static final String KEY_DATA              = "Data";
+    public static final String TOPIC                = "BehaviorTrace";
+    public static final String KEY_EXECUTION_ID     = "ExecutionId";
+    public static final String KEY_ORIGINAL_DATA    = "OriginalData";
+    public static final String KEY_DATA             = "Data";
+    public static final String KEY_EX               = "Exception";
 //    public static final String KEY_RESP_NAME         = "ResponsibleName";
 
     public BehaviorTraceEvent(String sourceName) {
@@ -51,6 +52,15 @@ public abstract class BehaviorTraceEvent extends BehaviorEvent {
      */
     public Object data() {
         return get(KEY_DATA);
+    }
+
+    /**
+     * Get exception object if the behavior execution failed.
+     *
+     * @return  The exception object or null
+     */
+    public Exception exception() {
+        return (Exception) get(KEY_EX);
     }
 
 //    public String responsibleName() {

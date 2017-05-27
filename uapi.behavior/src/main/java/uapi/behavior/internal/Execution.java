@@ -56,6 +56,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         ArgumentChecker.required(executionContext, "executionContext");
         Object output = input;
         String sourceRespName = executionContext.get(IExecutionContext.KEY_RESP_NAME);
+        Exception exception = null;
         try {
             do {
                 output = this._current.action().process(output, executionContext);
@@ -67,6 +68,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 this._current = this._current.findNext(output);
             } while (this._current != null);
         } catch (Exception ex) {
+            exception = ex;
             if (this._failureAction != null) {
                 BehaviorEvent bEvent;
                 try {
@@ -96,7 +98,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         }
         if (this._traceable) {
             BehaviorFinishedEvent event = new BehaviorFinishedEvent(
-                    this._id, input, output, sourceRespName);
+                    this._id, input, output, sourceRespName, exception);
             executionContext.fireEvent(event);
         }
         return output;
