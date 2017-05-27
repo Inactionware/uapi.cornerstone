@@ -76,8 +76,7 @@ class BehaviorTest extends Specification {
         behavior.then(actionId).build()
 
         then:
-//        thrown(BehaviorException)
-        noExceptionThrown()
+        thrown(BehaviorException)
 
         where:
         behaviorName    | behaviorInputType     | behaviorOutputType    | actionInputType   | actionOutputType

@@ -340,7 +340,7 @@ public class Behavior<I, O>
 
         @Override
         public boolean isAnonymous() {
-            return true;
+            return false;
         }
 
         @Override
@@ -397,7 +397,8 @@ public class Behavior<I, O>
             // Check new action input is matched to current action output
             // The check only on non-anonymous action
             if (! this._current.action().isAnonymous() && ! action.isAnonymous()) {
-                if (!this._current.action().outputType().equals(action.inputType())) {
+                if (! action.inputType().isAssignableFrom(this._current.action().outputType())) {
+//                if (!this._current.action().outputType().equals(action.inputType())) {
                     throw BehaviorException.builder()
                             .errorCode(BehaviorErrors.ACTION_IO_MISMATCH)
                             .variables(new BehaviorErrors.ActionIOMismatch()
