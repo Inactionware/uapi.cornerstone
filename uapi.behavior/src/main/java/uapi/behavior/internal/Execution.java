@@ -70,11 +70,11 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         } catch (Exception ex) {
             exception = ex;
             if (this._failureAction != null) {
-                BehaviorEvent bEvent;
+                BehaviorEvent bEvent = null;
                 try {
                     bEvent = this._failureAction.accept(ex, executionContext);
                 } catch (Exception eex) {
-                    throw new GeneralException(eex);
+                    exception = new GeneralException(eex);
                 }
                 if (bEvent != null) {
                     executionContext.fireEvent(bEvent);
@@ -82,11 +82,11 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
             }
         }
         if (this._successAction != null) {
-            BehaviorEvent bEvent;
+            BehaviorEvent bEvent = null;
             try {
                 bEvent = this._successAction.accept(output, executionContext);
             } catch (Exception eex) {
-                throw new GeneralException(eex);
+                exception = new GeneralException(eex);
             }
             if (bEvent != null) {
                 if (this._successEventCallback != null) {
@@ -100,6 +100,13 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
             BehaviorFinishedEvent event = new BehaviorFinishedEvent(
                     this._id, input, output, sourceRespName, exception);
             executionContext.fireEvent(event);
+        }
+        if (exception != null) {
+            if (exception instanceof GeneralException) {
+                throw (RuntimeException) exception;
+            } else {
+                throw new GeneralException(exception);
+            }
         }
         return output;
     }
