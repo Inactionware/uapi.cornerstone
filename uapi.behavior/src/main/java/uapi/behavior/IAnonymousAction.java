@@ -6,5 +6,5 @@ package uapi.behavior;
 @FunctionalInterface
 public interface IAnonymousAction<IT, OT> {
 
-    OT accept(IT input, IExecutionContext executionContext);
+    OT accept(IT input, IExecutionContext executionContext) throws Exception;
 }

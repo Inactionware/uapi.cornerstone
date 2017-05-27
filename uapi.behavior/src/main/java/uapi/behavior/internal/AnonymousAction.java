@@ -21,14 +21,12 @@ public class AnonymousAction<I, O> implements IAction<I, O> {
 
     @Override
     public O process(I input, IExecutionContext context) {
-        O output = this._action.accept(input, context);
-//        if (this._action instanceof IAnonymousAction.IContextIgnorant) {
-//            output = ((IAnonymousAction.IContextIgnorant) this._action).accept(input);
-//        } else if (this._action instanceof IAnonymousAction.IContextAware) {
-//            output = ((IAnonymousAction.IContextAware) this._action).accept(input, context);
-//        } else {
-//            throw new GeneralException("error");
-//        }
+        O output = null;
+        try {
+            output = this._action.accept(input, context);
+        } catch (Exception ex) {
+            throw new GeneralException(ex);
+        }
         return output;
     }
 

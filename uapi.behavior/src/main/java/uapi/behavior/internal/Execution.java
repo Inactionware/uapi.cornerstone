@@ -1,5 +1,6 @@
 package uapi.behavior.internal;
 
+import uapi.GeneralException;
 import uapi.IIdentifiable;
 import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
@@ -67,14 +68,24 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
             } while (this._current != null);
         } catch (Exception ex) {
             if (this._failureAction != null) {
-                BehaviorEvent bEvent = this._failureAction.accept(ex, executionContext);
+                BehaviorEvent bEvent;
+                try {
+                    bEvent = this._failureAction.accept(ex, executionContext);
+                } catch (Exception eex) {
+                    throw new GeneralException(eex);
+                }
                 if (bEvent != null) {
                     executionContext.fireEvent(bEvent);
                 }
             }
         }
         if (this._successAction != null) {
-            BehaviorEvent bEvent = this._successAction.accept(output, executionContext);
+            BehaviorEvent bEvent;
+            try {
+                bEvent = this._successAction.accept(output, executionContext);
+            } catch (Exception eex) {
+                throw new GeneralException(eex);
+            }
             if (bEvent != null) {
                 if (this._successEventCallback != null) {
                     executionContext.fireEvent(bEvent, this._successEventCallback);
