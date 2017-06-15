@@ -11,6 +11,8 @@ package uapi.behavior;
 
 import java.util.Map;
 
+import uapi.behavior.BehaviorEvent;
+
 /**
  * Store context during execution time
  */
@@ -18,6 +20,7 @@ public interface IExecutionContext {
 
     String KEY_RESP_NAME    = "ResponsibleName";
     String KEY_BEHA_NAME    = "BehaviorName";
+    String KEY_ORI_EVENT    = "OriginalEvent";
 
     /**
      * Put single k/v data under specific scope
@@ -56,6 +59,11 @@ public interface IExecutionContext {
 
     default String behaviorName() {
         return get(KEY_BEHA_NAME);
+    }
+
+    @SuppressWarnings("unchecked")
+    default <T extends BehaviorEvent> T originalEvent() {
+        return (T) get(KEY_ORI_EVENT);
     }
 
 //    void fireEvent(BehaviorTraceEvent event);
