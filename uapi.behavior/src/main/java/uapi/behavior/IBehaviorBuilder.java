@@ -77,6 +77,30 @@ public interface IBehaviorBuilder {
     IBehaviorBuilder then(IAnonymousAction<?, ?> action, String label) throws BehaviorException;
 
     /**
+     * Set next an anonymous action which return nothing when current branch condition is satisfied.
+     *
+     * @param   call
+     *          The anonymous action
+     * @return  The behavior builder self
+     * @throws  BehaviorException
+     *          Any exception when set the action
+     */
+    IBehaviorBuilder call(IAnonymousCall<?> call) throws BehaviorException;
+
+    /**
+     * Set next an anonymous action which return nothing with specific label when current branch condition is satisfied.
+     *
+     * @param   call
+     *          The anonymous action
+     * @param   label
+     *          The action/behavior label which can be used to navigate to it later
+     * @return  The behavior builder self
+     * @throws  BehaviorException
+     *          Any exception when set the action
+     */
+    IBehaviorBuilder call(IAnonymousCall<?> call, String label) throws BehaviorException;
+
+    /**
      * Invoke the action when the behavior is executed successful
      *
      * @param   action
