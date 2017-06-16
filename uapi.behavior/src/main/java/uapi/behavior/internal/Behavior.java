@@ -186,6 +186,24 @@ public class Behavior<I, O>
         return this;
     }
 
+    public IBehaviorBuilder call(
+            final IAnonymousCall<?> call
+    ) {
+        return call(call, null);
+    }
+
+    public IBehaviorBuilder call(
+            final IAnonymousCall<?> call,
+            final String label
+    ) {
+        ensureNotBuilt();
+        ArgumentChecker.required(call, "call");
+        AnonymousCall aAction = new AnonymousCall(call);
+        this._navigator.newNextAction(aAction, this._lastEvaluator, label);
+        this._lastEvaluator = null;
+        return this;
+    }
+
     @Override
     public IBehaviorBuilder onSuccess(
             final IAnonymousAction<Object, BehaviorEvent> action

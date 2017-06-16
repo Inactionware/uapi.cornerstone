@@ -15,6 +15,7 @@ import uapi.behavior.ActionType
 import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
 import uapi.behavior.IAnonymousAction
+import uapi.behavior.IAnonymousCall
 import uapi.common.IAttributed
 import uapi.common.Repository
 
@@ -286,6 +287,18 @@ class BehaviorTest extends Specification {
         when:
         def behavior = new Behavior(Mock(Responsible), repo, 'aaa', String.class)
         behavior.then({str, execCtx -> 'string'})
+
+        then:
+        noExceptionThrown()
+    }
+
+    def 'Test anonymous call'() {
+        given:
+        def repo = Mock(Repository)
+
+        when:
+        def behavior = new Behavior(Mock(Responsible), repo, 'aaa', String.class)
+        behavior.call({str, execCtx -> })
 
         then:
         noExceptionThrown()
