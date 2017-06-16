@@ -103,7 +103,8 @@ public class ServiceActivator {
             throw ServiceException.builder()
                     .errorCode(ServiceErrors.SERVICE_ACTIVE_TASK_TIMED_OUT)
                     .variables(new ServiceErrors.ServiceActiveTaskTimedOut()
-                        .serviceId(serviceHolder.getQualifiedId()))
+                        .serviceId(serviceHolder.getQualifiedId())
+                        .serviceType(serviceHolder.getService()))
                     .build();
         }
     }
@@ -130,7 +131,8 @@ public class ServiceActivator {
             throw ServiceException.builder()
                     .errorCode(ServiceErrors.SERVICE_DEACTIVATION_TASK_TIMED_OUT)
                     .variables(new ServiceErrors.ServiceDeactivationTaskTimedOut()
-                        .serviceId(serviceHolder.getQualifiedId()))
+                        .serviceId(serviceHolder.getQualifiedId())
+                        .serviceType(serviceHolder.getService()))
                     .build();
         }
     }

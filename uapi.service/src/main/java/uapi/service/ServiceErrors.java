@@ -10,6 +10,7 @@
 package uapi.service;
 
 import uapi.common.CollectionHelper;
+import uapi.common.StringHelper;
 import uapi.exception.FileBasedExceptionErrors;
 import uapi.exception.IndexedParameters;
 import uapi.service.internal.UnactivatedService;
@@ -140,15 +141,21 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         private static final String KEY = "ServiceActiveTaskTimedOut";
 
         private QualifiedServiceId _svcId;
+        private String _svcType;
 
         public ServiceActiveTaskTimedOut serviceId(final QualifiedServiceId serviceId) {
             this._svcId = serviceId;
             return this;
         }
 
+        public ServiceActiveTaskTimedOut serviceType(final Object service) {
+            this._svcType = service != null ? service.getClass().getCanonicalName() : StringHelper.EMPTY;
+            return this;
+        }
+
         @Override
         public Object[] get() {
-            return new Object[] { this._svcId };
+            return new Object[] { this._svcId, this._svcType };
         }
     }
 
@@ -160,15 +167,21 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         private static final String KEY = "ServiceDeactivationTaskTimedOut";
 
         private QualifiedServiceId _svcId;
+        private String _svcType;
 
         public ServiceDeactivationTaskTimedOut serviceId(final QualifiedServiceId serviceId) {
             this._svcId = serviceId;
             return this;
         }
 
+        public ServiceDeactivationTaskTimedOut serviceType(final Object service) {
+            this._svcType = service != null ? service.getClass().getCanonicalName() : StringHelper.EMPTY;
+            return this;
+        }
+
         @Override
         public Object[] get() {
-            return new Object[] { this._svcId };
+            return new Object[] { this._svcId, this._svcType };
         }
     }
 
