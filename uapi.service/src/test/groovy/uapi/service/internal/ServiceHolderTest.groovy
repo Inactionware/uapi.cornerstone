@@ -959,6 +959,51 @@ class ServiceHolderTest extends Specification {
         'local' | 'svcId'
     }
 
+    def 'Test set dependency when the service is deactivated'() {
+        given:
+        def dependency = Mock(Dependency) {
+            getServiceId() >> new QualifiedServiceId('depId', QualifiedServiceId.FROM_ANY)
+            toString() >> 'depId'
+        }
+        def svc = Mock(IInjectableInitableLifecycle) {
+            isOptional('depId') >> true
+            1 * onActivate()
+        }
+        def satisfyHook  = Mock(ISatisfyHook) {
+            1 * isSatisfied(_ as ServiceHolder) >> true
+        }
+        def svcHolder = new ServiceHolder(from, svc, svcId, [dependency] as Dependency[], satisfyHook)
+        def depSvcHolder = Mock(ServiceHolder) {
+            getId() >> 'depId'
+            getQualifiedId() >> Mock(QualifiedServiceId) {
+                toString() >> 'depId'
+                1 * isAssignTo(_) >> true
+            }
+            isResolved() >> true
+            isInjected() >> true
+            isSatisfied() >> true
+            isActivated() >> false
+        }
+        def svcActivator = Mock(ServiceActivator)
+
+        when:
+        svcHolder.activate()
+        svcHolder.setDependency(depSvcHolder, svcActivator)
+
+        then:
+        noExceptionThrown()
+        0 * svc.onDependencyInject('depId', _)
+        1 * depSvcHolder.addNotifier(_ as ServiceHolder.DependencyNotifier)
+        svcHolder.isResolved()
+        svcHolder.isInjected()
+        svcHolder.isSatisfied()
+        svcHolder.isActivated()
+
+        where:
+        from    | svcId
+        'local' | 'svcId'
+    }
+
     def 'Test deactivate service which is not activated'() {
         given:
         def svc = Mock(IInjectableInitableLifecycle)
