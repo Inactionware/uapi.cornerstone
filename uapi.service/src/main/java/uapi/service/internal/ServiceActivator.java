@@ -20,6 +20,7 @@ import uapi.service.ServiceException;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +47,16 @@ public class ServiceActivator {
         this._tasks = new AwaitingList<>(MAX_ACTIVE_THREAD_COUNT);
         this._lock = new ReentrantLock();
         this._extSvcLoader = externalServiceLoader;
+    }
+
+    public <T> Optional<T> tryActivateService(final ServiceHolder serviceHolder) {
+        T result = null;
+        try {
+            result = activateService(serviceHolder);
+        } catch (Exception ex) {
+            // do nothing
+        }
+        return Optional.ofNullable(result);
     }
 
     public <T> T activateService(final ServiceHolder serviceHolder) {
@@ -167,34 +178,37 @@ public class ServiceActivator {
         public T get() {
             int position = 0;
             UnactivatedService unactivatedSvc = null;
-            while (position < this._svcList.size()) {
-                unactivatedSvc = this._svcList.get(position);
-                if (unactivatedSvc.isExternalService()) {
-                    // load external service
-                    ServiceHolder svcHolder =
-                            ServiceActivator.this._extSvcLoader.loadService(unactivatedSvc.dependency());
-                    if (svcHolder != null) {
-                        unactivatedSvc.activate(svcHolder);
+            try {
+                while (position < this._svcList.size()) {
+                    unactivatedSvc = this._svcList.get(position);
+                    if (unactivatedSvc.isExternalService()) {
+                        // load external service
+                        ServiceHolder svcHolder =
+                                ServiceActivator.this._extSvcLoader.loadService(unactivatedSvc.dependency());
+                        if (svcHolder != null) {
+                            unactivatedSvc.activate(svcHolder);
+                        }
+                    } else {
+                        unactivatedSvc.activate();
                     }
-                } else {
-                    unactivatedSvc.activate();
+                    if (!unactivatedSvc.isActivated() && !unactivatedSvc.dependency().isOptional()) {
+                        throw ServiceException.builder()
+                                .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
+                                .variables(new ServiceErrors.ServiceActivationFailed()
+                                        .serviceId(unactivatedSvc.serviceId()))
+                                .build();
+                    }
+                    position++;
                 }
-                if (! unactivatedSvc.isActivated() && ! unactivatedSvc.dependency().isOptional()) {
+                if (unactivatedSvc == null) {
                     throw ServiceException.builder()
                             .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
                             .variables(new ServiceErrors.ServiceActivationFailed()
-                                .serviceId(unactivatedSvc.serviceId()))
+                                    .serviceId(unactivatedSvc.serviceId()))
                             .build();
                 }
-                position++;
-            }
-            Guarder.by(ServiceActivator.this._lock).run(() -> ServiceActivator.this._tasks.remove(this));
-            if (unactivatedSvc == null) {
-                throw ServiceException.builder()
-                        .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
-                        .variables(new ServiceErrors.ServiceActivationFailed()
-                                .serviceId(unactivatedSvc.serviceId()))
-                        .build();
+            } finally {
+                Guarder.by(ServiceActivator.this._lock).run(() -> ServiceActivator.this._tasks.remove(this));
             }
             return (T) unactivatedSvc.service();
         }

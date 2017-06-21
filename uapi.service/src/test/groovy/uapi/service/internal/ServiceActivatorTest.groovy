@@ -45,6 +45,25 @@ class ServiceActivatorTest extends Specification {
         result == svc
     }
 
+    def 'Test try activate service'() {
+        given:
+        def svc = Mock(Object)
+        def svcHolder = Mock(ServiceHolder) {
+            isActivated() >>> [false, true]
+            isExternalService() >> false
+            getService() >> svc
+            getUnactivatedServices() >> []
+        }
+        def svcActivator = new ServiceActivator(Mock(IExternalServiceLoader))
+
+        when:
+        def result = svcActivator.tryActivateService(svcHolder)
+
+        then:
+        noExceptionThrown()
+        result.get() == svc
+    }
+
     def 'Test activate service'() {
         given:
         def svc = Mock(Object)

@@ -248,7 +248,11 @@ public class ServiceHolder implements IServiceReference {
         if (service.isActivated()) {
             injectDependency(service);
         } else {
-            service.addNotifier(new DependencyNotifier(service));
+            if (serviceActivator.tryActivateService(service).isPresent()) {
+                injectDependency(service);
+            } else {
+                service.addNotifier(new DependencyNotifier(service));
+            }
         }
 
 //        // The service must be activated before use it
