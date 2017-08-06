@@ -52,11 +52,13 @@ build
 .settings
 .project
 .classpath
+bin/
 
 # IntelliJ IDEA project files
 #=================================
 .idea/
 *.iml
+out/
 
 # UAPI project files
 #=================================
