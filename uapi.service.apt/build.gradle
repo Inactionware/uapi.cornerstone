@@ -12,15 +12,14 @@ plugins {
 }
 
 dependencies {
-    compileOnly project(':uapi.service.apt')
-    compileOnly project(':uapi.config.apt')
-
-    compile project(':uapi.service')
-    compile project(':uapi.config')
-
     compile (
             "uapi:uapi.common:${uapi_base_version}",
+//            "uapi:uapi.exception:${uapi_base_version}",
+//            "uapi:uapi.state:${uapi_base_version}",
+            "uapi:uapi.codegen:${uapi_base_version}"
     )
+
+    compile project (":uapi.service")
 }
 
 publishing {

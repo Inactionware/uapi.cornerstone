@@ -12,6 +12,10 @@ plugins {
 }
 
 dependencies {
+    compileOnly project(':uapi.service.apt')
+    compileOnly project(':uapi.config.apt')
+    compileOnly project(':uapi.behavior.apt')
+
     compile project(':uapi.service')
     compile project(':uapi.config')
     compile project(':uapi.log')

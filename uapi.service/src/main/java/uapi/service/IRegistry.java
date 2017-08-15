@@ -10,7 +10,6 @@
 package uapi.service;
 
 import uapi.InvalidArgumentException;
-import uapi.service.annotation.Service;
 
 import java.util.List;
 

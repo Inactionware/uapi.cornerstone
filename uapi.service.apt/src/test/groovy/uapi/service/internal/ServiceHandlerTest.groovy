@@ -18,11 +18,7 @@ import uapi.codegen.LogSupport
 import uapi.service.IServiceHandlerHelper
 import uapi.service.annotation.Service
 
-import javax.lang.model.element.AnnotationMirror
-import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.Name
-import javax.lang.model.element.TypeElement
+import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType
 
 /**

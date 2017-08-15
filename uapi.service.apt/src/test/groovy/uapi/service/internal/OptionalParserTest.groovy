@@ -17,12 +17,7 @@ import uapi.codegen.IBuilderContext
 import uapi.codegen.LogSupport
 import uapi.service.SetterMeta
 
-import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.Modifier
-import javax.lang.model.element.Name
-import javax.lang.model.element.VariableElement
+import javax.lang.model.element.*
 import javax.lang.model.type.TypeMirror
 
 /**

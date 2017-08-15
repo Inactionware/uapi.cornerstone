@@ -4,19 +4,11 @@ import freemarker.template.Template
 import spock.lang.Specification
 import uapi.GeneralException
 import uapi.Type
-import uapi.codegen.ClassMeta
-import uapi.codegen.IBuilderContext
-import uapi.codegen.LogSupport
-import uapi.codegen.MethodMeta
-import uapi.codegen.ParameterMeta
+import uapi.codegen.*
 import uapi.service.IServiceLifecycle
 import uapi.service.annotation.OnInject
 
-import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.Name
-import javax.lang.model.element.VariableElement
+import javax.lang.model.element.*
 import javax.lang.model.type.TypeMirror
 
 /**

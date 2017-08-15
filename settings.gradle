@@ -1,6 +1,6 @@
 rootProject.name = 'uapi.cornerstone'
 
-include 'uapi.service', 'uapi.config', 'uapi.log'
-include 'uapi.event', 'uapi.behavior'
+include 'uapi.service', 'uapi.service.apt', 'uapi.config', 'uapi.config.apt', 'uapi.log'
+include 'uapi.event', 'uapi.behavior', 'uapi.behavior.apt'
 include 'uapi.app'
 include 'uapi.example'

@@ -23,11 +23,7 @@ import uapi.service.IServiceHandlerHelper
 import uapi.service.annotation.Inject
 import uapi.service.annotation.Service
 
-import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.Name
-import javax.lang.model.element.VariableElement
+import javax.lang.model.element.*
 import javax.lang.model.type.TypeMirror
 
 /**
@@ -67,10 +63,10 @@ class ActionHandlerTest extends Specification {
         thrown(GeneralException)
 
         where:
-        annoType        | placeholder
-        Service.class   | null
-        Inject.class    | null
-        Override.class  | null
+        annoType       | placeholder
+        Service.class  | null
+        Inject.class   | null
+        Override.class | null
     }
 
     def 'Test handle on incorrect element'() {

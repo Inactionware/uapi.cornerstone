@@ -12,6 +12,8 @@ plugins {
 }
 
 dependencies {
+    compileOnly project(':uapi.service.apt')
+
     compile project(':uapi.service')
 
     compile (

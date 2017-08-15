@@ -15,7 +15,6 @@ import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.service.IInjectableHandlerHelper
 import uapi.service.annotation.Inject
-import uapi.service.annotation.Optional
 import uapi.service.annotation.Service
 
 import javax.lang.model.element.Element
@@ -38,7 +37,7 @@ class InjectableHandlerTest extends Specification {
         def handler = new InjectableHandler()
 
         then:
-        handler.orderedAnnotations == [Inject.class, Optional.class] as Class[]
+        handler.orderedAnnotations == [Inject.class, uapi.service.annotation.Optional.class] as Class[]
     }
 
     def 'Test handle annotated elements'() {
@@ -57,9 +56,9 @@ class InjectableHandlerTest extends Specification {
 //        1 * oparser.parse(_, _)
 
         where:
-        annoType        | placeholder
-        Inject.class    | null
-        Optional.class  | null
+        annoType                                | placeholder
+        Inject.class                            | null
+        uapi.service.annotation.Optional.class  | null
     }
 
     def 'Test handle annotated elements with unsupported annotation'() {

@@ -12,14 +12,19 @@ plugins {
 }
 
 dependencies {
-    compileOnly project(':uapi.service.apt')
-    compileOnly project(':uapi.config.apt')
-
+    compile project(':uapi.service.apt')
     compile project(':uapi.service')
     compile project(':uapi.config')
+    compile project(':uapi.event')
+    compile project(':uapi.behavior')
 
     compile (
             "uapi:uapi.common:${uapi_base_version}",
+            "uapi:uapi.exception:${uapi_base_version}",
+            "uapi:uapi.codegen:${uapi_base_version}",
+
+            "com.google.auto.service:auto-service:${auto_service_version}",
+            "org.freemarker:freemarker:${freemarker_version}"
     )
 }
 

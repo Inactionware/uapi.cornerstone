@@ -10,7 +10,6 @@
 package uapi.service.internal
 
 import freemarker.template.Template
-import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.GeneralException
 import uapi.Type
@@ -19,18 +18,12 @@ import uapi.codegen.IBuilderContext
 import uapi.service.SetterMeta
 import uapi.service.annotation.Inject
 
-import javax.lang.model.element.Element
-import javax.lang.model.element.ElementKind
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.Name
-import javax.lang.model.element.TypeElement
-import javax.lang.model.element.VariableElement
+import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.type.WildcardType
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
-import java.lang.reflect.Executable
 
 /**
  * Unit test for InjectParser
