@@ -12,20 +12,32 @@ plugins {
 }
 
 dependencies {
-    compileOnly project(':uapi.service.apt')
-    compileOnly project(':uapi.config.apt')
-    compileOnly project(':uapi.behavior.apt')
+    compileOnly (
+            project(':uapi.service.apt'),
+            project(':uapi.config.apt'),
+            project(':uapi.behavior.apt'),
 
-    compile project(':uapi.service')
-    compile project(':uapi.config')
-    compile project(':uapi.log')
-    compile project(':uapi.event')
-    compile project(':uapi.behavior')
+            /* To fix the class path issue in IDEA */
+            files('../uapi.service.apt/src/main/resources'),
+            files('../uapi.config.apt/src/main/resources'),
+            files('../uapi.behavior.apt/src/main/resources')
+            /* End */
+    )
 
-    compile "uapi:uapi.common:${uapi_base_version}"
-    compile "uapi:uapi.exception:${uapi_base_version}"
+    compile (
+        project(':uapi.service'),
+        project(':uapi.config'),
+        project(':uapi.log'),
+        project(':uapi.event'),
+        project(':uapi.behavior'),
 
-    testCompile "org.awaitility:awaitility-groovy:${awaitility_version}"
+        "uapi:uapi.common:${uapi_base_version}",
+        "uapi:uapi.exception:${uapi_base_version}"
+    )
+
+    testCompile (
+            "org.awaitility:awaitility-groovy:${awaitility_version}"
+    )
 }
 
 publishing {

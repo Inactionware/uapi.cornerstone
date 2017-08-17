@@ -12,11 +12,17 @@ plugins {
 }
 
 dependencies {
-    compileOnly project(':uapi.service.apt')
+    compileOnly (
+            project(':uapi.service.apt'),
 
-    compile project(':uapi.service')
+            /* To fix the class path issue in IDEA */
+            files('../uapi.service.apt/src/main/resources'),
+            /* End */
+    )
 
     compile (
+            project(':uapi.service'),
+
             "uapi:uapi.common:${uapi_base_version}",
             "ch.qos.logback:logback-classic:${logback_version}"
     )
