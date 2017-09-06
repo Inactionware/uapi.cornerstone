@@ -9,9 +9,24 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Command {
 
-    String parent() default "";
+    /**
+     * The parent command type
+     *
+     * @return  The parent command type
+     */
+    Class<?> parent() default void.class;
 
+    /**
+     * The command name
+     *
+     * @return  The command name
+     */
     String name();
 
+    /**
+     * The command description
+     *
+     * @return  The command description
+     */
     String description();
 }

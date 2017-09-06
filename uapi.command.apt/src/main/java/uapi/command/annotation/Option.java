@@ -9,9 +9,31 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Option {
 
+    /**
+     * The option name
+     *
+     * @return  The option name
+     */
+    String name();
+
+    /**
+     * The short option name
+     *
+     * @return  The short option name
+     */
     char shortName();
 
-    String fullName();
+    /**
+     * The option argument if the option is string type
+     *
+     * @return  The option argument or empty string
+     */
+    String argument() default "";
 
+    /**
+     * The option description
+     *
+     * @return  The option description
+     */
     String description();
 }

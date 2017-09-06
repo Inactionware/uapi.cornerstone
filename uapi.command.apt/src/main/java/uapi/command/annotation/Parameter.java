@@ -9,9 +9,24 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Parameter {
 
+    /**
+     * The parameter index of the command
+     *
+     * @return  The parameter index
+     */
     int index();
 
+    /**
+     * The parameter is required or not
+     *
+     * @return  The parameter is required or not
+     */
     boolean required() default true;
 
+    /**
+     * The parameter description
+     *
+     * @return  The parameter description
+     */
     String description();
 }
