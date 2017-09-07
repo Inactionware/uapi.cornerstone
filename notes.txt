@@ -8,3 +8,4 @@ Module error category mapping:
     uapi.event      0x0103
     uapi.behavior   0x0104
     uapi.app        0x0105
+    uapi.command    0x0106
