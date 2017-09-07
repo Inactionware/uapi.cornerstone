@@ -11,18 +11,23 @@ package uapi.command;
 
 import uapi.common.StringHelper;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The implementation of this interface holds meta information of a command.
  */
 public interface ICommandMeta {
 
+    String PATH_SEPARATOR   = "/";
+
     /**
-     * The the parent command of this command.
-     * If the parent is null means no parent.
+     * The the parent command path of this command.
+     * If the parentPath is null means no parent command.
      *
-     * @return  The parent command of this command
+     * @return  The parentPath command of this command
      */
-    String parent();
+    String parentPath();
 
     /**
      * The name of this command.
@@ -38,25 +43,38 @@ public interface ICommandMeta {
      */
     String namespace();
 
+    default String[] ancestors() {
+        if (hasParent()) {
+            return this.parentPath().split(PATH_SEPARATOR);
+        }
+        return null;
+    }
+
     /**
      * The command identify which is consist by namespace and name in default.
      *
      * @return  The identify of the command
      */
     default String commandId() {
-        return StringHelper.makeString("{}.{}", namespace(), name());
+        Map<String, String> namedValues = new HashMap<>();
+        namedValues.put("namespace", namespace());
+        namedValues.put("sep", PATH_SEPARATOR);
+        namedValues.put("parent", parentPath());
+        namedValues.put("sep", PATH_SEPARATOR);
+        namedValues.put("name", name());
+        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
     }
 
     default String parentId() {
         if (hasParent()) {
-            return StringHelper.makeString("{}.{}", namespace(), parent());
+            return parentPath();
         } else {
             return null;
         }
     }
 
     default boolean hasParent() {
-        return parent() != null;
+        return parentPath() != null;
     }
 
     /**

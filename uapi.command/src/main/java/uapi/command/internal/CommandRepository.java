@@ -34,20 +34,28 @@ public class CommandRepository implements ICommandRepository {
         if (! commandMeta.hasParent()) {
             this._rootCmds.add(new Command(commandMeta));
         } else {
-            List<Command> parents = Looper.on(this._rootCmds)
-                    .filter(cmd -> commandMeta.parentId().equals(cmd.commandId()))
-                    .toList();
-            if (parents.size() == 0) {
+            String[] ancestorNames = commandMeta.ancestors();
+            Command ancestor = Looper.on(this._rootCmds)
+                    .filter(cmd -> cmd.name().equals(ancestorNames[0]))
+                    .first();
+            if (ancestor == null) {
                 this._unresolvedCmds.add(commandMeta);
-            } else if (parents.size() == 1) {
-                Command parent = parents.get(0);
-                Command command = new Command(commandMeta, parent);
-            } else {
-                throw CommandException.builder()
-                        .errorCode(CommandErrors.MULTIPLE_PARENT_COMMAND_FOUND)
-                        .variables(new CommandErrors.MutiParentFound().command(commandMeta))
-                        .build();
+                return;
+//                throw CommandException.builder()
+//                        .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
+//                        .variables(new CommandErrors.ParentCommandNotFound().command(commandMeta))
+//                        .build();
             }
+            for (int i = 1; i < ancestorNames.length; i++) {
+                String ancestorName = ancestorNames[i];
+                ancestor = ancestor.findSubCommand(ancestorName);
+                if (ancestor == null) {
+                    this._unresolvedCmds.add(commandMeta);
+                    return;
+                }
+            }
+            Command command = new Command(commandMeta, ancestor);
+            ancestor.addSubCommand(command);
         }
     }
 

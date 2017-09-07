@@ -53,8 +53,7 @@ public final class Command {
 
     void addSubCommand(Command command) {
         Command duplicatedCmd = Looper.on(this._subCmds)
-                .map(subCmd -> subCmd.find(command.name()))
-                .filter(subCmd -> subCmd != null)
+                .filter(subCmd -> subCmd.name().equals(command.name()))
                 .first(null);
         if (duplicatedCmd != null) {
             throw CommandException.builder()
@@ -71,13 +70,9 @@ public final class Command {
 
     }
 
-    Command find(String commandName) {
-        if (name().equals(commandName)) {
-            return this;
-        }
+    Command findSubCommand(String commandName) {
         return Looper.on(this._subCmds)
-                .map(subcmd -> subcmd.find(commandName))
-                .filter(subcmd -> subcmd != null)
+                .filter(subCmd -> subCmd.name().equals(commandName))
                 .first(null);
     }
 }

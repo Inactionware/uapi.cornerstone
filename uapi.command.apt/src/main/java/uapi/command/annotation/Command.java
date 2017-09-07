@@ -19,9 +19,9 @@ import java.lang.annotation.Target;
 public @interface Command {
 
     /**
-     * The parent command type
+     * The parentPath command type
      *
-     * @return  The parent command type
+     * @return  The parentPath command type
      */
     Class<?> parent() default void.class;
 
