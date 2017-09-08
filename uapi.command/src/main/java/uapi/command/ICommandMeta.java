@@ -77,6 +77,13 @@ public interface ICommandMeta {
         return parentPath() != null;
     }
 
+    default int depth() {
+        if (hasParent()) {
+            return ancestors().length;
+        }
+        return 0;
+    }
+
     /**
      * Description of this command.
      *
