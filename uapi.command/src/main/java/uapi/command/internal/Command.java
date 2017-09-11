@@ -4,12 +4,55 @@ import uapi.command.CommandErrors;
 import uapi.command.CommandException;
 import uapi.command.ICommandMeta;
 import uapi.common.ArgumentChecker;
+import uapi.common.StringHelper;
 import uapi.rx.Looper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class Command {
+
+    public static String generateCommandId(Command command) {
+        ArgumentChecker.required(command, "command");
+        return generateCommandId(command._cmdMeta);
+    }
+
+    public static String generateCommandId(ICommandMeta commandMeta) {
+        ArgumentChecker.required(commandMeta, "commandMeta");
+        return generateCommandId(commandMeta.namespace(), commandMeta.parentPath(), commandMeta.name());
+    }
+
+    public static String generateCommandId(
+            String namespace,
+            String parentPath,
+            String name
+    ) {
+        ArgumentChecker.required(name, "command");
+        Map<String, String> namedValues = new HashMap<>();
+        namedValues.put("namespace", namespace != null ? namespace : "");
+        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
+        namedValues.put("parent", parentPath);
+        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
+        namedValues.put("name", name);
+        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
+    }
+
+    public static String getNamespace(String commandId) {
+        ArgumentChecker.required(commandId, "commandId");
+        if (commandId.indexOf(ICommandMeta.PATH_SEPARATOR) == 0) {
+            return "";
+        }
+        return commandId.substring(0, commandId.indexOf(ICommandMeta.PATH_SEPARATOR));
+    }
+
+    public static String[] getPath(String commandId) {
+        ArgumentChecker.required(commandId, "commandId");
+        return commandId
+                .substring(commandId.indexOf(ICommandMeta.PATH_SEPARATOR) + 1)
+                .split(ICommandMeta.PATH_SEPARATOR);
+    }
 
     private final Command _parent;
 
@@ -39,16 +82,12 @@ public final class Command {
         return this._cmdMeta.hasParent();
     }
 
+    public String parentPath() {
+        return this._cmdMeta.parentPath();
+    }
+
     public String commandId() {
-        return this._cmdMeta.commandId();
-    }
-
-    public String parentId() {
-        return this._cmdMeta.parentId();
-    }
-
-    public String parentName() {
-        return this._parent == null ? "" : this._parent.name();
+        return generateCommandId(this);
     }
 
     void addSubCommand(Command command) {

@@ -17,7 +17,6 @@ import uapi.service.annotation.OnActivate;
 import uapi.service.annotation.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -29,8 +28,10 @@ public class CommandRepository implements ICommandRepository {
 
     private final List<Command> _rootCmds = new ArrayList<>();
 
+    private final CommandRunner _cmdRunner = new CommandRunner();
+
     @Inject
-    protected final List<ICommandMeta> _commandMetas = new ArrayList<>();
+    protected List<ICommandMeta> _commandMetas = new ArrayList<>();
 
     @OnActivate
     protected void activate() {
@@ -39,30 +40,10 @@ public class CommandRepository implements ICommandRepository {
             if (! commandMeta.hasParent()) {
                 this._rootCmds.add(new Command(commandMeta));
             } else {
-                String[] ancestorNames = commandMeta.ancestors();
-                Command ancestor = Looper.on(this._rootCmds)
-                        .filter(cmd -> cmd.name().equals(ancestorNames[0]))
-                        .first();
-                if (ancestor == null) {
-                    this._commandMetas.add(commandMeta);
-                    return;
-    //                throw CommandException.builder()
-    //                        .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
-    //                        .variables(new CommandErrors.ParentCommandNotFound().command(commandMeta))
-    //                        .build();
-                }
-                for (int i = 1; i < ancestorNames.length; i++) {
-                    String ancestorName = ancestorNames[i];
-                    ancestor = ancestor.findSubCommand(ancestorName);
-                    if (ancestor == null) {
-                        this._commandMetas.add(commandMeta);
-                        return;
-                    }
-                }
-                Command command = new Command(commandMeta, ancestor);
-                ancestor.addSubCommand(command);
+                addSubCommand(commandMeta);
             }
         });
+        this._commandMetas.clear();
     }
 
     @Override
@@ -71,34 +52,44 @@ public class CommandRepository implements ICommandRepository {
         if (! commandMeta.hasParent()) {
             this._rootCmds.add(new Command(commandMeta));
         } else {
-            String[] ancestorNames = commandMeta.ancestors();
-            Command ancestor = Looper.on(this._rootCmds)
-                    .filter(cmd -> cmd.name().equals(ancestorNames[0]))
-                    .first();
-            if (ancestor == null) {
-                throw CommandException.builder()
-                        .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
-                        .variables(new CommandErrors.ParentCommandNotFound().command(commandMeta))
-                        .build();
-            }
-            for (int i = 1; i < ancestorNames.length; i++) {
-                String ancestorName = ancestorNames[i];
-                ancestor = ancestor.findSubCommand(ancestorName);
-                if (ancestor == null) {
-                    throw CommandException.builder()
-                            .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
-                            .variables(new CommandErrors.ParentCommandNotFound().command(commandMeta))
-                            .build();
-                }
-            }
-            Command command = new Command(commandMeta, ancestor);
-            ancestor.addSubCommand(command);
+            addSubCommand(commandMeta);
         }
     }
 
     @Override
     public void deregister(String commandId) {
-
+        String namespace = Command.getNamespace(commandId);
+        String[] path = Command.getPath(commandId);
+        Command parentCmd = Looper.on(this._rootCmds)
+                .filter(cmd -> cmd.namespace().equals(namespace))
+                .filter(cmd -> cmd.name().equals(path[0]))
+                .first(null);
+        if (parentCmd == null) {
+            throw CommandException.builder()
+                    .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
+                    .variables(new CommandErrors.ParentCommandNotFound()
+                            .parentCommandName(path[0])
+                            .thisCommandId(commandId))
+                    .build();
+        }
+        Command command = null;
+        for (int i = 1; i < path.length; i++) {
+            if (command != null) {
+                parentCmd = command;
+            }
+            command = parentCmd.findSubCommand(path[i]);
+            if (command == null) {
+                throw CommandException.builder()
+                        .errorCode(CommandErrors.COMMAND_NOT_FOUND)
+                        .variables(new CommandErrors.CommandNotFound().commandId(commandId))
+                        .build();
+            }
+        }
+        if (command == null) {
+            this._rootCmds.remove(parentCmd);
+        } else {
+            parentCmd.removeSubCommand(command.name());
+        }
     }
 
     @Override
@@ -108,7 +99,36 @@ public class CommandRepository implements ICommandRepository {
 
     @Override
     public ICommandRunner getRunner() {
-        return null;
+        return this._cmdRunner;
+    }
+
+    private void addSubCommand(ICommandMeta commandMeta) {
+        String[] ancestorNames = commandMeta.ancestors();
+        Command ancestor = Looper.on(this._rootCmds)
+                .filter(cmd -> cmd.name().equals(ancestorNames[0]))
+                .first();
+        if (ancestor == null) {
+            throw CommandException.builder()
+                    .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
+                    .variables(new CommandErrors.ParentCommandNotFound()
+                            .parentCommandName(ancestorNames[0])
+                            .thisCommandId(Command.generateCommandId(commandMeta)))
+                    .build();
+        }
+        for (int i = 1; i < ancestorNames.length; i++) {
+            String ancestorName = ancestorNames[i];
+            ancestor = ancestor.findSubCommand(ancestorName);
+            if (ancestor == null) {
+                throw CommandException.builder()
+                        .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
+                        .variables(new CommandErrors.ParentCommandNotFound()
+                                .parentCommandName(ancestorName)
+                                .thisCommandId(Command.generateCommandId(commandMeta)))
+                        .build();
+            }
+        }
+        Command command = new Command(commandMeta, ancestor);
+        ancestor.addSubCommand(command);
     }
 
     /**

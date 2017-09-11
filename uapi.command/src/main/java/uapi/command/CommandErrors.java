@@ -20,17 +20,17 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
 
     public static final int CATEGORY   = 0x0106;
 
-//    public static final int MULTIPLE_PARENT_COMMAND_FOUND       = 1;
     public static final int PARENT_COMMAND_NOT_FOUND            = 1;
     public static final int DUPLICATED_SUBCOMMAND               = 2;
+    public static final int COMMAND_NOT_FOUND                   = 3;
 
     private static final Map<Integer, String> keyCodeMapping;
 
     static {
         keyCodeMapping = new ConcurrentHashMap<>();
-//        keyCodeMapping.put(MULTIPLE_PARENT_COMMAND_FOUND, MutiParentFound.KEY);
         keyCodeMapping.put(PARENT_COMMAND_NOT_FOUND, ParentCommandNotFound.KEY);
         keyCodeMapping.put(DUPLICATED_SUBCOMMAND, DuplicatedSubCommand.KEY);
+        keyCodeMapping.put(COMMAND_NOT_FOUND, CommandNotFound.KEY);
     }
 
     @Override
@@ -47,42 +47,28 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
     }
 
     /**
-     * Found multiple parentPath {} for command {}
-     */
-//    public static final class MutiParentFound extends IndexedParameters<MutiParentFound> {
-//
-//        private static final String KEY = "MultipleParentCommandFound";
-//
-//        private ICommandMeta _cmd;
-//
-//        public MutiParentFound command(ICommandMeta commandMeta) {
-//            this._cmd = commandMeta;
-//            return this;
-//        }
-//
-//        @Override
-//        public Object[] get() {
-//            return new Object[] { this._cmd.commandId(), this._cmd.parentId() };
-//        }
-//    }
-
-    /**
      * No parent command named {} for command {}
      */
     public static final class ParentCommandNotFound extends IndexedParameters<ParentCommandNotFound> {
 
         private static final String KEY = "ParentCommandNotFound";
 
-        private ICommandMeta _cmd;
+        private String _parentCmd;
+        private String _thisCmdId;
 
-        public ParentCommandNotFound command(ICommandMeta command) {
-            this._cmd = command;
+        public ParentCommandNotFound parentCommandName(String commandName) {
+            this._parentCmd = commandName;
+            return this;
+        }
+
+        public ParentCommandNotFound thisCommandId(String commandId) {
+            this._thisCmdId = commandId;
             return this;
         }
 
         @Override
         public Object[] get() {
-            return new Object[] { this._cmd.parentPath(), this._cmd.name() };
+            return new Object[] { this._parentCmd, this._thisCmdId };
         }
     }
 
@@ -109,6 +95,26 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
         @Override
         public Object[] get() {
             return new Object[] { this._subCmd.name(), this._parentCmd.name() };
+        }
+    }
+
+    /**
+     * Command was not found - {}
+     */
+    public static final class CommandNotFound extends IndexedParameters<CommandNotFound> {
+
+        public static final String KEY = "CommandNotFound";
+
+        private String _cmdId;
+
+        public CommandNotFound commandId(String commandId) {
+            this._cmdId = commandId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._cmdId };
         }
     }
 }

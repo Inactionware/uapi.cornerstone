@@ -31,6 +31,7 @@ public interface ICommandMeta {
 
     /**
      * The name of this command.
+     * The name can't contains PATH_SEPARATOR
      *
      * @return  Name of this command
      */
@@ -38,6 +39,7 @@ public interface ICommandMeta {
 
     /**
      * The namespace of this command.
+     * The namespace can't contains PATH_SEPARATOR
      *
      * @return  Namespace of this command
      */
@@ -55,23 +57,15 @@ public interface ICommandMeta {
      *
      * @return  The identify of the command
      */
-    default String commandId() {
-        Map<String, String> namedValues = new HashMap<>();
-        namedValues.put("namespace", namespace());
-        namedValues.put("sep", PATH_SEPARATOR);
-        namedValues.put("parent", parentPath());
-        namedValues.put("sep", PATH_SEPARATOR);
-        namedValues.put("name", name());
-        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
-    }
-
-    default String parentId() {
-        if (hasParent()) {
-            return parentPath();
-        } else {
-            return null;
-        }
-    }
+//    default String commandId() {
+//        Map<String, String> namedValues = new HashMap<>();
+//        namedValues.put("namespace", namespace() != null ? namespace() : "");
+//        namedValues.put("sep", PATH_SEPARATOR);
+//        namedValues.put("parent", parentPath());
+//        namedValues.put("sep", PATH_SEPARATOR);
+//        namedValues.put("name", name());
+//        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
+//    }
 
     default boolean hasParent() {
         return parentPath() != null;
