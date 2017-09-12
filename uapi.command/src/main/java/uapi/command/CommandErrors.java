@@ -23,14 +23,22 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
     public static final int PARENT_COMMAND_NOT_FOUND            = 1;
     public static final int DUPLICATED_SUBCOMMAND               = 2;
     public static final int COMMAND_NOT_FOUND                   = 3;
+    public static final int OPTION_NEEDS_VALUE                  = 4;
+    public static final int EMPTY_OPTION_NAME                   = 5;
+    public static final int UNSUPPORTED_OPTION                  = 6;
+    public static final int PARAM_OUT_OF_INDEX                  = 7;
 
     private static final Map<Integer, String> keyCodeMapping;
 
     static {
         keyCodeMapping = new ConcurrentHashMap<>();
-        keyCodeMapping.put(PARENT_COMMAND_NOT_FOUND, ParentCommandNotFound.KEY);
-        keyCodeMapping.put(DUPLICATED_SUBCOMMAND, DuplicatedSubCommand.KEY);
-        keyCodeMapping.put(COMMAND_NOT_FOUND, CommandNotFound.KEY);
+        keyCodeMapping.put(PARENT_COMMAND_NOT_FOUND, ParentCommandNotFound.class.getName());
+        keyCodeMapping.put(DUPLICATED_SUBCOMMAND, DuplicatedSubCommand.class.getName());
+        keyCodeMapping.put(COMMAND_NOT_FOUND, CommandNotFound.class.getName());
+        keyCodeMapping.put(OPTION_NEEDS_VALUE, OptionNeedsValue.class.getName());
+        keyCodeMapping.put(EMPTY_OPTION_NAME, EmptyOptionName.class.getName());
+        keyCodeMapping.put(UNSUPPORTED_OPTION, UnsupportedOption.class.getName());
+        keyCodeMapping.put(PARAM_OUT_OF_INDEX, ParameterOutOfIndex.class.getName());
     }
 
     @Override
@@ -50,8 +58,6 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
      * No parent command named {} for command {}
      */
     public static final class ParentCommandNotFound extends IndexedParameters<ParentCommandNotFound> {
-
-        private static final String KEY = "ParentCommandNotFound";
 
         private String _parentCmd;
         private String _thisCmdId;
@@ -77,8 +83,6 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
      */
     public static final class DuplicatedSubCommand extends IndexedParameters<DuplicatedSubCommand> {
 
-        private static final String KEY = "DuplicatedSubCommand";
-
         private Command _subCmd;
         private Command _parentCmd;
 
@@ -103,8 +107,6 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
      */
     public static final class CommandNotFound extends IndexedParameters<CommandNotFound> {
 
-        public static final String KEY = "CommandNotFound";
-
         private String _cmdId;
 
         public CommandNotFound commandId(String commandId) {
@@ -115,6 +117,102 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
         @Override
         public Object[] get() {
             return new Object[] { this._cmdId };
+        }
+    }
+
+    /**
+     * Invalid command option which needs value - {}, command line: {}
+     */
+    public static final class OptionNeedsValue extends IndexedParameters<OptionNeedsValue> {
+
+        private String _optName;
+        private String _cmdLine;
+
+        public OptionNeedsValue optionName(String name) {
+            this._optName = name;
+            return this;
+        }
+
+        public OptionNeedsValue commandLine(String commandLine) {
+            this._cmdLine = commandLine;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._optName, this._cmdLine };
+        }
+    }
+
+    /**
+     * Invalid command option which has empty name, command line: {}
+     */
+    public static final class EmptyOptionName extends IndexedParameters<EmptyOptionName> {
+
+        private String _cmdLine;
+
+        public EmptyOptionName commandLine(String commandLine) {
+            this._cmdLine = commandLine;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._cmdLine };
+        }
+    }
+
+    /**
+     * Invalid command option which is not supported - {}, command line: {}
+     */
+    public static final class UnsupportedOption extends IndexedParameters<UnsupportedOption> {
+
+        private String _optName;
+        private String _cmdLine;
+
+        public UnsupportedOption optionName(String name) {
+            this._optName = name;
+            return this;
+        }
+
+        public UnsupportedOption commandLine(String commandLine) {
+            this._cmdLine = commandLine;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._optName, this._cmdLine };
+        }
+    }
+
+    /**
+     * Invalid command parameter which is out of index - {}, parameter: {}, command line: {}
+     */
+    public static final class ParameterOutOfIndex extends IndexedParameters<ParameterOutOfIndex> {
+
+        private int _idx;
+        private String _param;
+        private String _cmdLine;
+
+        public ParameterOutOfIndex index(int index) {
+            this._idx = index;
+            return this;
+        }
+
+        public ParameterOutOfIndex parameter(String parameter) {
+            this._param = parameter;
+            return this;
+        }
+
+        public ParameterOutOfIndex commandLine(String commandLine) {
+            this._cmdLine = commandLine;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._idx, this._param, this._cmdLine };
         }
     }
 }

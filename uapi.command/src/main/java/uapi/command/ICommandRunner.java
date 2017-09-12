@@ -21,6 +21,8 @@ public interface ICommandRunner {
      * @param   commandLine The command line which contains command name, parameters and options
      * @param   output The message output object
      * @return  The command result
+     * @throws  CommandException
+     *          CommandErrors.COMMAND_NOT_FOUND Specified command was not found
      */
-    ICommandResult run(String commandLine, IMessageOutput output);
+    ICommandResult run(String commandLine, IMessageOutput output) throws CommandException;
 }

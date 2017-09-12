@@ -9,8 +9,10 @@
 
 package uapi.command.internal;
 
+import uapi.GeneralException;
 import uapi.command.*;
 import uapi.common.ArgumentChecker;
+import uapi.common.Multivariate;
 import uapi.rx.Looper;
 import uapi.service.annotation.Inject;
 import uapi.service.annotation.OnActivate;
@@ -93,11 +95,6 @@ public class CommandRepository implements ICommandRepository {
     }
 
     @Override
-    public ICommandMeta find(String commandId) {
-        return null;
-    }
-
-    @Override
     public ICommandRunner getRunner() {
         return this._cmdRunner;
     }
@@ -131,14 +128,168 @@ public class CommandRepository implements ICommandRepository {
         ancestor.addSubCommand(command);
     }
 
+    private Command find(String commandId) {
+        return null;
+    }
+
     /**
      * An implementation for command runner interface
      */
     private final class CommandRunner implements ICommandRunner {
 
         @Override
-        public ICommandResult run(String commandLine, IMessageOutput output) {
-            return null;
+        public ICommandResult run(
+                final String commandLine,
+                final IMessageOutput output
+        ) throws CommandException {
+            ArgumentChecker.required(commandLine, "commandLine");
+            String[] cmdParamOpts = commandLine.split(" ");
+            int idxNs = cmdParamOpts[0].indexOf(ICommandMeta.PATH_SEPARATOR);
+            String namespace;
+            String cmdName;
+            if (idxNs >= 0) {
+                namespace = cmdParamOpts[0].substring(0, idxNs);
+                cmdName = cmdParamOpts[0].substring(idxNs + 1, cmdParamOpts[0].length());
+            } else {
+                namespace = ICommandMeta.DEFAULT_NAMESPACE;
+                cmdName = cmdParamOpts[0];
+            }
+
+            // Find out root command
+            Command command = Looper.on(CommandRepository.this._rootCmds)
+                    .filter(cmd -> cmd.namespace().equals(namespace))
+                    .filter(cmd -> cmd.name().equals(cmdName))
+                    .first(null);
+            if (command == null) {
+                throw CommandException.builder()
+                        .errorCode(CommandErrors.COMMAND_NOT_FOUND)
+                        .variables(new CommandErrors.CommandNotFound().commandId(cmdName))
+                        .build();
+            }
+
+            // Find out command and command's parameter and option list
+            Multivariate cmdVar = new Multivariate(2);
+            cmdVar.put(0, command);      // command object
+            cmdVar.put(1, true);   // does need to find sub command
+            List<String> paramOpts = new ArrayList<>();
+            Looper.on(cmdParamOpts).skip(1).foreach(cmdParamOpt -> {
+                Command cmd = cmdVar.get(0);
+                if (cmdVar.get(1)) {
+                    Command subCmd = cmd.findSubCommand(cmdParamOpt);
+                    if (subCmd != null) {
+                        cmdVar.put(0, subCmd);
+                        return;
+                    }
+                }
+                paramOpts.add(cmdParamOpt);
+            });
+
+            // Set command parameter and options
+            Command cmd = cmdVar.get(0);
+            Multivariate optParamVar = new Multivariate(1);  // 0 -> option name; 1 -> parameter index
+            optParamVar.put(1, 0);
+            ICommandMeta cmdMeta = cmd.meta();
+            ICommandExecutor cmdExec = cmd.getExecutor();
+            IParameterMeta[] paramMetas = cmdMeta.parameterMetas();
+            IOptionMeta[] optMetas = cmdMeta.optionMetas();
+            Looper.on(paramOpts).foreach(paramOpt -> {
+                if (paramOpt.indexOf(IOptionMeta.LONG_PREFIX) == 0) {
+                    // Handle long option
+                    if (optParamVar.hasValue(0)) {
+                        throw CommandException.builder()
+                                .errorCode(CommandErrors.OPTION_NEEDS_VALUE)
+                                .variables(new CommandErrors.OptionNeedsValue()
+                                        .optionName(optParamVar.get(0))
+                                        .commandLine(commandLine))
+                                .build();
+                    }
+                    String optName = paramOpt.substring(2);
+                    if (ArgumentChecker.isEmpty(optName)) {
+                        throw CommandException.builder()
+                                .errorCode(CommandErrors.EMPTY_OPTION_NAME)
+                                .variables(new CommandErrors.EmptyOptionName().commandLine(commandLine))
+                                .build();
+                    }
+                    IOptionMeta matchedOpt = Looper.on(optMetas).filter(opt -> opt.name().equals(optName)).first(null);
+                    if (matchedOpt == null) {
+                        throw CommandException.builder()
+                                .errorCode(CommandErrors.UNSUPPORTED_OPTION)
+                                .variables(new CommandErrors.UnsupportedOption()
+                                        .optionName(optName)
+                                        .commandLine(commandLine))
+                                .build();
+                    }
+                    if (ArgumentChecker.isEmpty(matchedOpt.argument())) {
+                        cmdExec.setOption(optName);
+                    } else {
+                        optParamVar.put(0, optName);
+                    }
+                } else if (paramOpt.indexOf(IOptionMeta.SHORT_PREFIX) == 0) {
+                    // Handle short option
+                    if (optParamVar.hasValue(0)) {
+                        throw CommandException.builder()
+                                .errorCode(CommandErrors.OPTION_NEEDS_VALUE)
+                                .variables(new CommandErrors.OptionNeedsValue()
+                                        .optionName(optParamVar.get(0))
+                                        .commandLine(commandLine))
+                                .build();
+                    }
+                    String optStr = paramOpt.substring(1);
+                    if (ArgumentChecker.isEmpty(optStr)) {
+                        throw CommandException.builder()
+                                .errorCode(CommandErrors.EMPTY_OPTION_NAME)
+                                .variables(new CommandErrors.EmptyOptionName().commandLine(commandLine))
+                                .build();
+                    }
+                    for (char opt : optStr.toCharArray()) {
+                        IOptionMeta matchedOpt = Looper.on(optMetas)
+                                .filter(optMeta -> optMeta.shortName() == opt)
+                                .first(null);
+                        if (matchedOpt == null) {
+                            throw CommandException.builder()
+                                    .errorCode(CommandErrors.UNSUPPORTED_OPTION)
+                                    .variables(new CommandErrors.UnsupportedOption()
+                                            .optionName(String.valueOf(opt))
+                                            .commandLine(commandLine))
+                                    .build();
+                        }
+                        cmdExec.setOption(matchedOpt.name());
+                    }
+                } else if (cmdVar.hasValue(0)) {
+                    // Handle option argument
+                    cmdExec.setOption(optParamVar.get(0), paramOpt);
+                    optParamVar.put(0, null);
+                } else {
+                    // Handle parameter
+                    int paramIdx = optParamVar.get(1);
+                    if (paramIdx >= paramMetas.length) {
+                        throw CommandException.builder()
+                                .errorCode(CommandErrors.PARAM_OUT_OF_INDEX)
+                                .variables(new CommandErrors.ParameterOutOfIndex()
+                                        .index(paramIdx)
+                                        .parameter(paramOpt)
+                                        .commandLine(commandLine))
+                                .build();
+                    }
+                    IParameterMeta paramMeta = paramMetas[paramIdx];
+                    cmdExec.setParameter(paramMeta.name(), paramOpt);
+                    optParamVar.put(1, paramIdx + 1);
+                }
+            });
+
+            // Check required parameter
+            int paramIdx = optParamVar.get(1);
+            if (paramIdx < paramMetas.length) {
+                for (int i = paramIdx; i < paramMetas.length; i++) {
+                    if (paramMetas[i].required()) {
+                        // todo throw exception
+                    }
+                }
+            }
+
+            cmdExec.setMessageOutput(output);
+
+            return cmdExec.execute();
         }
     }
 }

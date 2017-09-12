@@ -2,6 +2,7 @@ package uapi.command.internal;
 
 import uapi.command.CommandErrors;
 import uapi.command.CommandException;
+import uapi.command.ICommandExecutor;
 import uapi.command.ICommandMeta;
 import uapi.common.ArgumentChecker;
 import uapi.common.StringHelper;
@@ -78,6 +79,10 @@ public final class Command {
         return this._cmdMeta.namespace();
     }
 
+    public ICommandMeta meta() {
+        return this._cmdMeta;
+    }
+
     public boolean hasParent() {
         return this._cmdMeta.hasParent();
     }
@@ -106,12 +111,18 @@ public final class Command {
     }
 
     void removeSubCommand(String commandName) {
-
+        Command command = findSubCommand(commandName);
+        this._subCmds.remove(command);
     }
 
     Command findSubCommand(String commandName) {
+        ArgumentChecker.required(commandName, "commandName");
         return Looper.on(this._subCmds)
                 .filter(subCmd -> subCmd.name().equals(commandName))
                 .first(null);
+    }
+
+    ICommandExecutor getExecutor() {
+        return this._cmdMeta.newExecutor();
     }
 }

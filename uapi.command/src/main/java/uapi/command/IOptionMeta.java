@@ -14,6 +14,9 @@ package uapi.command;
  */
 public interface IOptionMeta {
 
+    String SHORT_PREFIX = "-";
+    String LONG_PREFIX  = "--";
+
     /**
      * The option name also known as long option name.
      *
@@ -26,7 +29,7 @@ public interface IOptionMeta {
      *
      * @return  The short option name
      */
-    String shortName();
+    char shortName();
 
     /**
      * The type of the option.

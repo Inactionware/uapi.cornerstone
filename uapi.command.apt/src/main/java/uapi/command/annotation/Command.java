@@ -9,6 +9,8 @@
 
 package uapi.command.annotation;
 
+import uapi.command.ICommandMeta;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -24,6 +26,13 @@ public @interface Command {
      * @return  The parentPath command type
      */
     Class<?> parent() default void.class;
+
+    /**
+     * The namespace of this command
+     *
+     * @return  The namespace
+     */
+    String namespace() default ICommandMeta.DEFAULT_NAMESPACE;
 
     /**
      * The command name

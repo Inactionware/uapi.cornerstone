@@ -9,17 +9,14 @@
 
 package uapi.command;
 
-import uapi.common.StringHelper;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * The implementation of this interface holds meta information of a command.
  */
 public interface ICommandMeta {
 
-    String PATH_SEPARATOR   = "/";
+    String DEFAULT_NAMESPACE    = "";
+
+    String PATH_SEPARATOR       = "/";
 
     /**
      * The the parent command path of this command.
@@ -51,21 +48,6 @@ public interface ICommandMeta {
         }
         return null;
     }
-
-    /**
-     * The command identify which is consist by namespace and name in default.
-     *
-     * @return  The identify of the command
-     */
-//    default String commandId() {
-//        Map<String, String> namedValues = new HashMap<>();
-//        namedValues.put("namespace", namespace() != null ? namespace() : "");
-//        namedValues.put("sep", PATH_SEPARATOR);
-//        namedValues.put("parent", parentPath());
-//        namedValues.put("sep", PATH_SEPARATOR);
-//        namedValues.put("name", name());
-//        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
-//    }
 
     default boolean hasParent() {
         return parentPath() != null;
