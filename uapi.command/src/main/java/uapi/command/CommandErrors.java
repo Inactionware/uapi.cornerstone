@@ -27,6 +27,8 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
     public static final int EMPTY_OPTION_NAME                   = 5;
     public static final int UNSUPPORTED_OPTION                  = 6;
     public static final int PARAM_OUT_OF_INDEX                  = 7;
+    public static final int MISSING_REQUIRED_PARAMETER          = 8;
+    public static final int UNSUPPORTED_PARAMETER               = 9;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -39,6 +41,8 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
         keyCodeMapping.put(EMPTY_OPTION_NAME, EmptyOptionName.class.getName());
         keyCodeMapping.put(UNSUPPORTED_OPTION, UnsupportedOption.class.getName());
         keyCodeMapping.put(PARAM_OUT_OF_INDEX, ParameterOutOfIndex.class.getName());
+        keyCodeMapping.put(MISSING_REQUIRED_PARAMETER, MissingRequiredParameter.class.getName());
+        keyCodeMapping.put(UNSUPPORTED_PARAMETER, UnsupportedParameter.class.getName());
     }
 
     @Override
@@ -163,7 +167,7 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
     }
 
     /**
-     * Invalid command option which is not supported - {}, command line: {}
+     * Invalid command option which is not supported - {}, command: {}
      */
     public static final class UnsupportedOption extends IndexedParameters<UnsupportedOption> {
 
@@ -175,7 +179,7 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
             return this;
         }
 
-        public UnsupportedOption commandLine(String commandLine) {
+        public UnsupportedOption command(String commandLine) {
             this._cmdLine = commandLine;
             return this;
         }
@@ -213,6 +217,54 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
         @Override
         public Object[] get() {
             return new Object[] { this._idx, this._param, this._cmdLine };
+        }
+    }
+
+    /**
+     * The required parameter was missing - {}, command line: {}
+     */
+    public static final class MissingRequiredParameter extends IndexedParameters<MissingRequiredParameter> {
+
+        private String _paramName;
+        private String _cmdLine;
+
+        public MissingRequiredParameter parameterName(String name) {
+            this._paramName = name;
+            return this;
+        }
+
+        public MissingRequiredParameter commandLine(String commandLine) {
+            this._cmdLine = commandLine;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._paramName, this._cmdLine };
+        }
+    }
+
+    /**
+     * Invalid command parameter which is not supported - {}, command: {}
+     */
+    public static final class UnsupportedParameter extends IndexedParameters<UnsupportedParameter> {
+
+        private String _paramName;
+        private String _cmdId;
+
+        public UnsupportedParameter parameterName(String name) {
+            this._paramName = name;
+            return this;
+        }
+
+        public UnsupportedParameter commandId(String id) {
+            this._cmdId = id;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._paramName, this._cmdId };
         }
     }
 }

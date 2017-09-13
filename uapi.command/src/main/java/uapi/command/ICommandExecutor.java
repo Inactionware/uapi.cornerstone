@@ -14,6 +14,8 @@ package uapi.command;
  */
 public interface ICommandExecutor {
 
+    String commandId();
+
     /**
      * Execute command and return the result of command.
      *
@@ -27,14 +29,28 @@ public interface ICommandExecutor {
      * @param   name The parameter name
      * @param   value The parameter value
      */
-    void setParameter(String name, Object value);
+    default void setParameter(String name, Object value) {
+        throw CommandException.builder()
+                .errorCode(CommandErrors.UNSUPPORTED_PARAMETER)
+                .variables(new CommandErrors.UnsupportedParameter()
+                        .parameterName(name)
+                        .commandId(commandId()))
+                .build();
+    }
 
     /**
      * Set boolean type option to this command.
      *
      * @param   name The option name
      */
-    void setOption(String name);
+    default void setOption(String name) {
+        throw CommandException.builder()
+                .errorCode(CommandErrors.UNSUPPORTED_OPTION)
+                .variables(new CommandErrors.UnsupportedOption()
+                        .optionName(name)
+                        .command(commandId()))
+                .build();
+    }
 
     /**
      * Set string type option to this command.
@@ -42,12 +58,19 @@ public interface ICommandExecutor {
      * @param   name The option name
      * @param   argument The option argument value
      */
-    void setOption(String name, String argument);
+    default void setOption(String name, String argument) {
+        throw CommandException.builder()
+                .errorCode(CommandErrors.UNSUPPORTED_OPTION)
+                .variables(new CommandErrors.UnsupportedOption()
+                        .optionName(name)
+                        .command(commandId()))
+                .build();
+    }
 
     /**
      * Set message output which is used to output information during command execution.
      *
      * @param   output The message output
      */
-    void setMessageOutput(IMessageOutput output);
+    default void setMessageOutput(IMessageOutput output) { }
 }

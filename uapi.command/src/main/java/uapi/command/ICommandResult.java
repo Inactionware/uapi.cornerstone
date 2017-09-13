@@ -34,4 +34,5 @@ public interface ICommandResult {
      * @return  The exception object or null if no exception for the command execution
      */
     Throwable exception();
+    
 }

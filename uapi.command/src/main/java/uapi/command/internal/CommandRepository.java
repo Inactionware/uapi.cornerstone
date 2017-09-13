@@ -9,7 +9,6 @@
 
 package uapi.command.internal;
 
-import uapi.GeneralException;
 import uapi.command.*;
 import uapi.common.ArgumentChecker;
 import uapi.common.Multivariate;
@@ -20,6 +19,7 @@ import uapi.service.annotation.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -47,6 +47,11 @@ public class CommandRepository implements ICommandRepository {
         });
         this._commandMetas.clear();
     }
+
+//    @Override
+//    public Iterator<Command> iterator() {
+//        return this._rootCmds.iterator();
+//    }
 
     @Override
     public void register(ICommandMeta commandMeta) {
@@ -109,7 +114,7 @@ public class CommandRepository implements ICommandRepository {
                     .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
                     .variables(new CommandErrors.ParentCommandNotFound()
                             .parentCommandName(ancestorNames[0])
-                            .thisCommandId(Command.generateCommandId(commandMeta)))
+                            .thisCommandId(commandMeta.id()))
                     .build();
         }
         for (int i = 1; i < ancestorNames.length; i++) {
@@ -120,16 +125,12 @@ public class CommandRepository implements ICommandRepository {
                         .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
                         .variables(new CommandErrors.ParentCommandNotFound()
                                 .parentCommandName(ancestorName)
-                                .thisCommandId(Command.generateCommandId(commandMeta)))
+                                .thisCommandId(commandMeta.id()))
                         .build();
             }
         }
         Command command = new Command(commandMeta, ancestor);
         ancestor.addSubCommand(command);
-    }
-
-    private Command find(String commandId) {
-        return null;
     }
 
     /**
@@ -216,7 +217,7 @@ public class CommandRepository implements ICommandRepository {
                                 .errorCode(CommandErrors.UNSUPPORTED_OPTION)
                                 .variables(new CommandErrors.UnsupportedOption()
                                         .optionName(optName)
-                                        .commandLine(commandLine))
+                                        .command(commandLine))
                                 .build();
                     }
                     if (ArgumentChecker.isEmpty(matchedOpt.argument())) {
@@ -250,7 +251,7 @@ public class CommandRepository implements ICommandRepository {
                                     .errorCode(CommandErrors.UNSUPPORTED_OPTION)
                                     .variables(new CommandErrors.UnsupportedOption()
                                             .optionName(String.valueOf(opt))
-                                            .commandLine(commandLine))
+                                            .command(commandLine))
                                     .build();
                         }
                         cmdExec.setOption(matchedOpt.name());
@@ -282,7 +283,12 @@ public class CommandRepository implements ICommandRepository {
             if (paramIdx < paramMetas.length) {
                 for (int i = paramIdx; i < paramMetas.length; i++) {
                     if (paramMetas[i].required()) {
-                        // todo throw exception
+                        throw CommandException.builder()
+                                .errorCode(CommandErrors.MISSING_REQUIRED_PARAMETER)
+                                .variables(new CommandErrors.MissingRequiredParameter()
+                                        .parameterName(paramMetas[i].name())
+                                        .commandLine(commandLine))
+                                .build();
                     }
                 }
             }
