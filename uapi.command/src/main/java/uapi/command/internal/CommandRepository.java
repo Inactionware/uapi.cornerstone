@@ -19,7 +19,6 @@ import uapi.service.annotation.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -46,12 +45,10 @@ public class CommandRepository implements ICommandRepository {
             }
         });
         this._commandMetas.clear();
-    }
 
-//    @Override
-//    public Iterator<Command> iterator() {
-//        return this._rootCmds.iterator();
-//    }
+        // Add root command helper
+        this._rootCmds.add(new Command(new HelpCommandMeta(new RootCommand())));
+    }
 
     @Override
     public void register(ICommandMeta commandMeta) {
@@ -131,6 +128,52 @@ public class CommandRepository implements ICommandRepository {
         }
         Command command = new Command(commandMeta, ancestor);
         ancestor.addSubCommand(command);
+
+        // Add help command
+        if (ancestor.findSubCommand(HelpCommandMeta.NAME) == null) {
+            ancestor.addSubCommand(new Command(new HelpCommandMeta(ancestor)));
+        }
+    }
+
+    /**
+     * The root command is only used to make help command can output information
+     */
+    private final class RootCommand implements ICommand {
+
+        @Override
+        public String namespace() {
+            return ICommandMeta.DEFAULT_NAMESPACE;
+        }
+
+        @Override
+        public String name() {
+            return null;
+        }
+
+        @Override
+        public String[] ancestors() {
+            return new String[0];
+        }
+
+        @Override
+        public String description() {
+            return null;
+        }
+
+        @Override
+        public ICommand[] availableSubCommands() {
+            return new ICommand[0];
+        }
+
+        @Override
+        public IParameterMeta[] availableParameters() {
+            return new IParameterMeta[0];
+        }
+
+        @Override
+        public IOptionMeta[] availableOptions() {
+            return new IOptionMeta[0];
+        }
     }
 
     /**
@@ -139,7 +182,7 @@ public class CommandRepository implements ICommandRepository {
     private final class CommandRunner implements ICommandRunner {
 
         @Override
-        public ICommandResult run(
+        public CommandResult run(
                 final String commandLine,
                 final IMessageOutput output
         ) throws CommandException {

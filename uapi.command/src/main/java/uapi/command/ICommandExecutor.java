@@ -21,7 +21,7 @@ public interface ICommandExecutor {
      *
      * @return  The command execution result
      */
-    ICommandResult execute();
+    CommandResult execute();
 
     /**
      * Set command parameter value by specified parameter name to this command.

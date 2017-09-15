@@ -8,31 +8,6 @@ import java.util.*;
 
 public final class Command implements ICommand {
 
-//    public static String generateCommandId(Command command) {
-//        ArgumentChecker.required(command, "command");
-//        return generateCommandId(command._cmdMeta);
-//    }
-//
-//    public static String generateCommandId(ICommandMeta commandMeta) {
-//        ArgumentChecker.required(commandMeta, "commandMeta");
-//        return generateCommandId(commandMeta.namespace(), commandMeta.parentPath(), commandMeta.name());
-//    }
-//
-//    public static String generateCommandId(
-//            String namespace,
-//            String parentPath,
-//            String name
-//    ) {
-//        ArgumentChecker.required(name, "command");
-//        Map<String, String> namedValues = new HashMap<>();
-//        namedValues.put("namespace", namespace != null ? namespace : "");
-//        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
-//        namedValues.put("parent", parentPath);
-//        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
-//        namedValues.put("name", name);
-//        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
-//    }
-
     public static String getNamespace(String commandId) {
         ArgumentChecker.required(commandId, "commandId");
         if (commandId.indexOf(ICommandMeta.PATH_SEPARATOR) == 0) {

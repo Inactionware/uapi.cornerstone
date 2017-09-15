@@ -23,14 +23,14 @@ public @interface Option {
      *
      * @return  The option name
      */
-    String name();
+    String name() default "";
 
     /**
      * The short option name
      *
      * @return  The short option name
      */
-    char shortName();
+    char shortName() default 0;
 
     /**
      * The option argument if the option is string type
