@@ -11,6 +11,7 @@ package uapi.command.internal;
 
 import uapi.command.*;
 import uapi.common.ArgumentChecker;
+import uapi.common.CollectionHelper;
 import uapi.common.Multivariate;
 import uapi.rx.Looper;
 import uapi.service.annotation.Inject;
@@ -27,6 +28,10 @@ import java.util.List;
 @Service(ICommandRunner.class)
 public class CommandRepository implements ICommandRepository {
 
+    private static final String[] reservedCmdNames = new String[] {
+            HelpCommandMeta.NAME
+    };
+
     private final List<Command> _rootCmds = new ArrayList<>();
 
     private final CommandRunner _cmdRunner = new CommandRunner();
@@ -38,6 +43,7 @@ public class CommandRepository implements ICommandRepository {
     protected void activate() {
         this._commandMetas.sort(Comparator.comparingInt(ICommandMeta::depth));
         Looper.on(this._commandMetas).foreach(commandMeta -> {
+            checkReservedCommand(commandMeta.name());
             if (! commandMeta.hasParent()) {
                 this._rootCmds.add(new Command(commandMeta));
             } else {
@@ -53,6 +59,7 @@ public class CommandRepository implements ICommandRepository {
     @Override
     public void register(ICommandMeta commandMeta) {
         ArgumentChecker.required(commandMeta, "commandMeta");
+        checkReservedCommand(commandMeta.name());
         if (! commandMeta.hasParent()) {
             this._rootCmds.add(new Command(commandMeta));
         } else {
@@ -132,6 +139,15 @@ public class CommandRepository implements ICommandRepository {
         // Add help command
         if (ancestor.findSubCommand(HelpCommandMeta.NAME) == null) {
             ancestor.addSubCommand(new Command(new HelpCommandMeta(ancestor)));
+        }
+    }
+
+    private void checkReservedCommand(String cmdName) {
+        if (CollectionHelper.isContains(reservedCmdNames, cmdName)) {
+            throw CommandException.builder()
+                    .errorCode(CommandErrors.RESERVED_COMMAND_NAME)
+                    .variables(new CommandErrors.ReservedCommandName().commandName(cmdName))
+                    .build();
         }
     }
 

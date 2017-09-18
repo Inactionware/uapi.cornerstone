@@ -29,6 +29,7 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
     public static final int PARAM_OUT_OF_INDEX                  = 7;
     public static final int MISSING_REQUIRED_PARAMETER          = 8;
     public static final int UNSUPPORTED_PARAMETER               = 9;
+    public static final int RESERVED_COMMAND_NAME               = 10;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -43,6 +44,7 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
         keyCodeMapping.put(PARAM_OUT_OF_INDEX, ParameterOutOfIndex.class.getName());
         keyCodeMapping.put(MISSING_REQUIRED_PARAMETER, MissingRequiredParameter.class.getName());
         keyCodeMapping.put(UNSUPPORTED_PARAMETER, UnsupportedParameter.class.getName());
+        keyCodeMapping.put(RESERVED_COMMAND_NAME, ReservedCommandName.class.getName());
     }
 
     @Override
@@ -265,6 +267,23 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
         @Override
         public Object[] get() {
             return new Object[] { this._paramName, this._cmdId };
+        }
+    }
+
+    /**
+     * The command name is reserved for internal usage - {}
+     */
+    public static final class ReservedCommandName extends IndexedParameters<ReservedCommandName> {
+
+        private String _cmdName;
+
+        public ReservedCommandName commandName(String name) {
+            this._cmdName = name;
+            return this;
+        }
+
+        public Object[] get() {
+            return new Object[] { this._cmdName };
         }
     }
 }
