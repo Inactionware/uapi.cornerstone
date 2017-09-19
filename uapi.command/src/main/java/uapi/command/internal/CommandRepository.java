@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * An implementation for ICommandRepository interface
  */
-@Service(ICommandRunner.class)
+@Service(ICommandRepository.class)
 public class CommandRepository implements ICommandRepository {
 
     private static final String[] reservedCmdNames = new String[] {
@@ -108,11 +108,15 @@ public class CommandRepository implements ICommandRepository {
         return this._cmdRunner;
     }
 
+    int commandCount() {
+        return this._rootCmds.size();
+    }
+
     private void addSubCommand(ICommandMeta commandMeta) {
         String[] ancestorNames = commandMeta.ancestors();
         Command ancestor = Looper.on(this._rootCmds)
                 .filter(cmd -> cmd.name().equals(ancestorNames[0]))
-                .first();
+                .first(null);
         if (ancestor == null) {
             throw CommandException.builder()
                     .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
@@ -137,9 +141,10 @@ public class CommandRepository implements ICommandRepository {
         ancestor.addSubCommand(command);
 
         // Add help command
-        if (ancestor.findSubCommand(HelpCommandMeta.NAME) == null) {
-            ancestor.addSubCommand(new Command(new HelpCommandMeta(ancestor)));
-        }
+        command.addSubCommand(new Command(new HelpCommandMeta(ancestor)));
+//        if (ancestor.findSubCommand(HelpCommandMeta.NAME) == null) {
+//            ancestor.addSubCommand(new Command(new HelpCommandMeta(ancestor)));
+//        }
     }
 
     private void checkReservedCommand(String cmdName) {
@@ -178,7 +183,7 @@ public class CommandRepository implements ICommandRepository {
 
         @Override
         public ICommand[] availableSubCommands() {
-            return new ICommand[0];
+            return CommandRepository.this._rootCmds.toArray(new ICommand[CommandRepository.this._rootCmds.size()]);
         }
 
         @Override

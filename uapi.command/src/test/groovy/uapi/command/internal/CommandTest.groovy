@@ -1,6 +1,8 @@
 package uapi.command.internal
 
 import spock.lang.Specification
+import uapi.command.CommandException
+import uapi.command.ICommandExecutor
 import uapi.command.ICommandMeta
 import uapi.command.IOptionMeta
 import uapi.command.IParameterMeta
@@ -62,7 +64,72 @@ class CommandTest extends Specification {
         'b'     | 'name'    | 'description' | false     | 'b/name'  | [] as String[]    | ''
     }
 
-    def 'Test add remove sub command'() {
+    def 'Test add sub command'() {
+        when:
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.name() >> name
+        def subCmdMeta = Mock(ICommandMeta)
+        subCmdMeta.name() >> subName
+        def cmd = new Command(cmdMeta)
+        def subCmd = new Command(subCmdMeta)
+        cmd.addSubCommand(subCmd)
 
+        then:
+        cmd.findSubCommand(subName) == subCmd
+
+        where:
+        name        | subName
+        'cmd'       | 'subCmd'
+    }
+
+    def 'Test add duplicated sub command'() {
+        when:
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.name() >> name
+        def subCmdMeta = Mock(ICommandMeta)
+        subCmdMeta.name() >> subName
+        def subCmdMeta2 = Mock(ICommandMeta)
+        subCmdMeta2.name() >> subName
+        def cmd = new Command(cmdMeta)
+        def subCmd = new Command(subCmdMeta)
+        def subCmd2 = new Command(subCmdMeta2)
+        cmd.addSubCommand(subCmd)
+        cmd.addSubCommand(subCmd2)
+
+        then:
+        thrown(CommandException)
+
+        where:
+        name    | subName
+        'cmd'   | 'subName'
+    }
+
+    def 'Test remove sub command'() {
+        when:
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.name() >> name
+        def subCmdMeta = Mock(ICommandMeta)
+        subCmdMeta.name() >> subName
+        def cmd = new Command(cmdMeta)
+        def subCmd = new Command(subCmdMeta)
+        cmd.addSubCommand(subCmd)
+        cmd.removeSubCommand(subName)
+
+        then:
+        cmd.findSubCommand(subName) == null
+
+        where:
+        name        | subName
+        'cmd'       | 'subCmd'
+    }
+
+    def 'Test get executor'() {
+        given:
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.newExecutor() >> Mock(ICommandExecutor)
+        def cmd = new Command(cmdMeta)
+
+        expect:
+        cmd.getExecutor() != null
     }
 }
