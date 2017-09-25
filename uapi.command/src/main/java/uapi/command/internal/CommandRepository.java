@@ -251,7 +251,7 @@ public class CommandRepository implements ICommandRepository {
 
             // Set command parameter and options
             Command cmd = cmdVar.get(0);
-            Multivariate optParamVar = new Multivariate(1);  // 0 -> option name; 1 -> parameter index
+            Multivariate optParamVar = new Multivariate(2);  // 0 -> option name; 1 -> parameter index
             optParamVar.put(1, 0);
             ICommandMeta cmdMeta = cmd.meta();
             ICommandExecutor cmdExec = cmd.getExecutor();

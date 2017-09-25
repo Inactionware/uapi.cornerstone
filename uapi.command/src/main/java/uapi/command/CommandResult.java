@@ -12,7 +12,7 @@ package uapi.command;
 /**
  * Implementation holds command execution result.
  */
-public final class CommandResult {
+public class CommandResult {
 
     private final boolean _isSuccess;
     private final String _msg;

@@ -3,19 +3,30 @@ package uapi.command.internal
 import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.command.CommandException
+import uapi.command.CommandResult
+import uapi.command.ICommandExecutor
 import uapi.command.ICommandMeta
 import uapi.command.IMessageOutput
+import uapi.command.IParameterMeta
 
 class CommandRepositoryTest extends Specification {
 
     def 'Test create instance'() {
         given:
         def cmdRepo = new CommandRepository()
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.name() >> cmdName
+        cmdMeta.hasParent() >> hasParent
+        cmdRepo._commandMetas.add(cmdMeta)
 
         expect:
         cmdRepo.activate()
         cmdRepo.getRunner() != null
-        cmdRepo.commandCount() == 1
+        cmdRepo.commandCount() == 2
+
+        where:
+        hasParent   | cmdName
+        false       | 'cmd'
     }
 
     def 'Test register root command'() {
@@ -258,7 +269,6 @@ class CommandRepositoryTest extends Specification {
         'cmd'       | '/cmd'    | 'subCmd'      | '/cmd/subCmd'
     }
 
-    @Ignore
     def 'Test run command'() {
         given:
         def cmdRepo = new CommandRepository()
@@ -267,6 +277,12 @@ class CommandRepositoryTest extends Specification {
         cmdMeta.name() >> cmdName
         cmdMeta.id() >> cmdId
         cmdMeta.hasParent() >> false
+        cmdMeta.parameterMetas() >> []
+        cmdMeta.newExecutor() >> Mock(ICommandExecutor) {
+            execute() >> Mock(CommandResult) {
+                successful() >> true
+            }
+        }
         cmdRepo.register(cmdMeta)
         def cmdRunner = cmdRepo.getRunner()
         def msgout = Mock(IMessageOutput)
