@@ -284,9 +284,17 @@ public class CommandRepository implements ICommandRepository {
                                         .command(commandLine))
                                 .build();
                     }
-                    if (ArgumentChecker.isEmpty(matchedOpt.argument())) {
+                    if (matchedOpt.type() == OptionType.Boolean) {
                         cmdExec.setOption(optName);
                     } else {
+                        if (optParamVar.hasValue(0)) {
+                            throw CommandException.builder()
+                                    .errorCode(CommandErrors.OPTION_NEEDS_VALUE)
+                                    .variables(new CommandErrors.OptionNeedsValue()
+                                            .optionName(optParamVar.get(0))
+                                            .commandLine(commandLine))
+                                    .build();
+                        }
                         optParamVar.put(0, optName);
                     }
                 } else if (paramOpt.indexOf(IOptionMeta.SHORT_PREFIX) == 0) {
@@ -318,9 +326,29 @@ public class CommandRepository implements ICommandRepository {
                                             .command(commandLine))
                                     .build();
                         }
-                        cmdExec.setOption(matchedOpt.name());
+                        if (matchedOpt.type() == OptionType.String) {
+                            if (optStr.length() > 1) {
+                                throw CommandException.builder()
+                                        .errorCode(CommandErrors.SET_ARGUMENT_ON_COMBINED_SHORT_OPTION)
+                                        .variables(new CommandErrors.SetArgumentOnCombinedShortOption()
+                                                .combinedOptions(optStr)
+                                                .commandLine(commandLine))
+                                        .build();
+                            }
+                            if (optParamVar.hasValue(0)) {
+                                throw CommandException.builder()
+                                        .errorCode(CommandErrors.OPTION_NEEDS_VALUE)
+                                        .variables(new CommandErrors.OptionNeedsValue()
+                                                .optionName(optParamVar.get(0))
+                                                .commandLine(commandLine))
+                                        .build();
+                            }
+                            optParamVar.put(0, matchedOpt.name());
+                        } else {
+                            cmdExec.setOption(matchedOpt.name());
+                        }
                     }
-                } else if (cmdVar.hasValue(0)) {
+                } else if (optParamVar.hasValue(0)) {
                     // Handle option argument
                     cmdExec.setOption(optParamVar.get(0), paramOpt);
                     optParamVar.put(0, null);

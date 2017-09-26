@@ -30,6 +30,7 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
     public static final int MISSING_REQUIRED_PARAMETER          = 8;
     public static final int UNSUPPORTED_PARAMETER               = 9;
     public static final int RESERVED_COMMAND_NAME               = 10;
+    public static final int SET_ARGUMENT_ON_COMBINED_SHORT_OPTION   = 11;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -45,6 +46,7 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
         keyCodeMapping.put(MISSING_REQUIRED_PARAMETER, MissingRequiredParameter.class.getName());
         keyCodeMapping.put(UNSUPPORTED_PARAMETER, UnsupportedParameter.class.getName());
         keyCodeMapping.put(RESERVED_COMMAND_NAME, ReservedCommandName.class.getName());
+        keyCodeMapping.put(SET_ARGUMENT_ON_COMBINED_SHORT_OPTION, SetArgumentOnCombinedShortOption.class.getName());
     }
 
     @Override
@@ -284,6 +286,29 @@ public class CommandErrors extends FileBasedExceptionErrors<CommandException> {
 
         public Object[] get() {
             return new Object[] { this._cmdName };
+        }
+    }
+
+    /**
+     * Un-support set option argument when combine multiple short option - {}, command: {}
+     */
+    public static final class SetArgumentOnCombinedShortOption extends IndexedParameters<SetArgumentOnCombinedShortOption> {
+
+        private String _opts;
+        private String _cmdLine;
+
+        public SetArgumentOnCombinedShortOption combinedOptions(String options) {
+            this._opts = options;
+            return this;
+        }
+
+        public SetArgumentOnCombinedShortOption commandLine(String commandLine) {
+            this._cmdLine = commandLine;
+            return this;
+        }
+
+        public Object[] get() {
+            return new Object[] { this._opts, this._cmdLine };
         }
     }
 }
