@@ -301,4 +301,147 @@ class CommandRepositoryTest extends Specification {
         cmdName     | cmdId     | cmdline
         'cmd'       | '/cmd'    | 'cmd'
     }
+
+    def 'Test run unknown command'() {
+        given:
+        def cmdRepo = new CommandRepository()
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.namespace() >> ''
+        cmdMeta.name() >> cmdName
+        cmdMeta.id() >> cmdId
+        cmdMeta.hasParent() >> false
+        cmdMeta.parameterMetas() >> []
+        cmdMeta.newExecutor() >> Mock(ICommandExecutor) {
+            execute() >> Mock(CommandResult) {
+                successful() >> true
+            }
+        }
+        cmdRepo.register(cmdMeta)
+        def cmdRunner = cmdRepo.getRunner()
+        def msgout = Mock(IMessageOutput)
+
+        when:
+        def cmdResult = cmdRunner.run(cmdline, msgout)
+
+        then:
+        thrown(CommandException)
+        cmdResult == null
+
+        where:
+        cmdName     | cmdId     | cmdline
+        'cmd'       | '/cmd'    | 'cmd2'
+    }
+
+    def 'Test run command with ns'() {
+        given:
+        def cmdRepo = new CommandRepository()
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.namespace() >> cmdNs
+        cmdMeta.name() >> cmdName
+        cmdMeta.id() >> cmdId
+        cmdMeta.hasParent() >> false
+        cmdMeta.parameterMetas() >> []
+        cmdMeta.newExecutor() >> Mock(ICommandExecutor) {
+            execute() >> Mock(CommandResult) {
+                successful() >> true
+            }
+        }
+        def msgout = Mock(IMessageOutput)
+
+        when:
+        cmdRepo.register(cmdMeta)
+        def cmdRunner = cmdRepo.getRunner()
+        def cmdResult = cmdRunner.run(cmdline, msgout)
+
+        then:
+        noExceptionThrown()
+        cmdResult != null
+        cmdResult.successful()
+        cmdResult.message() == null
+        cmdResult.exception() == null
+
+        where:
+        cmdNs   | cmdName   | cmdId     | cmdline
+        'ns'    | 'cmd'     | 'ns/cmd'  | 'ns/cmd'
+    }
+
+    def 'Test run sub command with ns'() {
+        given:
+        def cmdRepo = new CommandRepository()
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.namespace() >> cmdNs
+        cmdMeta.name() >> cmdName
+        cmdMeta.id() >> cmdId
+        cmdMeta.hasParent() >> false
+        cmdMeta.parameterMetas() >> []
+        def subCmdMeta = Mock(ICommandMeta)
+        subCmdMeta.namespace() >> cmdNs
+        subCmdMeta.name() >> subcmdName
+        subCmdMeta.id() >> subcmdId
+        subCmdMeta.hasParent() >> true
+        subCmdMeta.ancestors() >> subcmdAncestors
+        subCmdMeta.parameterMetas() >> []
+        subCmdMeta.newExecutor() >> Mock(ICommandExecutor) {
+            execute() >> Mock(CommandResult) {
+                successful() >> true
+            }
+        }
+        def msgout = Mock(IMessageOutput)
+
+        when:
+        cmdRepo.register(cmdMeta)
+        cmdRepo.register(subCmdMeta)
+        def cmdRunner = cmdRepo.getRunner()
+        def cmdResult = cmdRunner.run(cmdline, msgout)
+
+        then:
+        noExceptionThrown()
+        cmdResult != null
+        cmdResult.successful()
+        cmdResult.message() == null
+        cmdResult.exception() == null
+
+        where:
+        cmdNs   | cmdName   | cmdId     | subcmdName    | subcmdId      | subcmdAncestors       | cmdline
+        'ns'    | 'cmd'     | 'ns/cmd'  | 'subcmd'      | 'ns/subcmd'   | ['cmd'] as String[]   | 'ns/cmd subcmd'
+    }
+
+    @Ignore
+    def 'Test run command with parameter'() {
+        given:
+        def cmdRepo = new CommandRepository()
+        def paramMeta = Mock(IParameterMeta)
+        paramMeta.name() >> paramName
+        paramMeta.required() >> true
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.namespace() >> ''
+        cmdMeta.name() >> cmdName
+        cmdMeta.id() >> cmdId
+        cmdMeta.hasParent() >> false
+        cmdMeta.parameterMetas() >> [paramMeta]
+        def cmdExec = Mock(ICommandExecutor)
+        cmdExec.execute() >> Mock(CommandResult) {
+            successful() >> true
+        }
+        cmdMeta.newExecutor() >> cmdExec
+
+        cmdRepo.register(cmdMeta)
+        def cmdRunner = cmdRepo.getRunner()
+        def msgout = Mock(IMessageOutput)
+
+        when:
+        def cmdResult = cmdRunner.run(cmdline, msgout)
+
+        then:
+        noExceptionThrown()
+        cmdResult != null
+        cmdResult.successful()
+        cmdResult.message() == null
+        cmdResult.exception() == null
+        1 * cmdExec.setParameter(paramName, paramValue)
+
+        where:
+        cmdName     | cmdId     | paramName     | paramValue    | cmdline
+        'cmd'       | '/cmd'    | 'test'        | 'value'       | 'cmd value'
+    }
 }
