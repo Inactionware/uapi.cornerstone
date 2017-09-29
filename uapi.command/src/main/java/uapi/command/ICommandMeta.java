@@ -61,7 +61,7 @@ public interface ICommandMeta {
     }
 
     default boolean hasParent() {
-        return parentPath() != null;
+        return ! StringHelper.isNullOrEmpty(parentPath());
     }
 
     default int depth() {

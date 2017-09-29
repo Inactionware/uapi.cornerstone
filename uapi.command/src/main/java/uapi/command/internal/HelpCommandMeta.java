@@ -18,6 +18,7 @@ public class HelpCommandMeta implements ICommandMeta {
 
     private final String _parentPath;
     private final ICommand _cmd;
+    private final ICommandExecutor _cmdExec;
 
     public HelpCommandMeta(ICommand command) {
         this(ROOT_PATH, command);
@@ -29,6 +30,7 @@ public class HelpCommandMeta implements ICommandMeta {
     ) {
         this._parentPath = parentPath;
         this._cmd = command;
+        this._cmdExec = new HelpCommandExecutor();
     }
 
     @Override
@@ -43,12 +45,16 @@ public class HelpCommandMeta implements ICommandMeta {
 
     @Override
     public String description() {
-        return null;
+        if (this._cmd.name() == null) {
+            return "Help command";
+        } else {
+            return StringHelper.makeString("Help command for " + this._cmd.name());
+        }
     }
 
     @Override
     public ICommandExecutor newExecutor() {
-        return null;
+        return this._cmdExec;
     }
 
     private final class HelpCommandExecutor implements ICommandExecutor {
@@ -69,10 +75,10 @@ public class HelpCommandMeta implements ICommandMeta {
         public CommandResult execute() {
             ICommand command = HelpCommandMeta.this._cmd;
             if (! command.namespace().equals(ICommandMeta.DEFAULT_NAMESPACE)) {
-                this._msgOut.output(StringHelper.makeString("Namespace: {}\n", command.namespace()));
+                output(StringHelper.makeString("Namespace: {}\n", command.namespace()));
             }
             if (! ArgumentChecker.isEmpty(command.name())) {
-                this._msgOut.output(StringHelper.makeString(
+                output(StringHelper.makeString(
                         "Usage: {} {} {} {} {}\n",
                         CollectionHelper.asString(command.ancestors(), " "),
                         command.name(),
@@ -81,14 +87,14 @@ public class HelpCommandMeta implements ICommandMeta {
                 ));
             }
 
-            this._msgOut.output("\n");
+            output("\n");
 
             if (command.availableParameters().length != 0) {
-                this._msgOut.output(StringHelper.makeString("Available parameters: \n"));
+                output(StringHelper.makeString("Available parameters: \n"));
                 Looper.on(command.availableParameters()).foreach(paramMeta -> {
-                    this._msgOut.output(NAME_INDENT);
+                    output(NAME_INDENT);
                     if (paramMeta.name().length() <= WIDTH_NAME_COLUMN) {
-                        this._msgOut.output(StringHelper.makeString(
+                        output(StringHelper.makeString(
                                 "{}{}{}{}{}\n",
                                 NAME_INDENT,
                                 paramMeta.name(),
@@ -96,7 +102,7 @@ public class HelpCommandMeta implements ICommandMeta {
                                 paramMeta.required() ? "" : "optional, ",
                                 paramMeta.description()));
                     } else {
-                        this._msgOut.output(StringHelper.makeString(
+                        output(StringHelper.makeString(
                                 "{}{}\n{}{}{}\n",
                                 NAME_INDENT,
                                 paramMeta.name(),
@@ -108,10 +114,10 @@ public class HelpCommandMeta implements ICommandMeta {
                 });
             }
 
-            this._msgOut.output("\n");
+            output("\n");
 
-            if (command.availableParameters().length != 0) {
-                this._msgOut.output(StringHelper.makeString("Available options: \n"));
+            if (command.availableOptions().length != 0) {
+                output(StringHelper.makeString("Available options: \n"));
                 Looper.on(command.availableOptions()).foreach(opt -> {
                     StringBuilder buffer = new StringBuilder();
                     boolean hasShortName = false;
@@ -130,7 +136,7 @@ public class HelpCommandMeta implements ICommandMeta {
                         buffer.append(" <").append(opt.argument()).append(">");
                     }
                     if (buffer.length() <= WIDTH_NAME_COLUMN) {
-                        this._msgOut.output(StringHelper.makeString(
+                        output(StringHelper.makeString(
                                 "{}{}{}{}\n",
                                 NAME_INDENT,
                                 buffer.toString(),
@@ -138,7 +144,7 @@ public class HelpCommandMeta implements ICommandMeta {
                                 opt.description()
                         ));
                     } else {
-                        this._msgOut.output(StringHelper.makeString(
+                        output(StringHelper.makeString(
                                 "{}{}\n{}{}\n",
                                 NAME_INDENT,
                                 buffer.toString(),
@@ -149,13 +155,13 @@ public class HelpCommandMeta implements ICommandMeta {
                 });
             }
 
-            this._msgOut.output("\n");
+            output("\n");
 
             ICommand[] subCmds = command.availableSubCommands();
             if (subCmds.length != 0) {
                 Looper.on(HelpCommandMeta.this._cmd).foreach(cmd -> {
                     if (cmd.name().length() <= WIDTH_NAME_COLUMN) {
-                        this._msgOut.output(StringHelper.makeString(
+                        output(StringHelper.makeString(
                                 "{}{}{}{}\n",
                                 NAME_INDENT,
                                 cmd.name(),
@@ -163,7 +169,7 @@ public class HelpCommandMeta implements ICommandMeta {
                                 cmd.description()
                         ));
                     } else {
-                        this._msgOut.output(StringHelper.makeString(
+                        output(StringHelper.makeString(
                                 "{}{}\n{}{}\n",
                                 NAME_INDENT,
                                 cmd.name(),
@@ -175,6 +181,12 @@ public class HelpCommandMeta implements ICommandMeta {
             }
 
             return CommandResult.success();
+        }
+
+        private void output(final String msg) {
+            if (this._msgOut != null) {
+                this._msgOut.output(msg);
+            }
         }
     }
 }
