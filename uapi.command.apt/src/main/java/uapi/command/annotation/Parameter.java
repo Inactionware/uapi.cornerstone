@@ -26,6 +26,13 @@ public @interface Parameter {
     int index();
 
     /**
+     * The parameter name
+     *
+     * @return  The name of parameter
+     */
+    String name();
+
+    /**
      * The parameter is required or not
      *
      * @return  The parameter is required or not

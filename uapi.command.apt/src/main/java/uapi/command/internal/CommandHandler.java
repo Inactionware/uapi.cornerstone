@@ -16,6 +16,8 @@ import java.util.Set;
 @AutoService(IAnnotationsHandler.class)
 public class CommandHandler extends AnnotationsHandler {
 
+    public static final String CMD_MODEL    = "COMMAND_MODEL";
+
     private final CommandParser     _cmdParser;
     private final ParameterParser   _paramParser;
     private final OptionParser      _optParser;

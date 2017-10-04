@@ -34,7 +34,7 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
- * The handler is used to handle Config related annotatioin
+ * The handler is used to handle Config related annotation
  */
 @AutoService(IAnnotationsHandler.class)
 public class ConfigHandler extends AnnotationsHandler {
