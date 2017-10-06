@@ -13,14 +13,12 @@ import uapi.service.annotation.Service;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ParameterParser {
 
     private static final String MODEL_CMD_PARAM     = "MODEL_COMMAND_PARAMETER";
-    private static final String TEMP_PARAM_METAS    = "template/parameterMetas_method";
+    private static final String TEMP_PARAM_METAS    = "template/parameterMetas_method.ftl";
 
     public void parse(
             final IBuilderContext builderContext,
@@ -49,12 +47,10 @@ public class ParameterParser {
                 paramModels = new ArrayList<>();
                 classBuilder.putTransience(MODEL_CMD_PARAM, paramModels);
             }
-            ParamModel paramModel = new ParamModel();
-            paramModel.index = paramIdx;
-            paramModel.name = paramName;
-            paramModel.required = paramRequired;
-            paramModel.description = paramDesc;
-            paramModels.add(paramModel);
+            paramModels.add(new ParamModel(paramName, paramRequired, paramDesc, paramIdx));
+            paramModels.sort(Comparator.comparingInt(ParamModel::index));
+            Map<String, List<ParamModel>> tmpModel = new HashMap<>();
+            tmpModel.put("parameters", paramModels);
 
             // Set up template
             Template tempParamMetas = builderContext.loadTemplate(TEMP_PARAM_METAS);
@@ -66,7 +62,7 @@ public class ParameterParser {
                     .setName("parameterMetas")
                     .setReturnTypeName(Type.toArrayType(IParameterMeta.class))
                     .addCodeBuilder(CodeMeta.builder()
-                            .setModel(paramModel)
+                            .setModel(tmpModel)
                             .setTemplate(tempParamMetas)));
         });
     }

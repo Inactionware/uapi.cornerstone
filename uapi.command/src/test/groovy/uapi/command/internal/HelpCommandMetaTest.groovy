@@ -39,7 +39,7 @@ class HelpCommandMetaTest extends Specification {
         def msgOut = Mock(IMessageOutput)
         def helpCmd = new HelpCommandMeta(cmd)
         def helpCmdExec = helpCmd.newExecutor()
-        helpCmdExec.setMessageOutput(msgOut)
+        helpCmdExec.setOutput(msgOut)
 
         when:
         def cmdResult = helpCmdExec.execute()

@@ -67,8 +67,13 @@ public class HelpCommandMeta implements ICommandMeta {
         }
 
         @Override
-        public void setMessageOutput(IMessageOutput output) {
+        public void setOutput(IMessageOutput output) {
             this._msgOut = output;
+        }
+
+        @Override
+        public IMessageOutput getOutput() {
+            return this._msgOut;
         }
 
         @Override

@@ -12,6 +12,7 @@ import uapi.service.annotation.Service;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,6 +52,8 @@ public class CommandParser {
             cmdModel.namespace = cmdNs;
             cmdModel.description = cmdDesc;
             cmdModel.parentPath = cmdParentPath;
+            Map<String, CommandModel> tmpModel = new HashMap<>();
+            tmpModel.put("command", cmdModel);
 
             // Setup template
             Template tmpName = builderContext.loadTemplate(TEMPLATE_NAME);
@@ -66,7 +69,7 @@ public class CommandParser {
                             .setName("name")
                             .setReturnTypeName(Type.STRING)
                             .addCodeBuilder(CodeMeta.builder()
-                                    .setModel(cmdModel)
+                                    .setModel(tmpModel)
                                     .setTemplate(tmpName)))
                     .addMethodBuilder(MethodMeta.builder()
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
@@ -74,7 +77,7 @@ public class CommandParser {
                             .setName("namespace")
                             .setReturnTypeName(Type.STRING)
                             .addCodeBuilder(CodeMeta.builder()
-                                    .setModel(cmdModel)
+                                    .setModel(tmpModel)
                                     .setTemplate(tmpNamespace)))
                     .addMethodBuilder(MethodMeta.builder()
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
@@ -82,7 +85,7 @@ public class CommandParser {
                             .setName("description")
                             .setReturnTypeName(Type.STRING)
                             .addCodeBuilder(CodeMeta.builder()
-                                    .setModel(cmdModel)
+                                    .setModel(tmpModel)
                                     .setTemplate(tmpDesc)))
                     .addMethodBuilder(MethodMeta.builder()
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
@@ -90,7 +93,7 @@ public class CommandParser {
                             .setName("parentPath")
                             .setReturnTypeName(Type.STRING)
                             .addCodeBuilder(CodeMeta.builder()
-                                    .setModel(cmdModel)
+                                    .setModel(tmpModel)
                                     .setTemplate(tmpParentPath)));
         });
     }

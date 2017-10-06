@@ -366,7 +366,7 @@ public class CommandRepository implements ICommandRepository {
                 }
             }
 
-            cmdExec.setMessageOutput(output);
+            cmdExec.setOutput(output);
 
             return cmdExec.execute();
         }
