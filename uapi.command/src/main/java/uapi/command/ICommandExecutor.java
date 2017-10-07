@@ -72,7 +72,5 @@ public interface ICommandExecutor {
      *
      * @param   output The message output
      */
-    default void setOutput(IMessageOutput output) { }
-
-    IMessageOutput getOutput();
+    void setOutput(IMessageOutput output);
 }

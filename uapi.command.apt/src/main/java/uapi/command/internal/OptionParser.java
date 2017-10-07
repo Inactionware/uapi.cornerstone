@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class OptionParser {
 
-    private static final String MODEL_COMMAND_OPTIONS   = "MODEL_COMMAND_OPTIONS";
+    static final String MODEL_COMMAND_OPTIONS           = "MODEL_COMMAND_OPTIONS";
     private static final String TEMP_OPTION_METAS       = "template/optionMetas_method.ftl";
 
     public void parse(
@@ -41,6 +41,7 @@ public class OptionParser {
             char optSName = option.shortName();
             String optArg = option.argument();
             String optDesc = option.description();
+            String optField = fieldElement.getSimpleName().toString();
 
             // Set up model
             ClassMeta.Builder classBuilder = builderContext.findClassBuilder(classElement);
@@ -49,7 +50,7 @@ public class OptionParser {
                 optModels = new ArrayList<>();
                 classBuilder.putTransience(MODEL_COMMAND_OPTIONS, optModels);
             }
-            optModels.add(new OptionModel(optName, optSName, optArg, optDesc));
+            optModels.add(new OptionModel(optName, optSName, optArg, optDesc, optField));
 
             // Set up template
             Template tempOptionMetas = builderContext.loadTemplate(TEMP_OPTION_METAS);

@@ -33,7 +33,12 @@ public class CommandHandler extends AnnotationsHandler {
     @SuppressWarnings("unchecked")
     @Override
     protected Class<? extends Annotation>[] getOrderedAnnotations() {
-        return new Class[] { uapi.command.annotation.Command.class, Parameter.class, Option.class, Run.class};
+        return new Class[] {
+                uapi.command.annotation.Command.class,
+                Parameter.class,
+                Option.class,
+                MessageOutput.class,
+                Run.class};
     }
 
     @Override

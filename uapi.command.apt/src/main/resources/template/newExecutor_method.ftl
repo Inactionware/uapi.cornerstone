@@ -1,1 +1,1 @@
-return new ${executorClassName}();
+return ${runMethodName}();

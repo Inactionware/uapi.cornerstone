@@ -17,7 +17,7 @@ import java.util.*;
 
 public class ParameterParser {
 
-    private static final String MODEL_CMD_PARAM     = "MODEL_COMMAND_PARAMETER";
+    static final String MODEL_CMD_PARAM             = "MODEL_COMMAND_PARAMETER";
     private static final String TEMP_PARAM_METAS    = "template/parameterMetas_method.ftl";
 
     public void parse(
@@ -39,6 +39,7 @@ public class ParameterParser {
             String paramName = param.name();
             boolean paramRequired = param.required();
             String paramDesc = param.description();
+            String paramField = fieldElement.getSimpleName().toString();
 
             // Set up model
             ClassMeta.Builder classBuilder = builderContext.findClassBuilder(classElement);
@@ -47,7 +48,7 @@ public class ParameterParser {
                 paramModels = new ArrayList<>();
                 classBuilder.putTransience(MODEL_CMD_PARAM, paramModels);
             }
-            paramModels.add(new ParamModel(paramName, paramRequired, paramDesc, paramIdx));
+            paramModels.add(new ParamModel(paramName, paramRequired, paramDesc, paramIdx, paramField));
             paramModels.sort(Comparator.comparingInt(ParamModel::index));
             Map<String, List<ParamModel>> tmpModel = new HashMap<>();
             tmpModel.put("parameters", paramModels);

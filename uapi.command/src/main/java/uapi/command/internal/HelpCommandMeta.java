@@ -72,11 +72,6 @@ public class HelpCommandMeta implements ICommandMeta {
         }
 
         @Override
-        public IMessageOutput getOutput() {
-            return this._msgOut;
-        }
-
-        @Override
         public CommandResult execute() {
             ICommand command = HelpCommandMeta.this._cmd;
             if (! command.namespace().equals(ICommandMeta.DEFAULT_NAMESPACE)) {
