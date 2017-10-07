@@ -142,9 +142,6 @@ public class CommandRepository implements ICommandRepository {
 
         // Add help command
         command.addSubCommand(new Command(new HelpCommandMeta(ancestor)));
-//        if (ancestor.findSubCommand(HelpCommandMeta.NAME) == null) {
-//            ancestor.addSubCommand(new Command(new HelpCommandMeta(ancestor)));
-//        }
     }
 
     private void checkReservedCommand(String cmdName) {
@@ -287,14 +284,6 @@ public class CommandRepository implements ICommandRepository {
                     if (matchedOpt.type() == OptionType.Boolean) {
                         cmdExec.setOption(optName);
                     } else {
-                        if (optParamVar.hasValue(0)) {
-                            throw CommandException.builder()
-                                    .errorCode(CommandErrors.OPTION_NEEDS_VALUE)
-                                    .variables(new CommandErrors.OptionNeedsValue()
-                                            .optionName(optParamVar.get(0))
-                                            .commandLine(commandLine))
-                                    .build();
-                        }
                         optParamVar.put(0, optName);
                     }
                 } else if (paramOpt.indexOf(IOptionMeta.SHORT_PREFIX) == 0) {
@@ -332,14 +321,6 @@ public class CommandRepository implements ICommandRepository {
                                         .errorCode(CommandErrors.SET_ARGUMENT_ON_COMBINED_SHORT_OPTION)
                                         .variables(new CommandErrors.SetArgumentOnCombinedShortOption()
                                                 .combinedOptions(optStr)
-                                                .commandLine(commandLine))
-                                        .build();
-                            }
-                            if (optParamVar.hasValue(0)) {
-                                throw CommandException.builder()
-                                        .errorCode(CommandErrors.OPTION_NEEDS_VALUE)
-                                        .variables(new CommandErrors.OptionNeedsValue()
-                                                .optionName(optParamVar.get(0))
                                                 .commandLine(commandLine))
                                         .build();
                             }
@@ -385,7 +366,7 @@ public class CommandRepository implements ICommandRepository {
                 }
             }
 
-            cmdExec.setMessageOutput(output);
+            cmdExec.setOutput(output);
 
             return cmdExec.execute();
         }

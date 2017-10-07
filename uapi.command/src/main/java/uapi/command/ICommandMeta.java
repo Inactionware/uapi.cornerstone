@@ -9,6 +9,7 @@
 
 package uapi.command;
 
+import uapi.GeneralException;
 import uapi.common.StringHelper;
 
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public interface ICommandMeta {
     }
 
     default boolean hasParent() {
-        return parentPath() != null;
+        return ! StringHelper.isNullOrEmpty(parentPath());
     }
 
     default int depth() {
@@ -101,7 +102,9 @@ public interface ICommandMeta {
      *
      * @return  The new command executor
      */
-    ICommandExecutor newExecutor();
+    default ICommandExecutor newExecutor() {
+        throw new GeneralException("The command does not provide executor - {}", id());
+    }
 
     default String id() {
         Map<String, String> namedValues = new HashMap<>();

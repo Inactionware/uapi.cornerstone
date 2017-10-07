@@ -1,6 +1,5 @@
 package uapi.command.internal
 
-import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.command.CommandException
 import uapi.command.CommandResult
@@ -446,6 +445,74 @@ class CommandRepositoryTest extends Specification {
         'cmd'       | '/cmd'    | 'test'        | 'value'       | 'cmd value'
     }
 
+    def 'Test run command with more parameter'() {
+        given:
+        def cmdRepo = new CommandRepository()
+        def paramMeta = Mock(IParameterMeta)
+        paramMeta.name() >> paramName
+        paramMeta.required() >> true
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.namespace() >> ''
+        cmdMeta.name() >> cmdName
+        cmdMeta.id() >> cmdId
+        cmdMeta.hasParent() >> false
+        cmdMeta.parameterMetas() >> [paramMeta]
+        def cmdExec = Mock(ICommandExecutor)
+        cmdExec.execute() >> Mock(CommandResult) {
+            successful() >> true
+        }
+        cmdMeta.newExecutor() >> cmdExec
+
+        cmdRepo.register(cmdMeta)
+        def cmdRunner = cmdRepo.getRunner()
+        def msgout = Mock(IMessageOutput)
+
+        when:
+        def cmdResult = cmdRunner.run(cmdline, msgout)
+
+        then:
+        thrown(CommandException)
+        cmdResult == null
+
+        where:
+        cmdName     | cmdId     | paramName     | paramValue    | cmdline
+        'cmd'       | '/cmd'    | 'test'        | 'value'       | 'cmd value value2'
+    }
+
+    def 'Test run command with missing required parameter'() {
+        given:
+        def cmdRepo = new CommandRepository()
+        def paramMeta = Mock(IParameterMeta)
+        paramMeta.name() >> paramName
+        paramMeta.required() >> true
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.namespace() >> ''
+        cmdMeta.name() >> cmdName
+        cmdMeta.id() >> cmdId
+        cmdMeta.hasParent() >> false
+        cmdMeta.parameterMetas() >> [paramMeta]
+        def cmdExec = Mock(ICommandExecutor)
+        cmdExec.execute() >> Mock(CommandResult) {
+            successful() >> true
+        }
+        cmdMeta.newExecutor() >> cmdExec
+
+        cmdRepo.register(cmdMeta)
+        def cmdRunner = cmdRepo.getRunner()
+        def msgout = Mock(IMessageOutput)
+
+        when:
+        def cmdResult = cmdRunner.run(cmdline, msgout)
+
+        then:
+        thrown(CommandException)
+        cmdResult == null
+
+        where:
+        cmdName     | cmdId     | paramName     | paramValue    | cmdline
+        'cmd'       | '/cmd'    | 'test'        | 'value'       | 'cmd'
+    }
+
     def 'Test run command with boolean option'() {
         given:
         def cmdRepo = new CommandRepository()
@@ -524,5 +591,197 @@ class CommandRepositoryTest extends Specification {
         cmdName     | cmdId     | optName   | optSName  | optValue  | cmdline
         'cmd'       | '/cmd'    | 'test'    | 't'       | 'abc'     | 'cmd -t abc'
         'cmd'       | '/cmd'    | 'test'    | 't'       | 'abc'     | 'cmd --test abc'
+    }
+
+    def 'Test run command with no named option'() {
+        given:
+        def cmdRepo = new CommandRepository()
+        def optMeta = Mock(IOptionMeta)
+        optMeta.name() >> optName
+        optMeta.shortName() >> optSName
+        optMeta.type() >> OptionType.String
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.namespace() >> ''
+        cmdMeta.name() >> cmdName
+        cmdMeta.hasParent() >> false
+        cmdMeta.optionMetas() >> [optMeta]
+        cmdMeta.parameterMetas() >> []
+        def cmdExec = Mock(ICommandExecutor)
+        cmdExec.execute() >> Mock(CommandResult) {
+            successful() >> true
+        }
+        cmdMeta.newExecutor() >> cmdExec
+
+        cmdRepo.register(cmdMeta)
+        def cmdRunner = cmdRepo.getRunner()
+        def msgout = Mock(IMessageOutput)
+
+        when:
+        def cmdResult = cmdRunner.run(cmdline, msgout)
+
+        then:
+        thrown(CommandException)
+        cmdResult == null
+
+        where:
+        cmdName     | cmdId     | optName   | optSName  | cmdline
+        'cmd'       | '/cmd'    | 'test'    | 't'       | 'cmd --'
+        'cmd'       | '/cmd'    | 'test'    | 't'       | 'cmd -'
+    }
+
+    def 'Test run command with unknown option'() {
+        given:
+        def cmdRepo = new CommandRepository()
+        def optMeta = Mock(IOptionMeta)
+        optMeta.name() >> optName
+        optMeta.shortName() >> optSName
+        optMeta.type() >> OptionType.String
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.namespace() >> ''
+        cmdMeta.name() >> cmdName
+        cmdMeta.hasParent() >> false
+        cmdMeta.optionMetas() >> [optMeta]
+        cmdMeta.parameterMetas() >> []
+        def cmdExec = Mock(ICommandExecutor)
+        cmdExec.execute() >> Mock(CommandResult) {
+            successful() >> true
+        }
+        cmdMeta.newExecutor() >> cmdExec
+
+        cmdRepo.register(cmdMeta)
+        def cmdRunner = cmdRepo.getRunner()
+        def msgout = Mock(IMessageOutput)
+
+        when:
+        def cmdResult = cmdRunner.run(cmdline, msgout)
+
+        then:
+        thrown(CommandException)
+        cmdResult == null
+
+        where:
+        cmdName     | cmdId     | optName   | optSName  | cmdline
+        'cmd'       | '/cmd'    | 'test'    | 't'       | 'cmd --test1'
+        'cmd'       | '/cmd'    | 'test'    | 't'       | 'cmd -s'
+    }
+
+    def 'Test run command with no value string option'() {
+        given:
+        def cmdRepo = new CommandRepository()
+        def optMeta = Mock(IOptionMeta)
+        optMeta.name() >> optName
+        optMeta.shortName() >> optSName
+        optMeta.type() >> OptionType.String
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.namespace() >> ''
+        cmdMeta.name() >> cmdName
+        cmdMeta.hasParent() >> false
+        cmdMeta.optionMetas() >> [optMeta]
+        cmdMeta.parameterMetas() >> []
+        def cmdExec = Mock(ICommandExecutor)
+        cmdExec.execute() >> Mock(CommandResult) {
+            successful() >> true
+        }
+        cmdMeta.newExecutor() >> cmdExec
+
+        cmdRepo.register(cmdMeta)
+        def cmdRunner = cmdRepo.getRunner()
+        def msgout = Mock(IMessageOutput)
+
+        when:
+        def cmdResult = cmdRunner.run(cmdline, msgout)
+
+        then:
+        thrown(CommandException)
+        cmdResult == null
+
+        where:
+        cmdName     | cmdId     | optName   | optSName  | cmdline
+        'cmd'       | '/cmd'    | 'test'    | 't'       | 'cmd --test --test'
+        'cmd'       | '/cmd'    | 'test'    | 't'       | 'cmd -t -t'
+    }
+
+    def 'Test run command with multiple boolean option'() {
+        given:
+        def cmdRepo = new CommandRepository()
+        def optMeta = Mock(IOptionMeta)
+        optMeta.name() >> optName
+        optMeta.shortName() >> optSName
+        optMeta.type() >> OptionType.Boolean
+        def optMeta1 = Mock(IOptionMeta)
+        optMeta1.name() >> optName1
+        optMeta1.shortName() >> optSName1
+        optMeta1.type() >> OptionType.Boolean
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.namespace() >> ''
+        cmdMeta.name() >> cmdName
+        cmdMeta.hasParent() >> false
+        cmdMeta.optionMetas() >> [optMeta, optMeta1]
+        cmdMeta.parameterMetas() >> []
+        def cmdExec = Mock(ICommandExecutor)
+        cmdExec.execute() >> Mock(CommandResult) {
+            successful() >> true
+        }
+        cmdMeta.newExecutor() >> cmdExec
+
+        cmdRepo.register(cmdMeta)
+        def cmdRunner = cmdRepo.getRunner()
+        def msgout = Mock(IMessageOutput)
+
+        when:
+        def cmdResult = cmdRunner.run(cmdline, msgout)
+
+        then:
+        noExceptionThrown()
+        cmdResult != null
+        cmdResult.successful()
+        cmdResult.message() == null
+        cmdResult.exception() == null
+        1 * cmdExec.setOption(optName)
+        1 * cmdExec.setOption(optName1)
+
+        where:
+        cmdName     | cmdId     | optName   | optSName  | optName1  | optSName1 | cmdline
+        'cmd'       | '/cmd'    | 'test'    | 't'       | 'off'     | 'o'       | 'cmd --test --off'
+        'cmd'       | '/cmd'    | 'test'    | 't'       | 'off'     | 'o'       | 'cmd -to'
+    }
+
+    def 'Test run command with multiple short string option'() {
+        given:
+        def cmdRepo = new CommandRepository()
+        def optMeta = Mock(IOptionMeta)
+        optMeta.name() >> optName
+        optMeta.shortName() >> optSName
+        optMeta.type() >> OptionType.String
+        def optMeta1 = Mock(IOptionMeta)
+        optMeta1.name() >> optName1
+        optMeta1.shortName() >> optSName1
+        optMeta1.type() >> OptionType.String
+        def cmdMeta = Mock(ICommandMeta)
+        cmdMeta.namespace() >> ''
+        cmdMeta.name() >> cmdName
+        cmdMeta.hasParent() >> false
+        cmdMeta.optionMetas() >> [optMeta, optMeta1]
+        cmdMeta.parameterMetas() >> []
+        def cmdExec = Mock(ICommandExecutor)
+        cmdExec.execute() >> Mock(CommandResult) {
+            successful() >> true
+        }
+        cmdMeta.newExecutor() >> cmdExec
+
+        cmdRepo.register(cmdMeta)
+        def cmdRunner = cmdRepo.getRunner()
+        def msgout = Mock(IMessageOutput)
+
+        when:
+        def cmdResult = cmdRunner.run(cmdline, msgout)
+
+        then:
+        thrown(CommandException)
+        cmdResult == null
+
+        where:
+        cmdName     | cmdId     | optName   | optSName  | optName1  | optSName1 | cmdline
+        'cmd'       | '/cmd'    | 'test'    | 't'       | 'off'     | 'o'       | 'cmd -to'
     }
 }
