@@ -1,1 +1,1 @@
-return ${runMethodName}();
+return new ${command.executorClassName}();

@@ -1,6 +1,6 @@
 <#list param in parameters>
 if ("${param.name()}".equals(name) {
-                this.${param.fieldName()} = value;
+                this.${param.userCommandField()}.${param.setterName()}(value);
                 return;
             }
 </#list>

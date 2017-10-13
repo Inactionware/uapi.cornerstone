@@ -50,7 +50,7 @@ public class CommandHandler extends AnnotationsHandler {
     ) throws GeneralException {
         ArgumentChecker.required(annotationType, "annotationType");
 
-        if (annotationType.equals(Command.class)) {
+        if (annotationType.equals(uapi.command.annotation.Command.class)) {
             this._cmdParser.parse(builderContext, elements);
         } else if (annotationType.equals(Parameter.class)) {
             this._paramParser.parse(builderContext, elements);

@@ -23,9 +23,10 @@ dependencies {
     )
 
     compile (
-            project(':uapi.service'),
+            project(':uapi.service.apt'),
             project(':uapi.config'),
             project(':uapi.event'),
+            project(':uapi.command.apt'),
 
             "uapi:uapi.common:${uapi_base_version}",
             "uapi:uapi.exception:${uapi_base_version}",

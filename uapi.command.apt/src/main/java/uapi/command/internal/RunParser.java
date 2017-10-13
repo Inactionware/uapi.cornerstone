@@ -5,6 +5,7 @@ import uapi.GeneralException;
 import uapi.Type;
 import uapi.codegen.*;
 import uapi.codegen.ParameterMeta;
+import uapi.command.CommandResult;
 import uapi.command.ICommandExecutor;
 import uapi.command.IMessageOutput;
 import uapi.command.annotation.Command;
@@ -15,6 +16,7 @@ import uapi.service.annotation.Service;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import java.util.*;
 
@@ -22,11 +24,11 @@ public class RunParser {
 
     private static final String MODEL_COMMAND_EXECUTOR  = "MODEL_COMMAND_EXECUTOR";
 
-    private static final String TEMP_NEW_EXECUTOR       = "template/newExecutor_method.ftl";
     private static final String TEMP_SET_PARAM          = "template/setParameter_method.ftl";
     private static final String TEMP_SET_OPT            = "template/setOption_method.ftl";
     private static final String TEMP_SET_OPT_ARG        = "template/setOption_arg_method.ftl";
     private static final String TEMP_SET_OUTPU          = "template/setOutput_method.ftl";
+    private static final String TEMP_EXECUTE            = "template/execute_method.ftl";
 
     private static final String VAR_RUN_METHOD_NAME     = "runMethodName";
     private static final String VAR_PARAMS              = "parameters";
@@ -47,39 +49,46 @@ public class RunParser {
             builderContext.checkModifiers(methodElement, Run.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
             String runMethodName = methodElement.getSimpleName().toString();
+            // The run method must be no argument and return boolean to figure out success or failure
+            ExecutableElement execElement = (ExecutableElement) methodElement;
+            List paramElements = execElement.getParameters();
+            if (paramElements.size() != 0) {
+                throw new GeneralException(
+                        "The method annotated with Run must be has no input parameter - {}", runMethodName);
+            }
+            String returnType = execElement.getReturnType().toString();
+            if (! Type.BOOLEAN.equals(returnType) && ! Type.Q_BOOLEAN.equals(returnType)) {
+                throw new GeneralException(
+                        "The method annotated with Run must return a boolean type - {}", returnType);
+            }
 
-            ClassMeta.Builder classBuilder = builderContext.findClassBuilder(classElement);
-            Map<String, Object> model = classBuilder.getTransience(MODEL_COMMAND_EXECUTOR);
+            ClassMeta.Builder cmdMetaBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
+            CommandModel cmdModel = cmdMetaBuilder.getTransience(CommandHandler.CMD_MODEL);
+
+            ClassMeta.Builder cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(classElement, builderContext);
+            Map<String, Object> model = cmdExecBuilder.getTransience(MODEL_COMMAND_EXECUTOR);
             if (model != null) {
                 throw new GeneralException(
                         "Only one Run annotation is allowed declare in a class - {}",
                         classElement.getSimpleName().toString());
             }
             model = new HashMap<>();
-            List<ParamModel> params = classBuilder.getTransience(ParameterParser.MODEL_CMD_PARAM);
-            if (params == null) {
-                params = new ArrayList<>();
-            }
-            List<OptionModel> options = classBuilder.getTransience(OptionParser.MODEL_COMMAND_OPTIONS);
-            if (options == null) {
-                options = new ArrayList<>();
-            }
-            String outputField = classBuilder.getTransience(MessageOutputParser.MODEL_COMMAND_MSG_OUT_FIELD_NAME);
+            String outputField = cmdExecBuilder.getTransience(MessageOutputParser.MODEL_COMMAND_MSG_OUT_FIELD_NAME);
             model.put(VAR_RUN_METHOD_NAME, runMethodName);
-            model.put(VAR_PARAMS, params);
-            model.put(VAR_OPTS, options);
+            model.put(VAR_PARAMS, cmdModel.parameters);
+            model.put(VAR_OPTS, cmdModel.options);
             model.put(VAR_OUTPUT, outputField);
 
-            classBuilder.putTransience(MODEL_COMMAND_EXECUTOR, model);
+            cmdExecBuilder.putTransience(MODEL_COMMAND_EXECUTOR, model);
 
-            Template tempNewExecutor = builderContext.loadTemplate(TEMP_NEW_EXECUTOR);
             Template tempSetParam = builderContext.loadTemplate(TEMP_SET_PARAM);
             Template tempSetOpt = builderContext.loadTemplate(TEMP_SET_OPT);
             Template tempSetOptArg = builderContext.loadTemplate(TEMP_SET_OPT_ARG);
             Template tempSetOutput = builderContext.loadTemplate(TEMP_SET_OUTPU);
+            Template tempExec = builderContext.loadTemplate(TEMP_EXECUTE);
 
             // Generate newExecutor method
-            classBuilder.addImplement(ICommandExecutor.class.getCanonicalName())
+            cmdExecBuilder.addImplement(ICommandExecutor.class.getCanonicalName())
                     .addFieldBuilder(FieldMeta.builder()
                             .addModifier(Modifier.PRIVATE)
                             .setName("_msgOut")
@@ -139,13 +148,13 @@ public class RunParser {
                             .addCodeBuilder(CodeMeta.builder()
                                     .setModel(model)
                                     .setTemplate(tempSetOutput)))
-                    .addMethodBuilder(MethodMeta.builder()
+                    .addMethodBuilder((MethodMeta.builder())
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
-                            .setName("newExecutor")
-                            .setReturnTypeName(Type.VOID)
+                            .setName("execute")
+                            .setReturnTypeName(CommandResult.class.getCanonicalName())
                             .addCodeBuilder(CodeMeta.builder()
                                     .setModel(model)
-                                    .setTemplate(tempNewExecutor)));
+                                    .setTemplate(tempExec)));
         });
     }
 

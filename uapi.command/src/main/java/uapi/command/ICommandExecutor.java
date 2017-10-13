@@ -21,7 +21,9 @@ public interface ICommandExecutor {
      *
      * @return  The command execution result
      */
-    CommandResult execute();
+    default CommandResult execute() {
+        return CommandResult.success();
+    }
 
     /**
      * Set command parameter value by specified parameter name to this command.
@@ -72,5 +74,5 @@ public interface ICommandExecutor {
      *
      * @param   output The message output
      */
-    void setOutput(IMessageOutput output);
+    default void setOutput(IMessageOutput output) { }
 }
