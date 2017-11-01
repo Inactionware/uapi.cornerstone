@@ -6,6 +6,7 @@ import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.Type;
 import uapi.codegen.*;
+import uapi.codegen.ParameterMeta;
 import uapi.command.ICommandExecutor;
 import uapi.command.ICommandMeta;
 import uapi.command.annotation.Command;
@@ -26,8 +27,12 @@ public class CommandParser {
     private static final String TEMPLATE_PARENT_PATH    = "template/parentPath_method.ftl";
     private static final String TEMPLATE_DESCRIPTION    = "template/description_method.ftl";
     private static final String TEMPLATE_NEW_EXEC       = "template/newExecutor_method.ftl";
+    private static final String TEMP_CMD_ID             = "template/commandId_method.ftl";
 
-    static final String FIELD_USER_CMD_FIELD            = "_userCmd";
+    static final String FIELD_USER_CMD                  = "_userCmd";
+    static final String FIELD_CMD_META                  = "_cmdMeta";
+
+    public static final String VAR_CMD_META_FIELD       = "commandMetaFieldName";
 
     public void parse(
             final IBuilderContext builderContext,
@@ -58,12 +63,39 @@ public class CommandParser {
             cmdBuilder.putTransience(CommandHandler.CMD_MODEL, cmdModel);
 
             // Initial command executor class builder
+            Template tempCmdId = builderContext.loadTemplate(TEMP_CMD_ID);
+            Map<String, String> model = new HashMap<>();
+            model.put(VAR_CMD_META_FIELD, CommandParser.FIELD_CMD_META);
             ClassMeta.Builder cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(classElement, builderContext);
-            cmdExecBuilder.addFieldBuilder(FieldMeta.builder()
-                    .addModifier(Modifier.PRIVATE)
-                    .setName(FIELD_USER_CMD_FIELD)
-                    .setTypeName(cmdBuilder.getQulifiedClassName())
-                    .setValue(StringHelper.makeString("new {}();", cmdBuilder.getQulifiedClassName())));
+            cmdExecBuilder.putTransience(FIELD_CMD_META, "_cmdMeta");
+            cmdExecBuilder
+                    .addImplement(ICommandExecutor.class.getCanonicalName())
+                    .addFieldBuilder(FieldMeta.builder()
+                        .addModifier(Modifier.PRIVATE)
+                        .setName(FIELD_USER_CMD)
+                        .setTypeName(cmdBuilder.getQulifiedClassName())
+                        .setValue(StringHelper.makeString("new {}();", cmdBuilder.getQulifiedClassName())))
+                    .addFieldBuilder(FieldMeta.builder()
+                        .addModifier(Modifier.PRIVATE)
+                        .setName(FIELD_CMD_META)
+                        .setTypeName(metaBuilder.getQulifiedClassName()))
+                    .addMethodBuilder(MethodMeta.builder()
+                        .addModifier(Modifier.PUBLIC)
+                        .setName(cmdExecBuilder.getGeneratedClassName())
+                        .setReturnTypeName("")
+                        .addParameterBuilder(ParameterMeta.builder()
+                            .setName("commandMeta")
+                            .setType(metaBuilder.getQulifiedClassName()))
+                        .addCodeBuilder(CodeMeta.builder()
+                            .addRawCode(StringHelper.makeString("this.{} = commandMeta;", FIELD_CMD_META))))
+                    .addMethodBuilder(MethodMeta.builder()
+                            .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
+                            .addModifier(Modifier.PUBLIC)
+                            .setName("commandId")
+                            .setReturnTypeName(Type.STRING)
+                            .addCodeBuilder(CodeMeta.builder()
+                                    .setModel(model)
+                                    .setTemplate(tempCmdId)));
 
             // Setup model
             cmdModel.name = cmdName;
@@ -72,7 +104,7 @@ public class CommandParser {
             cmdModel.parentPath = cmdParentPath;
             cmdModel.userCommandClassName = cmdBuilder.getQulifiedClassName();
             cmdModel.executorClassName = cmdExecBuilder.getQulifiedClassName();
-            Map<String, CommandModel> tmpModel = new HashMap<>();
+            Map<String, Object> tmpModel = new HashMap<>();
             tmpModel.put("command", cmdModel);
 
             // Setup template
@@ -89,7 +121,7 @@ public class CommandParser {
                             .setName(AutoService.class.getCanonicalName())
                             .addArgument(ArgumentMeta.builder()
                                     .setName("value")
-                                    .setValue(ICommandMeta.class.getCanonicalName())
+                                    .setValue(ICommandMeta.class.getCanonicalName() + ".class")
                                     .setIsString(false)))
                     .addMethodBuilder(MethodMeta.builder()
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
@@ -145,12 +177,12 @@ public class CommandParser {
         String thisCmdName = thisCommand.name();
         AnnotationMirror cmdMirror = MoreElements.getAnnotationMirror(classElement, Command.class).get();
         Element parentType = Looper.on(cmdMirror.getElementValues().entrySet())
-                .filter(entry -> "value".equals(entry.getKey().getSimpleName().toString()))
+                .filter(entry -> "parent".equals(entry.getKey().getSimpleName().toString()))
                 .map(Map.Entry::getValue)
                 .map(annoValue -> (DeclaredType) annoValue.getValue())
                 .map(DeclaredType::asElement)
                 .first(null);
-        if (void.class.getCanonicalName().equals(parentType.getSimpleName().toString())) {
+        if (parentType == null || void.class.getCanonicalName().equals(parentType.getSimpleName().toString())) {
             return ICommandMeta.ROOT_PATH;
         }
         Command parentCommand = parentType.getAnnotation(Command.class);

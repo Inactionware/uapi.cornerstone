@@ -59,7 +59,7 @@ public class OptionParser {
             ClassMeta.Builder cmdMetaClassBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
             CommandModel cmdModel = cmdMetaClassBuilder.getTransience(CommandHandler.CMD_MODEL);
             List<OptionModel> optModels = cmdModel.options;
-            optModels.add(new OptionModel(optName, optSName, optArg, optDesc, optField, setterName, CommandParser.FIELD_USER_CMD_FIELD));
+            optModels.add(new OptionModel(optName, optSName, optArg, optDesc, optField, setterName, CommandParser.FIELD_USER_CMD));
             Map<String, List<OptionModel>> tmpModel = new HashMap<>();
             tmpModel.put("parameters", optModels);
 

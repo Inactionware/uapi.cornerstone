@@ -59,7 +59,7 @@ public class ParameterParser {
             // Set up model
             CommandModel cmdModel = cmdMetaBuilder.getTransience(CommandHandler.CMD_MODEL);
             List<ParamModel> paramModels = cmdModel.parameters;
-            paramModels.add(new ParamModel(paramName, paramRequired, paramDesc, paramIdx, setterName, CommandParser.FIELD_USER_CMD_FIELD));
+            paramModels.add(new ParamModel(paramName, paramRequired, paramDesc, paramIdx, setterName, CommandParser.FIELD_USER_CMD));
             paramModels.sort(Comparator.comparingInt(ParamModel::index));
             Map<String, List<ParamModel>> tmpModel = new HashMap<>();
             tmpModel.put("parameters", paramModels);

@@ -1,5 +1,4 @@
-To enable service injection, the dependency must be add at compile time:
-
+To debug at gradle build-time, just create java remote debug connect to 5005 port.
 
 Module error category mapping:
     uapi.service    0x0100

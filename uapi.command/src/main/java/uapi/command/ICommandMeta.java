@@ -10,6 +10,7 @@
 package uapi.command;
 
 import uapi.GeneralException;
+import uapi.common.ArgumentChecker;
 import uapi.common.StringHelper;
 
 import java.util.HashMap;
@@ -25,6 +26,17 @@ public interface ICommandMeta {
     String ROOT_PATH            = "";
 
     String PATH_SEPARATOR       = "/";
+
+    static String makeId(ICommandMeta commandMeta) {
+        ArgumentChecker.required(commandMeta, "commandMeta");
+        Map<String, String> namedValues = new HashMap<>();
+        namedValues.put("namespace", commandMeta.namespace() != null ? commandMeta.namespace() : "");
+        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
+        namedValues.put("parent", commandMeta.parentPath());
+        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
+        namedValues.put("name", commandMeta.name());
+        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
+    }
 
     /**
      * The name of this command.
@@ -107,12 +119,13 @@ public interface ICommandMeta {
     }
 
     default String id() {
-        Map<String, String> namedValues = new HashMap<>();
-        namedValues.put("namespace", namespace() != null ? namespace() : "");
-        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
-        namedValues.put("parent", parentPath());
-        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
-        namedValues.put("name", name());
-        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
+//        Map<String, String> namedValues = new HashMap<>();
+//        namedValues.put("namespace", namespace() != null ? namespace() : "");
+//        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
+//        namedValues.put("parent", parentPath());
+//        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
+//        namedValues.put("name", name());
+//        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
+        return makeId(this);
     }
 }

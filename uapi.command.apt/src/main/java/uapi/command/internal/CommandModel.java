@@ -13,4 +13,36 @@ public class CommandModel {
     public String executorClassName;
     public List<ParamModel> parameters;
     public List<OptionModel> options;
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getNamespace() {
+        return this.namespace;
+    }
+
+    public String getParentPath() {
+        return this.parentPath;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public String getUserCommandClassName() {
+        return this.userCommandClassName;
+    }
+
+    public String getExecutorClassName() {
+        return this.executorClassName;
+    }
+
+    public List<ParamModel> getParameters() {
+        return this.parameters;
+    }
+
+    public List<OptionModel> getOptions() {
+        return this.options;
+    }
 }

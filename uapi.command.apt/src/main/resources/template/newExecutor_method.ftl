@@ -1,1 +1,1 @@
-return new ${command.executorClassName}();
+return new ${command.executorClassName}(this);
