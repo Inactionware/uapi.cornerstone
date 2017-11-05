@@ -5,6 +5,6 @@ import uapi.service.annotation.Service;
 
 @Service
 @Command(
-        name="behavior",
+        name = "behavior",
         description = "Behavior Commands")
 public class BehaviorCommand { }

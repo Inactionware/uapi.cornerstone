@@ -14,7 +14,7 @@ public class CommandBuilderUtil {
         String pkgName = builderContext.getElementUtils().getPackageOf(classElement).getQualifiedName().toString();
         String className = classElement.getSimpleName().toString();
         String execClassName = className + "_Meta_Generated";
-        ClassMeta.Builder cmdMetaBuilder = builderContext.findClassBuilder(pkgName, className, false);
+        ClassMeta.Builder cmdMetaBuilder = builderContext.findClassBuilder(pkgName, execClassName, false);
         if (cmdMetaBuilder == null) {
             cmdMetaBuilder = builderContext.newClassBuilder(pkgName, execClassName);
         }

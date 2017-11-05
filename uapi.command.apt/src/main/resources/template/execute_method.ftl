@@ -1,6 +1,6 @@
 boolean isSuccess;
         try {
-            isSuccess = ${runMethodName}();
+            isSuccess = ${userCommandField}.${runMethodName}();
         } catch (Exception ex) {
             return uapi.command.CommandResult.failure(ex);
         }

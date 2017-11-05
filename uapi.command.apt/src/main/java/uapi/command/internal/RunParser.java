@@ -34,7 +34,7 @@ public class RunParser {
     private static final String VAR_PARAMS              = "parameters";
     private static final String VAR_OPTS                = "options";
     private static final String VAR_OUTPUT              = "outputFieldName";
-
+    private static final String VAR_USER_CMD_FIELD      = "userCommandField";
 
     public void parse(
             final IBuilderContext builderContext,
@@ -79,6 +79,7 @@ public class RunParser {
             model.put(VAR_PARAMS, cmdModel.parameters);
             model.put(VAR_OPTS, cmdModel.options);
             model.put(VAR_OUTPUT, outputField);
+            model.put(VAR_USER_CMD_FIELD, CommandParser.FIELD_USER_CMD);
 
             cmdExecBuilder.putTransience(MODEL_COMMAND_EXECUTOR, model);
 
@@ -95,6 +96,7 @@ public class RunParser {
                             .setName("_msgOut")
                             .setTypeName(IMessageOutput.class.getCanonicalName()))
                     .addMethodBuilder(MethodMeta.builder()
+                            .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                             .setName("setOutput")
                             .addParameterBuilder(ParameterMeta.builder()
@@ -104,6 +106,7 @@ public class RunParser {
                             .addCodeBuilder(CodeMeta.builder()
                                     .addRawCode(StringHelper.makeString("this.{} = output;", "_msgOut"))))
                     .addMethodBuilder(MethodMeta.builder()
+                            .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                             .setName("setParameter")
                             .addParameterBuilder(ParameterMeta.builder()
@@ -117,6 +120,7 @@ public class RunParser {
                                     .setModel(model)
                                     .setTemplate(tempSetParam)))
                     .addMethodBuilder(MethodMeta.builder()
+                            .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                             .setName("setOption")
                             .addParameterBuilder(ParameterMeta.builder()
@@ -127,6 +131,7 @@ public class RunParser {
                                     .setModel(model)
                                     .setTemplate(tempSetOpt)))
                     .addMethodBuilder(MethodMeta.builder()
+                            .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                             .setName("setOption")
                             .addParameterBuilder(ParameterMeta.builder()
@@ -140,6 +145,7 @@ public class RunParser {
                                     .setModel(model)
                                     .setTemplate(tempSetOptArg)))
                     .addMethodBuilder(MethodMeta.builder()
+                            .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                             .setName("setOutput")
                             .addParameterBuilder(ParameterMeta.builder()
@@ -150,6 +156,7 @@ public class RunParser {
                                     .setModel(model)
                                     .setTemplate(tempSetOutput)))
                     .addMethodBuilder((MethodMeta.builder())
+                            .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                             .setName("execute")
                             .setReturnTypeName(CommandResult.class.getCanonicalName())
@@ -158,14 +165,4 @@ public class RunParser {
                                     .setTemplate(tempExec)));
         });
     }
-
-//    private String generateExecutorClass(IBuilderContext builderContext, Element classElement) {
-//        String pkgName = builderContext.getElementUtils().getPackageOf(classElement).getQualifiedName().toString();
-//        String execClassName = classElement.getSimpleName().toString() + "_Executor_Generated";
-//        ClassMeta.Builder execBuilder = builderContext.newClassBuilder(pkgName, execClassName);
-//
-//        // TODO: Generate all method
-//
-//        return execBuilder.getQulifiedClassName();
-//    }
 }

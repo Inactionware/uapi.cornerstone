@@ -39,7 +39,7 @@ public class ParameterParser {
             String paramDesc = param.description();
             String paramFieldName = fieldElement.getSimpleName().toString();
             String paramFieldType = fieldElement.asType().toString();
-            if (! Type.STRING.equals(paramFieldType) || ! Type.Q_STRING.equals(paramFieldType)) {
+            if (! Type.STRING.equals(paramFieldType) && ! Type.Q_STRING.equals(paramFieldType)) {
                 throw new GeneralException(
                         "The field which annotated with Parameter must be String type - {}:{}",
                         classElement.getSimpleName().toString(), paramFieldName);
@@ -59,7 +59,7 @@ public class ParameterParser {
             // Set up model
             CommandModel cmdModel = cmdMetaBuilder.getTransience(CommandHandler.CMD_MODEL);
             List<ParamModel> paramModels = cmdModel.parameters;
-            paramModels.add(new ParamModel(paramName, paramRequired, paramDesc, paramIdx, setterName, CommandParser.FIELD_USER_CMD));
+            paramModels.add(new ParamModel(paramName, paramRequired, paramDesc, paramIdx, setterName, CommandParser.FIELD_USER_CMD, paramFieldType));
             paramModels.sort(Comparator.comparingInt(ParamModel::index));
             Map<String, List<ParamModel>> tmpModel = new HashMap<>();
             tmpModel.put("parameters", paramModels);

@@ -4,9 +4,11 @@ import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.Type;
 import uapi.codegen.*;
-import uapi.command.IParameterMeta;
+import uapi.command.IOptionMeta;
+import uapi.command.OptionType;
 import uapi.command.annotation.Command;
 import uapi.command.annotation.Option;
+import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.annotation.Service;
 
@@ -40,10 +42,21 @@ public class OptionParser {
             String optDesc = option.description();
             String optField = fieldElement.getSimpleName().toString();
             String optFieldType = fieldElement.asType().toString();
-            if (! Type.STRING.equals(optFieldType) || ! Type.Q_STRING.equals(optFieldType)) {
-                throw new GeneralException(
-                        "The field which annotated with Parameter must be String type - {}:{}",
-                        classElement.getSimpleName().toString(), optFieldType);
+            OptionType optType;
+            if (StringHelper.isNullOrEmpty(optArg)) {
+                if (! Type.BOOLEAN.equals(optFieldType) && ! Type.Q_BOOLEAN.equals(optFieldType)) {
+                    throw new GeneralException(
+                            "The field which annotated with Option must be Boolean type - {}:{}",
+                            classElement.getSimpleName().toString(), optField);
+                }
+                optType = OptionType.Boolean;
+            } else {
+                if (! Type.STRING.equals(optFieldType) && ! Type.Q_STRING.equals(optFieldType)) {
+                    throw new GeneralException(
+                            "The field which annotated with Option must be String type - {}:{}",
+                            classElement.getSimpleName().toString(), optField);
+                }
+                optType = OptionType.String;
             }
 
             // Init user command class builder
@@ -59,9 +72,9 @@ public class OptionParser {
             ClassMeta.Builder cmdMetaClassBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
             CommandModel cmdModel = cmdMetaClassBuilder.getTransience(CommandHandler.CMD_MODEL);
             List<OptionModel> optModels = cmdModel.options;
-            optModels.add(new OptionModel(optName, optSName, optArg, optDesc, optField, setterName, CommandParser.FIELD_USER_CMD));
+            optModels.add(new OptionModel(optName, optSName, optArg, optDesc, optType, optField, setterName, CommandParser.FIELD_USER_CMD));
             Map<String, List<OptionModel>> tmpModel = new HashMap<>();
-            tmpModel.put("parameters", optModels);
+            tmpModel.put("options", optModels);
 
             // Set up template
             Template tempOptionMetas = builderContext.loadTemplate(TEMP_OPTION_METAS);
@@ -71,7 +84,7 @@ public class OptionParser {
                     .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                     .addModifier(Modifier.PUBLIC)
                     .setName("optionMetas")
-                    .setReturnTypeName(Type.toArrayType(IParameterMeta.class))
+                    .setReturnTypeName(Type.toArrayType(IOptionMeta.class))
                     .addCodeBuilder(CodeMeta.builder()
                             .setModel(tmpModel)
                             .setTemplate(tempOptionMetas)));

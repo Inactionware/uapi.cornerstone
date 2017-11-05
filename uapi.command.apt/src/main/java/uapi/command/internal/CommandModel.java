@@ -1,5 +1,6 @@
 package uapi.command.internal;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommandModel {
@@ -11,8 +12,8 @@ public class CommandModel {
 
     public String userCommandClassName;
     public String executorClassName;
-    public List<ParamModel> parameters;
-    public List<OptionModel> options;
+    public List<ParamModel> parameters = new ArrayList<>();
+    public List<OptionModel> options = new ArrayList<>();
 
     public String getName() {
         return this.name;
