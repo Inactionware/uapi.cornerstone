@@ -34,4 +34,6 @@ public class CommandBuilderUtil {
         }
         return cmdExecBuilder;
     }
+
+    private CommandBuilderUtil() { }
 }
