@@ -192,7 +192,7 @@ public class CommandParser {
         }
         if (! namespace.equals(parentCommand.namespace())) {
             throw new GeneralException(
-                    "The namespace of parent command does not equals to {} - {}", namespace, parentCommand.namespace());
+                    "The namespace of parent command does not equals to [{}] - {}", namespace, classElement.getSimpleName().toString());
         }
         String parentPath = getParentCommandPath(namespace, parentType, false);
         if (isThisCommand) {
