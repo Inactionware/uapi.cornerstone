@@ -9,6 +9,13 @@
 
 package uapi.command;
 
+import uapi.GeneralException;
+import uapi.common.ArgumentChecker;
+import uapi.common.StringHelper;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The implementation of this interface holds meta information of a command.
  */
@@ -16,15 +23,20 @@ public interface ICommandMeta {
 
     String DEFAULT_NAMESPACE    = "";
 
+    String ROOT_PATH            = "";
+
     String PATH_SEPARATOR       = "/";
 
-    /**
-     * The the parent command path of this command.
-     * If the parentPath is null means no parent command.
-     *
-     * @return  The parentPath command of this command
-     */
-    String parentPath();
+    static String makeId(ICommandMeta commandMeta) {
+        ArgumentChecker.required(commandMeta, "commandMeta");
+        Map<String, String> namedValues = new HashMap<>();
+        namedValues.put("namespace", commandMeta.namespace() != null ? commandMeta.namespace() : "");
+        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
+        namedValues.put("parent", commandMeta.parentPath());
+        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
+        namedValues.put("name", commandMeta.name());
+        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
+    }
 
     /**
      * The name of this command.
@@ -40,17 +52,29 @@ public interface ICommandMeta {
      *
      * @return  Namespace of this command
      */
-    String namespace();
+    default String namespace() {
+        return DEFAULT_NAMESPACE;
+    }
+
+    /**
+     * The the parent command path of this command.
+     * If the parentPath is null means no parent command.
+     *
+     * @return  The parentPath command of this command
+     */
+    default String parentPath() {
+        return ROOT_PATH;
+    }
 
     default String[] ancestors() {
         if (hasParent()) {
             return this.parentPath().split(PATH_SEPARATOR);
         }
-        return null;
+        return new String[0];
     }
 
     default boolean hasParent() {
-        return parentPath() != null;
+        return ! StringHelper.isNullOrEmpty(parentPath());
     }
 
     default int depth() {
@@ -72,19 +96,36 @@ public interface ICommandMeta {
      *
      * @return  Return parameter meta list
      */
-    IParameterMeta[] parameterMetas();
+    default IParameterMeta[] parameterMetas() {
+        return new IParameterMeta[0];
+    }
 
     /**
      * List of option meta of this command.
      *
      * @return  Return option meta list
      */
-    IOptionMeta[] optionMetas();
+    default IOptionMeta[] optionMetas() {
+        return new IOptionMeta[0];
+    }
 
     /**
      * Create new command executor.
      *
      * @return  The new command executor
      */
-    ICommandExecutor newExecutor();
+    default ICommandExecutor newExecutor() {
+        throw new GeneralException("The command does not provide executor - {}", id());
+    }
+
+    default String id() {
+//        Map<String, String> namedValues = new HashMap<>();
+//        namedValues.put("namespace", namespace() != null ? namespace() : "");
+//        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
+//        namedValues.put("parent", parentPath());
+//        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
+//        namedValues.put("name", name());
+//        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
+        return makeId(this);
+    }
 }

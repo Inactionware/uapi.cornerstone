@@ -24,5 +24,5 @@ public interface ICommandRunner {
      * @throws  CommandException
      *          CommandErrors.COMMAND_NOT_FOUND Specified command was not found
      */
-    ICommandResult run(String commandLine, IMessageOutput output) throws CommandException;
+    CommandResult run(String commandLine, IMessageOutput output) throws CommandException;
 }

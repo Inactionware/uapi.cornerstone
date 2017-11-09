@@ -30,7 +30,7 @@ public @interface Option {
      *
      * @return  The short option name
      */
-    char shortName();
+    char shortName() default 0;
 
     /**
      * The option argument if the option is string type

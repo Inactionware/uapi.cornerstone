@@ -1,44 +1,12 @@
 package uapi.command.internal;
 
-import uapi.command.CommandErrors;
-import uapi.command.CommandException;
-import uapi.command.ICommandExecutor;
-import uapi.command.ICommandMeta;
+import uapi.command.*;
 import uapi.common.ArgumentChecker;
-import uapi.common.StringHelper;
 import uapi.rx.Looper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public final class Command {
-
-    public static String generateCommandId(Command command) {
-        ArgumentChecker.required(command, "command");
-        return generateCommandId(command._cmdMeta);
-    }
-
-    public static String generateCommandId(ICommandMeta commandMeta) {
-        ArgumentChecker.required(commandMeta, "commandMeta");
-        return generateCommandId(commandMeta.namespace(), commandMeta.parentPath(), commandMeta.name());
-    }
-
-    public static String generateCommandId(
-            String namespace,
-            String parentPath,
-            String name
-    ) {
-        ArgumentChecker.required(name, "command");
-        Map<String, String> namedValues = new HashMap<>();
-        namedValues.put("namespace", namespace != null ? namespace : "");
-        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
-        namedValues.put("parent", parentPath);
-        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
-        namedValues.put("name", name);
-        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
-    }
+public final class Command implements ICommand {
 
     public static String getNamespace(String commandId) {
         ArgumentChecker.required(commandId, "commandId");
@@ -71,12 +39,39 @@ public final class Command {
         this._cmdMeta = commandMeta;
     }
 
+    @Override
+    public String namespace() {
+        return this._cmdMeta.namespace();
+    }
+
+    @Override
     public String name() {
         return this._cmdMeta.name();
     }
 
-    public String namespace() {
-        return this._cmdMeta.namespace();
+    @Override
+    public String[] ancestors() {
+        return this._cmdMeta.ancestors();
+    }
+
+    @Override
+    public String description() {
+        return this._cmdMeta.description();
+    }
+
+    @Override
+    public IParameterMeta[] availableParameters() {
+        return this._cmdMeta.parameterMetas();
+    }
+
+    @Override
+    public IOptionMeta[] availableOptions() {
+        return this._cmdMeta.optionMetas();
+    }
+
+    @Override
+    public ICommand[] availableSubCommands() {
+        return this._subCmds.toArray(new ICommand[this._subCmds.size()]);
     }
 
     public ICommandMeta meta() {
@@ -91,8 +86,8 @@ public final class Command {
         return this._cmdMeta.parentPath();
     }
 
-    public String commandId() {
-        return generateCommandId(this);
+    public String id() {
+        return this._cmdMeta.id();
     }
 
     void addSubCommand(Command command) {

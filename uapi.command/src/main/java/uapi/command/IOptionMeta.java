@@ -32,6 +32,15 @@ public interface IOptionMeta {
     char shortName();
 
     /**
+     * Check this option has short name or not.
+     *
+     * @return  True means the option has short name otherwise return false
+     */
+    default boolean hasShortName() {
+        return shortName() != 0;
+    }
+
+    /**
      * The type of the option.
      *
      * @return  The option type

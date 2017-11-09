@@ -9,9 +9,9 @@
 
 package uapi.command.internal;
 
-import uapi.GeneralException;
 import uapi.command.*;
 import uapi.common.ArgumentChecker;
+import uapi.common.CollectionHelper;
 import uapi.common.Multivariate;
 import uapi.rx.Looper;
 import uapi.service.annotation.Inject;
@@ -25,8 +25,12 @@ import java.util.List;
 /**
  * An implementation for ICommandRepository interface
  */
-@Service(ICommandRunner.class)
+@Service(ICommandRepository.class)
 public class CommandRepository implements ICommandRepository {
+
+    private static final String[] reservedCmdNames = new String[] {
+            HelpCommandMeta.NAME
+    };
 
     private final List<Command> _rootCmds = new ArrayList<>();
 
@@ -39,6 +43,7 @@ public class CommandRepository implements ICommandRepository {
     protected void activate() {
         this._commandMetas.sort(Comparator.comparingInt(ICommandMeta::depth));
         Looper.on(this._commandMetas).foreach(commandMeta -> {
+            checkReservedCommand(commandMeta.name());
             if (! commandMeta.hasParent()) {
                 this._rootCmds.add(new Command(commandMeta));
             } else {
@@ -46,11 +51,15 @@ public class CommandRepository implements ICommandRepository {
             }
         });
         this._commandMetas.clear();
+
+        // Add root command helper
+        this._rootCmds.add(new Command(new HelpCommandMeta(new RootCommand())));
     }
 
     @Override
     public void register(ICommandMeta commandMeta) {
         ArgumentChecker.required(commandMeta, "commandMeta");
+        checkReservedCommand(commandMeta.name());
         if (! commandMeta.hasParent()) {
             this._rootCmds.add(new Command(commandMeta));
         } else {
@@ -99,17 +108,21 @@ public class CommandRepository implements ICommandRepository {
         return this._cmdRunner;
     }
 
+    int commandCount() {
+        return this._rootCmds.size();
+    }
+
     private void addSubCommand(ICommandMeta commandMeta) {
         String[] ancestorNames = commandMeta.ancestors();
         Command ancestor = Looper.on(this._rootCmds)
                 .filter(cmd -> cmd.name().equals(ancestorNames[0]))
-                .first();
+                .first(null);
         if (ancestor == null) {
             throw CommandException.builder()
                     .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
                     .variables(new CommandErrors.ParentCommandNotFound()
                             .parentCommandName(ancestorNames[0])
-                            .thisCommandId(Command.generateCommandId(commandMeta)))
+                            .thisCommandId(commandMeta.id()))
                     .build();
         }
         for (int i = 1; i < ancestorNames.length; i++) {
@@ -120,16 +133,65 @@ public class CommandRepository implements ICommandRepository {
                         .errorCode(CommandErrors.PARENT_COMMAND_NOT_FOUND)
                         .variables(new CommandErrors.ParentCommandNotFound()
                                 .parentCommandName(ancestorName)
-                                .thisCommandId(Command.generateCommandId(commandMeta)))
+                                .thisCommandId(commandMeta.id()))
                         .build();
             }
         }
         Command command = new Command(commandMeta, ancestor);
         ancestor.addSubCommand(command);
+
+        // Add help command
+        command.addSubCommand(new Command(new HelpCommandMeta(ancestor)));
     }
 
-    private Command find(String commandId) {
-        return null;
+    private void checkReservedCommand(String cmdName) {
+        if (CollectionHelper.isContains(reservedCmdNames, cmdName)) {
+            throw CommandException.builder()
+                    .errorCode(CommandErrors.RESERVED_COMMAND_NAME)
+                    .variables(new CommandErrors.ReservedCommandName().commandName(cmdName))
+                    .build();
+        }
+    }
+
+    /**
+     * The root command is only used to make help command can output information
+     */
+    private final class RootCommand implements ICommand {
+
+        @Override
+        public String namespace() {
+            return ICommandMeta.DEFAULT_NAMESPACE;
+        }
+
+        @Override
+        public String name() {
+            return null;
+        }
+
+        @Override
+        public String[] ancestors() {
+            return new String[0];
+        }
+
+        @Override
+        public String description() {
+            return null;
+        }
+
+        @Override
+        public ICommand[] availableSubCommands() {
+            return CommandRepository.this._rootCmds.toArray(new ICommand[CommandRepository.this._rootCmds.size()]);
+        }
+
+        @Override
+        public IParameterMeta[] availableParameters() {
+            return new IParameterMeta[0];
+        }
+
+        @Override
+        public IOptionMeta[] availableOptions() {
+            return new IOptionMeta[0];
+        }
     }
 
     /**
@@ -138,7 +200,7 @@ public class CommandRepository implements ICommandRepository {
     private final class CommandRunner implements ICommandRunner {
 
         @Override
-        public ICommandResult run(
+        public CommandResult run(
                 final String commandLine,
                 final IMessageOutput output
         ) throws CommandException {
@@ -186,7 +248,7 @@ public class CommandRepository implements ICommandRepository {
 
             // Set command parameter and options
             Command cmd = cmdVar.get(0);
-            Multivariate optParamVar = new Multivariate(1);  // 0 -> option name; 1 -> parameter index
+            Multivariate optParamVar = new Multivariate(2);  // 0 -> option name; 1 -> parameter index
             optParamVar.put(1, 0);
             ICommandMeta cmdMeta = cmd.meta();
             ICommandExecutor cmdExec = cmd.getExecutor();
@@ -216,10 +278,10 @@ public class CommandRepository implements ICommandRepository {
                                 .errorCode(CommandErrors.UNSUPPORTED_OPTION)
                                 .variables(new CommandErrors.UnsupportedOption()
                                         .optionName(optName)
-                                        .commandLine(commandLine))
+                                        .command(commandLine))
                                 .build();
                     }
-                    if (ArgumentChecker.isEmpty(matchedOpt.argument())) {
+                    if (matchedOpt.type() == OptionType.Boolean) {
                         cmdExec.setOption(optName);
                     } else {
                         optParamVar.put(0, optName);
@@ -250,12 +312,24 @@ public class CommandRepository implements ICommandRepository {
                                     .errorCode(CommandErrors.UNSUPPORTED_OPTION)
                                     .variables(new CommandErrors.UnsupportedOption()
                                             .optionName(String.valueOf(opt))
-                                            .commandLine(commandLine))
+                                            .command(commandLine))
                                     .build();
                         }
-                        cmdExec.setOption(matchedOpt.name());
+                        if (matchedOpt.type() == OptionType.String) {
+                            if (optStr.length() > 1) {
+                                throw CommandException.builder()
+                                        .errorCode(CommandErrors.SET_ARGUMENT_ON_COMBINED_SHORT_OPTION)
+                                        .variables(new CommandErrors.SetArgumentOnCombinedShortOption()
+                                                .combinedOptions(optStr)
+                                                .commandLine(commandLine))
+                                        .build();
+                            }
+                            optParamVar.put(0, matchedOpt.name());
+                        } else {
+                            cmdExec.setOption(matchedOpt.name());
+                        }
                     }
-                } else if (cmdVar.hasValue(0)) {
+                } else if (optParamVar.hasValue(0)) {
                     // Handle option argument
                     cmdExec.setOption(optParamVar.get(0), paramOpt);
                     optParamVar.put(0, null);
@@ -282,12 +356,17 @@ public class CommandRepository implements ICommandRepository {
             if (paramIdx < paramMetas.length) {
                 for (int i = paramIdx; i < paramMetas.length; i++) {
                     if (paramMetas[i].required()) {
-                        // todo throw exception
+                        throw CommandException.builder()
+                                .errorCode(CommandErrors.MISSING_REQUIRED_PARAMETER)
+                                .variables(new CommandErrors.MissingRequiredParameter()
+                                        .parameterName(paramMetas[i].name())
+                                        .commandLine(commandLine))
+                                .build();
                     }
                 }
             }
 
-            cmdExec.setMessageOutput(output);
+            cmdExec.setOutput(output);
 
             return cmdExec.execute();
         }

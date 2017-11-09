@@ -46,5 +46,5 @@ public @interface Command {
      *
      * @return  The command description
      */
-    String description();
+    String description() default "";
 }
