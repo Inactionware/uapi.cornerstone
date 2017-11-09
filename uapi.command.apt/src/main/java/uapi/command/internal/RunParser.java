@@ -60,7 +60,7 @@ public class RunParser {
             String returnType = execElement.getReturnType().toString();
             if (! Type.BOOLEAN.equals(returnType) && ! Type.Q_BOOLEAN.equals(returnType)) {
                 throw new GeneralException(
-                        "The method annotated with Run must return a boolean type - {}", returnType);
+                        "The method annotated with Run must return a boolean type - {}", runMethodName);
             }
 
             ClassMeta.Builder cmdMetaBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);

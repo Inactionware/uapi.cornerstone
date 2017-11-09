@@ -23,7 +23,7 @@ public @interface Option {
      *
      * @return  The option name
      */
-    String name() default "";
+    String name();
 
     /**
      * The short option name
