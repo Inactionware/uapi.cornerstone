@@ -1,7 +1,14 @@
-<#list opt in options>
-if ("${opt.name()}".equals(name) {
-                this.${opt.fieldName()} = value;
-                return;
-            }
+<#list options as opt>
+<#if opt.isString()>
+if ("${opt.name()}".equals(name)) {
+            this.${opt.userCommandField()}.${opt.setterName()}("${opt.argument()}", argument);
+            return;
+        }
+</#if>
 </#list>
-            super.setOption(name, value);
+        throw uapi.command.CommandException.builder()
+                .errorCode(uapi.command.CommandErrors.UNSUPPORTED_OPTION)
+                .variables(new uapi.command.CommandErrors.UnsupportedOption()
+                        .optionName(name)
+                        .command(commandId()))
+                .build();

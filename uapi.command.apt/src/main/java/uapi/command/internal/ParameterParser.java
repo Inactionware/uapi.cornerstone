@@ -8,7 +8,6 @@ import uapi.command.IParameterMeta;
 import uapi.command.annotation.Command;
 import uapi.command.annotation.Parameter;
 import uapi.rx.Looper;
-import uapi.service.annotation.Service;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -17,7 +16,6 @@ import java.util.*;
 
 public class ParameterParser {
 
-    static final String MODEL_CMD_PARAM             = "MODEL_COMMAND_PARAMETER";
     private static final String TEMP_PARAM_METAS    = "template/parameterMetas_method.ftl";
 
     public void parse(
@@ -31,7 +29,7 @@ public class ParameterParser {
             }
 
             Element classElement = fieldElement.getEnclosingElement();
-            builderContext.checkAnnotations(classElement, Service.class, Command.class);
+            builderContext.checkAnnotations(classElement, Command.class);
             builderContext.checkModifiers(fieldElement, Parameter.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
             Parameter param = fieldElement.getAnnotation(Parameter.class);
@@ -39,16 +37,29 @@ public class ParameterParser {
             String paramName = param.name();
             boolean paramRequired = param.required();
             String paramDesc = param.description();
-            String paramField = fieldElement.getSimpleName().toString();
+            String paramFieldName = fieldElement.getSimpleName().toString();
+            String paramFieldType = fieldElement.asType().toString();
+            if (! Type.STRING.equals(paramFieldType) && ! Type.Q_STRING.equals(paramFieldType)) {
+                throw new GeneralException(
+                        "The field which annotated with Parameter must be String type - {}:{}",
+                        classElement.getSimpleName().toString(), paramFieldName);
+            }
+
+            // Init user command class builder
+            ClassMeta.Builder userCmdBuilder = builderContext.findClassBuilder(classElement);
+            PropertyMeta.Builder propBuilder = PropertyMeta.builder()
+                    .setFieldName(paramFieldName)
+                    .setFieldType(paramFieldType)
+                    .setGenerateSetter(true);
+            String setterName = propBuilder.setterName();
+            userCmdBuilder.addPropertyBuilder(propBuilder);
+
+            ClassMeta.Builder cmdMetaBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
 
             // Set up model
-            ClassMeta.Builder classBuilder = builderContext.findClassBuilder(classElement);
-            List<ParamModel> paramModels = classBuilder.getTransience(MODEL_CMD_PARAM);
-            if (paramModels == null) {
-                paramModels = new ArrayList<>();
-                classBuilder.putTransience(MODEL_CMD_PARAM, paramModels);
-            }
-            paramModels.add(new ParamModel(paramName, paramRequired, paramDesc, paramIdx, paramField));
+            CommandModel cmdModel = cmdMetaBuilder.getTransience(CommandHandler.CMD_MODEL);
+            List<ParamModel> paramModels = cmdModel.parameters;
+            paramModels.add(new ParamModel(paramName, paramRequired, paramDesc, paramIdx, setterName, CommandParser.FIELD_USER_CMD, paramFieldType));
             paramModels.sort(Comparator.comparingInt(ParamModel::index));
             Map<String, List<ParamModel>> tmpModel = new HashMap<>();
             tmpModel.put("parameters", paramModels);
@@ -57,7 +68,7 @@ public class ParameterParser {
             Template tempParamMetas = builderContext.loadTemplate(TEMP_PARAM_METAS);
 
             // Construct method
-            classBuilder.addMethodBuilder(MethodMeta.builder()
+            cmdMetaBuilder.addMethodBuilder(MethodMeta.builder()
                     .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                     .addModifier(Modifier.PUBLIC)
                     .setName("parameterMetas")

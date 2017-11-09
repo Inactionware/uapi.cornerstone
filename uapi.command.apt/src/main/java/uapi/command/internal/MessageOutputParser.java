@@ -1,6 +1,5 @@
 package uapi.command.internal;
 
-import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.codegen.ClassMeta;
 import uapi.codegen.IBuilderContext;
@@ -12,14 +11,11 @@ import uapi.service.annotation.Service;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 public class MessageOutputParser {
 
     static final String MODEL_COMMAND_MSG_OUT_FIELD_NAME    = "messageOutputFieldName";
-    private final String TEMP_SET_OUTPUT                    = "template/setOutput_method.ftl";
 
     public void parse(
             final IBuilderContext builderContext,
@@ -45,14 +41,6 @@ public class MessageOutputParser {
             }
             String fieldName = fieldElement.getSimpleName().toString();
             classBuilder.putTransience(MODEL_COMMAND_MSG_OUT_FIELD_NAME, fieldName);
-//            Map<String, String> model = new HashMap<>();
-//            model.put(MODEL_COMMAND_MSG_OUT_FIELD_NAME, fieldName);
-//
-//            // Set up template
-//            Template temp = builderContext.loadTemplate(TEMP_SET_OUTPUT);
-//
-//            // Build method
-
         });
     }
 }

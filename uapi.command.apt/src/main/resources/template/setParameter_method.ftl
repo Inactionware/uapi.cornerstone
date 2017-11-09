@@ -1,7 +1,12 @@
-<#list param in parameters>
-if ("${param.name()}".equals(name) {
-                this.${param.fieldName()} = value;
-                return;
-            }
+<#list parameters as param>
+if ("${param.name()}".equals(name)) {
+            this.${param.userCommandField()}.${param.setterName()}((${param.type()}) value);
+            return;
+        }
 </#list>
-            super.setParameter(name, value);
+        throw uapi.command.CommandException.builder()
+                .errorCode(uapi.command.CommandErrors.UNSUPPORTED_PARAMETER)
+                .variables(new uapi.command.CommandErrors.UnsupportedParameter()
+                        .parameterName(name)
+                        .commandId(commandId()))
+                .build();

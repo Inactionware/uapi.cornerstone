@@ -6,7 +6,6 @@ import uapi.codegen.AnnotationsHandler;
 import uapi.codegen.IAnnotationsHandler;
 import uapi.codegen.IBuilderContext;
 import uapi.command.annotation.*;
-import uapi.command.annotation.Command;
 import uapi.common.ArgumentChecker;
 
 import javax.lang.model.element.Element;
@@ -18,15 +17,17 @@ public class CommandHandler extends AnnotationsHandler {
 
     public static final String CMD_MODEL    = "COMMAND_MODEL";
 
-    private final CommandParser     _cmdParser;
-    private final ParameterParser   _paramParser;
-    private final OptionParser      _optParser;
-    private final RunParser         _runParser;
+    private CommandParser       _cmdParser;
+    private ParameterParser     _paramParser;
+    private OptionParser        _optParser;
+    private MessageOutputParser _outputParser;
+    private RunParser           _runParser;
 
     public CommandHandler() {
         this._cmdParser = new CommandParser();
         this._paramParser = new ParameterParser();
         this._optParser = new OptionParser();
+        this._outputParser = new MessageOutputParser();
         this._runParser = new RunParser();
     }
 
@@ -49,12 +50,14 @@ public class CommandHandler extends AnnotationsHandler {
     ) throws GeneralException {
         ArgumentChecker.required(annotationType, "annotationType");
 
-        if (annotationType.equals(Command.class)) {
+        if (annotationType.equals(uapi.command.annotation.Command.class)) {
             this._cmdParser.parse(builderContext, elements);
         } else if (annotationType.equals(Parameter.class)) {
             this._paramParser.parse(builderContext, elements);
         } else if (annotationType.equals(Option.class)) {
             this._optParser.parse(builderContext, elements);
+        } else if (annotationType.equals(MessageOutput.class)) {
+            this._outputParser.parse(builderContext, elements);
         } else if(annotationType.equals(Run.class)) {
             this._runParser.parse(builderContext, elements);
         } else {
