@@ -57,7 +57,7 @@ class InjectParser {
                         "The Inject annotation only can be applied on field or method",
                         annotatedElement.getSimpleName().toString());
             }
-            builderCtx.checkModifiers(annotatedElement, Inject.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+            builderCtx.checkModifiers(annotatedElement, Inject.class, Modifier.PRIVATE, Modifier.STATIC);
             Element classElemt = annotatedElement.getEnclosingElement();
             builderCtx.checkModifiers(classElemt, Inject.class, Modifier.PRIVATE, Modifier.FINAL);
 
@@ -107,6 +107,9 @@ class InjectParser {
                                 annotatedElement.getSimpleName().toString());
                     }
                     fieldTypeName = typeArgs.get(1).toString();
+                } else {
+                    // All injectable field can't be modified by final except collection or map field
+                    builderCtx.checkModifiers(annotatedElement, Inject.class, Modifier.FINAL);
                 }
 
                 if (StringHelper.isNullOrEmpty(injectId)) {
