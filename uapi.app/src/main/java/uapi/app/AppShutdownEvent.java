@@ -1,9 +1,6 @@
 package uapi.app;
 
 import uapi.behavior.BehaviorEvent;
-import uapi.service.IService;
-
-import java.util.List;
 
 /**
  * An event for application shutdown

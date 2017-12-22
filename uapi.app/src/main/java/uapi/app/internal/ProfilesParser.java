@@ -9,7 +9,6 @@
 
 package uapi.app.internal;
 
-import uapi.GeneralException;
 import uapi.Tags;
 import uapi.app.AppErrors;
 import uapi.app.AppException;

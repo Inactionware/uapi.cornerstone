@@ -1,7 +1,6 @@
 package uapi.app.internal;
 
 import uapi.behavior.BehaviorEvent;
-import uapi.event.IEvent;
 import uapi.service.IService;
 
 import java.util.List;

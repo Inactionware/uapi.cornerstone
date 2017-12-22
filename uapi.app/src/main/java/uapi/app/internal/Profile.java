@@ -77,8 +77,9 @@ public class Profile implements IProfile {
                     case SATISFY_ANY:
                         return ! CollectionHelper.isContains(tags, this._tags);
                 }
+            default:
+                throw new GeneralException("Unsupported model or matching - {}, {}", this._model, this._matching);
         }
-        throw new GeneralException("Unsupported model or matching - {}, {}", this._model, this._matching);
     }
 
     public enum Model {
