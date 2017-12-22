@@ -45,7 +45,6 @@ public class Behavior<I, O>
 
     private IAnonymousAction<Object, BehaviorEvent> _successAction;
     private IAnonymousAction<Exception, BehaviorEvent> _failureAction;
-    private IEventFinishCallback _successEventCallback;
 
     Behavior(
             final Responsible responsible,
@@ -227,14 +226,6 @@ public class Behavior<I, O>
     }
 
     @Override
-    public IBehaviorBuilder onSuccessEventCallback(IEventFinishCallback callback) {
-        ensureNotBuilt();
-        ArgumentChecker.required(callback, "callback");
-        this._successEventCallback = callback;
-        return this;
-    }
-
-    @Override
     public INavigator navigator() {
         ensureNotBuilt();
         return this._navigator;
@@ -318,8 +309,7 @@ public class Behavior<I, O>
                 this,
                 this._sequence.incrementAndGet(),
                 this._successAction,
-                this._failureAction,
-                this._successEventCallback);
+                this._failureAction);
     }
 
     ActionHolder entranceAction() {

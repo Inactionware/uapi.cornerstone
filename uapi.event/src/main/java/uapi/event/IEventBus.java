@@ -27,10 +27,10 @@ public interface IEventBus {
      *
      * @param   topic
      *          The event topic
-     * @param   syncable
+     * @param   sync
      *          Synchronous or asynchronous to fire
      */
-    void fire(String topic, boolean syncable);
+    void fire(String topic, boolean sync);
 
     /**
      * Fire event, the event will be handled in async
@@ -45,10 +45,10 @@ public interface IEventBus {
      *
      * @param   event
      *          Fired event
-     * @param   syncable
+     * @param   sync
      *          Synchronous or asynchronous to fire
      */
-    void fire(IEvent event, boolean syncable);
+    void fire(IEvent event, boolean sync);
 
     /**
      * Fire event, the callback will be invoked when the event is handled
@@ -59,6 +59,18 @@ public interface IEventBus {
      *          The callback which will be invoked when the event is handled
      */
     void fire(IEvent event, IEventFinishCallback callback);
+
+    /**
+     * Fire event, and block the thread until the callback is invoked when the event is
+     *
+     * @param   event
+     *          Fired event
+     * @param   callback
+     *          The callback which will be invoked when the event is handled
+     * @param   sync
+     *          Synchronous or asynchronous to fire
+     */
+    void fire(IEvent event, IEventFinishCallback callback, boolean sync);
 
     /**
      * Register a event handler

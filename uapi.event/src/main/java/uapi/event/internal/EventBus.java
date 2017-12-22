@@ -126,6 +126,34 @@ public class EventBus implements IEventBus {
     }
 
     @Override
+    public void fire(
+            final IEvent event,
+            final IEventFinishCallback callback,
+            final boolean sync
+    ) {
+        ArgumentChecker.required(event, "event");
+        ArgumentChecker.required(callback, "callback");
+
+        List<IEventHandler> handlers = findHandlers(event);
+        if (handlers.size() == 0) {
+            this._logger.warn("There are no event handler for event topic - {}", event.topic());
+            return;
+        }
+
+        HandleEventAction action = new HandleEventAction(handlers, event, callback);
+        if (sync) {
+            ForkJoinTask<Void> task = this._fjPoll.submit(action);
+            try {
+                task.get();
+            } catch (InterruptedException | ExecutionException ex) {
+                throw new GeneralException(ex);
+            }
+        } else {
+            this._fjPoll.submit(action);
+        }
+    }
+
+    @Override
     public void register(IEventHandler eventHandler) {
         ArgumentChecker.required(eventHandler, "eventHandler");
         this._eventHandlers.add(eventHandler);
@@ -196,7 +224,11 @@ public class EventBus implements IEventBus {
                     EventBus.this._logger.error(ex);
                 }
                 if (this._waitType == WaitType.CALLBACK) {
-                    this._finCallback.callback(this._event);
+                    try {
+                        this._finCallback.callback(this._event);
+                    } catch (Exception ex) {
+                        EventBus.this._logger.error(ex);
+                    }
                 }
                 return;
             }

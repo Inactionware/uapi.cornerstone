@@ -118,8 +118,6 @@ public interface IBehaviorBuilder {
      */
     IBehaviorBuilder onFailure(IAnonymousAction<Exception, BehaviorEvent> action);
 
-    IBehaviorBuilder onSuccessEventCallback(IEventFinishCallback callback);
-
     /**
      * Get navigator which associated with this behavior builder
      *

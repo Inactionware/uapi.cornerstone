@@ -27,6 +27,7 @@ class ApplicationTest extends Specification {
         noExceptionThrown()
     }
 
+    @Ignore
     def 'Test activate'() {
         given:
         def respReg = Mock(IResponsibleRegistry) {

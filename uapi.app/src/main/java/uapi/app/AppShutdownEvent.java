@@ -12,17 +12,7 @@ public class AppShutdownEvent extends BehaviorEvent {
 
     public static final String TOPIC = "ApplicationShutdown";
 
-    private final List<IService> _appSvcs;
-
-    public AppShutdownEvent(
-            final String sourceName,
-            final List<IService> applicationServices
-    ) {
+    public AppShutdownEvent(final String sourceName) {
         super(TOPIC, sourceName);
-        this._appSvcs = applicationServices;
-    }
-
-    public List<IService> applicationServices() {
-        return this._appSvcs;
     }
 }
