@@ -16,13 +16,13 @@ import uapi.service.annotation.Service;
 public class ListCommand {
 
     @Inject
-    ResponsibleRegistry _respReg;
+    protected ResponsibleRegistry _respReg;
 
     @Parameter(index=0, name="responsible", description="Show all available responsible")
-    String _responsible;
+    protected String _responsible;
 
     @Option(name="behavior", shortName='b', description="Show behaviors under specific responsible")
-    boolean _listBehaviors;
+    protected boolean _listBehaviors;
 
     @Run
     public boolean run() {

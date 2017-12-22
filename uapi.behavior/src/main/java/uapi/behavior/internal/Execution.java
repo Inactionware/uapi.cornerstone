@@ -4,7 +4,6 @@ import uapi.GeneralException;
 import uapi.IIdentifiable;
 import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
-import uapi.event.IEventFinishCallback;
 
 /**
  * The class represent a execution of one behavior
