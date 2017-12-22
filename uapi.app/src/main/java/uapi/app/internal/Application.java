@@ -59,15 +59,13 @@ public class Application {
         responsible.newBehavior(BEHAVIOR_SHUTDOWN, SystemShuttingDownEvent.class, SystemShuttingDownEvent.TOPIC)
                 .then((input, ctx) -> {
                     this._logger.info("Application is going to shutdown...");
+                    // Wait until AppShutdownEvent handling finish
+                    ctx.fireEvent(new AppShutdownEvent(responsible.name()), true);
+                    List<IService> appSvcs = ((SystemShuttingDownEvent) input).applicationServices();
+                    List<String[]> appSvcIds = Looper.on(appSvcs).map(IService::getIds).toList();
+                    Looper.on(appSvcIds).foreach(this._registry::deactivateServices);
+                    this._logger.info("Application shutdown success.");
                     return input;
-                })
-                .onSuccess((input, ctx) ->
-                        new AppShutdownEvent(responsible.name(), ((SystemShuttingDownEvent) input).applicationServices()))
-                .onSuccessEventCallback(event -> {
-                    List<IService> svcs = ((AppShutdownEvent) event).applicationServices();
-                    List<String[]> svcIds = Looper.on(svcs).map(IService::getIds).toList();
-                    Looper.on(svcIds).foreach(this._registry::deactivateServices);
-                    this._logger.debug("Application shutdown success.");
                 })
                 .onFailure(DEFAULT_FAILURE_ACTION)
                 .build();

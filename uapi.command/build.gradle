@@ -17,6 +17,7 @@ dependencies {
 
             /* To fix the class path issue in IDEA */
             files('../uapi.service.apt/src/main/resources'),
+            files('../uapi.command.apt/src/main/resources')
             /* End */
     )
 

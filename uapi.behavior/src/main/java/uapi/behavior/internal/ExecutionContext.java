@@ -85,9 +85,22 @@ public class ExecutionContext implements IExecutionContext {
         this._eventBus.fire(event);
     }
 
+    public void fireEvent(final BehaviorEvent event, boolean sync) {
+        ArgumentChecker.required(event, "event");
+        this._eventBus.fire(event, sync);
+    }
+
     public void fireEvent(final BehaviorEvent event, final IEventFinishCallback callback) {
         ArgumentChecker.required(event, "event");
         ArgumentChecker.required(callback, "callback");
         this._eventBus.fire(event, callback);
+    }
+
+    public void fireEvent(
+            final BehaviorEvent event,
+            final IEventFinishCallback callback,
+            final boolean sync
+    ) {
+        this._eventBus.fire(event, callback, sync);
     }
 }

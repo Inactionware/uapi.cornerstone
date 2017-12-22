@@ -294,6 +294,11 @@ class ResponsibleTest extends Specification {
         }
 
         @Override
+        void fire(IEvent event, IEventFinishCallback callback, boolean sync) {
+
+        }
+
+        @Override
         void register(IEventHandler eventHandler) {
             this._handler = eventHandler
         }

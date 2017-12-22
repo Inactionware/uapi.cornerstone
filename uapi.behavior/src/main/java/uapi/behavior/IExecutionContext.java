@@ -66,7 +66,21 @@ public interface IExecutionContext {
         return (T) get(KEY_ORI_EVENT);
     }
 
-//    void fireEvent(BehaviorTraceEvent event);
-//
-//    void fireEvent(BehaviorEvent event);
+    /**
+     * Fire event by synchronized way
+     *
+     * @param   event
+     *          Fired event
+     */
+    void fireEvent(BehaviorEvent event);
+
+    /**
+     * Fire event by synchronized or asynchronous way
+     *
+     * @param   event
+     *          The fired event
+     * @param   sync
+     *          True is synchronized otherwise asynchronous
+     */
+    void fireEvent(BehaviorEvent event, boolean sync);
 }

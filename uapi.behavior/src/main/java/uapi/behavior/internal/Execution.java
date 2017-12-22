@@ -17,14 +17,12 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
 
     private final IAnonymousAction<Object, BehaviorEvent> _successAction;
     private final IAnonymousAction<Exception, BehaviorEvent> _failureAction;
-    private final IEventFinishCallback _successEventCallback;
 
     Execution(
             final Behavior behavior,
             final int sequence,
             final IAnonymousAction<Object, BehaviorEvent> successAction,
-            final IAnonymousAction<Exception, BehaviorEvent> failureAction,
-            final IEventFinishCallback successEventCallback
+            final IAnonymousAction<Exception, BehaviorEvent> failureAction
     ) {
         ArgumentChecker.required(behavior, "behavior");
         this._id = new ExecutionIdentify(behavior.getId(), sequence);
@@ -32,7 +30,6 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         this._current = behavior.entranceAction();
         this._successAction = successAction;
         this._failureAction = failureAction;
-        this._successEventCallback = successEventCallback;
     }
 
     @Override
@@ -89,11 +86,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 exception = new GeneralException(eex);
             }
             if (bEvent != null) {
-                if (this._successEventCallback != null) {
-                    executionContext.fireEvent(bEvent, this._successEventCallback);
-                } else {
-                    executionContext.fireEvent(bEvent);
-                }
+                executionContext.fireEvent(bEvent);
             }
         }
         if (this._traceable) {
