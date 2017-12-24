@@ -16,11 +16,13 @@ dependencies {
             project(':uapi.service.apt'),
 
             /* To fix the class path issue in IDEA */
-            files('../uapi.service.apt/src/main/resources'),
+            files('../uapi.service.apt/src/main/resources')
             /* End */
     )
 
-    compile project(':uapi.service')
+    testCompile (
+            project(':uapi.service.apt'),
+    )
 
     compile (
             project(':uapi.service'),

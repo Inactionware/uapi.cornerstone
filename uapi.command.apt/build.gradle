@@ -12,11 +12,22 @@ plugins {
 }
 
 dependencies {
-    compile project(':uapi.service.apt')
-    compile project(':uapi.service')
-    compile project(':uapi.command')
+    compileOnly (
+            project(':uapi.service.apt'),
+
+            /* To fix the class path issue in IDEA */
+            files('../uapi.service.apt/src/main/resources')
+            /* End */
+    )
+
+    testCompile (
+            project(':uapi.service.apt')
+    )
 
     compile (
+            project(':uapi.service'),
+            project(':uapi.command'),
+
             "uapi:uapi.common:${uapi_base_version}",
             "uapi:uapi.exception:${uapi_base_version}",
             "uapi:uapi.codegen:${uapi_base_version}",
