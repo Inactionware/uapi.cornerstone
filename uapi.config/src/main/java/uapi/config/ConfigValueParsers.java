@@ -13,11 +13,13 @@ import uapi.GeneralException;
 import uapi.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.rx.Looper;
+import uapi.service.IServiceLifecycle;
 import uapi.service.annotation.Inject;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -25,10 +27,10 @@ import java.util.List;
  */
 @Service
 @Tag(Tags.CONFIG)
-public class ConfigValueParsers {
+public class ConfigValueParsers implements IServiceLifecycle {
 
     @Inject
-    protected List<IConfigValueParser> _parsers = new ArrayList<>();
+    protected List<IConfigValueParser> _parsers = new LinkedList<>();
 
     public IConfigValueParser findParser(String inType, String outType) {
         ArgumentChecker.notEmpty(inType, "inType");
@@ -60,5 +62,24 @@ public class ConfigValueParsers {
                     name, matches);
         }
         return matches.get(0);
+    }
+
+    @Override
+    public void onActivate() {
+        // Do nothing
+    }
+
+    @Override
+    public void onDeactivate() {
+        // Do nothing
+    }
+
+    @Override
+    public void onDependencyInject(String serviceId, Object service) {
+        if (service instanceof IConfigValueParser) {
+            this._parsers.add((IConfigValueParser) service);
+        } else {
+            throw new GeneralException("Unsupported config value parser: {}", service.getClass().getCanonicalName());
+        }
     }
 }

@@ -111,7 +111,7 @@ class ConfigValueParsersTest extends Specification {
     def 'Test found multiple parser by name'() {
         def IConfigValueParser mockParser = Mock(IConfigValueParser)
         mockParser.getName() >> {
-            return parserName;
+            return parserName
         }
 
         given:
@@ -128,5 +128,43 @@ class ConfigValueParsersTest extends Specification {
         where:
         parserName  | node
         'IntParser' | ''
+    }
+
+    def 'Test inject parser'() {
+        given:
+        IConfigValueParser mockParser = Mock(IConfigValueParser)
+        mockParser.getName() >> {
+            return parserName
+        }
+
+        ConfigValueParsers parsers = new ConfigValueParsers()
+
+        when:
+        parsers.onDependencyInject(parserId, mockParser)
+
+        then:
+        noExceptionThrown()
+        parsers.findParser(parserName) != null
+
+        where:
+        parserId    | parserName
+        'parserId'  | 'IntParser'
+    }
+
+    def 'Test inject incorrect parser'() {
+        given:
+        Object mockParser = Mock(Object)
+
+        ConfigValueParsers parsers = new ConfigValueParsers()
+
+        when:
+        parsers.onDependencyInject(parserId, mockParser)
+
+        then:
+        thrown(GeneralException)
+
+        where:
+        parserId    | parserName
+        'parserId'  | 'IntParser'
     }
 }
