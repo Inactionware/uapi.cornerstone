@@ -18,9 +18,7 @@ import uapi.service.IServiceReference;
 import uapi.service.QualifiedServiceId;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The uapi.config.Configuration hold at least one config value and store as a tree structure
@@ -38,7 +36,7 @@ public class Configuration {
     private final Configuration _parent;
     private final String _key;
     private Object _value;
-    private final Map<QualifiedServiceId, WeakReference<IServiceReference>> _configuableSvcs;
+    private final Map<QualifiedServiceId, WeakReference<IServiceReference>> _configurableSvcs;
     private final Map<String, Configuration> _children;
 
     public Configuration(final Configuration parent, final String key) {
@@ -57,9 +55,9 @@ public class Configuration {
         this._parent = parent;
         this._key = key;
         this._value = value;
-        this._configuableSvcs = new HashMap<>();
+        this._configurableSvcs = new HashMap<>();
         if (serviceReference != null) {
-            this._configuableSvcs.put(serviceReference.getQualifiedId(), new WeakReference<>(serviceReference));
+            this._configurableSvcs.put(serviceReference.getQualifiedId(), new WeakReference<>(serviceReference));
         }
         this._children = new HashMap<>();
     }
@@ -71,7 +69,7 @@ public class Configuration {
         this._parent = null;
         this._key = ROOT_KEY;
         // For root node, not configurable service can be bind on it.
-        this._configuableSvcs = null;
+        this._configurableSvcs = null;
         this._children = new HashMap<>();
     }
 
@@ -121,7 +119,7 @@ public class Configuration {
             this._value = value;
         }
 
-        Looper.on(this._configuableSvcs.values())
+        Looper.on(this._configurableSvcs.values())
                 .filter(ref -> ref.get() != null)
                 .map(WeakReference::get)
                 .next(svcRef -> ((IConfigurable) svcRef.getService()).config(getFullPath(), value))
@@ -160,19 +158,19 @@ public class Configuration {
         ArgumentChecker.notNull(serviceRef, "serviceRef");
 
         String path = getFullPath();
-        if (this._configuableSvcs.containsKey(serviceRef.getQualifiedId())) {
+        if (this._configurableSvcs.containsKey(serviceRef.getQualifiedId())) {
             if (this._value != null) {
                 return true;
             }
             return ((IConfigurable) serviceRef.getService()).isOptionalConfig(path);
         }
         IConfigurable cfg = ((IConfigurable) serviceRef.getService());
-        this._configuableSvcs.put(serviceRef.getQualifiedId(), new WeakReference<>(serviceRef));
+        this._configurableSvcs.put(serviceRef.getQualifiedId(), new WeakReference<>(serviceRef));
         if (this._value != null) {
             cfg.config(path, this._value);
             return true;
         } else if (this._children.size() > 0) {
-            cfg.config(path, this._children);
+            cfg.config(path, getChildrenValue(this._children));
             return true;
         } else {
             return cfg.isOptionalConfig(path);
@@ -260,11 +258,36 @@ public class Configuration {
     }
 
     private void cleanNullReference() {
-        Iterator<Map.Entry<QualifiedServiceId, WeakReference<IServiceReference>>> it = this._configuableSvcs.entrySet().iterator();
+        Iterator<Map.Entry<QualifiedServiceId, WeakReference<IServiceReference>>> it = this._configurableSvcs.entrySet().iterator();
         while (it.hasNext()) {
             if (it.next().getValue().get() == null) {
                 it.remove();
             }
         }
+    }
+
+    /**
+     * The value of configuration may be wrapped by Configuration object.
+     * To inject configuration to service we have to unwrap it first.
+     *
+     * @param   value
+     *          The configuration value
+     * @return  Un-warped configuration value
+     */
+    private Object getChildrenValue(final Map<String, Configuration> value) {
+        if (value == null) {
+            return null;
+        }
+
+        Map<String, Object> mapValue = new HashMap<>();
+        Looper.on(value.entrySet())
+                .foreach(entry -> {
+                    if (entry.getValue()._children.size() > 0) {
+                        mapValue.put(entry.getKey(), getChildrenValue(entry.getValue()._children));
+                    } else {
+                        mapValue.put(entry.getKey(), entry.getValue()._value);
+                    }
+                });
+        return mapValue;
     }
 }
