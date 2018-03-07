@@ -10,6 +10,7 @@
 package uapi.service;
 
 import uapi.codegen.ClassMeta;
+import uapi.codegen.IBuilderContext;
 import uapi.codegen.IHandlerHelper;
 
 /**
@@ -20,4 +21,6 @@ public interface IServiceHandlerHelper extends IHandlerHelper {
     String name = "ServiceHelper";
 
     void addServiceId(ClassMeta.Builder classBuilder, String... serviceIds);
+
+    void becomeService(IBuilderContext builderCtx, ClassMeta.Builder classBuilder, String... serviceIds);
 }
