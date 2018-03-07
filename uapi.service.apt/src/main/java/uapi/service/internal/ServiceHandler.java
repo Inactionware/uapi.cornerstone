@@ -89,35 +89,36 @@ public final class ServiceHandler extends AnnotationsHandler {
                 }
                 serviceIds = new String[] { svcId.toString() };
             }
-            Template tempGetIds = builderCtx.loadTemplate(TEMPLATE_GET_IDS);
             this._helper.addServiceId(classBuilder, serviceIds);
 
             // Build class builder
-            classBuilder
-                    .addAnnotationBuilder(AnnotationMeta.builder()
-                            .setName(AutoService.class.getCanonicalName())
-                            .addArgument(ArgumentMeta.builder()
-                                    .setName("value")
-                                    .setIsString(false)
-                                    .setValue(IService.class.getCanonicalName() + ".class")))
-                    .addImplement(IService.class.getCanonicalName())
-                    .addMethodBuilder(MethodMeta.builder()
-                            .addAnnotationBuilder(AnnotationMeta.builder()
-                                    .setName(AnnotationMeta.OVERRIDE))
-                            .setName(IService.METHOD_GETIDS)
-                            .addModifier(Modifier.PUBLIC)
-                            .setReturnTypeName(IService.METHOD_GETIDS_RETURN_TYPE)
-                            .addCodeBuilder(CodeMeta.builder()
-                                    .setTemplate(tempGetIds)
-                                    .setModel(classBuilder.getTransience(MODEL_GET_IDS))))
-                    .addMethodBuilder(MethodMeta.builder()
-                            .addAnnotationBuilder(AnnotationMeta.builder()
-                                    .setName(AnnotationMeta.OVERRIDE))
-                            .setName(IService.METHOD_AUTOACTIVE)
-                            .addModifier(Modifier.PUBLIC)
-                            .setReturnTypeName(IService.METHOD_AUTOACTIVE_RETURN_TYPE)
-                            .addCodeBuilder(CodeMeta.builder()
-                                    .addRawCode(StringHelper.makeString("return {};", autoActive))));
+            constructService(builderCtx, classBuilder, autoActive);
+//            Template tempGetIds = builderCtx.loadTemplate(TEMPLATE_GET_IDS);
+//            classBuilder
+//                    .addAnnotationBuilder(AnnotationMeta.builder()
+//                            .setName(AutoService.class.getCanonicalName())
+//                            .addArgument(ArgumentMeta.builder()
+//                                    .setName("value")
+//                                    .setIsString(false)
+//                                    .setValue(IService.class.getCanonicalName() + ".class")))
+//                    .addImplement(IService.class.getCanonicalName())
+//                    .addMethodBuilder(MethodMeta.builder()
+//                            .addAnnotationBuilder(AnnotationMeta.builder()
+//                                    .setName(AnnotationMeta.OVERRIDE))
+//                            .setName(IService.METHOD_GETIDS)
+//                            .addModifier(Modifier.PUBLIC)
+//                            .setReturnTypeName(IService.METHOD_GETIDS_RETURN_TYPE)
+//                            .addCodeBuilder(CodeMeta.builder()
+//                                    .setTemplate(tempGetIds)
+//                                    .setModel(classBuilder.getTransience(MODEL_GET_IDS))))
+//                    .addMethodBuilder(MethodMeta.builder()
+//                            .addAnnotationBuilder(AnnotationMeta.builder()
+//                                    .setName(AnnotationMeta.OVERRIDE))
+//                            .setName(IService.METHOD_AUTOACTIVE)
+//                            .addModifier(Modifier.PUBLIC)
+//                            .setReturnTypeName(IService.METHOD_AUTOACTIVE_RETURN_TYPE)
+//                            .addCodeBuilder(CodeMeta.builder()
+//                                    .addRawCode(StringHelper.makeString("return {};", autoActive))));
 //            builderCtx.getLogger().info("End handle annotation {} for class {}",
 //                    annotationType, classElement.getSimpleName().toString());
         });
@@ -128,6 +129,42 @@ public final class ServiceHandler extends AnnotationsHandler {
         Looper.on(serviceTypes).foreach(ids::add);
         Looper.on(serviceIds).foreach(ids::add);
         return ids.toArray(new String[ids.size()]);
+    }
+
+    private void constructService(
+            final IBuilderContext builderCtx,
+            final ClassMeta.Builder classBuilder,
+            final boolean autoActive
+    ) {
+        Template tempGetIds = builderCtx.loadTemplate(TEMPLATE_GET_IDS);
+//        this._helper.addServiceId(classBuilder, serviceIds);
+
+        // Build class builder
+        classBuilder
+                .addAnnotationBuilder(AnnotationMeta.builder()
+                        .setName(AutoService.class.getCanonicalName())
+                        .addArgument(ArgumentMeta.builder()
+                                .setName("value")
+                                .setIsString(false)
+                                .setValue(IService.class.getCanonicalName() + ".class")))
+                .addImplement(IService.class.getCanonicalName())
+                .addMethodBuilder(MethodMeta.builder()
+                        .addAnnotationBuilder(AnnotationMeta.builder()
+                                .setName(AnnotationMeta.OVERRIDE))
+                        .setName(IService.METHOD_GETIDS)
+                        .addModifier(Modifier.PUBLIC)
+                        .setReturnTypeName(IService.METHOD_GETIDS_RETURN_TYPE)
+                        .addCodeBuilder(CodeMeta.builder()
+                                .setTemplate(tempGetIds)
+                                .setModel(classBuilder.getTransience(MODEL_GET_IDS))))
+                .addMethodBuilder(MethodMeta.builder()
+                        .addAnnotationBuilder(AnnotationMeta.builder()
+                                .setName(AnnotationMeta.OVERRIDE))
+                        .setName(IService.METHOD_AUTOACTIVE)
+                        .addModifier(Modifier.PUBLIC)
+                        .setReturnTypeName(IService.METHOD_AUTOACTIVE_RETURN_TYPE)
+                        .addCodeBuilder(CodeMeta.builder()
+                                .addRawCode(StringHelper.makeString("return {};", autoActive))));
     }
 
 //    /**
@@ -175,6 +212,12 @@ public final class ServiceHandler extends AnnotationsHandler {
                 idArr = idList.toArray(new String[idList.size()]);
             }
             tempGetIdsModel.put(VAR_SVC_IDS, idArr);
+        }
+
+        @Override
+        public void becomeService(IBuilderContext builderCtx, ClassMeta.Builder classBuilder, String... serviceIds) {
+            addServiceId(classBuilder, serviceIds);
+            constructService(builderCtx, classBuilder, false);
         }
     }
 }
