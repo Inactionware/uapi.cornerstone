@@ -10,6 +10,7 @@
 package uapi.service.internal;
 
 import uapi.GeneralException;
+import uapi.UapiException;
 import uapi.common.ArgumentChecker;
 import uapi.common.Guarder;
 import uapi.common.IntervalTime;
@@ -18,6 +19,7 @@ import uapi.rx.Looper;
 import uapi.service.ServiceErrors;
 import uapi.service.ServiceException;
 
+import javax.xml.ws.Service;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -101,9 +103,10 @@ public class ServiceActivator {
         }).timeout(timeout).start();
 
         // Assign service active task to handle
-        CompletableFuture<T> future = CompletableFuture.supplyAsync(task);
+        CompletableFuture<ActivateServiceResult<T>> future = CompletableFuture.supplyAsync(task);
+        ActivateServiceResult<T> result;
         try {
-            return future.get(timeout.milliseconds(), TimeUnit.MILLISECONDS);
+            result = future.get(timeout.milliseconds(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException ex) {
             if (ex.getCause() instanceof ServiceException) {
                 throw (ServiceException) ex.getCause();
@@ -118,6 +121,11 @@ public class ServiceActivator {
                         .serviceType(serviceHolder.getService()))
                     .build();
         }
+
+        if (result.exception != null) {
+            throw result.exception;
+        }
+        return result.service;
     }
 
     public void deactivateService(final ServiceHolder serviceHolder) {
@@ -166,7 +174,15 @@ public class ServiceActivator {
                 .foreach(unactivatedService -> constructServiceStack(unactivatedService, svcList));
     }
 
-    private final class ServiceActiveTask<T> implements Supplier<T> {
+    public final class A<T extends ActivateServiceResult<A>> implements Supplier<T> {
+
+        @Override
+        public T get() {
+            return null;
+        }
+    }
+
+    private final class ServiceActiveTask<T> implements Supplier<ActivateServiceResult<T>> {
 
         private final List<UnactivatedService> _svcList;
 
@@ -175,9 +191,10 @@ public class ServiceActivator {
         }
 
         @Override
-        public T get() {
+        public ActivateServiceResult<T> get() {
             int position = 0;
             UnactivatedService unactivatedSvc = null;
+            Exception exception = null;
             try {
                 while (position < this._svcList.size()) {
                     unactivatedSvc = this._svcList.get(position);
@@ -200,17 +217,28 @@ public class ServiceActivator {
                     }
                     position++;
                 }
-                if (unactivatedSvc == null) {
-                    throw ServiceException.builder()
-                            .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
-                            .variables(new ServiceErrors.ServiceActivationFailed()
-                                    .serviceId(unactivatedSvc.serviceId()))
-                            .build();
-                }
+            } catch (Exception ex) {
+                exception = ex;
             } finally {
                 Guarder.by(ServiceActivator.this._lock).run(() -> ServiceActivator.this._tasks.remove(this));
             }
-            return (T) unactivatedSvc.service();
+
+            if (exception != null) {
+                if (exception instanceof ServiceException) {
+                    return new ActivateServiceResult<>((ServiceException) exception);
+                } else {
+                    return new ActivateServiceResult<>(new UapiException(exception));
+                }
+            } else if (unactivatedSvc == null) {
+                ServiceException ex = ServiceException.builder()
+                        .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
+                        .variables(new ServiceErrors.ServiceActivationFailed()
+                                .serviceId(unactivatedSvc.serviceId()))
+                        .build();
+                return new ActivateServiceResult<>(ex);
+            } else {
+                return new ActivateServiceResult(unactivatedSvc.service());
+            }
         }
 
         private UnactivatedService isInHandling(List<UnactivatedService> unactivatedServices) {
@@ -238,6 +266,25 @@ public class ServiceActivator {
         @Override
         public void run() {
             this._svcHolder.deactivate();
+        }
+    }
+
+    private static final class ActivateServiceResult<T> {
+
+        private final T service;
+        private final UapiException exception;
+
+        ActivateServiceResult(final T service) {
+            this(service, null);
+        }
+
+        private ActivateServiceResult(final UapiException exception) {
+            this(null, exception);
+        }
+
+        private ActivateServiceResult(final T service, final UapiException exception) {
+            this.service = service;
+            this.exception = exception;
         }
     }
 }

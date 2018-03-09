@@ -28,7 +28,9 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
 /**
@@ -39,7 +41,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
     private static final String[] tags = new String[] {Tags.REGISTRY };
 
-    private final Lock _svcRepoLock;
+    private final ReadWriteLock _svcRepoLock;
     private final SatisfyDecider _satisfyDecider;
     private final Multimap<String, ServiceHolder> _svcRepo;
     private final List<WeakReference<ISatisfyHook>> _satisfyHooks;
@@ -53,7 +55,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     private final IServiceLoader.IServiceReadyListener _svcReadyListener;
 
     public Registry() {
-        this._svcRepoLock = new ReentrantLock();
+        this._svcRepoLock = new ReentrantReadWriteLock();
         this._svcRepo = LinkedListMultimap.create();
         this._satisfyHooks = new CopyOnWriteArrayList<>();
         this._satisfyDecider = new SatisfyDecider();
@@ -241,7 +243,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             final String tag
     ) {
         ArgumentChecker.notEmpty(tag, "tag");
-        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock).runForResult(() ->
+        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock.readLock()).runForResult(() ->
             Looper.on(this._svcRepo.values())
                     .filter(svcHolder -> CollectionHelper.isContains(svcHolder.serviceTags(), tag))
                     .toList()
@@ -257,7 +259,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             final String tag
     ) {
         ArgumentChecker.notEmpty(tag, "tag");
-        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock).runForResult(() ->
+        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock.readLock()).runForResult(() ->
                 Looper.on(this._svcRepo.values())
                         .filter(svcHolder -> CollectionHelper.isContains(svcHolder.serviceTags(), tag))
                         .toList()
@@ -271,7 +273,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     @Override
     public void deactivateServices(String[] serviceIds) {
         ArgumentChecker.required(serviceIds, "serviceIds");
-        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock).runForResult(() ->
+        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock.readLock()).runForResult(() ->
             Looper.on(this._svcRepo.values())
                 .filter(svcHolder -> CollectionHelper.isContains(serviceIds, svcHolder.getId()))
                 .toList()
@@ -287,7 +289,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     ) {
         List<ServiceHolder> svcHolders;
         try {
-            svcHolders = Guarder.by(this._svcRepoLock).runForResult(() ->
+            svcHolders = Guarder.by(this._svcRepoLock.readLock()).runForResult(() ->
                 Looper.on(this._svcRepo.values())
                     .filter(svcHolder -> svcHolder.getId().equals(serviceId))
                     .toList()
@@ -325,7 +327,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     }
 
     int getCount() {
-        return Guarder.by(this._svcRepoLock).runForResult(this._svcRepo::size);
+        return Guarder.by(this._svcRepoLock.readLock()).runForResult(this._svcRepo::size);
     }
 
     private ILogger getLogger() {
@@ -358,7 +360,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                         this._svcActivator.activateService(svcHolder);
                     }
                 }).foreach(svcHolder -> {
-                    Guarder.by(this._svcRepoLock).run(() -> {
+                    Guarder.by(this._svcRepoLock.readLock()).run(() -> {
                         // Check whether the new register service depends on existing service
                         Looper.on(this._svcRepo.values())
                                 .filter(existingSvc -> svcHolder.isDependsOn(existingSvc.getQualifiedId()))
@@ -367,8 +369,8 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                         Looper.on(this._svcRepo.values())
                                 .filter(existingSvc -> existingSvc.isDependsOn(svcHolder.getQualifiedId()))
                                 .foreach(existingSvc -> existingSvc.setDependency(svcHolder, this._svcActivator));
-                        this._svcRepo.put(svcHolder.getId(), svcHolder);
                     });
+                    Guarder.by(this._svcRepoLock.writeLock()).run(() -> this._svcRepo.put(svcHolder.getId(), svcHolder));
                 });
     }
 
