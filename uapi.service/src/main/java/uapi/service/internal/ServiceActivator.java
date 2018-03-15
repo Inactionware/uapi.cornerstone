@@ -23,6 +23,7 @@ import javax.xml.ws.Service;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -125,6 +126,15 @@ public class ServiceActivator {
         if (result.exception != null) {
             throw result.exception;
         }
+
+        // Need try to activate services which monitored on new activated services
+        Looper.on(svcList)
+                .filter(UnactivatedService::isActivated)
+                .map(UnactivatedService::holder)
+                .filter(ServiceHolder::hasMonitor)
+                .flatmap(svcHolder -> Looper.on(svcHolder.getMonitoredService()))
+                .foreach(this::tryActivateService);
+
         return result.service;
     }
 
@@ -285,6 +295,29 @@ public class ServiceActivator {
         private ActivateServiceResult(final T service, final UapiException exception) {
             this.service = service;
             this.exception = exception;
+        }
+    }
+
+    private static final class NewActivatedServices<T> {
+
+        private final T _svc;
+        private final Queue<ServiceHolder> _activedSvcs;
+
+        private NewActivatedServices(final T service) {
+            this._svc = service;
+            this._activedSvcs = new LinkedList<>();
+        }
+
+        private T service() {
+            return this._svc;
+        }
+
+        private Queue<ServiceHolder> activatedServices() {
+            return this._activedSvcs;
+        }
+
+        private void addActivatedService(final ServiceHolder serviceHolder) {
+            this._activedSvcs.offer(serviceHolder);
         }
     }
 }

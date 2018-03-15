@@ -485,6 +485,19 @@ public class ServiceHolder implements IServiceReference {
         this._injectedSvcs.add(dependSvcHolder);
     }
 
+    boolean hasMonitor() {
+        return this._depNotifiers.size() != 0;
+    }
+
+    ServiceHolder[] getMonitoredService() {
+        if (this._depNotifiers.size() == 0) {
+            return new ServiceHolder[0];
+        }
+        return Looper.on(this._depNotifiers)
+                .map(notifier -> notifier._depSvc)
+                .toArray();
+    }
+
     /**
      * Notify when the service is activate
      */
