@@ -23,6 +23,7 @@ import javax.xml.ws.Service;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -125,6 +126,19 @@ public class ServiceActivator {
         if (result.exception != null) {
             throw result.exception;
         }
+
+        // Need try to activate services which monitored on new activated services
+        try {
+            Looper.on(svcList)
+                    .filter(UnactivatedService::isActivated)
+                    .map(UnactivatedService::holder)
+                    .filter(ServiceHolder::hasMonitor)
+                    .flatmap(svcHolder -> Looper.on(svcHolder.getMonitoredServices()))
+                    .foreach(this::tryActivateService);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
         return result.service;
     }
 

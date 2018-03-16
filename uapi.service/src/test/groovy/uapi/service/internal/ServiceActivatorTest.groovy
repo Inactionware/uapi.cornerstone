@@ -90,9 +90,13 @@ class ServiceActivatorTest extends Specification {
             serviceId() >> 'svc'
             isActivated() >>> [false, true]
             getService() >> svc
+            hasMonitor() >> false
             getUnactivatedServices() >> [Mock(UnactivatedService) {
                 serviceId() >> 'extSvc'
                 isExternalService() >> true
+                holder() >> Mock(ServiceHolder) {
+                    hasMonitor() >> false
+                }
                 dependency() >> Mock(Dependency)
                 isActivated() >> true
             }]
@@ -222,6 +226,9 @@ class ServiceActivatorTest extends Specification {
             dependency() >> extDependency
             isActivated() >>> [false, false, false, true]
             equals(_) >> true
+            holder() >> Mock(ServiceHolder) {
+                hasMonitor() >> false
+            }
         }
         def svc = Mock(Object)
         def svcHolder = Mock(ServiceHolder) {

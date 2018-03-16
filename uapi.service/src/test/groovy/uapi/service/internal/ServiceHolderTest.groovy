@@ -1043,7 +1043,7 @@ class ServiceHolderTest extends Specification {
         then:
         noExceptionThrown()
         0 * svc.onDependencyInject('depId', _)
-        0 * depSvcHolder.addNotifier(_ as ServiceHolder.DependencyNotifier)
+        1 * depSvcHolder.addNotifier(_ as ServiceHolder.DependencyNotifier)
         1 * svc.onDependencyInject('depId', realSvc)
         svcHolder.isResolved()
         svcHolder.isInjected()

@@ -47,6 +47,10 @@ public class UnactivatedService implements IAwaiting {
         return this._dependency;
     }
 
+    public ServiceHolder holder() {
+        return this._svcHolder;
+    }
+
     public void referencedBy(UnactivatedService service) {
         this._refBy = service;
     }
