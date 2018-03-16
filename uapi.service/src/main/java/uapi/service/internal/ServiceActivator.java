@@ -128,12 +128,16 @@ public class ServiceActivator {
         }
 
         // Need try to activate services which monitored on new activated services
-        Looper.on(svcList)
-                .filter(UnactivatedService::isActivated)
-                .map(UnactivatedService::holder)
-                .filter(ServiceHolder::hasMonitor)
-                .flatmap(svcHolder -> Looper.on(svcHolder.getMonitoredService()))
-                .foreach(this::tryActivateService);
+        try {
+            Looper.on(svcList)
+                    .filter(UnactivatedService::isActivated)
+                    .map(UnactivatedService::holder)
+                    .filter(ServiceHolder::hasMonitor)
+                    .flatmap(svcHolder -> Looper.on(svcHolder.getMonitoredServices()))
+                    .foreach(this::tryActivateService);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         return result.service;
     }
@@ -295,29 +299,6 @@ public class ServiceActivator {
         private ActivateServiceResult(final T service, final UapiException exception) {
             this.service = service;
             this.exception = exception;
-        }
-    }
-
-    private static final class NewActivatedServices<T> {
-
-        private final T _svc;
-        private final Queue<ServiceHolder> _activedSvcs;
-
-        private NewActivatedServices(final T service) {
-            this._svc = service;
-            this._activedSvcs = new LinkedList<>();
-        }
-
-        private T service() {
-            return this._svc;
-        }
-
-        private Queue<ServiceHolder> activatedServices() {
-            return this._activedSvcs;
-        }
-
-        private void addActivatedService(final ServiceHolder serviceHolder) {
-            this._activedSvcs.offer(serviceHolder);
         }
     }
 }
