@@ -14,14 +14,17 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
     private final boolean _traceable;
     private ActionHolder _current;
 
-    private final IAnonymousAction<Object, BehaviorEvent> _successAction;
-    private final IAnonymousAction<Exception, BehaviorEvent> _failureAction;
+//    private final IAnonymousAction<Object, BehaviorEvent> _successAction;
+//    private final IAnonymousAction<Exception, BehaviorEvent> _failureAction;
+
+    private final IAction<BehaviorSuccess, BehaviorEvent> _successAction;
+    private final IAction<BehaviorFailure, BehaviorEvent> _failureAction;
 
     Execution(
             final Behavior behavior,
             final int sequence,
-            final IAnonymousAction<Object, BehaviorEvent> successAction,
-            final IAnonymousAction<Exception, BehaviorEvent> failureAction
+            final IAction<BehaviorSuccess, BehaviorEvent> successAction,
+            final IAction<BehaviorFailure, BehaviorEvent> failureAction
     ) {
         ArgumentChecker.required(behavior, "behavior");
         this._id = new ExecutionIdentify(behavior.getId(), sequence);
@@ -68,7 +71,8 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
             if (this._failureAction != null) {
                 BehaviorEvent bEvent = null;
                 try {
-                    bEvent = this._failureAction.accept(ex, executionContext);
+                    BehaviorFailure bFailure = new BehaviorFailure(this._current.action().getId(), output, ex);
+                    bEvent = this._failureAction.process(bFailure, executionContext);
                 } catch (Exception eex) {
                     exception = new GeneralException(eex);
                 }
@@ -80,7 +84,8 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         if (this._successAction != null) {
             BehaviorEvent bEvent = null;
             try {
-                bEvent = this._successAction.accept(output, executionContext);
+                BehaviorSuccess bSuccess = new BehaviorSuccess(output);
+                bEvent = this._successAction.process(bSuccess, executionContext);
             } catch (Exception eex) {
                 exception = new GeneralException(eex);
             }

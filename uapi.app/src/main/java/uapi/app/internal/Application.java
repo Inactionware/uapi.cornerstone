@@ -5,7 +5,6 @@ import uapi.app.*;
 import uapi.behavior.*;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
-import uapi.common.StringHelper;
 import uapi.log.ILogger;
 import uapi.rx.Looper;
 import uapi.service.IRegistry;
@@ -30,8 +29,8 @@ public class Application {
     private static final String BEHAVIOR_STARTUP            = "startUp";
     private static final String BEHAVIOR_SHUTDOWN           = "shutdown";
 
-    private final IAnonymousAction<Exception, BehaviorEvent> DEFAULT_FAILURE_ACTION = (ex, ctx) -> {
-        this._logger.error(ex, "Fail to process behavior - {}", ctx.behaviorName());
+    private final IAnonymousAction<BehaviorFailure, BehaviorEvent> DEFAULT_FAILURE_ACTION = (failure, ctx) -> {
+        this._logger.error(failure.cause(), "Fail to process behavior - {}", ctx.behaviorName());
         return null;
     };
 

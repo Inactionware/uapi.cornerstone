@@ -13,7 +13,7 @@ import uapi.exception.ExceptionBuilder;
 import uapi.exception.ParameterizedException;
 
 /**
- * The root exception for behavior framework
+ * The root cause for behavior framework
  */
 public class BehaviorException extends ParameterizedException {
 

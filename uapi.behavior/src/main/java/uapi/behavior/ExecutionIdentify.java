@@ -10,9 +10,6 @@
 package uapi.behavior;
 
 import uapi.InvalidArgumentException;
-import uapi.behavior.ActionIdentify;
-import uapi.behavior.ActionType;
-import uapi.common.ArgumentChecker;
 
 /**
  * An identify for behavior execution
