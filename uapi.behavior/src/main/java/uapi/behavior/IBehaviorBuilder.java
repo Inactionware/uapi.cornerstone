@@ -59,7 +59,7 @@ public interface IBehaviorBuilder {
      *          The anonymous action
      * @return  The behavior builder self
      * @throws  BehaviorException
-     *          Any exception when set action
+     *          Any cause when set action
      */
     IBehaviorBuilder then(IAnonymousAction<?, ?> action) throws BehaviorException;
 
@@ -72,7 +72,7 @@ public interface IBehaviorBuilder {
      *          The action/behavior label which can be used to navigate to it later
      * @return  The behavior builder self
      * @throws  BehaviorException
-     *          Any exception when set action
+     *          Any cause when set action
      */
     IBehaviorBuilder then(IAnonymousAction<?, ?> action, String label) throws BehaviorException;
 
@@ -83,7 +83,7 @@ public interface IBehaviorBuilder {
      *          The anonymous action
      * @return  The behavior builder self
      * @throws  BehaviorException
-     *          Any exception when set the action
+     *          Any cause when set the action
      */
     IBehaviorBuilder call(IAnonymousCall<?> call) throws BehaviorException;
 
@@ -96,7 +96,7 @@ public interface IBehaviorBuilder {
      *          The action/behavior label which can be used to navigate to it later
      * @return  The behavior builder self
      * @throws  BehaviorException
-     *          Any exception when set the action
+     *          Any cause when set the action
      */
     IBehaviorBuilder call(IAnonymousCall<?> call, String label) throws BehaviorException;
 
@@ -107,7 +107,9 @@ public interface IBehaviorBuilder {
      *          The action which will be invoked on behavior successful
      * @return  The behavior builder self
      */
-    IBehaviorBuilder onSuccess(IAnonymousAction<Object, BehaviorEvent> action);
+    IBehaviorBuilder onSuccess(IAnonymousAction<BehaviorSuccess, BehaviorEvent> action);
+
+    IBehaviorBuilder onSuccess(ActionIdentify actionId);
 
     /**
      * Invoke the action when the behavior is executed failed
@@ -116,7 +118,9 @@ public interface IBehaviorBuilder {
      *          The action which will be invoked on behavior failed
      * @return  The behavior builder self
      */
-    IBehaviorBuilder onFailure(IAnonymousAction<Exception, BehaviorEvent> action);
+    IBehaviorBuilder onFailure(IAnonymousAction<BehaviorFailure, BehaviorEvent> action);
+
+    IBehaviorBuilder onFailure(ActionIdentify actionId);
 
     /**
      * Get navigator which associated with this behavior builder

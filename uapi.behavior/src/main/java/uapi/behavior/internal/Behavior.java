@@ -43,8 +43,11 @@ public class Behavior<I, O>
 
     private Functionals.Evaluator _lastEvaluator;
 
-    private IAnonymousAction<Object, BehaviorEvent> _successAction;
-    private IAnonymousAction<Exception, BehaviorEvent> _failureAction;
+//    private IAnonymousAction<Object, BehaviorEvent> _successAction;
+//    private IAnonymousAction<Exception, BehaviorEvent> _failureAction;
+
+    private IAction<BehaviorSuccess, BehaviorEvent> _successAction;
+    private IAction<BehaviorFailure, BehaviorEvent> _failureAction;
 
     Behavior(
             final Responsible responsible,
@@ -207,21 +210,85 @@ public class Behavior<I, O>
 
     @Override
     public IBehaviorBuilder onSuccess(
-            final IAnonymousAction<Object, BehaviorEvent> action
+            final IAnonymousAction<BehaviorSuccess, BehaviorEvent> action
     ) {
         ensureNotBuilt();
         ArgumentChecker.required(action, "action");
-        this._successAction = action;
+        if (this._successAction != null) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.SUCCESS_ACTION_EXISTS)
+                    .variables(new BehaviorErrors.FailureActionExists()
+                            .behaviorId(this._actionId))
+                    .build();
+        }
+        this._successAction = new AnonymousAction<>(action);
+        return this;
+    }
+
+    @Override
+    public IBehaviorBuilder onSuccess(
+            final ActionIdentify actionId
+    ) {
+        ensureNotBuilt();
+        ArgumentChecker.required(actionId, "actionId");
+        if (this._successAction != null) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.SUCCESS_ACTION_EXISTS)
+                    .variables(new BehaviorErrors.FailureActionExists()
+                            .behaviorId(this._actionId))
+                    .build();
+        }
+        IAction<?, ?> action = this._actionRepo.get(actionId);
+        if (action == null) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
+                    .variables(new BehaviorErrors.ActionNotFound()
+                            .actionId(actionId))
+                    .build();
+        }
+        this._successAction = (IAction<BehaviorSuccess, BehaviorEvent>) action;
         return this;
     }
 
     @Override
     public IBehaviorBuilder onFailure(
-            final IAnonymousAction<Exception, BehaviorEvent> action
+            final IAnonymousAction<BehaviorFailure, BehaviorEvent> action
     ) {
         ensureNotBuilt();
         ArgumentChecker.required(action, "action");
-        this._failureAction = action;
+        if (this._failureAction != null) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.FAILURE_ACTION_EXISTS)
+                    .variables(new BehaviorErrors.FailureActionExists()
+                            .behaviorId(this._actionId))
+                    .build();
+        }
+        this._failureAction = new AnonymousAction<>(action);
+        return this;
+    }
+
+    @Override
+    public IBehaviorBuilder onFailure(
+            final ActionIdentify actionId
+    ) {
+        ensureNotBuilt();
+        ArgumentChecker.required(actionId, "actionId");
+        if (this._failureAction != null) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.FAILURE_ACTION_EXISTS)
+                    .variables(new BehaviorErrors.FailureActionExists()
+                            .behaviorId(this._actionId))
+                    .build();
+        }
+        IAction<?, ?> action = this._actionRepo.get(actionId);
+        if (action == null) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
+                    .variables(new BehaviorErrors.ActionNotFound()
+                            .actionId(actionId))
+                    .build();
+        }
+        this._failureAction = (IAction<BehaviorFailure, BehaviorEvent>) action;
         return this;
     }
 

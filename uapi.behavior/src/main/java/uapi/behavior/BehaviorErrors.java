@@ -38,6 +38,8 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int DUPLICATED_RESPONSIBLE_NAME     = 14;
     public static final int UNSUPPORTED_BEHAVIOR_EVENT_TYPE = 15;
     public static final int UNSUPPORTED_INJECTED_SERVICE    = 16;
+    public static final int FAILURE_ACTION_EXISTS           = 17;
+    public static final int SUCCESS_ACTION_EXISTS           = 18;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -59,6 +61,8 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(DUPLICATED_RESPONSIBLE_NAME, DuplicatedResponsibleName.KEY);
         keyCodeMapping.put(UNSUPPORTED_BEHAVIOR_EVENT_TYPE, UnsupportedBehaviorTraceEventType.KEY);
         keyCodeMapping.put(UNSUPPORTED_INJECTED_SERVICE, UnsupportedInjectedService.KEY);
+        keyCodeMapping.put(FAILURE_ACTION_EXISTS, FailureActionExists.KEY);
+        keyCodeMapping.put(SUCCESS_ACTION_EXISTS, SuccessActionExists.KEY);
     }
 
     public BehaviorErrors() {
@@ -187,7 +191,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     }
 
     /**
-     * Class for action label is bind exception.
+     * Class for action label is bind cause.
      * Error string template:
      *      The label [{}] has been bind to action [{}]
      */
@@ -484,6 +488,48 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._injectSvc, this._injectedSvc };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The behavior's failure action is specified - {}
+     */
+    public static final class FailureActionExists extends IndexedParameters<FailureActionExists> {
+
+        private static final String KEY = "FailureActionExists";
+
+        private ActionIdentify _behaviorId;
+
+        public FailureActionExists behaviorId(ActionIdentify behaviorId) {
+            this._behaviorId = behaviorId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._behaviorId };
+        }
+    }
+
+    /**
+     * Error string template
+     *      The behavior's success action is specified - {}
+     */
+    public static final class SuccessActionExists extends IndexedParameters<SuccessActionExists> {
+
+        public static final String KEY = "SuccessActionExists";
+
+        private ActionIdentify _behaviorId;
+
+        public SuccessActionExists behaviorId(ActionIdentify behaviorId) {
+            this._behaviorId = behaviorId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._behaviorId };
         }
     }
 }

@@ -55,9 +55,9 @@ public abstract class BehaviorTraceEvent extends BehaviorEvent {
     }
 
     /**
-     * Get exception object if the behavior execution failed.
+     * Get cause object if the behavior execution failed.
      *
-     * @return  The exception object or null
+     * @return  The cause object or null
      */
     public Exception exception() {
         return (Exception) get(KEY_EX);
