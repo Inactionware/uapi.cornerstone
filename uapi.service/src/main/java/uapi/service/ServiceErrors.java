@@ -45,6 +45,7 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
     public static final int MULTIPLE_SERVICE_FOUND              = 18;
     public static final int NO_SERVICE_FOUND                    = 19;
     public static final int SERVICE_DEACTIVATION_TASK_TIMED_OUT = 20;
+    public static final int UNSUPPORTED_INJECTION                 = 21;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -70,6 +71,7 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         keyCodeMapping.put(MULTIPLE_SERVICE_FOUND, MultipleServiceFound.KEY);
         keyCodeMapping.put(NO_SERVICE_FOUND, NoServiceFound.KEY);
         keyCodeMapping.put(SERVICE_DEACTIVATION_TASK_TIMED_OUT, ServiceDeactivationTaskTimedOut.KEY);
+        keyCodeMapping.put(UNSUPPORTED_INJECTION, UnsupportedInjection.KEY);
     }
 
     @Override
@@ -529,6 +531,26 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         }
 
         @Override
+        public Object[] get() {
+            return new Object[] { this._svcId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The service does not support injection - {}
+     */
+    public static final class UnsupportedInjection extends IndexedParameters<UnsupportedInjection> {
+
+        private static final String KEY = "UnsupportInjection";
+
+        private String _svcId;
+
+        public UnsupportedInjection serviceId(String serviceId) {
+            this._svcId = serviceId;
+            return this;
+        }
+
         public Object[] get() {
             return new Object[] { this._svcId };
         }
