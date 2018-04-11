@@ -12,6 +12,7 @@ package uapi.service;
 import uapi.InvalidArgumentException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * A registry for storing service, it has following features:
@@ -88,7 +89,9 @@ public interface IRegistry {
      * @throws  ServiceException
      *          The service can't be found
      */
-    <T> T findService(final String serviceId) throws ServiceException;
+    <T> T findService(
+            final String serviceId
+    ) throws ServiceException;
 
     /**
      * Find service by specific service type
@@ -101,7 +104,9 @@ public interface IRegistry {
      * @throws  ServiceException
      *          The service can't be found
      */
-    <T> T findService(final Class<T> serviceType) throws ServiceException;
+    <T> T findService(
+            final Class<T> serviceType
+    ) throws ServiceException;
 
     /**
      * Find service from specified location
@@ -115,7 +120,20 @@ public interface IRegistry {
      * @throws  ServiceException
      *          The service can't be found
      */
-    <T> T findService(final String serviceId, final String serviceFrom) throws ServiceException;
+    <T> T findService(
+            final String serviceId,
+            final String serviceFrom
+    ) throws ServiceException;
+
+    <T> T findService(
+            final String serviceId,
+            final Map<String, ?> attributes
+    ) throws ServiceException;
+
+    <T> T findService(
+            final Class serviceType,
+            final Map<String, ?> attributes
+    ) throws ServiceException;
 
     /**
      * Find multiple service by specific service id

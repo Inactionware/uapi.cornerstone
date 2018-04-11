@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * A prototype can create new instance from its self
  */
-public interface IPrototype {
+public interface IPrototype extends IService {
 
     /**
      * Retrieve attributes which is required to create new instance from prototype.
@@ -30,5 +30,5 @@ public interface IPrototype {
      *          The attribute which is used in new instance
      * @return  The created instance
      */
-    Object newInstance(Map<String, ?> attributes);
+    IInstance newInstance(Map<String, ?> attributes);
 }

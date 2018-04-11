@@ -45,7 +45,8 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
     public static final int MULTIPLE_SERVICE_FOUND              = 18;
     public static final int NO_SERVICE_FOUND                    = 19;
     public static final int SERVICE_DEACTIVATION_TASK_TIMED_OUT = 20;
-    public static final int UNSUPPORTED_INJECTION                 = 21;
+    public static final int NOT_A_PROTOTYPE_SERVICE             = 21;
+    public static final int INSTANCE_SERVCICE_REGISTER_FAILED   = 22;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -71,7 +72,8 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         keyCodeMapping.put(MULTIPLE_SERVICE_FOUND, MultipleServiceFound.KEY);
         keyCodeMapping.put(NO_SERVICE_FOUND, NoServiceFound.KEY);
         keyCodeMapping.put(SERVICE_DEACTIVATION_TASK_TIMED_OUT, ServiceDeactivationTaskTimedOut.KEY);
-        keyCodeMapping.put(UNSUPPORTED_INJECTION, UnsupportedInjection.KEY);
+        keyCodeMapping.put(NOT_A_PROTOTYPE_SERVICE, NotAPrototypeService.KEY);
+        keyCodeMapping.put(INSTANCE_SERVCICE_REGISTER_FAILED, InstanceServiceRegisterFailed.KEY);
     }
 
     @Override
@@ -538,21 +540,48 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
 
     /**
      * Error string template:
-     *      The service does not support injection - {}
+     *      The service is not a prototype service - {}
      */
-    public static final class UnsupportedInjection extends IndexedParameters<UnsupportedInjection> {
+    public static final class NotAPrototypeService extends IndexedParameters<NotAPrototypeService> {
 
-        private static final String KEY = "UnsupportInjection";
+        private static final String KEY = "NotAPrototypeService";
 
         private String _svcId;
 
-        public UnsupportedInjection serviceId(String serviceId) {
+        public NotAPrototypeService serviceId(String serviceId) {
             this._svcId = serviceId;
             return this;
         }
 
         public Object[] get() {
             return new Object[] { this._svcId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Register instance service fail - {}, prototype service - {}
+     */
+    public static final class InstanceServiceRegisterFailed extends IndexedParameters<InstanceServiceRegisterFailed> {
+
+        private static final String KEY = "InstanceServiceRegisterFailed";
+
+        private String _instSvcId;
+        private String _prototypeSvcId;
+
+        public InstanceServiceRegisterFailed instanceServiceId(String serviceId) {
+            this._instSvcId = serviceId;
+            return this;
+        }
+
+        public InstanceServiceRegisterFailed prototypeServiceId(String serviceId) {
+            this._prototypeSvcId = serviceId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._instSvcId, this._prototypeSvcId };
         }
     }
 }
