@@ -116,7 +116,7 @@ public interface IRegistry {
      *          Where is the service from
      * @param   <T>
      *          The service type
-     * @return  The service instance or null if not such service available
+     * @return  The service instance
      * @throws  ServiceException
      *          The service can't be found
      */
@@ -125,11 +125,37 @@ public interface IRegistry {
             final String serviceFrom
     ) throws ServiceException;
 
+    /**
+     * Find instance service by service id and specific attributes
+     *
+     * @param   serviceId
+     *          The prototype service id
+     * @param   attributes
+     *          The attributes which used for creating instance service
+     * @param   <T>
+     *          The service type
+     * @return  The instance service
+     * @throws  ServiceException
+     *          The prototype service can't be found or creating instance service failed
+     */
     <T> T findService(
             final String serviceId,
             final Map<String, ?> attributes
     ) throws ServiceException;
 
+    /**
+     * Find instance service by service type and specific attributes
+     *
+     * @param   serviceType
+     *          The prototype service type
+     * @param   attributes
+     *          The attributes which used for creating instance service
+     * @param   <T>
+     *          The service type
+     * @return  The instance service
+     * @throws  ServiceException
+     *          The prototype service can't be found or creating instance service failed
+     */
     <T> T findService(
             final Class serviceType,
             final Map<String, ?> attributes

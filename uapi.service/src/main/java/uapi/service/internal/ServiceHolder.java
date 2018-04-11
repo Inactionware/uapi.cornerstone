@@ -32,7 +32,7 @@ public class ServiceHolder implements IServiceReference {
     private final String _from;
     private QualifiedServiceId _qualifiedSvcId;
     private final Multimap<Dependency, ServiceHolder> _dependencies;
-    protected final ISatisfyHook _satisfyHook;
+    private final ISatisfyHook _satisfyHook;
     private final String[] _tags;
 
     private final List<ServiceHolder> _injectedSvcs = new LinkedList<>();
@@ -214,6 +214,13 @@ public class ServiceHolder implements IServiceReference {
                 .filter(thisDependency -> dependency.getServiceId().isAssignTo(thisDependency.getServiceId()))
                 .first(null);
         return dep != null;
+    }
+
+    public void replaceDependency(
+            PrototypeServiceHolder prototype,
+            ServiceHolder instance
+    ) {
+        // TODO: replace prototype with instance
     }
 
     public void setDependency(

@@ -9,10 +9,13 @@
 
 package uapi.service.internal
 
+import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.InvalidArgumentException
 import uapi.service.Dependency
 import uapi.service.IInjectable
+import uapi.service.IInstance
+import uapi.service.IPrototype
 import uapi.service.IRegistry
 import uapi.service.ISatisfyHook
 import uapi.service.IService
@@ -126,6 +129,62 @@ class RegistryTest extends Specification {
         registry.findService("3") == svc2
         registry.findService("4") == svc2
         registry.getCount() == 4
+    }
+
+    def 'Test find prototype instance service'() {
+        given:
+        def instance = Mock(IInstance) {
+            getIds() >> ['2']
+        }
+        def prototype = Mock(IPrototype) {
+            getIds() >> ['1']
+            1 * newInstance(_ as Map) >> instance
+        }
+
+        when:
+        registry.register(prototype)
+
+        then:
+        registry.getCount() == 1
+        registry.findService('1', Mock(Map)) == instance
+        registry.getCount() == 2
+        registry.findService('2') == instance
+    }
+
+    @Ignore
+    def 'Test a service depends on a prototype service'() {
+        given:
+        def instance = Mock(IInstance) {
+            getIds() >> ['inst']
+        }
+        def prototype = Mock(IPrototype) {
+            getIds() >> ['proto']
+            1 * newInstance(_ as Map) >> instance
+        }
+        def svc = Mock(IInjectableService) {
+            getIds() >> ['svc']
+            getDependencies() >> [Mock(Dependency) {
+                getServiceId() >> Mock(QualifiedServiceId) {
+                    getId() >> 'proto'
+                    getFrom() >> 'Local'
+                    isExternalService() >> false
+                }
+                getServiceType() >> IPrototype.class
+                isSingle() >> true
+                isOptional() >> false
+            }]
+            1 * injectObject(_)
+        }
+
+        when:
+        registry.register(prototype, svc)
+        def rtnSvc = registry.findService('svc')
+
+        then:
+        noExceptionThrown()
+        registry.getCount() == 3
+        rtnSvc == svc
+
     }
 
     def 'Test find service by id and from'() {

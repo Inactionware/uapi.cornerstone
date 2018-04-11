@@ -27,9 +27,7 @@ import uapi.log.ILogger;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
@@ -411,17 +409,29 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                         this._svcActivator.activateService(svcHolder);
                     }
                 }).foreach(svcHolder -> {
-                    Map<String, ?> attributes = new HashMap<>();
+                    List<ServiceHolder> hostSvcs = new ArrayList<>();
+                    // Check whether the new register service depends on existing service
                     Guarder.by(this._svcRepoLock.readLock()).run(() -> {
-                        // Check whether the new register service depends on existing service
+
                         Looper.on(this._svcRepo.values())
                                 .filter(existingSvc -> svcHolder.isDependsOn(existingSvc.getQualifiedId()))
-                                .foreach(existingSvc -> setDependency(svcHolder, existingSvc, initInstanceAttributes(svcHolder.getId())));
-                        // Check whether existing service depends on the new register service
+                                .foreach(hostSvcs::add);
+//                                .foreach(existingSvc -> setDependency(svcHolder, existingSvc, initInstanceAttributes(svcHolder.getId())));
+
+                    });
+                    Looper.on(hostSvcs).foreach(existingSvc -> setDependency(svcHolder, existingSvc, initInstanceAttributes(svcHolder.getId())));
+                    hostSvcs.clear();
+
+                    // Check whether existing service depends on the new register service
+                    Guarder.by(this._svcRepoLock.readLock()).run(() -> {
                         Looper.on(this._svcRepo.values())
                                 .filter(existingSvc -> existingSvc.isDependsOn(svcHolder.getQualifiedId()))
-                                .foreach(existingSvc -> setDependency(existingSvc, svcHolder, initInstanceAttributes(existingSvc.getId())));
+                                .foreach(hostSvcs::add);
+//                                .foreach(existingSvc -> setDependency(existingSvc, svcHolder, initInstanceAttributes(existingSvc.getId())));
                     });
+                    Looper.on(hostSvcs).foreach(existingSvc -> setDependency(existingSvc, svcHolder, initInstanceAttributes(existingSvc.getId())));
+                    hostSvcs.clear();
+
                     Guarder.by(this._svcRepoLock.writeLock()).run(() -> this._svcRepo.put(svcHolder.getId(), svcHolder));
                 });
 
