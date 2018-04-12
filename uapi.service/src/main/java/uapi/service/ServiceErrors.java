@@ -46,7 +46,7 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
     public static final int NO_SERVICE_FOUND                    = 19;
     public static final int SERVICE_DEACTIVATION_TASK_TIMED_OUT = 20;
     public static final int NOT_A_PROTOTYPE_SERVICE             = 21;
-    public static final int INSTANCE_SERVCICE_REGISTER_FAILED   = 22;
+    public static final int INSTANCE_SERVICE_REGISTER_FAILED    = 22;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -73,7 +73,7 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         keyCodeMapping.put(NO_SERVICE_FOUND, NoServiceFound.KEY);
         keyCodeMapping.put(SERVICE_DEACTIVATION_TASK_TIMED_OUT, ServiceDeactivationTaskTimedOut.KEY);
         keyCodeMapping.put(NOT_A_PROTOTYPE_SERVICE, NotAPrototypeService.KEY);
-        keyCodeMapping.put(INSTANCE_SERVCICE_REGISTER_FAILED, InstanceServiceRegisterFailed.KEY);
+        keyCodeMapping.put(INSTANCE_SERVICE_REGISTER_FAILED, InstanceServiceRegisterFailed.KEY);
     }
 
     @Override

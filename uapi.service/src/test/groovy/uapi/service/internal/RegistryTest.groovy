@@ -9,7 +9,6 @@
 
 package uapi.service.internal
 
-import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.InvalidArgumentException
 import uapi.service.Dependency
@@ -135,6 +134,7 @@ class RegistryTest extends Specification {
         given:
         def instance = Mock(IInstance) {
             getIds() >> ['2']
+            prototypeId() >> '1'
         }
         def prototype = Mock(IPrototype) {
             getIds() >> ['1']
@@ -151,11 +151,11 @@ class RegistryTest extends Specification {
         registry.findService('2') == instance
     }
 
-    @Ignore
     def 'Test a service depends on a prototype service'() {
         given:
         def instance = Mock(IInstance) {
             getIds() >> ['inst']
+            prototypeId() >> 'proto'
         }
         def prototype = Mock(IPrototype) {
             getIds() >> ['proto']
@@ -168,6 +168,7 @@ class RegistryTest extends Specification {
                     getId() >> 'proto'
                     getFrom() >> 'Local'
                     isExternalService() >> false
+                    isAssignTo(_ as QualifiedServiceId) >> true
                 }
                 getServiceType() >> IPrototype.class
                 isSingle() >> true

@@ -223,7 +223,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         ServiceHolder instanceHolder = findServiceHolder(instance.getIds()[0]);
         if (instanceHolder == null) {
             throw ServiceException.builder()
-                    .errorCode(ServiceErrors.INSTANCE_SERVCICE_REGISTER_FAILED)
+                    .errorCode(ServiceErrors.INSTANCE_SERVICE_REGISTER_FAILED)
                     .variables(new ServiceErrors.InstanceServiceRegisterFailed()
                             .instanceServiceId(instance.getIds()[0])
                             .prototypeServiceId(svcHolder.getId()))
@@ -401,10 +401,17 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         }
 
         Looper.on(svcIds)
-                .map(svcId -> svc instanceof IPrototype ?
-                        new PrototypeServiceHolder(svcFrom, (IPrototype) svc, svcId, dependencies, this._satisfyDecider) :
-                        new ServiceHolder(svcFrom, svc, svcId, dependencies, this._satisfyDecider))
-                .next(svcHolder -> {
+                .map(svcId -> {
+                    ServiceHolder svcHolder;
+                    if (svc instanceof IPrototype) {
+                        svcHolder = new PrototypeServiceHolder(svcFrom, (IPrototype) svc, svcId, dependencies, this._satisfyDecider);
+                    } else if (svc instanceof IInstance) {
+                        svcHolder = new InstanceServiceHolder(svcFrom, (IInstance) svc, svcId, dependencies, this._satisfyDecider);
+                    } else {
+                        svcHolder = new ServiceHolder(svcFrom, svc, svcId, dependencies, this._satisfyDecider);
+                    }
+                    return svcHolder;
+                }).next(svcHolder -> {
                     if (svcHolder.getQualifiedId().isExternalService()) {
                         this._svcActivator.activateService(svcHolder);
                     }
@@ -481,7 +488,10 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             if (instanceHolder == null) {
                 throw new GeneralException("Register instance service is failed, prototype service is - {}", dependencySvc.getId());
             }
-            hostSvc.setDependency(instanceHolder, this._svcActivator);
+            if (! (instanceHolder instanceof InstanceServiceHolder)) {
+                throw new GeneralException("Instance service should wrap by InstanceServiceHolder");
+            }
+            hostSvc.setInstanceDependency((InstanceServiceHolder) instanceHolder, this._svcActivator);
         } else {
             hostSvc.setDependency(dependencySvc, this._svcActivator);
         }

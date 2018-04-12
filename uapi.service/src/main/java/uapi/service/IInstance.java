@@ -17,7 +17,7 @@ public interface IInstance extends IService {
 
     Map<String, ?> attributes();
 
-    String[] prototypeIds();
+    String prototypeId();
 
     @Override
     default String[] getIds() {
@@ -26,9 +26,7 @@ public interface IInstance extends IService {
                 .map(Map.Entry::getValue)
                 .map(Object::toString)
                 .foreach(str -> buffer.append("_").append(str));
-        String[] ids = new String[prototypeIds().length];
-        Looper.on(prototypeIds()).foreachWithIndex((idx, str) -> ids[idx] = str + buffer.toString());
-        return ids;
+        return new String[] { prototypeId() + buffer.toString() };
     }
 
     @Override

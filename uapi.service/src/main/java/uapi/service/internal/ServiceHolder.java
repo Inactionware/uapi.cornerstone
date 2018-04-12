@@ -216,11 +216,25 @@ public class ServiceHolder implements IServiceReference {
         return dep != null;
     }
 
-    public void replaceDependency(
-            PrototypeServiceHolder prototype,
-            ServiceHolder instance
+    public void setInstanceDependency(
+            final InstanceServiceHolder instSvcHolder,
+            final ServiceActivator serviceActivator
     ) {
-        // TODO: replace prototype with instance
+        ArgumentChecker.required(instSvcHolder, "instSvcHolder");
+
+        Dependency dependency = findDependencies(instSvcHolder.prototypeId());
+        if (dependency == null) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.NOT_A_DEPENDENCY)
+                    .variables(new ServiceErrors.NotDependency()
+                            .thisServiceId(this._qualifiedSvcId)
+                            .dependencyServiceId(instSvcHolder.getQualifiedId()))
+                    .build();
+        }
+        this._dependencies.removeAll(dependency);
+        this._dependencies.put(dependency, instSvcHolder);
+
+        innerSetDependency(instSvcHolder, serviceActivator);
     }
 
     public void setDependency(
@@ -244,16 +258,37 @@ public class ServiceHolder implements IServiceReference {
 
         // Note: we have to try activate if dependency notifiers are not empty
         // Since the notifier means that some other service is wait for this service
+//        if (! isActivated() && this._depNotifiers.size() == 0) {
+//            return;
+//        }
+//
+//        if (service.isActivated()) {
+//            injectDependency(service);
+//        } else {
+//            service.addNotifier(new DependencyNotifier());
+//            if (serviceActivator.tryActivateService(service).isPresent()) {
+//                injectDependency(service);
+//            }
+//        }
+        innerSetDependency(service, serviceActivator);
+    }
+
+    private void innerSetDependency(
+            final ServiceHolder dependency,
+            final ServiceActivator serviceActivator
+    ) {
+        // Note: we have to try activate if dependency notifiers are not empty
+        // Since the notifier means that some other service is wait for this service
         if (! isActivated() && this._depNotifiers.size() == 0) {
             return;
         }
 
-        if (service.isActivated()) {
-            injectDependency(service);
+        if (dependency.isActivated()) {
+            injectDependency(dependency);
         } else {
-            service.addNotifier(new DependencyNotifier());
-            if (serviceActivator.tryActivateService(service).isPresent()) {
-                injectDependency(service);
+            dependency.addNotifier(new DependencyNotifier());
+            if (serviceActivator.tryActivateService(dependency).isPresent()) {
+                injectDependency(dependency);
             }
         }
     }
