@@ -20,6 +20,7 @@ import uapi.service.annotation.Service
 
 import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.util.Elements
 
 /**
  * Unit test for ServiceHandler
@@ -145,6 +146,13 @@ class ServiceHandlerTest extends Specification {
             findClassBuilder(classElem) >> classBudr
             loadTemplate(_) >> Mock(Template)
             getLogger() >> Mock(LogSupport)
+            getElementUtils() >> Mock(Elements) {
+                getPackageOf(classElem) >> Mock(PackageElement) {
+                    getQualifiedName() >> Mock(Name) {
+                        toString() >> pkg
+                    }
+                }
+            }
         }
         def svcHandler = new ServiceHandler()
 
@@ -156,8 +164,8 @@ class ServiceHandlerTest extends Specification {
         noExceptionThrown()
 
         where:
-        elemKind                | elemName
-        ElementKind.CLASS       | 'name'
+        elemKind                | elemName  | pkg
+        ElementKind.CLASS       | 'name'    | 'com.ee'
     }
 
     @Service

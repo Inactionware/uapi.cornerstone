@@ -9,6 +9,8 @@
 
 package uapi.service.annotation;
 
+import uapi.service.ServiceType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -41,4 +43,11 @@ public @interface Service {
      * @return  True means activated the service otherwise do nothing
      */
     boolean autoActive() default false;
+
+    /**
+     * Indicate type of the service
+     *
+     * @return  The service type
+     */
+    ServiceType type() default ServiceType.Singleton;
 }

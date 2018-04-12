@@ -15,6 +15,9 @@ import java.util.Map;
 
 public interface IInstance extends IService {
 
+    String METHOD_PROTOTYPE_ID  = "prototypeId";
+    String METHOD_ATTRIBUTES    = "attributes";
+
     Map<String, ?> attributes();
 
     String prototypeId();
