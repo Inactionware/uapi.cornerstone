@@ -16,6 +16,7 @@ import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.LogSupport
 import uapi.service.IServiceHandlerHelper
+import uapi.service.annotation.Attribute
 import uapi.service.annotation.Service
 
 import javax.lang.model.element.*
@@ -40,7 +41,7 @@ class ServiceHandlerTest extends Specification {
         def svcHandle = new ServiceHandler()
 
         then:
-        svcHandle.getOrderedAnnotations() == [Service.class] as Class[]
+        svcHandle.getOrderedAnnotations() == [Service.class, Attribute.class] as Class[]
     }
 
     def 'Test helper on add new service id'() {

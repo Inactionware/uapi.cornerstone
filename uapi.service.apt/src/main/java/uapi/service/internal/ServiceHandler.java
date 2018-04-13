@@ -19,6 +19,7 @@ import uapi.common.ArgumentChecker;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.*;
+import uapi.service.annotation.Attribute;
 import uapi.service.annotation.Service;
 
 import javax.lang.model.element.*;
@@ -33,7 +34,9 @@ import java.util.*;
 public final class ServiceHandler extends AnnotationsHandler {
 
     @SuppressWarnings("unchecked")
-    private static final Class<? extends Annotation>[] orderedAnnotations = new Class[] { Service.class };
+    private static final Class<? extends Annotation>[] orderedAnnotations = new Class[] {
+            Service.class, Attribute.class
+    };
 
     private static final String TEMPLATE_GET_IDS            = "template/getIds_method.ftl";
     private static final String TEMPLATE_REQ_ATTRS          = "template/requiredAttributes_method.ftl";
@@ -43,6 +46,7 @@ public final class ServiceHandler extends AnnotationsHandler {
     private static final String MODEL_GET_IDS               = "ModelGetId";
     private static final String MODEL_REQ_ATTRS             = "ModelRequiredAttributes";
     private static final String VAR_SVC_IDS                 = "serviceIds";
+    private static final String VAR_ATTRS                   = "attrs";
 
     private final ServiceHandlerHelper _helper = new ServiceHandlerHelper();
 
@@ -60,6 +64,44 @@ public final class ServiceHandler extends AnnotationsHandler {
     protected void handleAnnotatedElements(
             final IBuilderContext builderCtx,
             final Class<? extends Annotation> annotationType,
+            final Set<? extends Element> elements
+    ) throws GeneralException {
+        if (annotationType.equals(Service.class)) {
+            handleServiceAnnotation(builderCtx, elements);
+        } else if (annotationType.equals(Attribute.class)) {
+            handleAttributeAnnotation(builderCtx, elements);
+        } else {
+            throw new GeneralException("Unsupported annotation - {}", annotationType.getClass().getName());
+        }
+    }
+
+    private void handleAttributeAnnotation(
+            final IBuilderContext builderCtx,
+            final Set<? extends Element> elements
+    ) throws GeneralException {
+        Looper.on(elements).foreach(fieldElement -> {
+            if (fieldElement.getKind() != ElementKind.FIELD) {
+                throw new GeneralException(
+                        "The Attribute annotation only can be applied on field - {}",
+                        fieldElement.getSimpleName().toString());
+            }
+            builderCtx.checkModifiers(fieldElement, Attribute.class, Modifier.PRIVATE, Modifier.FINAL);
+
+            Attribute annoAttr = fieldElement.getAnnotation(Attribute.class);
+            Element classElement = fieldElement.getEnclosingElement();
+            ClassMeta.Builder instClassBuilder = builderCtx.findClassBuilder(classElement);
+            Map<String, Object> modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
+            List<String> requiredAttrs = (List<String>) modelReqAttrs.get(VAR_ATTRS);
+            if (requiredAttrs == null) {
+                requiredAttrs = new ArrayList<>();
+                modelReqAttrs.put(VAR_ATTRS, requiredAttrs);
+            }
+            requiredAttrs.add(annoAttr.value());
+        });
+    }
+
+    private void handleServiceAnnotation(
+            final IBuilderContext builderCtx,
             final Set<? extends Element> elements
     ) throws GeneralException {
         elements.forEach(classElement -> {
