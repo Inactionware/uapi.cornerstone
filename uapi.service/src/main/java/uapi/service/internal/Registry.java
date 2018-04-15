@@ -471,7 +471,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         if (attributes == null) {
             attributes = new HashMap<>();
         }
-        attributes.put("serveFor", refBy);
+        attributes.put(GenericAttributes.SERVE_FOR, refBy);
         return attributes;
     }
 

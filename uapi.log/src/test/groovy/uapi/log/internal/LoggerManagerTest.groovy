@@ -16,6 +16,7 @@ import uapi.codegen.IGenerated
 /**
  * Unit test for LoggerManager
  */
+@spock.lang.Ignore
 class LoggerManagerTest extends Specification {
 
     def 'Test createService'() {

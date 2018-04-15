@@ -88,15 +88,19 @@ public final class ServiceHandler extends AnnotationsHandler {
             builderCtx.checkModifiers(fieldElement, Attribute.class, Modifier.PRIVATE, Modifier.FINAL);
 
             Attribute annoAttr = fieldElement.getAnnotation(Attribute.class);
+            String attrName = annoAttr.value();
+            String attrField = fieldElement.getSimpleName().toString();
+            String attrFieldType = fieldElement.asType().toString();
             Element classElement = fieldElement.getEnclosingElement();
             ClassMeta.Builder instClassBuilder = builderCtx.findClassBuilder(classElement);
             Map<String, Object> modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
-            List<String> requiredAttrs = (List<String>) modelReqAttrs.get(VAR_ATTRS);
+            List<AttributeMode> requiredAttrs = (List<AttributeMode>) modelReqAttrs.get(VAR_ATTRS);
             if (requiredAttrs == null) {
                 requiredAttrs = new ArrayList<>();
                 modelReqAttrs.put(VAR_ATTRS, requiredAttrs);
             }
-            requiredAttrs.add(annoAttr.value());
+            AttributeMode attrInfo = new AttributeMode(attrName, attrField, attrFieldType);
+            requiredAttrs.add(attrInfo);
         });
     }
 
@@ -145,7 +149,7 @@ public final class ServiceHandler extends AnnotationsHandler {
 
             // Build class builder
             if (svcType == ServiceType.Prototype) {
-                constructPrototypeService(builderCtx, classBuilder, serviceIds[0], pkgName, classElement.getSimpleName().toString());
+                constructPrototypeService(builderCtx, classBuilder, pkgName, serviceIds[0], classElement.getSimpleName().toString());
             } else {
                 constructService(builderCtx, classBuilder, autoActive);
             }
@@ -164,7 +168,7 @@ public final class ServiceHandler extends AnnotationsHandler {
             final ClassMeta.Builder instClassBuilder,
             final String packageName,
             final String prototypeId,
-            final String instClassName
+            final String userClassName
     ) {
         Template tempReqAttrs = builderContext.loadTemplate(TEMPLATE_REQ_ATTRS);
         Template tempInstCons = builderContext.loadTemplate(TEMPLATE_INST_CONSTRUCTOR);
@@ -176,21 +180,23 @@ public final class ServiceHandler extends AnnotationsHandler {
                 .addImplement(IInstance.class.getCanonicalName())
                 .addFieldBuilder(FieldMeta.builder()
                         .setName("_attributes")
-                        .addModifier(Modifier.PRIVATE, Modifier.FINAL)
+                        .addModifier(Modifier.PRIVATE)
                         .setIsMap(true)
                         .setKeyTypeName(Type.STRING)
                         .setTypeName("?"))
                 // Constructor
                 .addMethodBuilder(MethodMeta.builder()
-                        .setName(instClassName)
+                        .setName(instClassBuilder.getGeneratedClassName())
                         .addModifier(Modifier.PUBLIC)
                         .addParameterBuilder(ParameterMeta.builder()
                                 .setName("attributes")
                                 .setType("java.util.Map<String, ?>"))
                         .addCodeBuilder(CodeMeta.builder()
+                                .setModel(modelReqAttrs)
                                 .setTemplate(tempInstCons)))
                 .addMethodBuilder(MethodMeta.builder()
                         .setName(IInstance.METHOD_ATTRIBUTES)
+                        .setReturnTypeName("java.util.Map<String, ?>")
                         .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                         .addModifier(Modifier.PUBLIC)
                         .addCodeBuilder(CodeMeta.builder()
@@ -211,7 +217,11 @@ public final class ServiceHandler extends AnnotationsHandler {
                                 .setModel(modelReqAttrs)));
 
         // Prototype service
-        ClassMeta.Builder prototypeBuilder = builderContext.newClassBuilder(packageName, instClassName + "_Prototype_Generated");
+        Template tempGetIds = builderContext.loadTemplate(TEMPLATE_GET_IDS);
+        Map<String, Object> tempGetIdsModel = new HashMap<>();
+        tempGetIdsModel.put(VAR_SVC_IDS, new String[] { prototypeId });
+        String[] idArr = (String[]) tempGetIdsModel.get(VAR_SVC_IDS);
+        ClassMeta.Builder prototypeBuilder = builderContext.newClassBuilder(packageName, userClassName + "_Prototype_Generated");
         prototypeBuilder
                 .addAnnotationBuilder(AnnotationMeta.builder()
                         .setName(AutoService.class.getCanonicalName())
@@ -221,7 +231,25 @@ public final class ServiceHandler extends AnnotationsHandler {
                                 .setValue(IService.class.getCanonicalName() + ".class")))
                 .addImplement(IPrototype.class.getCanonicalName())
                 .addMethodBuilder(MethodMeta.builder()
+                        .addAnnotationBuilder(AnnotationMeta.builder()
+                                .setName(AnnotationMeta.OVERRIDE))
+                        .setName(IService.METHOD_AUTOACTIVE)
+                        .addModifier(Modifier.PUBLIC)
+                        .setReturnTypeName(IService.METHOD_AUTOACTIVE_RETURN_TYPE)
+                        .addCodeBuilder(CodeMeta.builder()
+                                .addRawCode(StringHelper.makeString("return {};", false))))
+                .addMethodBuilder(MethodMeta.builder()
+                        .addAnnotationBuilder(AnnotationMeta.builder()
+                                .setName(AnnotationMeta.OVERRIDE))
+                        .setName(IService.METHOD_GETIDS)
+                        .addModifier(Modifier.PUBLIC)
+                        .setReturnTypeName(IService.METHOD_GETIDS_RETURN_TYPE)
+                        .addCodeBuilder(CodeMeta.builder()
+                                .setTemplate(tempGetIds)
+                                .setModel(tempGetIdsModel)))
+                .addMethodBuilder(MethodMeta.builder()
                         .setName("attributes")
+                        .addModifier(Modifier.PUBLIC)
                         .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                         .setReturnTypeName(Type.Q_STRING_ARRAY)
                         .addCodeBuilder(CodeMeta.builder()
@@ -230,12 +258,13 @@ public final class ServiceHandler extends AnnotationsHandler {
                 .addMethodBuilder(MethodMeta.builder()
                         .setName("newInstance")
                         .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
+                        .addModifier(Modifier.PUBLIC)
                         .setReturnTypeName(IInstance.class.getCanonicalName())
                         .addParameterBuilder(ParameterMeta.builder()
                                 .setName("attributes")
                                 .setType("java.util.Map<String, ?>"))
                         .addCodeBuilder(CodeMeta.builder()
-                                .addRawCode("return new {}(attributes);", instClassName)));
+                                .addRawCode("return new {}(attributes);", instClassBuilder.getGeneratedClassName())));
 
     }
 
@@ -273,6 +302,39 @@ public final class ServiceHandler extends AnnotationsHandler {
                         .setReturnTypeName(IService.METHOD_AUTOACTIVE_RETURN_TYPE)
                         .addCodeBuilder(CodeMeta.builder()
                                 .addRawCode(StringHelper.makeString("return {};", autoActive))));
+    }
+
+    public static final class AttributeMode {
+
+        private String _name;
+        private String _field;
+        private String _type;
+
+        private AttributeMode(
+                final String name,
+                final String field,
+                final String type
+        ) {
+            this._name = name;
+            this._field = field;
+            this._type = type;
+        }
+
+        public String getName() {
+            return this._name;
+        }
+
+        public String getField() {
+            return this._field;
+        }
+
+        public String getType() {
+            return this._type;
+        }
+
+        public String toString() {
+            return StringHelper.makeString("name={}, field={}, type={}", getName(), this._field, this._type);
+        }
     }
 
     private final class ServiceHandlerHelper implements IServiceHandlerHelper {
