@@ -73,19 +73,19 @@ public class CommandParser {
                     .addFieldBuilder(FieldMeta.builder()
                         .addModifier(Modifier.PRIVATE)
                         .setName(FIELD_USER_CMD)
-                        .setTypeName(cmdBuilder.getQulifiedClassName())
-                        .setValue(StringHelper.makeString("new {}();", cmdBuilder.getQulifiedClassName())))
+                        .setTypeName(cmdBuilder.getQualifiedClassName())
+                        .setValue(StringHelper.makeString("new {}();", cmdBuilder.getQualifiedClassName())))
                     .addFieldBuilder(FieldMeta.builder()
                         .addModifier(Modifier.PRIVATE)
                         .setName(FIELD_CMD_META)
-                        .setTypeName(metaBuilder.getQulifiedClassName()))
+                        .setTypeName(metaBuilder.getQualifiedClassName()))
                     .addMethodBuilder(MethodMeta.builder()
                         .addModifier(Modifier.PUBLIC)
                         .setName(cmdExecBuilder.getGeneratedClassName())
                         .setReturnTypeName("")
                         .addParameterBuilder(ParameterMeta.builder()
                             .setName("commandMeta")
-                            .setType(metaBuilder.getQulifiedClassName()))
+                            .setType(metaBuilder.getQualifiedClassName()))
                         .addCodeBuilder(CodeMeta.builder()
                             .addRawCode(StringHelper.makeString("this.{} = commandMeta;", FIELD_CMD_META))))
                     .addMethodBuilder(MethodMeta.builder()
@@ -102,8 +102,8 @@ public class CommandParser {
             cmdModel.namespace = cmdNs;
             cmdModel.description = cmdDesc;
             cmdModel.parentPath = cmdParentPath;
-            cmdModel.userCommandClassName = cmdBuilder.getQulifiedClassName();
-            cmdModel.executorClassName = cmdExecBuilder.getQulifiedClassName();
+            cmdModel.userCommandClassName = cmdBuilder.getQualifiedClassName();
+            cmdModel.executorClassName = cmdExecBuilder.getQualifiedClassName();
             Map<String, Object> tmpModel = new HashMap<>();
             tmpModel.put("command", cmdModel);
 

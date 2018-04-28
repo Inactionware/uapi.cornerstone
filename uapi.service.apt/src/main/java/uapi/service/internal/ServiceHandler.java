@@ -48,6 +48,10 @@ public final class ServiceHandler extends AnnotationsHandler {
     private static final String VAR_SVC_IDS                 = "serviceIds";
     private static final String VAR_ATTRS                   = "attrs";
 
+    // Below variable is store to class build to indicate prototype service information
+    static final String VAR_IS_PROTOTYPE                    = "isPrototype";
+    static final String VAR_PROTOTYPE_CLASS_NAME            = "prototypeClassName";
+
     private final ServiceHandlerHelper _helper = new ServiceHandlerHelper();
 
     @Override
@@ -266,6 +270,8 @@ public final class ServiceHandler extends AnnotationsHandler {
                         .addCodeBuilder(CodeMeta.builder()
                                 .addRawCode("return new {}(attributes);", instClassBuilder.getGeneratedClassName())));
 
+        instClassBuilder.putTransience(VAR_IS_PROTOTYPE, true);
+        instClassBuilder.putTransience(VAR_PROTOTYPE_CLASS_NAME, prototypeBuilder.getQualifiedClassName());
     }
 
     private void constructService(

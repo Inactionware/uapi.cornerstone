@@ -15,6 +15,7 @@ import com.google.common.collect.Multimap;
 import uapi.GeneralException;
 import uapi.InvalidArgumentException;
 import uapi.Tags;
+import uapi.codegen.IGenerated;
 import uapi.common.ArgumentChecker;
 import uapi.common.CollectionHelper;
 import uapi.common.Guarder;
@@ -426,7 +427,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 //                                .foreach(existingSvc -> setDependency(svcHolder, existingSvc, initInstanceAttributes(svcHolder.getId())));
 
                     });
-                    Looper.on(hostSvcs).foreach(existingSvc -> setDependency(svcHolder, existingSvc, initInstanceAttributes(svcHolder.getId())));
+                    Looper.on(hostSvcs).foreach(existingSvc -> setDependency(svcHolder, existingSvc, initInstanceAttributes(svcHolder)));
                     hostSvcs.clear();
 
                     // Check whether existing service depends on the new register service
@@ -436,7 +437,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                                 .foreach(hostSvcs::add);
 //                                .foreach(existingSvc -> setDependency(existingSvc, svcHolder, initInstanceAttributes(existingSvc.getId())));
                     });
-                    Looper.on(hostSvcs).foreach(existingSvc -> setDependency(existingSvc, svcHolder, initInstanceAttributes(existingSvc.getId())));
+                    Looper.on(hostSvcs).foreach(existingSvc -> setDependency(existingSvc, svcHolder, initInstanceAttributes(existingSvc)));
                     hostSvcs.clear();
 
                     Guarder.by(this._svcRepoLock.writeLock()).run(() -> this._svcRepo.put(svcHolder.getId(), svcHolder));
@@ -463,14 +464,25 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 //                    });
     }
 
-    private Map<String, ?> initInstanceAttributes(String refBy) {
-        return initInstanceAttributes(new HashMap<>(), refBy);
-    }
+//    private Map<String, ?> initInstanceAttributes(ServiceHolder refSvc) {
+//        return initInstanceAttributes(new HashMap<>(), refSvc.getId());
+//    }
 
-    private Map<String, ?> initInstanceAttributes(Map<String, Object> attributes, String refBy) {
-        if (attributes == null) {
-            attributes = new HashMap<>();
+    private Map<String, ?> initInstanceAttributes(ServiceHolder refSvcHolder) {
+        Map<String, Object> attributes = new HashMap<>();
+
+        String refId = refSvcHolder.getId();
+        String refBy = refSvcHolder.getId();
+        Object refSvc = refSvcHolder.getService();
+        if (refSvc != null) {
+            if (refSvc instanceof IGenerated) {
+                refBy = ((IGenerated) refSvc).originalType().getCanonicalName();
+            } else {
+                refBy = refSvc.getClass().getCanonicalName();
+            }
         }
+
+        attributes.put(GenericAttributes.REF_ID, refId);
         attributes.put(GenericAttributes.SERVE_FOR, refBy);
         return attributes;
     }
@@ -480,6 +492,9 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             final ServiceHolder dependencySvc,
             final Map<String, ?> attributes
     ) {
+//        if (hostSvc.isDependencySet(dependencySvc)) {
+//            return;
+//        }
         if (dependencySvc instanceof PrototypeServiceHolder) {
             // Get service instance and register it then set instance service holder
             IInstance instance = ((PrototypeServiceHolder) dependencySvc).newInstance(attributes);
