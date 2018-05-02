@@ -21,6 +21,7 @@ import uapi.service.annotation.Service
 
 import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
 
 /**
@@ -169,6 +170,67 @@ class ServiceHandlerTest extends Specification {
         ElementKind.CLASS       | 'name'    | 'com.ee'
     }
 
+    def 'Test handle Attribute annotation on incorrect element type'() {
+        given:
+        def fieldElemt = Mock(Element) {
+            getKind() >> elemKind
+            getSimpleName() >> Mock(Name) {
+                toString() >> elemName
+            }
+        }
+        def budrCtx = Mock(IBuilderContext)
+        def svcHandler = new ServiceHandler()
+
+        when:
+        svcHandler.handleAnnotatedElements(budrCtx, Attribute.class, [fieldElemt] as Set)
+
+        then:
+        thrown(GeneralException)
+
+        where:
+        elemKind                | elemName
+        ElementKind.CLASS       | 'name'
+        ElementKind.INTERFACE   | 'name'
+    }
+
+    def 'Test handle Attribute annotation'() {
+        given:
+        def attrMap = new HashMap<String, Object>()
+        def clsElemt = Mock(Element)
+        def fieldElemt = Mock(Element) {
+            getKind() >> elemKind
+            getSimpleName() >> Mock(Name) {
+                toString() >> elemName
+            }
+            getAnnotation(Attribute.class) >> TestService.getField('name').getAnnotation(Attribute.class)
+            asType() >> Mock(TypeMirror) {
+                toString() >> 'java.lang.String'
+            }
+            getEnclosingElement() >> clsElemt
+        }
+        def budrCtx = Mock(IBuilderContext) {
+            findClassBuilder(clsElemt) >> Mock(ClassMeta.Builder) {
+                createTransienceIfAbsent(_, _) >> attrMap
+            }
+        }
+        def svcHandler = new ServiceHandler()
+
+        when:
+        svcHandler.handleAnnotatedElements(budrCtx, Attribute.class, [fieldElemt] as Set)
+
+        then:
+        noExceptionThrown()
+        attrMap.size() == 1
+
+        where:
+        elemKind                | elemName
+        ElementKind.FIELD       | 'name'
+    }
+
     @Service
-    private class TestService {}
+    class TestService {
+
+        @Attribute('attrName')
+        public String name;
+    }
 }
