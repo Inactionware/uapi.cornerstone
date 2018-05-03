@@ -16,6 +16,7 @@ import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.LogSupport
 import uapi.service.IServiceHandlerHelper
+import uapi.service.ServiceType
 import uapi.service.annotation.Attribute
 import uapi.service.annotation.Service
 
@@ -193,16 +194,51 @@ class ServiceHandlerTest extends Specification {
         ElementKind.INTERFACE   | 'name'
     }
 
-    def 'Test handle Attribute annotation'() {
+    def 'Test handle Attribute annotation on non-prototype service'() {
         given:
         def attrMap = new HashMap<String, Object>()
-        def clsElemt = Mock(Element)
+        def clsElemt = Mock(Element) {
+            getAnnotation(Service.class) >> TestService.getAnnotation(Service.class)
+            getSimpleName() >> Mock(Name) {
+                toString() >> 'className'
+            }
+        }
         def fieldElemt = Mock(Element) {
             getKind() >> elemKind
             getSimpleName() >> Mock(Name) {
                 toString() >> elemName
             }
-            getAnnotation(Attribute.class) >> TestService.getField('name').getAnnotation(Attribute.class)
+            getEnclosingElement() >> clsElemt
+        }
+        def budrCtx = Mock(IBuilderContext)
+        def svcHandler = new ServiceHandler()
+
+        when:
+        svcHandler.handleAnnotatedElements(budrCtx, Attribute.class, [fieldElemt] as Set)
+
+        then:
+        thrown(GeneralException)
+
+        where:
+        elemKind                | elemName
+        ElementKind.FIELD       | 'name'
+    }
+
+    def 'Test handle Attribute annotation'() {
+        given:
+        def attrMap = new HashMap<String, Object>()
+        def clsElemt = Mock(Element) {
+            getAnnotation(Service.class) >> PrototypeService.getAnnotation(Service.class)
+            getSimpleName() >> Mock(Name) {
+                toString() >> 'className'
+            }
+        }
+        def fieldElemt = Mock(Element) {
+            getKind() >> elemKind
+            getSimpleName() >> Mock(Name) {
+                toString() >> elemName
+            }
+            getAnnotation(Attribute.class) >> PrototypeService.getField('name').getAnnotation(Attribute.class)
             asType() >> Mock(TypeMirror) {
                 toString() >> 'java.lang.String'
             }
@@ -228,9 +264,16 @@ class ServiceHandlerTest extends Specification {
     }
 
     @Service
-    class TestService {
+    static class TestService {
 
         @Attribute('attrName')
-        public String name;
+        public String name
+    }
+
+    @Service(type=ServiceType.Prototype)
+    class PrototypeService {
+
+        @Attribute('attrName')
+        public static name
     }
 }

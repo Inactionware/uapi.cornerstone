@@ -91,11 +91,19 @@ public final class ServiceHandler extends AnnotationsHandler {
             }
             builderCtx.checkModifiers(fieldElement, Attribute.class, Modifier.PRIVATE, Modifier.FINAL);
 
+            Element classElement = fieldElement.getEnclosingElement();
+            builderCtx.checkModifiers(classElement, Service.class, Modifier.PRIVATE, Modifier.FINAL);
+            Service annoSvc = classElement.getAnnotation(Service.class);
+            if (annoSvc.type() != ServiceType.Prototype) {
+                throw new GeneralException(
+                        "Attribute annotation is only support declare in prototype service - {}",
+                        classElement.getSimpleName().toString());
+            }
+
             Attribute annoAttr = fieldElement.getAnnotation(Attribute.class);
             String attrName = annoAttr.value();
             String attrField = fieldElement.getSimpleName().toString();
             String attrFieldType = fieldElement.asType().toString();
-            Element classElement = fieldElement.getEnclosingElement();
             ClassMeta.Builder instClassBuilder = builderCtx.findClassBuilder(classElement);
             Map<String, Object> modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
             List<AttributeMode> requiredAttrs = (List<AttributeMode>) modelReqAttrs.get(VAR_ATTRS);
