@@ -61,6 +61,14 @@ public class TagHandler extends AnnotationsHandler {
             modelGetTags.put(VAR_TAGS, tag.value());
 
             ClassMeta.Builder classBuilder = builderContext.findClassBuilder(classElement);
+            boolean isPrototype = classBuilder.getTransience(ServiceHandler.VAR_IS_PROTOTYPE, false);
+            if (isPrototype) {
+                String prototypeClassName = classBuilder.getTransience(ServiceHandler.VAR_PROTOTYPE_CLASS_NAME);
+                classBuilder = builderContext.findClassBuilder(prototypeClassName, false);
+                if (classBuilder == null) {
+                    throw new GeneralException("The prototype of service was not found in context - {}", prototypeClassName);
+                }
+            }
             classBuilder
                     .addImplement(ITagged.class.getCanonicalName())
                     .addMethodBuilder(MethodMeta.builder()

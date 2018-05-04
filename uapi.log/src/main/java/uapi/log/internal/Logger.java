@@ -9,35 +9,50 @@
 
 package uapi.log.internal;
 
+import org.slf4j.LoggerFactory;
+import uapi.Tags;
 import uapi.common.StringHelper;
 import uapi.log.ILogger;
+import uapi.service.GenericAttributes;
+import uapi.service.ServiceType;
+import uapi.service.annotation.Attribute;
+import uapi.service.annotation.Service;
+import uapi.service.annotation.Tag;
 
-final class Logger implements ILogger {
+@Service(value=ILogger.class, type = ServiceType.Prototype)
+@Tag(Tags.LOG)
+public class Logger implements ILogger {
 
-    private final org.slf4j.Logger _slfLogger;
+    org.slf4j.Logger _slfLogger;
 
-    Logger(org.slf4j.Logger slfLogger) {
-        this._slfLogger = slfLogger;
+    @Attribute(GenericAttributes.SERVE_FOR)
+    String _serveFor;
+
+    private org.slf4j.Logger getLogger() {
+        if (this._slfLogger == null) {
+            this._slfLogger = LoggerFactory.getLogger(this._serveFor);
+        }
+        return this._slfLogger;
     }
 
     @Override
     public void trace(String message, Object... parameters) {
-        this._slfLogger.trace(message, parameters);
+        getLogger().trace(message, parameters);
     }
 
     @Override
     public void debug(String message, Object... parameters) {
-        this._slfLogger.debug(message, parameters);
+        getLogger().debug(message, parameters);
     }
 
     @Override
     public void info(String message, Object... parameters) {
-        this._slfLogger.info(message, parameters);
+        getLogger().info(message, parameters);
     }
 
     @Override
     public void warn(String message, Object... parameters) {
-        this._slfLogger.warn(message, parameters);
+        getLogger().warn(message, parameters);
     }
 
     @Override
@@ -47,12 +62,12 @@ final class Logger implements ILogger {
 
     @Override
     public void warn(Throwable t, String message, Object... parameters) {
-        this._slfLogger.warn(StringHelper.makeString(message, parameters), t);
+        getLogger().warn(StringHelper.makeString(message, parameters), t);
     }
 
     @Override
     public void error(String message, Object... parameters) {
-        this._slfLogger.error(message, parameters);
+        getLogger().error(message, parameters);
     }
 
     @Override
@@ -62,6 +77,6 @@ final class Logger implements ILogger {
 
     @Override
     public void error(Throwable t, String message, Object... parameters) {
-        this._slfLogger.error(StringHelper.makeString(message, parameters), t);
+        getLogger().error(StringHelper.makeString(message, parameters), t);
     }
 }

@@ -206,7 +206,9 @@ public class ServiceHolder implements IServiceReference {
         return findDependencies(qualifiedServiceId) != null;
     }
 
-    public boolean isDependsOn(final Dependency dependency) {
+    public boolean isDependsOn(
+            final Dependency dependency
+    ) {
         ArgumentChecker.required(dependency, "dependency");
         Dependency dep = Looper.on(this._dependencies.keys())
                 .filter(thisDependency -> dependency.getServiceId().isAssignTo(thisDependency.getServiceId()))
@@ -214,7 +216,48 @@ public class ServiceHolder implements IServiceReference {
         return dep != null;
     }
 
-    public void setDependency(ServiceHolder service, ServiceActivator serviceActivator) {
+//    public boolean isDependencySet(
+//            final ServiceHolder svcHolder
+//    ) {
+//        ArgumentChecker.required(svcHolder, "svcHolder");
+//        if (svcHolder instanceof PrototypeServiceHolder) {
+//            QualifiedServiceId prototypeId = svcHolder.getQualifiedId();
+//            InstanceServiceHolder matchedSvc = Looper.on(this._dependencies.values())
+//                    .filter(svc -> svc instanceof InstanceServiceHolder)
+//                    .map(svc -> (InstanceServiceHolder) svc)
+//                    .filter(svc -> svc.prototypeId().equals(prototypeId))
+//                    .first(null);
+//            return matchedSvc != null;
+//        } else {
+//            return CollectionHelper.isStrictContains(this._injectedSvcs, svcHolder);
+//        }
+//    }
+
+    public void setInstanceDependency(
+            final InstanceServiceHolder instSvcHolder,
+            final ServiceActivator serviceActivator
+    ) {
+        ArgumentChecker.required(instSvcHolder, "instSvcHolder");
+
+        Dependency dependency = findDependencies(instSvcHolder.prototypeId());
+        if (dependency == null) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.NOT_A_DEPENDENCY)
+                    .variables(new ServiceErrors.NotDependency()
+                            .thisServiceId(this._qualifiedSvcId)
+                            .dependencyServiceId(instSvcHolder.getQualifiedId()))
+                    .build();
+        }
+        this._dependencies.removeAll(dependency);
+        this._dependencies.put(dependency, instSvcHolder);
+
+        innerSetDependency(instSvcHolder, serviceActivator);
+    }
+
+    public void setDependency(
+            final ServiceHolder service,
+            final ServiceActivator serviceActivator
+    ) {
         ArgumentChecker.notNull(service, "service");
 
         // remove null entry first
@@ -232,39 +275,39 @@ public class ServiceHolder implements IServiceReference {
 
         // Note: we have to try activate if dependency notifiers are not empty
         // Since the notifier means that some other service is wait for this service
+//        if (! isActivated() && this._depNotifiers.size() == 0) {
+//            return;
+//        }
+//
+//        if (service.isActivated()) {
+//            injectDependency(service);
+//        } else {
+//            service.addNotifier(new DependencyNotifier());
+//            if (serviceActivator.tryActivateService(service).isPresent()) {
+//                injectDependency(service);
+//            }
+//        }
+        innerSetDependency(service, serviceActivator);
+    }
+
+    private void innerSetDependency(
+            final ServiceHolder dependency,
+            final ServiceActivator serviceActivator
+    ) {
+        // Note: we have to try activate if dependency notifiers are not empty
+        // Since the notifier means that some other service is wait for this service
         if (! isActivated() && this._depNotifiers.size() == 0) {
             return;
         }
 
-        if (service.isActivated()) {
-            injectDependency(service);
+        if (dependency.isActivated()) {
+            injectDependency(dependency);
         } else {
-            service.addNotifier(new DependencyNotifier());
-            if (serviceActivator.tryActivateService(service).isPresent()) {
-                injectDependency(service);
+            dependency.addNotifier(new DependencyNotifier());
+            if (serviceActivator.tryActivateService(dependency).isPresent()) {
+                injectDependency(dependency);
             }
         }
-
-//        // The service must be activated before use it
-//        Object injectedSvc;
-//        if (! service.isActivated()) {
-//            injectedSvc = serviceActivator.activateService(service);
-//        } else {
-//            injectedSvc = service.getService();
-//        }
-//        if (injectedSvc == null) {
-//            throw ServiceException.builder()
-//                    .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
-//                    .variables(new ServiceErrors.ServiceActivationFailed()
-//                            .serviceId(service.getId()))
-//                    .build();
-//        }
-//        if (injectedSvc instanceof IServiceFactory) {
-//            // Create service from service factory
-//            injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
-//        }
-//        ((IServiceLifecycle) _svc).onDependencyInject(service.getId(), injectedSvc);
-//        this._injectedSvcs.add(service);
     }
 
     /**
@@ -426,14 +469,29 @@ public class ServiceHolder implements IServiceReference {
         }
     }
 
-    private void injectDependency(ServiceHolder dependSvcHolder) {
+    private void injectDependency(
+            final ServiceHolder dependSvcHolder
+    ) {
         if (CollectionHelper.isStrictContains(this._injectedSvcs, dependSvcHolder)) {
             return;
         }
+        doInject(dependSvcHolder);
+        this._injectedSvcs.add(dependSvcHolder);
+    }
+
+    protected void doInject(
+            final ServiceHolder dependSvcHolder
+    ) {
         Object injectedSvc = dependSvcHolder.getService();
         if (injectedSvc instanceof IServiceFactory) {
             // Create service from service factory
             injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);
+        }
+        String injectedId;
+        if (dependSvcHolder instanceof InstanceServiceHolder) {
+            injectedId = ((InstanceServiceHolder) dependSvcHolder).prototypeId().getId();
+        } else {
+            injectedId = dependSvcHolder.getId();
         }
         if (isActivated()) {
             if (! (this._svc instanceof IServiceLifecycle)) {
@@ -443,11 +501,10 @@ public class ServiceHolder implements IServiceReference {
                                 .serviceId(this.getId()))
                         .build();
             }
-            ((IServiceLifecycle) _svc).onDependencyInject(dependSvcHolder.getId(), injectedSvc);
+            ((IServiceLifecycle) _svc).onDependencyInject(injectedId, injectedSvc);
         } else {
-            ((IInjectable) _svc).injectObject(new Injection(dependSvcHolder.getId(), injectedSvc));
+            ((IInjectable) _svc).injectObject(new Injection(injectedId, injectedSvc));
         }
-        this._injectedSvcs.add(dependSvcHolder);
     }
 
     boolean hasMonitor() {

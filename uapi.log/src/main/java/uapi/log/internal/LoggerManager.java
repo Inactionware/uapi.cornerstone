@@ -19,18 +19,19 @@ import uapi.service.IServiceFactory;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
-@Service
-@Tag(Tags.LOG)
+//@Service
+//@Tag(Tags.LOG)
 public class LoggerManager implements IServiceFactory<ILogger> {
 
     @Override
     public ILogger createService(Object serveFor) {
-        ArgumentChecker.required(serveFor, "serveFor");
-
-        if (serveFor instanceof IGenerated) {
-            return new Logger(LoggerFactory.getLogger(((IGenerated) serveFor).originalType()));
-        } else {
-            return new Logger(LoggerFactory.getLogger(serveFor.getClass()));
-        }
+//        ArgumentChecker.required(serveFor, "serveFor");
+//
+//        if (serveFor instanceof IGenerated) {
+//            return new Logger(LoggerFactory.getLogger(((IGenerated) serveFor).originalType()));
+//        } else {
+//            return new Logger(LoggerFactory.getLogger(serveFor.getClass()));
+//        }
+        return null;
     }
 }

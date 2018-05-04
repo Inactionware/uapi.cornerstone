@@ -13,6 +13,8 @@ import spock.lang.Specification
 import uapi.InvalidArgumentException
 import uapi.service.Dependency
 import uapi.service.IInjectable
+import uapi.service.IInstance
+import uapi.service.IPrototype
 import uapi.service.IRegistry
 import uapi.service.ISatisfyHook
 import uapi.service.IService
@@ -22,6 +24,7 @@ import uapi.service.ITagged
 import uapi.service.Injection
 import uapi.service.QualifiedServiceId
 import uapi.log.ILogger
+import uapi.service.ServiceErrors
 import uapi.service.ServiceException
 
 /**
@@ -126,6 +129,126 @@ class RegistryTest extends Specification {
         registry.findService("3") == svc2
         registry.findService("4") == svc2
         registry.getCount() == 4
+    }
+
+    def 'Test find prototype instance service'() {
+        given:
+        def instance = Mock(IInstance) {
+            getIds() >> ['2']
+            prototypeId() >> '1'
+        }
+        def prototype = Mock(IPrototype) {
+            getIds() >> ['1']
+            1 * newInstance(_ as Map) >> instance
+        }
+
+        when:
+        registry.register(prototype)
+
+        then:
+        registry.getCount() == 1
+        registry.findService('1', Mock(Map)) == instance
+        registry.getCount() == 2
+        registry.findService('2') == instance
+    }
+
+    def 'Test a service depends on a prototype service'() {
+        given:
+        def instance = Mock(IInstance) {
+            getIds() >> ['inst']
+            prototypeId() >> 'proto'
+        }
+        def prototype = Mock(IPrototype) {
+            getIds() >> ['proto']
+            1 * newInstance(_ as Map) >> instance
+        }
+        def svc = Mock(IInjectableService) {
+            getIds() >> ['svc']
+            getDependencies() >> [Mock(Dependency) {
+                getServiceId() >> Mock(QualifiedServiceId) {
+                    getId() >> 'proto'
+                    getFrom() >> 'Local'
+                    isExternalService() >> false
+                    isAssignTo(_ as QualifiedServiceId) >> true
+                }
+                getServiceType() >> IPrototype.class
+                isSingle() >> true
+                isOptional() >> false
+            }]
+            1 * injectObject(_)
+        }
+
+        when:
+        registry.register(prototype, svc)
+        def rtnSvc = registry.findService('svc')
+
+        then:
+        noExceptionThrown()
+        registry.getCount() == 3
+        rtnSvc == svc
+
+    }
+
+    def 'Test find instance service on empty repo'() {
+        given:
+        def attrs = [] as Map
+
+        when:
+        registry.findService(String.class, attrs)
+
+        then:
+        thrown(ServiceException)
+    }
+
+    def 'Test find instance service by it is not prototype service'() {
+        given:
+        def attrs = [] as Map
+        def svc1 = Mock(IService) {
+            getIds() >> ["1", "2"]
+        }
+        ISatisfyHook hook = Mock(ISatisfyHook) {
+            isSatisfied(_) >> true
+        }
+        Injection injection = Mock(Injection) {
+            getId() >> ISatisfyHook.canonicalName
+            getObject() >> hook
+        }
+        registry.injectObject(injection)
+
+        when:
+        registry.register(svc1)
+        registry.findService('1', attrs)
+
+        then:
+        ServiceException ex = thrown()
+        ex.errorCode() == ServiceErrors.NOT_A_PROTOTYPE_SERVICE
+    }
+
+    def 'Test find instance service'() {
+        given:
+        def attrs = [] as Map
+        def svc1 = Mock(IPrototype) {
+            getIds() >> ["1", "2"]
+            newInstance(attrs) >> Mock(IInstance) {
+                getIds() >> ['a', 'b']
+                prototypeId() >> ['x']
+            }
+        }
+        ISatisfyHook hook = Mock(ISatisfyHook) {
+            isSatisfied(_) >> true
+        }
+        Injection injection = Mock(Injection) {
+            getId() >> ISatisfyHook.canonicalName
+            getObject() >> hook
+        }
+        registry.injectObject(injection)
+
+        when:
+        registry.register(svc1)
+        registry.findService('1', attrs)
+
+        then:
+        noExceptionThrown()
     }
 
     def 'Test find service by id and from'() {

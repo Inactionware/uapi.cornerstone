@@ -62,8 +62,8 @@ public class QualifiedServiceId extends Pair<String, String> {
         return StringHelper.makeString("{}{}{}", id, LOCATION, from);
     }
 
-    public QualifiedServiceId(String leftValue, String rightValue) {
-        super(leftValue, rightValue);
+    public QualifiedServiceId(String id, String from) {
+        super(id, from);
     }
 
     public String getId() {

@@ -15,6 +15,7 @@ import com.google.common.collect.Multimap;
 import uapi.GeneralException;
 import uapi.InvalidArgumentException;
 import uapi.Tags;
+import uapi.codegen.IGenerated;
 import uapi.common.ArgumentChecker;
 import uapi.common.CollectionHelper;
 import uapi.common.Guarder;
@@ -27,9 +28,7 @@ import uapi.log.ILogger;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
@@ -193,6 +192,48 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     }
 
     @Override
+    public <T> T findService(
+            final Class serviceType,
+            final Map<String, ?> attributes
+    ) throws ServiceException {
+        return findService(serviceType.getName(), attributes);
+    }
+
+    @Override
+    public <T> T findService(
+            final String serviceId,
+            final Map<String, ?> attributes
+    ) throws ServiceException {
+        ArgumentChecker.required(serviceId, "serviceId");
+        ArgumentChecker.required(attributes, "attributes");
+        ServiceHolder svcHolder = findServiceHolder(serviceId, QualifiedServiceId.FROM_LOCAL);
+        if (svcHolder == null) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.NO_SERVICE_FOUND)
+                    .variables(new ServiceErrors.NoServiceFound().serviceId(serviceId))
+                    .build();
+        }
+        if (! (svcHolder instanceof PrototypeServiceHolder)) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.NOT_A_PROTOTYPE_SERVICE)
+                    .variables(new ServiceErrors.NotAPrototypeService().serviceId(serviceId))
+                    .build();
+        }
+        IInstance instance = ((PrototypeServiceHolder) svcHolder).newInstance(attributes);
+        register(instance);
+        ServiceHolder instanceHolder = findServiceHolder(instance.getIds()[0]);
+        if (instanceHolder == null) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.INSTANCE_SERVICE_REGISTER_FAILED)
+                    .variables(new ServiceErrors.InstanceServiceRegisterFailed()
+                            .instanceServiceId(instance.getIds()[0])
+                            .prototypeServiceId(svcHolder.getId()))
+                    .build();
+        }
+        return this._svcActivator.activateService(instanceHolder);
+    }
+
+    @Override
     public <T> List<T> findServices(
             final Class<T> serviceType
     ) {
@@ -301,6 +342,10 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         return svcHolders;
     }
 
+    private ServiceHolder findServiceHolder(final String serviceId) {
+        return findServiceHolder(serviceId, QualifiedServiceId.FROM_LOCAL);
+    }
+
     private ServiceHolder findServiceHolder(
             final String serviceId,
             final String serviceFrom
@@ -318,7 +363,10 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         if (found.size() == 1) {
             return found.get(0);
         }
-        throw new GeneralException("Find multiple service by service id {}@{}", serviceId, serviceFrom);
+        throw ServiceException.builder()
+                .errorCode(ServiceErrors.MULTIPLE_SERVICE_FOUND)
+                .variables(new ServiceErrors.MultipleServiceFound().serviceId(serviceId))
+                .build();
     }
 
     @Override
@@ -354,24 +402,114 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         }
 
         Looper.on(svcIds)
-                .map(svcId -> new ServiceHolder(svcFrom, svc, svcId, dependencies, this._satisfyDecider))
-                .next(svcHolder -> {
+                .map(svcId -> {
+                    ServiceHolder svcHolder;
+                    if (svc instanceof IPrototype) {
+                        svcHolder = new PrototypeServiceHolder(svcFrom, (IPrototype) svc, svcId, dependencies, this._satisfyDecider);
+                    } else if (svc instanceof IInstance) {
+                        svcHolder = new InstanceServiceHolder(svcFrom, (IInstance) svc, svcId, dependencies, this._satisfyDecider);
+                    } else {
+                        svcHolder = new ServiceHolder(svcFrom, svc, svcId, dependencies, this._satisfyDecider);
+                    }
+                    return svcHolder;
+                }).next(svcHolder -> {
                     if (svcHolder.getQualifiedId().isExternalService()) {
                         this._svcActivator.activateService(svcHolder);
                     }
                 }).foreach(svcHolder -> {
+                    List<ServiceHolder> hostSvcs = new ArrayList<>();
+                    // Check whether the new register service depends on existing service
                     Guarder.by(this._svcRepoLock.readLock()).run(() -> {
-                        // Check whether the new register service depends on existing service
+
                         Looper.on(this._svcRepo.values())
                                 .filter(existingSvc -> svcHolder.isDependsOn(existingSvc.getQualifiedId()))
-                                .foreach(existingSvc -> svcHolder.setDependency(existingSvc, this._svcActivator));
-                        // Check whether existing service depends on the new register service
+                                .foreach(hostSvcs::add);
+//                                .foreach(existingSvc -> setDependency(svcHolder, existingSvc, initInstanceAttributes(svcHolder.getId())));
+
+                    });
+                    Looper.on(hostSvcs).foreach(existingSvc -> setDependency(svcHolder, existingSvc, initInstanceAttributes(svcHolder)));
+                    hostSvcs.clear();
+
+                    // Check whether existing service depends on the new register service
+                    Guarder.by(this._svcRepoLock.readLock()).run(() -> {
                         Looper.on(this._svcRepo.values())
                                 .filter(existingSvc -> existingSvc.isDependsOn(svcHolder.getQualifiedId()))
-                                .foreach(existingSvc -> existingSvc.setDependency(svcHolder, this._svcActivator));
+                                .foreach(hostSvcs::add);
+//                                .foreach(existingSvc -> setDependency(existingSvc, svcHolder, initInstanceAttributes(existingSvc.getId())));
                     });
+                    Looper.on(hostSvcs).foreach(existingSvc -> setDependency(existingSvc, svcHolder, initInstanceAttributes(existingSvc)));
+                    hostSvcs.clear();
+
                     Guarder.by(this._svcRepoLock.writeLock()).run(() -> this._svcRepo.put(svcHolder.getId(), svcHolder));
                 });
+
+//            Looper.on(svcIds)
+//                    .map(svcId -> new ServiceHolder(svcFrom, svc, svcId, dependencies, this._satisfyDecider))
+//                    .next(svcHolder -> {
+//                        if (svcHolder.getQualifiedId().isExternalService()) {
+//                            this._svcActivator.activateService(svcHolder);
+//                        }
+//                    }).foreach(svcHolder -> {
+//                        Guarder.by(this._svcRepoLock.readLock()).run(() -> {
+//                            // Check whether the new register service depends on existing service
+//                            Looper.on(this._svcRepo.values())
+//                                    .filter(existingSvc -> svcHolder.isDependsOn(existingSvc.getQualifiedId()))
+//                                    .foreach(existingSvc -> svcHolder.setDependency(existingSvc, this._svcActivator));
+//                            // Check whether existing service depends on the new register service
+//                            Looper.on(this._svcRepo.values())
+//                                    .filter(existingSvc -> existingSvc.isDependsOn(svcHolder.getQualifiedId()))
+//                                    .foreach(existingSvc -> existingSvc.setDependency(svcHolder, this._svcActivator));
+//                        });
+//                        Guarder.by(this._svcRepoLock.writeLock()).run(() -> this._svcRepo.put(svcHolder.getId(), svcHolder));
+//                    });
+    }
+
+//    private Map<String, ?> initInstanceAttributes(ServiceHolder refSvc) {
+//        return initInstanceAttributes(new HashMap<>(), refSvc.getId());
+//    }
+
+    private Map<String, ?> initInstanceAttributes(ServiceHolder refSvcHolder) {
+        Map<String, Object> attributes = new HashMap<>();
+
+        String refId = refSvcHolder.getId();
+        String refBy = refSvcHolder.getId();
+        Object refSvc = refSvcHolder.getService();
+        if (refSvc != null) {
+            if (refSvc instanceof IGenerated) {
+                refBy = ((IGenerated) refSvc).originalType().getCanonicalName();
+            } else {
+                refBy = refSvc.getClass().getCanonicalName();
+            }
+        }
+
+        attributes.put(GenericAttributes.REF_ID, refId);
+        attributes.put(GenericAttributes.SERVE_FOR, refBy);
+        return attributes;
+    }
+
+    private void setDependency(
+            final ServiceHolder hostSvc,
+            final ServiceHolder dependencySvc,
+            final Map<String, ?> attributes
+    ) {
+//        if (hostSvc.isDependencySet(dependencySvc)) {
+//            return;
+//        }
+        if (dependencySvc instanceof PrototypeServiceHolder) {
+            // Get service instance and register it then set instance service holder
+            IInstance instance = ((PrototypeServiceHolder) dependencySvc).newInstance(attributes);
+            register(instance);
+            ServiceHolder instanceHolder = findServiceHolder(instance.getIds()[0], QualifiedServiceId.FROM_LOCAL);
+            if (instanceHolder == null) {
+                throw new GeneralException("Register instance service is failed, prototype service is - {}", dependencySvc.getId());
+            }
+            if (! (instanceHolder instanceof InstanceServiceHolder)) {
+                throw new GeneralException("Instance service should wrap by InstanceServiceHolder");
+            }
+            hostSvc.setInstanceDependency((InstanceServiceHolder) instanceHolder, this._svcActivator);
+        } else {
+            hostSvc.setDependency(dependencySvc, this._svcActivator);
+        }
     }
 
     @Override

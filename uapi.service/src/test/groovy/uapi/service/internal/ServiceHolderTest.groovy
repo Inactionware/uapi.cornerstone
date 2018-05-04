@@ -88,6 +88,39 @@ class ServiceHolderTest extends Specification {
         'local' | 'svcId'   | Mock(ISatisfyHook)
     }
 
+    def 'Test set instance dependency'() {
+        given:
+        def dependency = Mock(Dependency) {
+            getServiceId() >> Mock(QualifiedServiceId) {
+                getId() >> 'depId'
+            }
+        }
+        def svc = Mock(IInjectable)
+        def svcHolder = new ServiceHolder(from, svc, svcId, [dependency] as Dependency[], satisfiyHook)
+        def depSvcHolder = Mock(InstanceServiceHolder) {
+            getQualifiedId() >> Mock(QualifiedServiceId) {
+                toString() >> 'depId'
+                1 * isAssignTo(_) >> true
+            }
+        }
+        def svcActivator = Mock(ServiceActivator)
+
+        when:
+        svcHolder.setDependency(depSvcHolder, svcActivator)
+
+        then:
+        noExceptionThrown()
+        ! svcHolder.isResolved()
+        ! svcHolder.isInjected()
+        ! svcHolder.isSatisfied()
+        ! svcHolder.isActivated()
+
+        where:
+        from    | svcId     | satisfiyHook
+        'local' | 'svcId'   | Mock(ISatisfyHook)
+
+    }
+
     def 'Test set dependency'() {
         given:
         def dependency = Mock(Dependency) {

@@ -16,10 +16,21 @@ import spock.lang.Specification
  */
 class LoggerTest extends Specification {
 
+    def 'Test create instance'() {
+        when:
+        def logger = new Logger()
+        logger._serveFor = 'test'
+        logger.trace('aaa')
+
+        then:
+        logger._slfLogger != null
+    }
+
     def 'Test trace'() {
         given:
         def slfLogger = Mock(org.slf4j.Logger)
-        def logger = new Logger(slfLogger)
+        def logger = new Logger()
+        logger._slfLogger = slfLogger
 
         when:
         logger.trace(msg, params)
@@ -35,7 +46,8 @@ class LoggerTest extends Specification {
     def 'Test debug'() {
         given:
         def slfLogger = Mock(org.slf4j.Logger)
-        def logger = new Logger(slfLogger)
+        def logger = new Logger()
+        logger._slfLogger = slfLogger
 
         when:
         logger.debug(msg, params)
@@ -51,7 +63,8 @@ class LoggerTest extends Specification {
     def 'Test info'() {
         given:
         def slfLogger = Mock(org.slf4j.Logger)
-        def logger = new Logger(slfLogger)
+        def logger = new Logger()
+        logger._slfLogger = slfLogger
 
         when:
         logger.info(msg, params)
@@ -67,7 +80,8 @@ class LoggerTest extends Specification {
     def 'Test warn'() {
         given:
         def slfLogger = Mock(org.slf4j.Logger)
-        def logger = new Logger(slfLogger)
+        def logger = new Logger()
+        logger._slfLogger = slfLogger
 
         when:
         logger.warn(msg, params)
@@ -83,7 +97,8 @@ class LoggerTest extends Specification {
     def 'Test warn with exception'() {
         given:
         def slfLogger = Mock(org.slf4j.Logger)
-        def logger = new Logger(slfLogger)
+        def logger = new Logger()
+        logger._slfLogger = slfLogger
         def ex = Mock(Throwable) {
             getMessage() >> msg
         }
@@ -121,7 +136,8 @@ class LoggerTest extends Specification {
     def 'Test error'() {
         given:
         def slfLogger = Mock(org.slf4j.Logger)
-        def logger = new Logger(slfLogger)
+        def logger = new Logger()
+        logger._slfLogger = slfLogger
 
         when:
         logger.error(msg, params)
@@ -137,7 +153,8 @@ class LoggerTest extends Specification {
     def 'Test error with exception'() {
         given:
         def slfLogger = Mock(org.slf4j.Logger)
-        def logger = new Logger(slfLogger)
+        def logger = new Logger()
+        logger._slfLogger = slfLogger
         def ex = Mock(Throwable) {
             getMessage() >> msg
         }
