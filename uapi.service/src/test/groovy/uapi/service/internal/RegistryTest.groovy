@@ -24,6 +24,7 @@ import uapi.service.ITagged
 import uapi.service.Injection
 import uapi.service.QualifiedServiceId
 import uapi.log.ILogger
+import uapi.service.ServiceErrors
 import uapi.service.ServiceException
 
 /**
@@ -186,6 +187,68 @@ class RegistryTest extends Specification {
         registry.getCount() == 3
         rtnSvc == svc
 
+    }
+
+    def 'Test find instance service on empty repo'() {
+        given:
+        def attrs = [] as Map
+
+        when:
+        registry.findService(String.class, attrs)
+
+        then:
+        thrown(ServiceException)
+    }
+
+    def 'Test find instance service by it is not prototype service'() {
+        given:
+        def attrs = [] as Map
+        def svc1 = Mock(IService) {
+            getIds() >> ["1", "2"]
+        }
+        ISatisfyHook hook = Mock(ISatisfyHook) {
+            isSatisfied(_) >> true
+        }
+        Injection injection = Mock(Injection) {
+            getId() >> ISatisfyHook.canonicalName
+            getObject() >> hook
+        }
+        registry.injectObject(injection)
+
+        when:
+        registry.register(svc1)
+        registry.findService('1', attrs)
+
+        then:
+        ServiceException ex = thrown()
+        ex.errorCode() == ServiceErrors.NOT_A_PROTOTYPE_SERVICE
+    }
+
+    def 'Test find instance service'() {
+        given:
+        def attrs = [] as Map
+        def svc1 = Mock(IPrototype) {
+            getIds() >> ["1", "2"]
+            newInstance(attrs) >> Mock(IInstance) {
+                getIds() >> ['a', 'b']
+                prototypeId() >> ['x']
+            }
+        }
+        ISatisfyHook hook = Mock(ISatisfyHook) {
+            isSatisfied(_) >> true
+        }
+        Injection injection = Mock(Injection) {
+            getId() >> ISatisfyHook.canonicalName
+            getObject() >> hook
+        }
+        registry.injectObject(injection)
+
+        when:
+        registry.register(svc1)
+        registry.findService('1', attrs)
+
+        then:
+        noExceptionThrown()
     }
 
     def 'Test find service by id and from'() {
