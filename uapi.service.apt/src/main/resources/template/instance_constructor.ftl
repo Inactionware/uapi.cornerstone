@@ -8,7 +8,7 @@ uapi.common.ArgumentChecker.required(attributes, "attributes");
         uapi.rx.Looper.on(attributes.entrySet())
                 .foreach(attrEntry -> {
                 <#list attrs as attr>
-    if (attrEntry.getKey().equals("${attr.name}")) {
+                    if (attrEntry.getKey().equals("${attr.name}")) {
                         if (! (attrEntry.getValue() instanceof ${attr.type})) {
                             throw new uapi.GeneralException(
                                     "The attribute value {} can't convert to {}",
