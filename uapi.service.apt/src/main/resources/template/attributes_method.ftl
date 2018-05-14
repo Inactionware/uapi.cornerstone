@@ -1,5 +1,5 @@
 return new String[] {
 <#list attrs as attr>
-            "${attr.name}"
+            "${attr.name}"<#sep>, </#sep>
 </#list>
         };

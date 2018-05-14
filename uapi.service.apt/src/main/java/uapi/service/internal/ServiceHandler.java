@@ -103,7 +103,7 @@ public final class ServiceHandler extends AnnotationsHandler {
             Attribute annoAttr = fieldElement.getAnnotation(Attribute.class);
             String attrName = annoAttr.value();
             String attrField = fieldElement.getSimpleName().toString();
-            String attrFieldType = fieldElement.asType().toString();
+            String attrFieldType = Type.toQType(fieldElement.asType().toString());
             ClassMeta.Builder instClassBuilder = builderCtx.findClassBuilder(classElement);
             Map<String, Object> modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
             List<AttributeMode> requiredAttrs = (List<AttributeMode>) modelReqAttrs.get(VAR_ATTRS);
