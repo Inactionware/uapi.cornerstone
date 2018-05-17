@@ -25,6 +25,7 @@ import uapi.event.IEvent
 import uapi.event.IEventBus
 import uapi.event.IEventFinishCallback
 import uapi.event.IEventHandler
+import uapi.event.PlainEvent
 
 /**
  * Unit test for Responsible
@@ -289,12 +290,12 @@ class ResponsibleTest extends Specification {
         }
 
         @Override
-        void fire(IEvent event, IEventFinishCallback callback) {
+        <T extends IEvent> void fire(T event, IEventFinishCallback<T> callback) {
 
         }
 
         @Override
-        void fire(IEvent event, IEventFinishCallback callback, boolean sync) {
+        <T extends IEvent> void fire(T event, IEventFinishCallback<T> callback, boolean sync) {
 
         }
 
