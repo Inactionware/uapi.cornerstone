@@ -4,7 +4,7 @@ package uapi.event;
  * Created by xquan on 5/18/2017.
  */
 @FunctionalInterface
-public interface IEventFinishCallback {
+public interface IEventFinishCallback<T extends IEvent> {
 
     /**
      * Invoked when specific event handling is finished.
@@ -12,5 +12,5 @@ public interface IEventFinishCallback {
      * @param   event
      *          Finished event
      */
-    void callback(IEvent event);
+    void callback(T event);
 }

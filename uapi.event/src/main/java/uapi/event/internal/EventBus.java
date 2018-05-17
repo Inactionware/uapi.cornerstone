@@ -108,9 +108,9 @@ public class EventBus implements IEventBus {
     }
 
     @Override
-    public void fire(
-            final IEvent event,
-            final IEventFinishCallback callback
+    public <T extends IEvent> void fire(
+            final T event,
+            final IEventFinishCallback<T> callback
     ) {
         ArgumentChecker.required(event, "event");
         ArgumentChecker.required(callback, "callback");
@@ -126,9 +126,9 @@ public class EventBus implements IEventBus {
     }
 
     @Override
-    public void fire(
-            final IEvent event,
-            final IEventFinishCallback callback,
+    public <T extends IEvent> void fire(
+            final T event,
+            final IEventFinishCallback<T> callback,
             final boolean sync
     ) {
         ArgumentChecker.required(event, "event");

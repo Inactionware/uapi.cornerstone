@@ -58,7 +58,7 @@ public interface IEventBus {
      * @param   callback
      *          The callback which will be invoked when the event is handled
      */
-    void fire(IEvent event, IEventFinishCallback callback);
+    <T extends IEvent> void fire(T event, IEventFinishCallback<T> callback);
 
     /**
      * Fire event, and block the thread until the callback is invoked when the event is
@@ -70,7 +70,7 @@ public interface IEventBus {
      * @param   sync
      *          Synchronous or asynchronous to fire
      */
-    void fire(IEvent event, IEventFinishCallback callback, boolean sync);
+    <T extends IEvent> void fire(T event, IEventFinishCallback<T> callback, boolean sync);
 
     /**
      * Register a event handler
