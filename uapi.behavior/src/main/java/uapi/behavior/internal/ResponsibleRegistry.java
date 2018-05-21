@@ -9,6 +9,7 @@
 
 package uapi.behavior.internal;
 
+import uapi.GeneralException;
 import uapi.Tags;
 import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
@@ -16,6 +17,7 @@ import uapi.common.Guarder;
 import uapi.common.Repository;
 import uapi.event.IEventBus;
 import uapi.log.ILogger;
+import uapi.service.IServiceLifecycle;
 import uapi.service.annotation.*;
 
 import java.util.HashMap;
@@ -28,7 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 @Service(IResponsibleRegistry.class)
 @Tag(Tags.BEHAVIOR)
-public class ResponsibleRegistry implements IResponsibleRegistry {
+public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecycle {
 
     @Inject
     protected ILogger _logger;
@@ -99,5 +101,25 @@ public class ResponsibleRegistry implements IResponsibleRegistry {
         ArgumentChecker.required(constructor, "constructor");
         IResponsible responsible = register(constructor.name());
         constructor.construct(responsible);
+    }
+
+    @Override
+    public void onActivate() {
+        // do nothing
+    }
+
+    @Override
+    public void onDeactivate() {
+        // do nothing
+    }
+
+    @Override
+    public void onDependencyInject(String serviceId, Object service) {
+        if (IAction.class.getCanonicalName().equals(serviceId) && service instanceof IAction) {
+            this._actionRepo.put((IAction) service);
+        } else {
+            throw new GeneralException(
+                    "Unsupported dependency injection - {}, {}", service, service.getClass().getCanonicalName());
+        }
     }
 }

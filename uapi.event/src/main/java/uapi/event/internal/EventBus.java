@@ -19,6 +19,7 @@ import uapi.config.internal.IntervalTimeParser;
 import uapi.event.*;
 import uapi.log.ILogger;
 import uapi.rx.Looper;
+import uapi.service.IServiceLifecycle;
 import uapi.service.annotation.*;
 
 import java.util.LinkedList;
@@ -30,7 +31,7 @@ import java.util.concurrent.*;
  */
 @Service(IEventBus.class)
 @Tag(Tags.EVENT)
-public class EventBus implements IEventBus {
+public class EventBus implements IEventBus, IServiceLifecycle {
 
     private static final IntervalTime DEFAULT_AWAIT_TIME = IntervalTime.parse("100s");
 
@@ -180,6 +181,28 @@ public class EventBus implements IEventBus {
                     .toList();
         }
         return handlers;
+    }
+
+    @Override
+    public void onActivate() {
+        // do nothing
+    }
+
+    @Override
+    public void onDeactivate() {
+        // do nothing
+    }
+
+    @Override
+    public void onDependencyInject(
+            final String serviceId,
+            final Object service) {
+        if (IEventHandler.class.getCanonicalName().equals(serviceId) && service instanceof IEventHandler) {
+            this._eventHandlers.add((IEventHandler) service);
+        } else {
+            throw new GeneralException(
+                    "Unsupported dependency injection - {}, {}", service, service.getClass().getCanonicalName());
+        }
     }
 
     private class HandleEventAction extends RecursiveAction {

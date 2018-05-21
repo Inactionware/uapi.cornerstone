@@ -15,6 +15,7 @@ import uapi.GeneralException
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.LogSupport
+import uapi.service.IServiceLifecycle
 import uapi.service.SetterMeta
 
 import javax.lang.model.element.*
@@ -37,6 +38,7 @@ class OptionalParserTest extends Specification {
         given:
         def budrCtx = Mock(IBuilderContext) {
             getLogger() >> Mock(LogSupport)
+            isAssignable(_, IServiceLifecycle.class) >> true
         }
         def element = Mock(Element) {
             getKind() >> elemKind
@@ -69,6 +71,7 @@ class OptionalParserTest extends Specification {
             findClassBuilder(_) >> classBudr
             getBuilders() >> [classBudr]
             loadTemplate(_) >> Mock(Template)
+            isAssignable(_, IServiceLifecycle.class) >> true
         }
         def element = Mock(Element) {
             getKind() >> ElementKind.FIELD
@@ -108,6 +111,7 @@ class OptionalParserTest extends Specification {
             findClassBuilder(_) >> classBudr
             getBuilders() >> [classBudr]
             loadTemplate(_) >> Mock(Template)
+            isAssignable(_, IServiceLifecycle.class) >> true
         }
         def element = Mock(Element) {
             getKind() >> ElementKind.FIELD
@@ -147,6 +151,7 @@ class OptionalParserTest extends Specification {
             findClassBuilder(_) >> classBudr
             getBuilders() >> [classBudr]
             loadTemplate(_) >> Mock(Template)
+            isAssignable(_, IServiceLifecycle.class) >> true
         }
         def element = Mock(Element) {
             getKind() >> ElementKind.METHOD
@@ -194,6 +199,7 @@ class OptionalParserTest extends Specification {
             findClassBuilder(_) >> classBudr
             getBuilders() >> [classBudr]
             loadTemplate(_) >> Mock(Template)
+            isAssignable(_, IServiceLifecycle.class) >> true
         }
         def element = Mock(ExecutableElement) {
             getKind() >> ElementKind.METHOD
@@ -246,6 +252,7 @@ class OptionalParserTest extends Specification {
             findClassBuilder(_) >> classBudr
             getBuilders() >> [classBudr]
             loadTemplate(_) >> Mock(Template)
+            isAssignable(_, IServiceLifecycle.class) >> true
         }
         def element = Mock(ExecutableElement) {
             getKind() >> ElementKind.METHOD
