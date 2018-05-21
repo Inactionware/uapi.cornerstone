@@ -15,6 +15,7 @@ import uapi.InvalidArgumentException;
 import uapi.Type;
 import uapi.codegen.*;
 import uapi.rx.Looper;
+import uapi.service.IServiceLifecycle;
 import uapi.service.SetterMeta;
 
 import javax.lang.model.element.*;
@@ -48,6 +49,13 @@ class OptionalParser {
             Element classElemt = element.getEnclosingElement();
             builderCtx.checkModifiers(classElemt, uapi.service.annotation.Optional.class,
                     Modifier.PRIVATE, Modifier.FINAL);
+
+            // Ensure the class must implements IServiceLifecycle interface
+            if (! builderCtx.isAssignable(classElemt, IServiceLifecycle.class)) {
+                throw new GeneralException(
+                        "The service dependency is optional, the service must implements IServiceLifecycle interface - {}::{}",
+                        classElemt.getSimpleName().toString(), element.getSimpleName().toString());
+            }
 
             if (element.getKind() == ElementKind.FIELD) {
                 String fieldName = element.getSimpleName().toString();
