@@ -65,16 +65,6 @@ public class ConfigValueParsers implements IServiceLifecycle {
     }
 
     @Override
-    public void onActivate() {
-        // Do nothing
-    }
-
-    @Override
-    public void onDeactivate() {
-        // Do nothing
-    }
-
-    @Override
     public void onDependencyInject(String serviceId, Object service) {
         if (service instanceof IConfigValueParser) {
             this._parsers.add((IConfigValueParser) service);
