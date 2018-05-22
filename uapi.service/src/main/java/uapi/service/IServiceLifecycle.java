@@ -17,12 +17,16 @@ public interface IServiceLifecycle {
     /**
      * It is invoked when the service is resolved and all other dependent services are activated.
      */
-    void onActivate();
+    default void onActivate() {
+        // do nothing
+    }
 
     /**
      * It is invoked when the system/app will be shut down.
      */
-    void onDeactivate();
+    default void onDeactivate() {
+        // do nothing
+    }
 
     /**
      * Invoked when a injectable property is set

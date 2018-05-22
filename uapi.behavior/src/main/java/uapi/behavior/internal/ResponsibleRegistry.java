@@ -104,16 +104,6 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
     }
 
     @Override
-    public void onActivate() {
-        // do nothing
-    }
-
-    @Override
-    public void onDeactivate() {
-        // do nothing
-    }
-
-    @Override
     public void onDependencyInject(String serviceId, Object service) {
         if (IAction.class.getCanonicalName().equals(serviceId) && service instanceof IAction) {
             this._actionRepo.put((IAction) service);

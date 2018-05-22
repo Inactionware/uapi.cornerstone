@@ -184,16 +184,6 @@ public class EventBus implements IEventBus, IServiceLifecycle {
     }
 
     @Override
-    public void onActivate() {
-        // do nothing
-    }
-
-    @Override
-    public void onDeactivate() {
-        // do nothing
-    }
-
-    @Override
     public void onDependencyInject(
             final String serviceId,
             final Object service) {
