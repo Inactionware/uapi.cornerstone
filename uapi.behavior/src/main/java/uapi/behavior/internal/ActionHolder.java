@@ -72,6 +72,10 @@ class ActionHolder {
         return this._nextActions.size() != 0;
     }
 
+    int nextActionSize() {
+        return this._nextActions.size();
+    }
+
     IAction action() {
         return this._action;
     }

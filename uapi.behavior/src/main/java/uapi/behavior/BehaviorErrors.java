@@ -12,6 +12,7 @@ package uapi.behavior;
 import uapi.exception.FileBasedExceptionErrors;
 import uapi.exception.IndexedParameters;
 
+import javax.swing.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,24 +23,26 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 
     public static final int CATEGORY   = 0x0104;
 
-    public static final int UNMATCHED_ACTION                = 1;
-    public static final int NOT_ONLY_NEXT_ACTION            = 2;
-    public static final int BEHAVIOR_ID_IS_USED             = 3;
-    public static final int NO_ACTION_WITH_LABEL            = 4;
-    public static final int ACTION_LABEL_IS_BIND            = 5;
-    public static final int EVALUATOR_IS_SET                = 6;
-    public static final int ACTION_NOT_FOUND                = 7;
-    public static final int EVALUATOR_NOT_USED              = 8;
-    public static final int NO_ACTION_IN_BEHAVIOR           = 9;
-    public static final int ACTION_IO_MISMATCH              = 10;
-    public static final int PUBLISH_UNREG_BEHAVIOR          = 11;
-    public static final int BEHAVIOR_IS_PUBLISHED           = 12;
-    public static final int INCONSISTENT_LEAF_ACTIONS       = 13;
-    public static final int DUPLICATED_RESPONSIBLE_NAME     = 14;
-    public static final int UNSUPPORTED_BEHAVIOR_EVENT_TYPE = 15;
-    public static final int UNSUPPORTED_INJECTED_SERVICE    = 16;
-    public static final int FAILURE_ACTION_EXISTS           = 17;
-    public static final int SUCCESS_ACTION_EXISTS           = 18;
+    public static final int UNMATCHED_ACTION                    = 1;
+    public static final int NOT_ONLY_NEXT_ACTION                = 2;
+    public static final int BEHAVIOR_ID_IS_USED                 = 3;
+    public static final int NO_ACTION_WITH_LABEL                = 4;
+    public static final int ACTION_LABEL_IS_BIND                = 5;
+    public static final int EVALUATOR_IS_SET                    = 6;
+    public static final int ACTION_NOT_FOUND                    = 7;
+    public static final int EVALUATOR_NOT_USED                  = 8;
+    public static final int NO_ACTION_IN_BEHAVIOR               = 9;
+    public static final int ACTION_IO_MISMATCH                  = 10;
+    public static final int PUBLISH_UNREG_BEHAVIOR              = 11;
+    public static final int BEHAVIOR_IS_PUBLISHED               = 12;
+    public static final int INCONSISTENT_LEAF_ACTIONS           = 13;
+    public static final int DUPLICATED_RESPONSIBLE_NAME         = 14;
+    public static final int UNSUPPORTED_BEHAVIOR_EVENT_TYPE     = 15;
+    public static final int UNSUPPORTED_INJECTED_SERVICE        = 16;
+    public static final int FAILURE_ACTION_EXISTS               = 17;
+    public static final int SUCCESS_ACTION_EXISTS               = 18;
+    public static final int DEPENDENT_ACTION_NOT_FOUND          = 19;
+    public static final int DEPENDENT_IO_NOT_MATCH_ACTION_INPUT = 20;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -63,6 +66,8 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(UNSUPPORTED_INJECTED_SERVICE, UnsupportedInjectedService.KEY);
         keyCodeMapping.put(FAILURE_ACTION_EXISTS, FailureActionExists.KEY);
         keyCodeMapping.put(SUCCESS_ACTION_EXISTS, SuccessActionExists.KEY);
+        keyCodeMapping.put(DEPENDENT_ACTION_NOT_FOUND, DependentActionNotFound.KEY);
+        keyCodeMapping.put(DEPENDENT_IO_NOT_MATCH_ACTION_INPUT, DependentIONotmatchActionInput.KEY);
     }
 
     public BehaviorErrors() {
@@ -530,6 +535,78 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._behaviorId };
+        }
+    }
+
+    /**
+     * Error string template
+     *      The action {} depends on action {} which is not found in the repository
+     */
+    public static final class DependentActionNotFound extends IndexedParameters<DependentActionNotFound> {
+
+        public static final String KEY = "DependentActionNotFound";
+
+        private Object _byAction;
+        private Object _depAction;
+
+        public DependentActionNotFound byAction(Object actionId) {
+            this._byAction = actionId;
+            return this;
+        }
+
+        public DependentActionNotFound dependentAction(Object actionId) {
+            this._depAction = actionId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._byAction, this._depAction };
+        }
+    }
+
+    /**
+     * Error string template
+     *      The input type [{}] or output type [{}] of dependent action {} does not match input type [{}] of action {}
+     */
+    public static final class DependentIONotmatchActionInput extends IndexedParameters<DependentIONotmatchActionInput> {
+
+        public static final String KEY = "DependentIONotmatchActionInput";
+
+        private Class<?> _iDepType;
+        private Class<?> _oDepType;
+        private Class<?> _iActionType;
+        private ActionIdentify _depActionId;
+        private ActionIdentify _actionId;
+
+        public DependentIONotmatchActionInput dependentInputType(Class<?> type) {
+            this._iDepType = type;
+            return this;
+        }
+
+        public DependentIONotmatchActionInput dependentOutputType(Class<?> type) {
+            this._oDepType = type;
+            return this;
+        }
+
+        public DependentIONotmatchActionInput actionInputType(Class<?> type) {
+            this._iActionType = type;
+            return this;
+        }
+
+        public DependentIONotmatchActionInput dependentId(ActionIdentify actionId) {
+            this._depActionId = actionId;
+            return this;
+        }
+
+        public DependentIONotmatchActionInput actionId(ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._iDepType, this._oDepType, this._depActionId, this._iActionType, this._actionId };
         }
     }
 }

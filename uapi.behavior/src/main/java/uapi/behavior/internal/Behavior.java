@@ -10,11 +10,7 @@
 package uapi.behavior.internal;
 
 import uapi.behavior.*;
-import uapi.common.ArgumentChecker;
-import uapi.common.Builder;
-import uapi.common.Functionals;
-import uapi.common.Repository;
-import uapi.event.IEventFinishCallback;
+import uapi.common.*;
 import uapi.rx.Looper;
 
 import java.util.HashMap;
@@ -42,9 +38,6 @@ public class Behavior<I, O>
     private final AtomicInteger _sequence;
 
     private Functionals.Evaluator _lastEvaluator;
-
-//    private IAnonymousAction<Object, BehaviorEvent> _successAction;
-//    private IAnonymousAction<Exception, BehaviorEvent> _failureAction;
 
     private IAction<BehaviorSuccess, BehaviorEvent> _successAction;
     private IAction<BehaviorFailure, BehaviorEvent> _failureAction;
@@ -163,9 +156,51 @@ public class Behavior<I, O>
                             .actionId(id))
                     .build();
         }
-        this._navigator.newNextAction(action, this._lastEvaluator, label);
+        if (addDependentAction(action, label)) {
+            this._navigator.newNextAction(action, this._lastEvaluator, null);
+        } else {
+            this._navigator.newNextAction(action, this._lastEvaluator, label);
+        }
         this._lastEvaluator = null;
         return this;
+    }
+
+    private boolean addDependentAction(IAction<?, ?> action, String label) {
+        if (action instanceof IDependent) {
+            Object depActionId = ((IDependent) action).dependsOn();
+            IAction<?, ?> dependentAction;
+            if (depActionId instanceof ActionIdentify) {
+                dependentAction = this._actionRepo.get((ActionIdentify) depActionId);
+                if (dependentAction == null) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.DEPENDENT_ACTION_NOT_FOUND)
+                            .variables(new BehaviorErrors.DependentActionNotFound()
+                                    .byAction(action)
+                                    .dependentAction(depActionId))
+                            .build();
+                }
+            } else {
+                return false;
+            }
+            // The input and output type of dependent action must be same as input type of the action
+            Class<?> depInputType = dependentAction.inputType();
+            Class<?> depOutputType = dependentAction.outputType();
+            if (depInputType != action.inputType() || depOutputType != action.inputType()) {
+                throw BehaviorException.builder()
+                        .errorCode(BehaviorErrors.DEPENDENT_IO_NOT_MATCH_ACTION_INPUT)
+                        .variables(new BehaviorErrors.DependentIONotmatchActionInput()
+                                .dependentId(dependentAction.getId())
+                                .actionId(action.getId())
+                                .dependentInputType(depInputType)
+                                .dependentOutputType(depOutputType)
+                                .actionInputType(action.inputType()))
+                        .build();
+            }
+            this._navigator.newNextAction(dependentAction, this._lastEvaluator, label);
+            this._lastEvaluator = null;
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -183,7 +218,11 @@ public class Behavior<I, O>
         ensureNotBuilt();
         ArgumentChecker.required(action, "action");
         AnonymousAction aAction = new AnonymousAction(action);
-        this._navigator.newNextAction(aAction, this._lastEvaluator, label);
+        if (addDependentAction(aAction, label)) {
+            this._navigator.newNextAction(aAction, this._lastEvaluator, null);
+        } else {
+            this._navigator.newNextAction(aAction, this._lastEvaluator, label);
+        }
         this._lastEvaluator = null;
         return this;
     }
@@ -384,6 +423,13 @@ public class Behavior<I, O>
         return this._entranceAction;
     }
 
+    int actionSize() {
+        return Looper.on(this._navigator._actions)
+                .map(ActionHolder::action)
+                .filter(action -> ! (action.getClass().isAssignableFrom(EndpointAction.class)))
+                .count();
+    }
+
     private final class EndpointAction implements IAction {
 
         private final EndpointType _type;
@@ -475,7 +521,6 @@ public class Behavior<I, O>
             // The check only on non-anonymous action
             if (! this._current.action().isAnonymous() && ! action.isAnonymous()) {
                 if (! action.inputType().isAssignableFrom(this._current.action().outputType())) {
-//                if (!this._current.action().outputType().equals(action.inputType())) {
                     throw BehaviorException.builder()
                             .errorCode(BehaviorErrors.ACTION_IO_MISMATCH)
                             .variables(new BehaviorErrors.ActionIOMismatch()
