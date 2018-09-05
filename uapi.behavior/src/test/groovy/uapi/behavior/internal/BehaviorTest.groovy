@@ -12,11 +12,13 @@ package uapi.behavior.internal
 import spock.lang.Specification
 import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionType
+import uapi.behavior.BehaviorErrors
 import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
 import uapi.behavior.IAnonymousAction
 import uapi.behavior.IAnonymousCall
 import uapi.common.IAttributed
+import uapi.common.IDependent
 import uapi.common.Repository
 
 /**
@@ -124,6 +126,95 @@ class BehaviorTest extends Specification {
         where:
         behaviorName    | behaviorInput     | a1Name    | a1IType       | a1OType       | a2Name    | a2IType       | a2OType
         'bName'         | String.class      | 'a1'      | String.class  | Integer.class | 'a2'      | String.class  | String.class
+    }
+
+    def 'Test add dependent action'() {
+        given:
+        def a1 = new ActionIdentify(a1Name, ActionType.ACTION)
+        def dep = new ActionIdentify(depName, ActionType.ACTION)
+        def repo = Mock(Repository) {
+            get(a1) >> Mock(IDependentAction) {
+                getId() >> a1
+                inputType() >> a1IType
+                outputType() >> a1OType
+                dependsOn() >> dep
+            }
+            get(dep) >> Mock(IAction) {
+                getId() >> dep
+                inputType() >> depIType
+                outputType() >> depOType
+            }
+        }
+
+        when:
+        def behavior = new Behavior(Mock(Responsible), repo, bName, bInput)
+        behavior.then(a1).build()
+
+        then:
+        noExceptionThrown()
+        behavior.actionSize() == 2
+
+        where:
+        bName   | bInput        | a1Name    | a1IType       | a1OType       | depName   | depIType      | depOType
+        'bName' | String.class  |'a1'       | String.class  | Integer.class |'dep'      | String.class  | String.class
+    }
+
+    def 'Test add dependent action which does not exist in the repo'() {
+        given:
+        def a1 = new ActionIdentify(a1Name, ActionType.ACTION)
+        def dep = new ActionIdentify(depName, ActionType.ACTION)
+        def repo = Mock(Repository) {
+            get(a1) >> Mock(IDependentAction) {
+                getId() >> a1
+                inputType() >> a1IType
+                outputType() >> a1OType
+                dependsOn() >> dep
+            }
+        }
+
+        when:
+        def behavior = new Behavior(Mock(Responsible), repo, bName, bInput)
+        behavior.then(a1).build()
+
+        then:
+        def ex = thrown(BehaviorException)
+        ex.errorCode() == BehaviorErrors.DEPENDENT_ACTION_NOT_FOUND
+
+        where:
+        bName   | bInput        | a1Name    | a1IType       | a1OType       | depName   | depIType      | depOType
+        'bName' | String.class  |'a1'       | String.class  | Integer.class |'dep'      | String.class  | String.class
+    }
+
+    def 'Test add dependent action which IO does not match'() {
+        given:
+        def a1 = new ActionIdentify(a1Name, ActionType.ACTION)
+        def dep = new ActionIdentify(depName, ActionType.ACTION)
+        def repo = Mock(Repository) {
+            get(a1) >> Mock(IDependentAction) {
+                getId() >> a1
+                inputType() >> a1IType
+                outputType() >> a1OType
+                dependsOn() >> dep
+            }
+            get(dep) >> Mock(IAction) {
+                getId() >> dep
+                inputType() >> depIType
+                outputType() >> depOType
+            }
+        }
+
+        when:
+        def behavior = new Behavior(Mock(Responsible), repo, bName, bInput)
+        behavior.then(a1).build()
+
+        then:
+        def ex = thrown(BehaviorException)
+        ex.errorCode() == BehaviorErrors.DEPENDENT_IO_NOT_MATCH_ACTION_INPUT
+
+        where:
+        bName   | bInput        | a1Name    | a1IType       | a1OType       | depName   | depIType      | depOType
+        'bName' | String.class  |'a1'       | String.class  | Integer.class |'dep'      | Integer.class | String.class
+        'bName' | String.class  |'a1'       | Integer.class | Integer.class |'dep'      | String.class  | String.class
     }
 
     def 'Test process'() {
@@ -303,4 +394,6 @@ class BehaviorTest extends Specification {
         then:
         noExceptionThrown()
     }
+
+    private interface IDependentAction extends IAction, IDependent {}
 }
