@@ -1,0 +1,1 @@
+return new uapi.behavior.ActionIdentify("${dependsOnActionName}", uapi.behavior.ActionType.ACTION);

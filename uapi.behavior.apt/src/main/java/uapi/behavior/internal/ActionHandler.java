@@ -9,6 +9,7 @@
 
 package uapi.behavior.internal;
 
+import com.google.auto.common.MoreElements;
 import com.google.auto.service.AutoService;
 import com.google.common.base.Strings;
 import freemarker.template.Template;
@@ -20,6 +21,8 @@ import uapi.behavior.IExecutionContext;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
 import uapi.codegen.*;
+import uapi.common.ArgumentChecker;
+import uapi.common.IDependent;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.IServiceHandlerHelper;
@@ -42,6 +45,7 @@ public class ActionHandler extends AnnotationsHandler {
     private static final String TEMPLATE_INPUT_TYPE     = "template/inputType_method.ftl";
     private static final String TEMPLATE_OUTPUT_TYPE    = "template/outputType_method.ftl";
     private static final String TEMPLATE_PROCESS        = "template/process_method.ftl";
+    private static final String TEMPLATE_DEPENDS_ON     = "template/dependsOn_method.ftl";
 
     @SuppressWarnings("unchecked")
     private static final Class<? extends Annotation>[] orderedAnnotations =
@@ -125,6 +129,8 @@ public class ActionHandler extends AnnotationsHandler {
             inputType = Type.toQType(inputType);
             outputType = Type.toQType(outputType);
 
+            ClassMeta.Builder clsBuilder = builderContext.findClassBuilder(classElement);
+
             Template tempGetId = builderContext.loadTemplate(TEMPLATE_GET_ID);
             Template tempInputType = builderContext.loadTemplate(TEMPLATE_INPUT_TYPE);
             Template tempOutputType = builderContext.loadTemplate(TEMPLATE_OUTPUT_TYPE);
@@ -138,7 +144,6 @@ public class ActionHandler extends AnnotationsHandler {
             model.put("isInVoid", Type.Q_VOID.equals(inputType));
             model.put("isOutVoid", Type.Q_VOID.equals(outputType));
 
-            ClassMeta.Builder clsBuilder = builderContext.findClassBuilder(classElement);
             clsBuilder
                     .addImplement(StringHelper.makeString(
                             "{}<{}, {}>", IAction.class.getCanonicalName(), inputType, outputType))
@@ -180,6 +185,48 @@ public class ActionHandler extends AnnotationsHandler {
             // Add IAction as this service's id
             IServiceHandlerHelper svcHelper = (IServiceHandlerHelper) builderContext.getHelper(IServiceHandlerHelper.name);
             svcHelper.addServiceId(clsBuilder, IAction.class.getCanonicalName());
+
+            constructDependentInterface(builderContext, clsBuilder, classElement, action);
         });
+    }
+
+    private void constructDependentInterface(
+            final IBuilderContext builderCtx,
+            final ClassMeta.Builder clsBuilder,
+            final Element classElement,
+            final Action action) {
+        AnnotationMirror actionAnnoMirror = MoreElements.getAnnotationMirror(classElement, Action.class).get();
+        List<String> depActionClasses = getTypesInAnnotation(actionAnnoMirror, "dependsOn");
+        String depActionClassName = StringHelper.EMPTY;
+        if (depActionClasses.size() == 1) {
+            depActionClassName = depActionClasses.get(0);
+        }
+        String depActionName = action.dependsOnName();
+        if (! ArgumentChecker.isEmpty(depActionClassName) && ! ArgumentChecker.isEmpty(depActionName)) {
+            throw new GeneralException("Only allow set one of dependsOn or dependsOnId on Action annotation");
+        }
+        String dependsOn = null;
+        if (! ArgumentChecker.isEmpty(depActionClassName)) {
+            dependsOn = depActionClassName;
+        } else if (! ArgumentChecker.isEmpty(depActionName)) {
+            dependsOn = depActionName;
+        }
+
+        if (dependsOn == null) {
+            return;
+        }
+
+        Template tempDependsOn = builderCtx.loadTemplate(TEMPLATE_DEPENDS_ON);
+        Map<String, Object> model = new HashMap<>();
+        model.put("dependsOnActionName", dependsOn);
+
+        clsBuilder
+                .addImplement(StringHelper.makeString(
+                        "{}<{}>", IDependent.class.getCanonicalName(), ActionIdentify.class.getCanonicalName()))
+                .addMethodBuilder(MethodMeta.builder()
+                        .setName("dependsOn")
+                        .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
+                        .setReturnTypeName(ActionIdentify.class.getCanonicalName())
+                        .addCodeBuilder(CodeMeta.builder().setTemplate(tempDependsOn).setModel(model)));
     }
 }
