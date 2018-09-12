@@ -196,6 +196,15 @@ public class Behavior<I, O>
                                 .actionInputType(action.inputType()))
                         .build();
             }
+            if (dependentAction instanceof IDependent) {
+                throw BehaviorException.builder()
+                        .errorCode(BehaviorErrors.UNSUPPORTED_DEPENTENT_DEPENDENCY)
+                        .variables(new BehaviorErrors.UnsupportedDependentDependency()
+                                .action(action)
+                                .dependentAction(dependentAction)
+                                .dependentDependency(((IDependent) dependentAction).dependsOn()))
+                        .build();
+            }
             this._navigator.newNextAction(dependentAction, this._lastEvaluator, label);
             this._lastEvaluator = null;
             return true;

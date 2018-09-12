@@ -159,6 +159,37 @@ class BehaviorTest extends Specification {
         'bName' | String.class  |'a1'       | String.class  | Integer.class |'dep'      | String.class  | String.class
     }
 
+    def 'Test add dependent action which depends on other action'() {
+        given:
+        def a1 = new ActionIdentify(a1Name, ActionType.ACTION)
+        def dep = new ActionIdentify(depName, ActionType.ACTION)
+        def repo = Mock(Repository) {
+            get(a1) >> Mock(IDependentAction) {
+                getId() >> a1
+                inputType() >> a1IType
+                outputType() >> a1OType
+                dependsOn() >> dep
+            }
+            get(dep) >> Mock(IDependentAction) {
+                getId() >> dep
+                inputType() >> depIType
+                outputType() >> depOType
+            }
+        }
+
+        when:
+        def behavior = new Behavior(Mock(Responsible), repo, bName, bInput)
+        behavior.then(a1).build()
+
+        then:
+        def ex = thrown(BehaviorException)
+        ex.errorCode() == BehaviorErrors.UNSUPPORTED_DEPENTENT_DEPENDENCY
+
+        where:
+        bName   | bInput        | a1Name    | a1IType       | a1OType       | depName   | depIType      | depOType
+        'bName' | String.class  |'a1'       | String.class  | Integer.class |'dep'      | String.class  | String.class
+    }
+
     def 'Test add dependent action which does not exist in the repo'() {
         given:
         def a1 = new ActionIdentify(a1Name, ActionType.ACTION)

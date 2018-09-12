@@ -12,7 +12,6 @@ package uapi.behavior;
 import uapi.exception.FileBasedExceptionErrors;
 import uapi.exception.IndexedParameters;
 
-import javax.swing.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,6 +42,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int SUCCESS_ACTION_EXISTS               = 18;
     public static final int DEPENDENT_ACTION_NOT_FOUND          = 19;
     public static final int DEPENDENT_IO_NOT_MATCH_ACTION_INPUT = 20;
+    public static final int UNSUPPORTED_DEPENTENT_DEPENDENCY    = 21;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -68,6 +68,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(SUCCESS_ACTION_EXISTS, SuccessActionExists.KEY);
         keyCodeMapping.put(DEPENDENT_ACTION_NOT_FOUND, DependentActionNotFound.KEY);
         keyCodeMapping.put(DEPENDENT_IO_NOT_MATCH_ACTION_INPUT, DependentIONotmatchActionInput.KEY);
+        keyCodeMapping.put(UNSUPPORTED_DEPENTENT_DEPENDENCY, UnsupportedDependentDependency.KEY);
     }
 
     public BehaviorErrors() {
@@ -607,6 +608,39 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._iDepType, this._oDepType, this._depActionId, this._iActionType, this._actionId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Unsupported action dependency: {} -> {} -> {}
+     */
+    public static final class UnsupportedDependentDependency extends IndexedParameters<UnsupportedDependentDependency> {
+
+        public static final String KEY = "UnsupportedDependentDependency";
+
+        private IAction _action;
+        private IAction _depAction;
+        private Object _depDependency;
+
+        public UnsupportedDependentDependency action(final IAction action) {
+            this._action = action;
+            return this;
+        }
+
+        public UnsupportedDependentDependency dependentAction(final IAction action) {
+            this._depAction = action;
+            return this;
+        }
+
+        public UnsupportedDependentDependency dependentDependency(final Object object) {
+            this._depDependency = object;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._action, this._depAction, this._depDependency };
         }
     }
 }

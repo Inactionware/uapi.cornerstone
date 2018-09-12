@@ -9,6 +9,10 @@
 
 package uapi.behavior.annotation;
 
+import sun.reflect.generics.tree.VoidDescriptor;
+import uapi.Type;
+import uapi.common.StringHelper;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,5 +30,9 @@ public @interface Action {
      *
      * @return  Action name
      */
-    String value() default "";
+    String value() default StringHelper.EMPTY;
+
+    Class<?> dependsOn() default Void.class;
+
+    String dependsOnName() default StringHelper.EMPTY;
 }
