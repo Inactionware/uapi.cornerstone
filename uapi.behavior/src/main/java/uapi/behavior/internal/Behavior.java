@@ -156,7 +156,7 @@ public class Behavior<I, O>
                             .actionId(id))
                     .build();
         }
-        if (addDependentAction(action, label)) {
+        if (addInterceptor(action, label)) {
             this._navigator.newNextAction(action, this._lastEvaluator, null);
         } else {
             this._navigator.newNextAction(action, this._lastEvaluator, label);
@@ -165,47 +165,41 @@ public class Behavior<I, O>
         return this;
     }
 
-    private boolean addDependentAction(IAction<?, ?> action, String label) {
-        if (action instanceof IDependent) {
-            Object depActionId = ((IDependent) action).dependsOn();
-            IAction<?, ?> dependentAction;
-            if (depActionId instanceof ActionIdentify) {
-                dependentAction = this._actionRepo.get((ActionIdentify) depActionId);
-                if (dependentAction == null) {
-                    throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.DEPENDENT_ACTION_NOT_FOUND)
-                            .variables(new BehaviorErrors.DependentActionNotFound()
-                                    .byAction(action)
-                                    .dependentAction(depActionId))
-                            .build();
-                }
-            } else {
-                return false;
-            }
-            // The input and output type of dependent action must be same as input type of the action
-            Class<?> depInputType = dependentAction.inputType();
-            Class<?> depOutputType = dependentAction.outputType();
-            if (depInputType != action.inputType() || depOutputType != action.inputType()) {
+    private boolean addInterceptor(IAction<?, ?> action, String label) {
+        if (action instanceof IInterceptive) {
+            ActionIdentify interceptorId = ((IInterceptive) action).by();
+            IAction<?, ?> interceptor;
+            interceptor = this._actionRepo.get(interceptorId);
+            if (interceptor == null) {
                 throw BehaviorException.builder()
-                        .errorCode(BehaviorErrors.DEPENDENT_IO_NOT_MATCH_ACTION_INPUT)
-                        .variables(new BehaviorErrors.DependentIONotmatchActionInput()
-                                .dependentId(dependentAction.getId())
+                        .errorCode(BehaviorErrors.INTERCEPTOR_NOT_FOUND)
+                        .variables(new BehaviorErrors.InterceptorNotFound()
                                 .actionId(action.getId())
-                                .dependentInputType(depInputType)
-                                .dependentOutputType(depOutputType)
+                                .interceptorId(interceptorId))
+                        .build();
+            }
+            if (! (interceptor instanceof IInterceptor)) {
+                throw BehaviorException.builder()
+                        .errorCode(BehaviorErrors.ACTION_IS_NOT_INTERCEPTOR)
+                        .variables(new BehaviorErrors.ActionIsNotInterceptor()
+                                .actionId(interceptorId))
+                        .build();
+            }
+
+            // The input and output type of dependent action must be same as input type of the action
+            Class<?> interceptorInputType = interceptor.inputType();
+            if (interceptorInputType != action.inputType()) {
+                throw BehaviorException.builder()
+                        .errorCode(BehaviorErrors.INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT)
+                        .variables(new BehaviorErrors.InterceptorIONotMatchActionInput()
+                                .interceptorId(interceptorId)
+                                .actionId(action.getId())
+                                .interceptorIOType(interceptorInputType)
                                 .actionInputType(action.inputType()))
                         .build();
             }
-            if (dependentAction instanceof IDependent) {
-                throw BehaviorException.builder()
-                        .errorCode(BehaviorErrors.UNSUPPORTED_DEPENTENT_DEPENDENCY)
-                        .variables(new BehaviorErrors.UnsupportedDependentDependency()
-                                .action(action)
-                                .dependentAction(dependentAction)
-                                .dependentDependency(((IDependent) dependentAction).dependsOn()))
-                        .build();
-            }
-            this._navigator.newNextAction(dependentAction, this._lastEvaluator, label);
+
+            this._navigator.newNextAction(interceptor, this._lastEvaluator, label);
             this._lastEvaluator = null;
             return true;
         }
@@ -227,7 +221,7 @@ public class Behavior<I, O>
         ensureNotBuilt();
         ArgumentChecker.required(action, "action");
         AnonymousAction aAction = new AnonymousAction(action);
-        if (addDependentAction(aAction, label)) {
+        if (addInterceptor(aAction, label)) {
             this._navigator.newNextAction(aAction, this._lastEvaluator, null);
         } else {
             this._navigator.newNextAction(aAction, this._lastEvaluator, label);
