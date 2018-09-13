@@ -54,6 +54,13 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
     @Optional
     public void addAction(IAction<?, ?> action) {
         ArgumentChecker.required(action, "action");
+        if (action instanceof IInterceptor && action instanceof IInterceptive) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.UNSUPPORTED_INTERCEPTIVE_INTERCEPTOR)
+                    .variables(new BehaviorErrors.UnsupportedInterceptiveInterceptor()
+                            .interceptorId(action.getId()))
+                    .build();
+        }
         IAction<?, ?> existing = this._actionRepo.put(action);
         if (existing != null) {
             this._logger.warn("The existing action {} was overridden by new action {}", existing, action);

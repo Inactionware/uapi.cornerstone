@@ -13,8 +13,11 @@ import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionType
+import uapi.behavior.BehaviorErrors
 import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
+import uapi.behavior.IInterceptive
+import uapi.behavior.IInterceptor
 import uapi.behavior.IResponsible
 import uapi.event.IEventBus
 import uapi.log.ILogger
@@ -75,6 +78,39 @@ class ResponsibleRegistryTest extends Specification {
         respReg.responsibleCount() == 0
     }
 
+    def 'Test add interceptor'() {
+        given:
+        def interceptor = Mock(IInterceptor) {
+            getId() >> new ActionIdentify('aname', ActionType.ACTION)
+        }
+        def respReg = new ResponsibleRegistry()
+
+        when:
+        respReg.addAction(interceptor)
+
+        then:
+        noExceptionThrown()
+        respReg.actionCount() == 1
+        respReg.responsibleCount() == 0
+    }
+
+    def 'Test add interceptive interceptor'() {
+        given:
+        def interceptor = Mock(IInterceptiveInterceptor) {
+            getId() >> new ActionIdentify('aname', ActionType.ACTION)
+        }
+        def respReg = new ResponsibleRegistry()
+
+        when:
+        respReg.addAction(interceptor)
+
+        then:
+        def ex = thrown(BehaviorException)
+        ex.errorCode() == BehaviorErrors.UNSUPPORTED_INTERCEPTIVE_INTERCEPTOR
+        respReg.actionCount() == 0
+        respReg.responsibleCount() == 0
+    }
+
     def 'Test register'() {
         given:
         def eventBus = Mock(IEventBus)
@@ -118,4 +154,6 @@ class ResponsibleRegistryTest extends Specification {
         respReg.actionCount() == 0
         respReg.responsibleCount() == 0
     }
+
+    private interface IInterceptiveInterceptor extends IInterceptor, IInterceptive {}
 }

@@ -22,27 +22,28 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 
     public static final int CATEGORY   = 0x0104;
 
-    public static final int UNMATCHED_ACTION                    = 1;
-    public static final int NOT_ONLY_NEXT_ACTION                = 2;
-    public static final int BEHAVIOR_ID_IS_USED                 = 3;
-    public static final int NO_ACTION_WITH_LABEL                = 4;
-    public static final int ACTION_LABEL_IS_BIND                = 5;
-    public static final int EVALUATOR_IS_SET                    = 6;
-    public static final int ACTION_NOT_FOUND                    = 7;
-    public static final int EVALUATOR_NOT_USED                  = 8;
-    public static final int NO_ACTION_IN_BEHAVIOR               = 9;
-    public static final int ACTION_IO_MISMATCH                  = 10;
-    public static final int PUBLISH_UNREG_BEHAVIOR              = 11;
-    public static final int BEHAVIOR_IS_PUBLISHED               = 12;
-    public static final int INCONSISTENT_LEAF_ACTIONS           = 13;
-    public static final int DUPLICATED_RESPONSIBLE_NAME         = 14;
-    public static final int UNSUPPORTED_BEHAVIOR_EVENT_TYPE     = 15;
-    public static final int UNSUPPORTED_INJECTED_SERVICE        = 16;
-    public static final int FAILURE_ACTION_EXISTS               = 17;
-    public static final int SUCCESS_ACTION_EXISTS               = 18;
-    public static final int DEPENDENT_ACTION_NOT_FOUND          = 19;
-    public static final int DEPENDENT_IO_NOT_MATCH_ACTION_INPUT = 20;
-    public static final int UNSUPPORTED_DEPENTENT_DEPENDENCY    = 21;
+    public static final int UNMATCHED_ACTION                        = 1;
+    public static final int NOT_ONLY_NEXT_ACTION                    = 2;
+    public static final int BEHAVIOR_ID_IS_USED                     = 3;
+    public static final int NO_ACTION_WITH_LABEL                    = 4;
+    public static final int ACTION_LABEL_IS_BIND                    = 5;
+    public static final int EVALUATOR_IS_SET                        = 6;
+    public static final int ACTION_NOT_FOUND                        = 7;
+    public static final int EVALUATOR_NOT_USED                      = 8;
+    public static final int NO_ACTION_IN_BEHAVIOR                   = 9;
+    public static final int ACTION_IO_MISMATCH                      = 10;
+    public static final int PUBLISH_UNREG_BEHAVIOR                  = 11;
+    public static final int BEHAVIOR_IS_PUBLISHED                   = 12;
+    public static final int INCONSISTENT_LEAF_ACTIONS               = 13;
+    public static final int DUPLICATED_RESPONSIBLE_NAME             = 14;
+    public static final int UNSUPPORTED_BEHAVIOR_EVENT_TYPE         = 15;
+    public static final int UNSUPPORTED_INJECTED_SERVICE            = 16;
+    public static final int FAILURE_ACTION_EXISTS                   = 17;
+    public static final int SUCCESS_ACTION_EXISTS                   = 18;
+    public static final int INTERCEPTOR_NOT_FOUND                   = 19;
+    public static final int ACTION_IS_NOT_INTERCEPTOR               = 20;
+    public static final int INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT   = 21;
+    public static final int UNSUPPORTED_INTERCEPTIVE_INTERCEPTOR    = 22;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -66,9 +67,10 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(UNSUPPORTED_INJECTED_SERVICE, UnsupportedInjectedService.KEY);
         keyCodeMapping.put(FAILURE_ACTION_EXISTS, FailureActionExists.KEY);
         keyCodeMapping.put(SUCCESS_ACTION_EXISTS, SuccessActionExists.KEY);
-        keyCodeMapping.put(DEPENDENT_ACTION_NOT_FOUND, DependentActionNotFound.KEY);
-        keyCodeMapping.put(DEPENDENT_IO_NOT_MATCH_ACTION_INPUT, DependentIONotmatchActionInput.KEY);
-        keyCodeMapping.put(UNSUPPORTED_DEPENTENT_DEPENDENCY, UnsupportedDependentDependency.KEY);
+        keyCodeMapping.put(INTERCEPTOR_NOT_FOUND, InterceptorNotFound.KEY);
+        keyCodeMapping.put(ACTION_IS_NOT_INTERCEPTOR, ActionIsNotInterceptor.KEY);
+        keyCodeMapping.put(INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT, InterceptorIONotMatchActionInput.KEY);
+        keyCodeMapping.put(UNSUPPORTED_INTERCEPTIVE_INTERCEPTOR, UnsupportedInterceptiveInterceptor.KEY);
     }
 
     public BehaviorErrors() {
@@ -541,106 +543,110 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 
     /**
      * Error string template
-     *      The action {} depends on action {} which is not found in the repository
+     *      The action {} depends on interceptor {} which is not found in the repository
      */
-    public static final class DependentActionNotFound extends IndexedParameters<DependentActionNotFound> {
+    public static final class InterceptorNotFound extends IndexedParameters<InterceptorNotFound> {
 
-        public static final String KEY = "DependentActionNotFound";
+        public static final String KEY = "InterceptorNotFound";
 
-        private Object _byAction;
-        private Object _depAction;
+        private ActionIdentify _actionId;
+        private ActionIdentify _interceptorId;
 
-        public DependentActionNotFound byAction(Object actionId) {
-            this._byAction = actionId;
+        public InterceptorNotFound actionId(ActionIdentify actionId) {
+            this._actionId = actionId;
             return this;
         }
 
-        public DependentActionNotFound dependentAction(Object actionId) {
-            this._depAction = actionId;
+        public InterceptorNotFound interceptorId(ActionIdentify actionId) {
+            this._interceptorId = actionId;
             return this;
         }
 
         @Override
         public Object[] get() {
-            return new Object[] { this._byAction, this._depAction };
+            return new Object[] { this._actionId, this._interceptorId };
         }
     }
 
     /**
      * Error string template
-     *      The input type [{}] or output type [{}] of dependent action {} does not match input type [{}] of action {}
+     *      The action {} does not implement IInterceptor interface
      */
-    public static final class DependentIONotmatchActionInput extends IndexedParameters<DependentIONotmatchActionInput> {
+    public static final class ActionIsNotInterceptor extends IndexedParameters<ActionIsNotInterceptor> {
 
-        public static final String KEY = "DependentIONotmatchActionInput";
+        public static final String KEY = "ActionIsNotInterceptor";
 
-        private Class<?> _iDepType;
-        private Class<?> _oDepType;
-        private Class<?> _iActionType;
-        private ActionIdentify _depActionId;
         private ActionIdentify _actionId;
 
-        public DependentIONotmatchActionInput dependentInputType(Class<?> type) {
-            this._iDepType = type;
-            return this;
-        }
-
-        public DependentIONotmatchActionInput dependentOutputType(Class<?> type) {
-            this._oDepType = type;
-            return this;
-        }
-
-        public DependentIONotmatchActionInput actionInputType(Class<?> type) {
-            this._iActionType = type;
-            return this;
-        }
-
-        public DependentIONotmatchActionInput dependentId(ActionIdentify actionId) {
-            this._depActionId = actionId;
-            return this;
-        }
-
-        public DependentIONotmatchActionInput actionId(ActionIdentify actionId) {
+        public ActionIsNotInterceptor actionId(ActionIdentify actionId) {
             this._actionId = actionId;
             return this;
         }
 
         @Override
         public Object[] get() {
-            return new Object[] { this._iDepType, this._oDepType, this._depActionId, this._iActionType, this._actionId };
+            return new Object[] { this._actionId };
         }
     }
 
     /**
-     * Error string template:
-     *      Unsupported action dependency: {} -> {} -> {}
+     * Error string template
+     *      The IO type [{}] of interceptor {} does not match input type [{}] of action {
      */
-    public static final class UnsupportedDependentDependency extends IndexedParameters<UnsupportedDependentDependency> {
+    public static final class InterceptorIONotMatchActionInput extends IndexedParameters<InterceptorIONotMatchActionInput> {
 
-        public static final String KEY = "UnsupportedDependentDependency";
+        public static final String KEY = "InterceptorIONotMatchActionInput";
 
-        private IAction _action;
-        private IAction _depAction;
-        private Object _depDependency;
+        private Class<?> _interceptorIOType;
+        private Class<?> _actionInputType;
+        private ActionIdentify _interceptorId;
+        private ActionIdentify _actionId;
 
-        public UnsupportedDependentDependency action(final IAction action) {
-            this._action = action;
+        public InterceptorIONotMatchActionInput interceptorIOType(Class<?> type) {
+            this._interceptorIOType = type;
             return this;
         }
 
-        public UnsupportedDependentDependency dependentAction(final IAction action) {
-            this._depAction = action;
+        public InterceptorIONotMatchActionInput actionInputType(Class<?> type) {
+            this._actionInputType = type;
             return this;
         }
 
-        public UnsupportedDependentDependency dependentDependency(final Object object) {
-            this._depDependency = object;
+        public InterceptorIONotMatchActionInput interceptorId(ActionIdentify actionId) {
+            this._interceptorId = actionId;
+            return this;
+        }
+
+        public InterceptorIONotMatchActionInput actionId(ActionIdentify actionId) {
+            this._actionId = actionId;
             return this;
         }
 
         @Override
         public Object[] get() {
-            return new Object[] { this._action, this._depAction, this._depDependency };
+            return new Object[] { this._interceptorIOType, this._interceptorId, this._actionInputType, this._actionId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      An interceptor can not be intercepted by other interceptor - {}
+     */
+    public static final class UnsupportedInterceptiveInterceptor extends IndexedParameters<UnsupportedInterceptiveInterceptor> {
+
+        public static final String KEY = "UnsupportedDependentDependency";
+
+        private ActionIdentify _interceptorId;
+
+        public UnsupportedInterceptiveInterceptor interceptorId(final ActionIdentify actionId) {
+            this._interceptorId = actionId;
+            return this;
+        }
+
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._interceptorId };
         }
     }
 }
