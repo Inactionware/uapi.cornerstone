@@ -311,76 +311,8 @@ class ActionHandlerTest extends Specification {
         noExceptionThrown()
     }
 
-    def 'Test handle element which depends on other action'() {
-        when:
-        def handler = new ActionHandler()
-        def element = Mock(Element) {
-            getKind() >> ElementKind.CLASS
-            getSimpleName() >> Mock(Name) {
-                toString() >> 'TestClass'
-            }
-            asType() >> Mock(TypeMirror) {
-                toString() >> 'TestClass'
-            }
-            getAnnotation(Action.class) >> TestClass2.getAnnotation(Action.class)
-            getEnclosedElements() >> [Mock(ExecutableElement) {
-                getKind() >> ElementKind.METHOD
-                getAnnotation(ActionDo.class) >> actionDoAnno
-                getSimpleName() >> Mock(Name) {
-                    toString() >> 'MethodName'
-                }
-                getParameters() >> [Mock(VariableElement) {
-                    asType() >> Mock(TypeMirror) {
-                        toString() >> Object.canonicalName
-                    }
-                }, Mock(VariableElement) {
-                    asType() >> Mock(TypeMirror) {
-                        toString() >> IExecutionContext.canonicalName
-                    }
-                }]
-                getReturnType() >> Mock(TypeMirror) {
-                    toString() >> String.canonicalName
-                }
-            }]
-            getAnnotationMirrors() >> [Mock(AnnotationMirror) {
-                getAnnotationType() >> Mock(DeclaredType) {
-                    asElement() >> Mock(Element) {
-                        accept(_, _) >> Mock(TypeElement) {
-                            getQualifiedName() >> Mock(Name) {
-                                contentEquals(_) >> true
-                            }
-                        }
-                    }
-                }
-                getElementValues() >> [:]
-            }]
-        }
-        def clsBuilder = Mock(ClassMeta.Builder)
-        def builderCtx = Mock(IBuilderContext) {
-            checkAnnotations(element, Service.class as Class[]) >> true
-            loadTemplate(_) >> Mock(Template)
-            findClassBuilder(element) >> clsBuilder
-            1 * getHelper(IServiceHandlerHelper.name) >> Mock(IServiceHandlerHelper) {
-                1 * addServiceId(_, _)
-            }
-        }
-        2 * clsBuilder.addImplement(_ as String) >> clsBuilder
-        6 * clsBuilder.addMethodBuilder(_ as MethodMeta.Builder) >> clsBuilder
-        handler.handleAnnotatedElements(builderCtx, Action.class, [ element ] as Set)
-
-        then:
-        noExceptionThrown()
-    }
-
     @Action()
     class TestClass {
-
-        @ActionDo
-        public static void test() {}
-    }
-
-    @Action(dependsOnName = "A")
-    class TestClass2 {
 
         @ActionDo
         public static void test() {}
