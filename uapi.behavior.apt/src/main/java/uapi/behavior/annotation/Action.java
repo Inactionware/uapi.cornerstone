@@ -29,6 +29,4 @@ public @interface Action {
      * @return  Action name
      */
     String value() default StringHelper.EMPTY;
-
-    String dependsOnName() default StringHelper.EMPTY;
 }

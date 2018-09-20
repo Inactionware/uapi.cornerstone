@@ -18,7 +18,6 @@ import uapi.behavior.IAction
 import uapi.behavior.IInterceptive
 import uapi.behavior.IInterceptor
 import uapi.common.IAttributed
-import uapi.common.IDependent
 import uapi.common.Repository
 
 /**
@@ -394,8 +393,6 @@ class BehaviorTest extends Specification {
         then:
         noExceptionThrown()
     }
-
-    private interface IDependentAction extends IAction, IDependent {}
 
     private interface IInterceptiveAction extends IInterceptive, IAction {}
 }

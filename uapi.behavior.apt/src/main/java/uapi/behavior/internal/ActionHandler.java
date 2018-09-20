@@ -22,7 +22,6 @@ import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
 import uapi.codegen.*;
 import uapi.common.ArgumentChecker;
-import uapi.common.IDependent;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.IServiceHandlerHelper;
@@ -185,48 +184,6 @@ public class ActionHandler extends AnnotationsHandler {
             // Add IAction as this service's id
             IServiceHandlerHelper svcHelper = (IServiceHandlerHelper) builderContext.getHelper(IServiceHandlerHelper.name);
             svcHelper.addServiceId(clsBuilder, IAction.class.getCanonicalName());
-
-            constructDependentInterface(builderContext, clsBuilder, classElement, action);
         });
-    }
-
-    private void constructDependentInterface(
-            final IBuilderContext builderCtx,
-            final ClassMeta.Builder clsBuilder,
-            final Element classElement,
-            final Action action) {
-        AnnotationMirror actionAnnoMirror = MoreElements.getAnnotationMirror(classElement, Action.class).get();
-        List<String> depActionClasses = getTypesInAnnotation(actionAnnoMirror, "dependsOn");
-        String depActionClassName = StringHelper.EMPTY;
-        if (depActionClasses.size() == 1) {
-            depActionClassName = depActionClasses.get(0);
-        }
-        String depActionName = action.dependsOnName();
-        if (! ArgumentChecker.isEmpty(depActionClassName) && ! ArgumentChecker.isEmpty(depActionName)) {
-            throw new GeneralException("Only allow set one of dependsOn or dependsOnId on Action annotation");
-        }
-        String dependsOn = null;
-        if (! ArgumentChecker.isEmpty(depActionClassName)) {
-            dependsOn = depActionClassName;
-        } else if (! ArgumentChecker.isEmpty(depActionName)) {
-            dependsOn = depActionName;
-        }
-
-        if (dependsOn == null) {
-            return;
-        }
-
-        Template tempDependsOn = builderCtx.loadTemplate(TEMPLATE_DEPENDS_ON);
-        Map<String, Object> model = new HashMap<>();
-        model.put("dependsOnActionName", dependsOn);
-
-        clsBuilder
-                .addImplement(StringHelper.makeString(
-                        "{}<{}>", IDependent.class.getCanonicalName(), ActionIdentify.class.getCanonicalName()))
-                .addMethodBuilder(MethodMeta.builder()
-                        .setName("dependsOn")
-                        .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
-                        .setReturnTypeName(ActionIdentify.class.getCanonicalName())
-                        .addCodeBuilder(CodeMeta.builder().setTemplate(tempDependsOn).setModel(model)));
     }
 }
