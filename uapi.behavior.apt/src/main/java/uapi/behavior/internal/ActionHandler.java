@@ -9,7 +9,6 @@
 
 package uapi.behavior.internal;
 
-import com.google.auto.common.MoreElements;
 import com.google.auto.service.AutoService;
 import com.google.common.base.Strings;
 import freemarker.template.Template;
@@ -17,11 +16,11 @@ import uapi.GeneralException;
 import uapi.Type;
 import uapi.behavior.ActionIdentify;
 import uapi.behavior.IAction;
+import uapi.behavior.IActionHandlerHelper;
 import uapi.behavior.IExecutionContext;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
 import uapi.codegen.*;
-import uapi.common.ArgumentChecker;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.IServiceHandlerHelper;
@@ -44,7 +43,8 @@ public class ActionHandler extends AnnotationsHandler {
     private static final String TEMPLATE_INPUT_TYPE     = "template/inputType_method.ftl";
     private static final String TEMPLATE_OUTPUT_TYPE    = "template/outputType_method.ftl";
     private static final String TEMPLATE_PROCESS        = "template/process_method.ftl";
-    private static final String TEMPLATE_DEPENDS_ON     = "template/dependsOn_method.ftl";
+
+    private final ActionHandlerHelper _helper = new ActionHandlerHelper();
 
     @SuppressWarnings("unchecked")
     private static final Class<? extends Annotation>[] orderedAnnotations =
@@ -77,56 +77,11 @@ public class ActionHandler extends AnnotationsHandler {
                 actionName = classElement.asType().toString();
             }
             // Check process method
-            List actionDoElements = Looper.on(classElement.getEnclosedElements())
-                    .filter(element -> element.getKind() == ElementKind.METHOD)
-                    .filter(element -> element.getAnnotation(ActionDo.class) != null)
-                    .toList();
-            if (actionDoElements.size() == 0) {
-                throw new GeneralException(
-                        "The action class {} must define a method which is annotated with ActionDo annotation",
-                        classElement.getSimpleName().toString());
-            }
-            if (actionDoElements.size() > 1) {
-                throw new GeneralException(
-                        "The action class {} define more methods which is annotated with ActionDo annotation",
-                        classElement.getSimpleName().toString());
-            }
-            ExecutableElement actionDoElement = (ExecutableElement) actionDoElements.get(0);
-            String actionMethodName = actionDoElement.getSimpleName().toString();
-            List paramElements = actionDoElement.getParameters();
-            String inputType;
-            String outputType;
-            boolean needContext = false;
-            if (paramElements.size() == 0) {
-                throw new GeneralException(
-                        "The method annotated with ActionDo must contains 1 or 2 parameters - {}::{}",
-                        classElement.getSimpleName().toString(), actionMethodName);
-            } else if (paramElements.size() > 2) {
-                throw new GeneralException(
-                        "The method annotated with ActionDo must contains more than 2 parameters - {}::{}",
-                        classElement.getSimpleName().toString(), actionMethodName);
-            } else {
-                VariableElement inputParamElement = (VariableElement) paramElements.get(0);
-                inputType = inputParamElement.asType().toString();
-                if (paramElements.size() == 1) {
-                    if (IExecutionContext.class.getCanonicalName().equals(inputType)) {
-                        inputType = Type.VOID;
-                        needContext = true;
-                    }
-                } else if (paramElements.size() == 2) {
-                    VariableElement contextParamElement = (VariableElement) paramElements.get(1);
-                    if (! IExecutionContext.class.getCanonicalName().equals(contextParamElement.asType().toString())) {
-                        throw new GeneralException(
-                                "The second parameter of method which annotated with ActionDo must be IExecutionContext - {}::{}",
-                                classElement.getSimpleName().toString(), actionMethodName);
-                    }
-                    needContext = true;
-                }
-            }
-            outputType = actionDoElement.getReturnType().toString();
-            // convert native type to associated qualified type
-            inputType = Type.toQType(inputType);
-            outputType = Type.toQType(outputType);
+            IActionHandlerHelper.ActionMethodMeta actionMeta = this._helper.parseActionMethod(classElement);
+            String inputType = actionMeta.inputType();
+            String outputType = actionMeta.outputType();
+            boolean needContext = actionMeta.needContext();
+            String actionMethodName = actionMeta.methodName();
 
             ClassMeta.Builder clsBuilder = builderContext.findClassBuilder(classElement);
 
@@ -185,5 +140,65 @@ public class ActionHandler extends AnnotationsHandler {
             IServiceHandlerHelper svcHelper = (IServiceHandlerHelper) builderContext.getHelper(IServiceHandlerHelper.name);
             svcHelper.addServiceId(clsBuilder, IAction.class.getCanonicalName());
         });
+    }
+
+    private final class ActionHandlerHelper implements IActionHandlerHelper {
+
+        @Override
+        public ActionMethodMeta parseActionMethod(Element classElement) {
+            // Check process method
+            List actionDoElements = Looper.on(classElement.getEnclosedElements())
+                    .filter(element -> element.getKind() == ElementKind.METHOD)
+                    .filter(element -> element.getAnnotation(ActionDo.class) != null)
+                    .toList();
+            if (actionDoElements.size() == 0) {
+                throw new GeneralException(
+                        "The action class {} must define a method which is annotated with ActionDo annotation",
+                        classElement.getSimpleName().toString());
+            }
+            if (actionDoElements.size() > 1) {
+                throw new GeneralException(
+                        "The action class {} define more methods which is annotated with ActionDo annotation",
+                        classElement.getSimpleName().toString());
+            }
+            ExecutableElement actionDoElement = (ExecutableElement) actionDoElements.get(0);
+            String actionMethodName = actionDoElement.getSimpleName().toString();
+            List paramElements = actionDoElement.getParameters();
+            String inputType;
+            String outputType;
+            boolean needContext = false;
+            if (paramElements.size() == 0) {
+                throw new GeneralException(
+                        "The method annotated with ActionDo must contains 1 or 2 parameters - {}::{}",
+                        classElement.getSimpleName().toString(), actionMethodName);
+            } else if (paramElements.size() > 2) {
+                throw new GeneralException(
+                        "The method annotated with ActionDo must contains more than 2 parameters - {}::{}",
+                        classElement.getSimpleName().toString(), actionMethodName);
+            } else {
+                VariableElement inputParamElement = (VariableElement) paramElements.get(0);
+                inputType = inputParamElement.asType().toString();
+                if (paramElements.size() == 1) {
+                    if (IExecutionContext.class.getCanonicalName().equals(inputType)) {
+                        inputType = Type.VOID;
+                        needContext = true;
+                    }
+                } else if (paramElements.size() == 2) {
+                    VariableElement contextParamElement = (VariableElement) paramElements.get(1);
+                    if (! IExecutionContext.class.getCanonicalName().equals(contextParamElement.asType().toString())) {
+                        throw new GeneralException(
+                                "The second parameter of method which annotated with ActionDo must be IExecutionContext - {}::{}",
+                                classElement.getSimpleName().toString(), actionMethodName);
+                    }
+                    needContext = true;
+                }
+            }
+            outputType = actionDoElement.getReturnType().toString();
+            // convert native type to associated qualified type
+            inputType = Type.toQType(inputType);
+            outputType = Type.toQType(outputType);
+
+            return new ActionMethodMeta(inputType, outputType, actionMethodName, needContext);
+        }
     }
 }
