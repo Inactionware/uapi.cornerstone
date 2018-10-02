@@ -50,5 +50,9 @@ public interface IInjectable {
      * @throws  InvalidArgumentException
      *          If the specified id is null
      */
-    boolean isOptional(final String id) throws InvalidArgumentException;
+    default boolean isOptional(
+            final String id
+    ) throws InvalidArgumentException {
+        return false;
+    }
 }
