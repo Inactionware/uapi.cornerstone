@@ -56,6 +56,11 @@ public class ActionHandler extends AnnotationsHandler {
     }
 
     @Override
+    public IHandlerHelper getHelper() {
+        return this._helper;
+    }
+
+    @Override
     protected void handleAnnotatedElements(
             final IBuilderContext builderContext,
             final Class<? extends Annotation> annotationType,
