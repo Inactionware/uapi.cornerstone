@@ -19,11 +19,9 @@ import uapi.rx.Looper;
 import uapi.service.ServiceErrors;
 import uapi.service.ServiceException;
 
-import javax.xml.ws.Service;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
