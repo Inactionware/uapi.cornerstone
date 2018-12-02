@@ -63,3 +63,4 @@ out/
 # UAPI project files
 #=================================
 **/perf/*.txt
+.config/

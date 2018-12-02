@@ -4,4 +4,4 @@ include 'uapi.service', 'uapi.service.apt', 'uapi.config', 'uapi.config.apt', 'u
 include 'uapi.event', 'uapi.behavior', 'uapi.behavior.apt'
 include 'uapi.command', 'uapi.command.apt'
 include 'uapi.app'
-include 'uapi.example'
+// include 'uapi.example'
