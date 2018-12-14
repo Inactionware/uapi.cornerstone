@@ -102,7 +102,7 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "${gradle_version}"
+    gradleVersion = libs.gradle.version
 }
 
 def publishedProjects = subprojects.findAll { it.path != ':uapi.example' }

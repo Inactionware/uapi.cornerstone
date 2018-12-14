@@ -33,8 +33,6 @@ dependencies {
 
         baseProjects.common.coordinate,
         baseProjects.exception.coordinate
-        // "uapi:uapi.common:${uapi_base_version}",
-        // "uapi:uapi.exception:${uapi_base_version}"
     )
 
     testCompile (

@@ -13,10 +13,10 @@ plugins {
 
 dependencies {
     compile (
-            "uapi:uapi.common:${uapi_base_version}",
-            "uapi:uapi.exception:${uapi_base_version}",
-            "uapi:uapi.state:${uapi_base_version}",
-            "uapi:uapi.codegen:${uapi_base_version}"
+        baseProjects.common.coordinate,
+        baseProjects.exception.coordinate,
+        baseProjects.state.coordinate,
+        baseProjects.codegen.coordinate
     )
 }
 

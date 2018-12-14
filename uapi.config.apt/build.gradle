@@ -12,17 +12,32 @@ plugins {
 }
 
 dependencies {
-    compile project(':uapi.service.apt')
-    compile project(':uapi.service')
-    compile project(':uapi.config')
+    compileOnly (
+        project(':uapi.service.apt'),
+
+        /* To fix the class path issue in IDEA */
+        files('../uapi.service.apt/src/main/resources')
+        /* End */
+    )
+    // compile project(':uapi.service.apt')
+    // compile project(':uapi.service')
+    // compile project(':uapi.config')
 
     compile (
-            "com.google.guava:guava:${guava_version}",
-            "uapi:uapi.common:${uapi_base_version}",
-            "uapi:uapi.state:${uapi_base_version}",
-            "uapi:uapi.codegen:${uapi_base_version}",
-            "com.fasterxml.jackson.jr:jackson-jr-objects:${jackson_version}",
-            "com.esotericsoftware.yamlbeans:yamlbeans:${yamlbeans_version}"
+        project(':uapi.service'),
+        project(':uapi.config'),
+
+        baseProjects.common.coordinate,
+        baseProjects.state.coordinate,
+        baseProjects.codegen.coordinate,
+
+        libs.guava.coordinate,
+        libs.jackson.coordinate,
+        libs.yamlbeans.coordinate
+    )
+
+    testCompile (
+        project(':uapi.service.apt')
     )
 }
 
