@@ -34,10 +34,6 @@ dependencies {
         baseProjects.common.coordinate,
         baseProjects.exception.coordinate
     )
-
-    testCompile (
-            // "org.awaitility:awaitility-groovy:${awaitility_version}"
-    )
 }
 
 publishing {

@@ -19,9 +19,6 @@ dependencies {
         files('../uapi.service.apt/src/main/resources')
         /* End */
     )
-    // compile project(':uapi.service.apt')
-    // compile project(':uapi.service')
-    // compile project(':uapi.config')
 
     compile (
         project(':uapi.service'),
