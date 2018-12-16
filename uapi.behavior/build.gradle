@@ -25,15 +25,15 @@ dependencies {
     )
 
     compile (
-            project(':uapi.config'),
-            project(':uapi.event'),
+        project(':uapi.config'),
+        project(':uapi.event'),
 
-            "uapi:uapi.common:${uapi_base_version}",
-            "uapi:uapi.exception:${uapi_base_version}",
-            "uapi:uapi.codegen:${uapi_base_version}",
+        baseProjects.common.coordinate,
+        baseProjects.exception.coordinate,
+        baseProjects.codegen.coordinate,
 
-            "com.google.auto.service:auto-service:${auto_service_version}",
-            "org.freemarker:freemarker:${freemarker_version}"
+        libs.auto_service.coordinate,
+        libs.freemarker.coordinate
     )
 }
 
@@ -42,9 +42,9 @@ publishing {
         mavenPublication(MavenPublication) {
             from components.java
             artifact sourcesJar
-            groupId "${project_group}"
+            groupId "${project.group}"
             artifactId "${project.name}"
-            version "${project_version}"
+            version "${project.version}"
         }
     }
 }
@@ -55,17 +55,17 @@ bintray {
     publications = ['mavenPublication']
     publish = true
     pkg {
-        repo = "${publish_repo}"
-        vcsUrl = "${project_repo_url}"
+        repo = getMavenRepo(project.name)
+        vcsUrl = repoCfg.url
         name = "${project.name}"
-        licenses = ["${project_license}"]
+        licenses = [repoCfg.license]
         userOrg = System.getenv('BINTRAY_USER_ORG')
 
-        githubRepo = "${project_repo_name}"
+        githubRepo = repoCfg.github
         githubReleaseNotesFile = 'README.md'
 
         version {
-            name = "${project_version}"
+            name = "${project.version}"
         }
     }
 }

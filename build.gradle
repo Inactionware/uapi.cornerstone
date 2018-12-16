@@ -13,10 +13,16 @@ buildscript {
     }
 }
 
-apply plugin: 'jacoco'
+ext {
+    thisRepo = 'cornerstone'
+}
 
-ext.project_version = getProjectVersion()
-ext.publish_repo    = getMavenRepo()
+apply from: '.config/uapi/all.config.gradle'
+apply from: '.config/uapi/base.config.gradle'
+apply from: '.config/uapi/cornerstone.config.gradle'
+apply from: '.config/uapi/functions.gradle'
+
+apply plugin: 'jacoco'
 
 allprojects {
     repositories {
@@ -36,8 +42,8 @@ subprojects {
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
 
-    group = "${project_group}"
-    version = "${project_version}"
+    group = "${allCfg.group}"
+    version = getBuildVersion(project.name)
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
@@ -46,11 +52,11 @@ subprojects {
     }
 
     dependencies {
-        testCompile "org.spockframework:spock-core:${spock_version}"
+        testCompile libs.spock.coordinate
 
         testRuntime (
-                "cglib:cglib-nodep:${cglib_version}",           // allows mocking of classes (in addition to interfaces)
-                "org.objenesis:objenesis:${objenesis_version}"  // allows mocking of classes without default constructor (together with CGLIB)
+                libs.cglib.coordinate,      // allows mocking of classes (in addition to interfaces)
+                libs.objenesis.coordinate   // allows mocking of classes without default constructor (together with CGLIB)
         )
     }
 
@@ -89,14 +95,14 @@ subprojects {
     }
 
     jacoco {
-        toolVersion = "${jacoco_version}"
+        toolVersion = libs.jacoco.version
     }
 
     build.dependsOn jacocoTestReport
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "${gradle_version}"
+    gradleVersion = libs.gradle.version
 }
 
 def publishedProjects = subprojects.findAll { it.path != ':uapi.example' }
@@ -137,28 +143,4 @@ task uploadCoverageToCodacy(type: JavaExec) {
             "-r",
             "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
     ]
-}
-
-def getProjectVersion() {
-    def release = project.hasProperty("project_release") ? project.project_release.toBoolean() : null
-    def rcno = project.hasProperty("project_rcno") ? project.project_rcno.toInteger() : null
-    def prjVer = "${project_version_major}.${project_version_minor}.${project_version_fix}"
-    if (release) {
-        return "${prjVer}-release"
-    } else if (rcno > 0) {
-        return "${prjVer}-rc${rcno}"
-    } else {
-        def timestampFormat = new java.text.SimpleDateFormat('yyyyMMddHHmmss')
-        timestampFormat.timeZone = TimeZone.getTimeZone("UTC")
-        def ts = timestampFormat.format(new Date())
-        return "${prjVer}-${ts}"
-    }
-}
-
-def getMavenRepo() {
-    if (project.project_release.toBoolean()) {
-        return 'maven-release'
-    } else {
-        return 'maven-snapshot'
-    }
 }
