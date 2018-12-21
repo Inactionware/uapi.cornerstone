@@ -13,27 +13,27 @@ plugins {
 
 dependencies {
     compileOnly (
-            project(':uapi.service.apt'),
-            project(':uapi.config.apt'),
-            project(':uapi.command.apt'),
+        project(':uapi.service.apt'),
+        project(':uapi.config.apt'),
+        project(':uapi.command.apt'),
 
-            /* To fix the class path issue in IDEA */
-            files('../uapi.service.apt/src/main/resources'),
-            files('../uapi.config.apt/src/main/resources'),
-            files('../uapi.command.apt/src/main/resources')
-            /* End */
+        /* To fix the class path issue in IDEA */
+        files('../uapi.service.apt/src/main/resources'),
+        files('../uapi.config.apt/src/main/resources'),
+        files('../uapi.command.apt/src/main/resources')
+        /* End */
     )
 
     compile (
         project(':uapi.config'),
         project(':uapi.event'),
 
-        baseProjects.common.coordinate,
-        baseProjects.exception.coordinate,
-        baseProjects.codegen.coordinate,
+        coordinate(baseProjects.common),
+        coordinate(baseProjects.exception),
+        coordinate(baseProjects.codegen),
 
-        libs.auto_service.coordinate,
-        libs.freemarker.coordinate
+        coordinate(libs.auto_service),
+        coordinate(libs.freemarker)
     )
 }
 

@@ -23,9 +23,9 @@ dependencies {
     compile (
         project(':uapi.service'),
 
-        baseProjects.common.coordinate,
+        coordinate(baseProjects.common),
 
-        libs.logback.coordinate
+        coordinate(libs.logback)
     )
 }
 

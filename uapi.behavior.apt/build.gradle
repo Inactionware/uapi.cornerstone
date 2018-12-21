@@ -19,12 +19,12 @@ dependencies {
     compile project(':uapi.behavior')
 
     compile (
-        baseProjects.common.coordinate,
-        baseProjects.exception.coordinate,
-        baseProjects.codegen.coordinate,
+        coordinate(baseProjects.common),
+        coordinate(baseProjects.exception),
+        coordinate(baseProjects.codegen),
 
-        libs.auto_service.coordinate,
-        libs.freemarker.coordinate
+        coordinate(libs.auto_service),
+        coordinate(libs.freemarker)
     )
 }
 

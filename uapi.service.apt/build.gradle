@@ -15,8 +15,8 @@ dependencies {
     compile (
         project (":uapi.service"),
 
-        baseProjects.common.coordinate,
-        baseProjects.codegen.coordinate
+        coordinate(baseProjects.common),
+        coordinate(baseProjects.codegen)
     )
 }
 
