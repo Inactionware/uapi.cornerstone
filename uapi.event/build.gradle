@@ -26,7 +26,7 @@ dependencies {
         project(':uapi.service'),
         project(':uapi.config'),
 
-        baseProjects.common.coordinate
+        coordinate(baseProjects.common)
     )
 }
 

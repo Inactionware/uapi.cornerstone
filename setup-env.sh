@@ -14,7 +14,7 @@ mkdir .config
 cd .config
 
 git init
-git remote add -f origin https://github.com/Inactionware/configuration.git
+git remote add -f origin https://gitlab.com/Inactionware/configuration.git
 git config core.sparsecheckout true
 echo "uapi" >> .git/info/sparse-checkout
 git checkout ${cfgBranch}

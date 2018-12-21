@@ -13,10 +13,10 @@ plugins {
 
 dependencies {
     compile (
-        baseProjects.common.coordinate,
-        baseProjects.exception.coordinate,
-        baseProjects.state.coordinate,
-        baseProjects.codegen.coordinate
+        coordinate(baseProjects.common),
+        coordinate(baseProjects.exception),
+        coordinate(baseProjects.state),
+        coordinate(baseProjects.codegen)
     )
 }
 

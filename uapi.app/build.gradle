@@ -13,15 +13,15 @@ plugins {
 
 dependencies {
     compileOnly (
-            project(':uapi.service.apt'),
-            project(':uapi.config.apt'),
-            project(':uapi.behavior.apt'),
+        project(':uapi.service.apt'),
+        project(':uapi.config.apt'),
+        project(':uapi.behavior.apt'),
 
-            /* To fix the class path issue in IDEA */
-            files('../uapi.service.apt/src/main/resources'),
-            files('../uapi.config.apt/src/main/resources'),
-            files('../uapi.behavior.apt/src/main/resources')
-            /* End */
+        /* To fix the class path issue in IDEA */
+        files('../uapi.service.apt/src/main/resources'),
+        files('../uapi.config.apt/src/main/resources'),
+        files('../uapi.behavior.apt/src/main/resources')
+        /* End */
     )
 
     compile (
@@ -31,8 +31,8 @@ dependencies {
         project(':uapi.event'),
         project(':uapi.behavior'),
 
-        baseProjects.common.coordinate,
-        baseProjects.exception.coordinate
+        coordinate(baseProjects.common),
+        coordinate(baseProjects.exception)
     )
 }
 

@@ -52,11 +52,11 @@ subprojects {
     }
 
     dependencies {
-        testCompile libs.spock.coordinate
+        testCompile coordinate(libs.spock)
 
         testRuntime (
-                libs.cglib.coordinate,      // allows mocking of classes (in addition to interfaces)
-                libs.objenesis.coordinate   // allows mocking of classes without default constructor (together with CGLIB)
+                coordinate(libs.cglib),      // allows mocking of classes (in addition to interfaces)
+                coordinate(libs.objenesis)   // allows mocking of classes without default constructor (together with CGLIB)
         )
     }
 

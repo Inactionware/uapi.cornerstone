@@ -28,12 +28,12 @@ dependencies {
         project(':uapi.service'),
         project(':uapi.command'),
 
-        baseProjects.common.coordinate,
-        baseProjects.exception.coordinate,
-        baseProjects.codegen.coordinate,
+        coordinate(baseProjects.common),
+        coordinate(baseProjects.exception),
+        coordinate(baseProjects.codegen),
 
-        libs.auto_service.coordinate,
-        libs.freemarker.coordinate
+        coordinate(libs.auto_service),
+        coordinate(libs.freemarker)
     )
 }
 
