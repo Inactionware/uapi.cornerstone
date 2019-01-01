@@ -40,7 +40,7 @@ public interface IBehaviorBuilder {
     IBehaviorBuilder then(ActionIdentify id) throws BehaviorException;
 
     /**
-     * Set where is next action/behavior when current branch condition is satisfied and specified a label fot it.
+     * Set where is next action/behavior when current branch condition is satisfied and specify a label for it.
      *
      * @param   id
      *          The id of next action/behavior
@@ -51,6 +51,32 @@ public interface IBehaviorBuilder {
      *          No action has such id, see {@link BehaviorErrors.ActionNotFound}
      */
     IBehaviorBuilder then(ActionIdentify id, String label) throws BehaviorException;
+
+    /**
+     * Set where is next action/behavior when current branch condition is satisfied.
+     * The actionType will be converted to default action id which is used to find action in repository.
+     *
+     * @param   actionType
+     *          The action type of next action/behavior
+     * @return  The behavior builder self
+     * @throws  BehaviorException
+     *          No such action in the repository, see {@link BehaviorErrors.ActionNotFound}
+     */
+    IBehaviorBuilder then(Class<? extends IAction> actionType) throws BehaviorException;
+
+    /**
+     * Set where is next action/behavior when current branch condition is satisfied and specify a label for it.
+     * The actionType will be converted to default action id which is used to find action in repository.
+     *
+     * @param   actionType
+     *          The action type of next action/behavior
+     * @param   label
+     *          The action/behavior label which can be used to navigate to it late
+     * @return  The behavior builder instance
+     * @throws  BehaviorException
+     *          No action in the repository, see {@link BehaviorErrors.ActionNotFound}
+     */
+    IBehaviorBuilder then(Class<? extends IAction> actionType, String label) throws BehaviorException;
 
     /**
      * Set next an anonymous action when current branch condition is satisfied.
@@ -130,7 +156,9 @@ public interface IBehaviorBuilder {
     INavigator navigator();
 
     /**
-     * Indi
+     * Build behavior
+     *
+     * @return  Behavior instance
      */
     IBehavior build();
 }

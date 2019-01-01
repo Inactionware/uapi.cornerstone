@@ -165,6 +165,21 @@ public class Behavior<I, O>
         return this;
     }
 
+    @Override
+    public IBehaviorBuilder then(
+            final Class<? extends IAction> actionType
+    ) throws BehaviorException {
+        return then(ActionIdentify.toActionId(actionType));
+    }
+
+    @Override
+    public IBehaviorBuilder then(
+            final Class<? extends IAction> actionType,
+            final String label
+    ) throws BehaviorException {
+        return then(ActionIdentify.toActionId(actionType), label);
+    }
+
     private boolean addInterceptor(IAction<?, ?> action, String label) {
         if (action instanceof IInterceptive) {
             ActionIdentify interceptorId = ((IInterceptive) action).by();
