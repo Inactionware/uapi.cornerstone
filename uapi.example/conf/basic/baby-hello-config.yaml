@@ -1,9 +1,0 @@
-app:
-  active-profile: BabyHelloAppProfile
-
-profiles:
-  - name: BabyHelloAppProfile
-    model: include
-    matching: satisfy-any
-    tags:
-      - BabyHello
