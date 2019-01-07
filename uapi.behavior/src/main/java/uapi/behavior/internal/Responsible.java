@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Responsible implements IResponsible {
 
     private final String _name;
-    private final Repository<ActionIdentify, IAction<?, ?>> _actionRepo;
+    private final Repository<ActionIdentify, IAction> _actionRepo;
     private final IEventBus _eventBus;
 
     private final Map<ActionIdentify, BehaviorHolder> _behaviors;
@@ -37,7 +37,7 @@ public class Responsible implements IResponsible {
     Responsible(
             final String name,
             final IEventBus eventBus,
-            final Repository<ActionIdentify, IAction<?, ?>> actionRepository
+            final Repository<ActionIdentify, IAction> actionRepository
     ) {
         ArgumentChecker.required(name, "name");
         ArgumentChecker.required(eventBus, "eventBus");
@@ -159,11 +159,11 @@ public class Responsible implements IResponsible {
     private final class BehaviorEventHandler implements IAttributedEventHandler<BehaviorEvent> {
 
         private final String _topic;
-        private final Behavior<?, ?> _behavior;
+        private final Behavior _behavior;
 
         private BehaviorEventHandler(
                 final String topic,
-                final Behavior<?, ?> behavior
+                final Behavior behavior
         ) {
             this._topic = topic;
             this._behavior = behavior;

@@ -1,43 +1,44 @@
 package uapi.behavior.internal;
 
 import uapi.GeneralException;
-import uapi.behavior.ActionIdentify;
-import uapi.behavior.IAction;
-import uapi.behavior.IAnonymousAction;
-import uapi.behavior.IExecutionContext;
+import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
 
 /**
  * Created by min on 2017/5/21.
  */
-public class AnonymousAction<I, O> implements IAction<I, O> {
+public class AnonymousAction implements IAction {
 
-    private final IAnonymousAction<I, O> _action;
+    private final IAnonymousAction _action;
 
-    public AnonymousAction(IAnonymousAction<I, O> action) {
+    public AnonymousAction(IAnonymousAction action) {
         ArgumentChecker.required(action, "action");
         this._action = action;
     }
 
     @Override
-    public O process(I input, IExecutionContext context) {
-        O output = null;
+    public ActionResult process(
+            final Object[] inputs,
+            final ActionOutput[] outputs,
+            final IExecutionContext context
+    ) {
+        ActionResult result = null;
         try {
-            output = this._action.accept(input, context);
+            result = this._action.accept(context);
         } catch (Exception ex) {
             throw new GeneralException(ex);
         }
-        return output;
+        return result;
     }
 
     @Override
-    public Class inputType() {
-        return Object.class;
+    public ActionInputMeta[] inputMetas() {
+        return new ActionInputMeta[0];
     }
 
     @Override
-    public Class outputType() {
-        return Object.class;
+    public ActionOutputMeta[] outputMetas() {
+        return new ActionOutputMeta[0];
     }
 
     @Override

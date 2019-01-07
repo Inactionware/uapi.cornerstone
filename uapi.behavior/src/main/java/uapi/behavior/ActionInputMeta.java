@@ -10,11 +10,26 @@
 package uapi.behavior;
 
 import uapi.common.ArgumentChecker;
+import uapi.common.Pair;
 
 /**
  * The meta class hold bass information for action input argument.
  */
 public final class ActionInputMeta {
+
+    private static final String SEP = ".";
+
+    public static Pair<String, String> parse(final String inputString) {
+        ArgumentChecker.required(inputString, "inputString");
+        String[] inputRef = inputString.split(".");
+        if (inputRef.length != 2) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.INVALIDE_ACTION_INPUT_REF)
+                    .variables(new BehaviorErrors.InvalidActionInputRef().inputReference(inputString))
+                    .build();
+        }
+        return new Pair<>(inputRef[0], inputRef[1]);
+    }
 
     private final Class<?> _type;
 

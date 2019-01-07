@@ -46,11 +46,13 @@ public interface IBehaviorBuilder {
      *          The id of next action/behavior
      * @param   label
      *          The action/behavior label which can be used to navigate to it later
+     * @param   inputs
+     *          Specified inputs for the action/behavior
      * @return  The behavior builder self
      * @throws  BehaviorException
      *          No action has such id, see {@link BehaviorErrors.ActionNotFound}
      */
-    IBehaviorBuilder then(ActionIdentify id, String label) throws BehaviorException;
+    IBehaviorBuilder then(ActionIdentify id, String label, String... inputs) throws BehaviorException;
 
     /**
      * Set where is next action/behavior when current branch condition is satisfied.
@@ -72,11 +74,13 @@ public interface IBehaviorBuilder {
      *          The action type of next action/behavior
      * @param   label
      *          The action/behavior label which can be used to navigate to it late
+     * @param   inputs
+     *          The inputs for the action/behavior
      * @return  The behavior builder instance
      * @throws  BehaviorException
      *          No action in the repository, see {@link BehaviorErrors.ActionNotFound}
      */
-    IBehaviorBuilder then(Class<? extends IAction> actionType, String label) throws BehaviorException;
+    IBehaviorBuilder then(Class<? extends IAction> actionType, String label, String... inputs) throws BehaviorException;
 
     /**
      * Set next an anonymous action when current branch condition is satisfied.
@@ -87,7 +91,7 @@ public interface IBehaviorBuilder {
      * @throws  BehaviorException
      *          Any cause when set action
      */
-    IBehaviorBuilder then(IAnonymousAction<?, ?> action) throws BehaviorException;
+    IBehaviorBuilder then(IAnonymousAction action) throws BehaviorException;
 
     /**
      * Set next an anonymous action with specific label when current branch condition is satisfied.
@@ -100,7 +104,7 @@ public interface IBehaviorBuilder {
      * @throws  BehaviorException
      *          Any cause when set action
      */
-    IBehaviorBuilder then(IAnonymousAction<?, ?> action, String label) throws BehaviorException;
+    IBehaviorBuilder then(IAnonymousAction action, String label) throws BehaviorException;
 
     /**
      * Set next an anonymous action which return nothing when current branch condition is satisfied.

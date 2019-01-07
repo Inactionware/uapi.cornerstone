@@ -44,6 +44,13 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int ACTION_IS_NOT_INTERCEPTOR               = 20;
     public static final int INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT   = 21;
     public static final int UNSUPPORTED_INTERCEPTIVE_INTERCEPTOR    = 22;
+    public static final int RESERVED_RESULT_KEY                     = 23;
+    public static final int ACTION_OUTPUT_TYPE_NOT_MATCHED          = 24;
+    public static final int ACTION_OUTPUT_SET_TWICE                 = 25;
+    public static final int INCOMPATIBLE_ACTION_TYPE                = 26;
+    public static final int DUPLICATED_ACTION_LABEL                 = 27;
+    public static final int GENERATE_ACTION_LABEL_OVER_MAX          = 28;
+    public static final int INVALIDE_ACTION_INPUT_REF               = 29;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -71,6 +78,13 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(ACTION_IS_NOT_INTERCEPTOR, ActionIsNotInterceptor.KEY);
         keyCodeMapping.put(INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT, InterceptorIONotMatchActionInput.KEY);
         keyCodeMapping.put(UNSUPPORTED_INTERCEPTIVE_INTERCEPTOR, UnsupportedInterceptiveInterceptor.KEY);
+        keyCodeMapping.put(RESERVED_RESULT_KEY, ReservedResultKey.KEY);
+        keyCodeMapping.put(ACTION_OUTPUT_TYPE_NOT_MATCHED, ActionOutputTypeNotMatched.KEY);
+        keyCodeMapping.put(ACTION_OUTPUT_SET_TWICE, ActionOutputSetTwice.KEY);
+        keyCodeMapping.put(INCOMPATIBLE_ACTION_TYPE, IncompatibleActionType.KEY);
+        keyCodeMapping.put(DUPLICATED_ACTION_LABEL, DuplicatedActionLabel.KEY);
+        keyCodeMapping.put(GENERATE_ACTION_LABEL_OVER_MAX, GenerateActionLabelOverMax.KEY);
+        keyCodeMapping.put(INVALIDE_ACTION_INPUT_REF, InvalidActionInputRef.KEY);
     }
 
     public BehaviorErrors() {
@@ -643,10 +657,174 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
             return this;
         }
 
-
         @Override
         public Object[] get() {
             return new Object[] { this._interceptorId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The Action result key is reserved - {}
+     */
+    public static final class ReservedResultKey extends IndexedParameters<ReservedResultKey> {
+
+        public static final String KEY = "ReservedResultKey";
+
+        private String _key;
+
+        public ReservedResultKey key(String key) {
+            this._key = key;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._key };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The Action output {} is not instance of type - {}
+     */
+    public static final class ActionOutputTypeNotMatched extends IndexedParameters<ActionOutputTypeNotMatched> {
+
+        public static final String KEY = "ActionOutputTypeNotMatched";
+
+        private Object _output;
+        private Class<?> _type;
+
+        public ActionOutputTypeNotMatched output(final Object output) {
+            this._output = output;
+            return this;
+        }
+
+        public ActionOutputTypeNotMatched type(final Class<?> type) {
+            this._type = type;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._output, this._type };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The Action output is set twice - {}
+     */
+    public static final class ActionOutputSetTwice extends IndexedParameters<ActionOutputSetTwice> {
+
+        public static final String KEY = "ActionOutputSetTwice";
+
+        private String _name;
+
+        public ActionOutputSetTwice name(final String name) {
+            this._name = name;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._name };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The Action type is not Action or Behavior - {}
+     */
+    public static final class IncompatibleActionType extends IndexedParameters<IncompatibleActionType> {
+
+        public static final String KEY = "IncompatibleActionType";
+
+        private Class<?> _type;
+
+        public IncompatibleActionType type(final Class<?> type) {
+            this._type = type;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._type.getCanonicalName() };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The Action label [{}] is duplicated in Behavior [{}]
+     */
+    public static class DuplicatedActionLabel extends IndexedParameters<DuplicatedActionLabel> {
+
+        public  static final String KEY = "DuplicatedActionLabel";
+
+        private String _label;
+        private ActionIdentify _behaviorId;
+
+        public DuplicatedActionLabel label(String label) {
+            this._label = label;
+            return this;
+        }
+
+        public DuplicatedActionLabel behaviorId(ActionIdentify id) {
+            this._behaviorId = id;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._label, this._behaviorId.toString() };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Try generate label for action [{}] count over max count [{}]
+     */
+    public static class GenerateActionLabelOverMax extends IndexedParameters<GenerateActionLabelOverMax> {
+
+        public static final String KEY = "GenerateActionLabelOverMax";
+
+        private ActionIdentify _actionId;
+        private int _maxCount;
+
+        public GenerateActionLabelOverMax actionId(final ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        public GenerateActionLabelOverMax maxCount(final int maxCount) {
+            this._maxCount = maxCount;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._actionId.toString(), this._maxCount };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The action input reference is invalid - {}
+     */
+    public static final class InvalidActionInputRef extends IndexedParameters<InvalidActionInputRef> {
+
+        public static final String KEY = "InvalidActionInputRef";
+
+        private String _actionInputRef;
+
+        public InvalidActionInputRef inputReference(String ref) {
+            this._actionInputRef = ref;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._actionInputRef };
         }
     }
 }

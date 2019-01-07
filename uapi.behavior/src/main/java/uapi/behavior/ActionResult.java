@@ -9,31 +9,60 @@
 
 package uapi.behavior;
 
-import uapi.common.IAttributed;
+import uapi.common.ArgumentChecker;
+import uapi.common.Attributed;
 
-import java.util.HashMap;
-import java.util.Map;
+public class ActionResult extends Attributed {
 
-public class ActionResult implements IAttributed {
-
-    private final Map<Object, Object> _attributes;
+    private static final String KEY_SUCCESS = "SUCCESS";
+    private static final String KEY_CAUSE   = "CAUSE";
 
     public ActionResult() {
-        this._attributes = new HashMap<>();
+        super();
+        super.set(KEY_SUCCESS, true);
+    }
+
+    public ActionResult(final boolean success) {
+        super();
+        super.set(KEY_SUCCESS, success);
+    }
+
+    /**
+     * Create failed action result with cause.
+     *
+     * @param   cause
+     *          The exception which cause the failed action
+     */
+    public ActionResult(final Exception cause) {
+        this(false);
+        ArgumentChecker.required(cause, "cause");
+        super.set(KEY_CAUSE, cause);
     }
 
     @Override
-    public Object get(Object key) {
-        return null;
+    public Object set(
+            final Object key,
+            final Object value
+    ) {
+        if (KEY_SUCCESS.equals(key)) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.RESERVED_RESULT_KEY)
+                    .variables(new BehaviorErrors.ReservedResultKey()
+                            .key((String) key))
+                    .build();
+        }
+        return super.set(key, value);
     }
 
-    @Override
-    public boolean contains(Object key, Object value) {
-        return false;
+    public boolean successful() {
+        return get(KEY_SUCCESS);
     }
 
-    @Override
-    public boolean contains(Map<Object, Object> attributes) {
-        return false;
+    public boolean failed() {
+        return ! (boolean) get(KEY_SUCCESS);
+    }
+
+    public Exception cause() {
+        return get(KEY_CAUSE);
     }
 }

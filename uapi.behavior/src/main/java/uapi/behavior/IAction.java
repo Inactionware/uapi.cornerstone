@@ -14,38 +14,39 @@ import uapi.IIdentifiable;
 /**
  * The IAction is minimum data handling unit in BEHAVIOR framework.
  * It process input data and output processed data.
- *
- * @param   <I>
- *          Input data type
- * @param   <O>
- *          Output data type
  */
-public interface IAction<I, O> extends IIdentifiable<ActionIdentify> {
+public interface IAction extends IIdentifiable<ActionIdentify> {
 
     /**
      * Process input data and output processed data
      *
-     * @param   input
-     *          Inputted data
+     * @param   inputs
+     *          Action inputs
+     * @param   outputs
+     *          Action outputs
      * @param   context
      *          The execution context
-     * @return  Output data
+     * @return  Action result
      */
-    O process(I input, IExecutionContext context);
+    default ActionResult process(Object[] inputs, ActionOutput[] outputs, IExecutionContext context) {
+        return new ActionResult();
+    }
 
     /**
-     * Return input data type
+     * Return input meta data
      *
      * @return  input data type
      */
-    Class<I> inputType();
+    ActionInputMeta[] inputMetas();
 
     /**
-     * Return output data type
+     * Return output meta data
      *
      * @return  output data type
      */
-    Class<O> outputType();
+    default ActionOutputMeta[] outputMetas() {
+        return new ActionOutputMeta[0];
+    }
 
     /**
      * Is this action anonymous or not

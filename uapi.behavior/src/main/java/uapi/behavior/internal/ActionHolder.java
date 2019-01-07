@@ -32,8 +32,8 @@ class ActionHolder {
     ) {
         ArgumentChecker.required(action, "action");
         ArgumentChecker.required(action.getId(), "action.id");
-        ArgumentChecker.required(action.inputType(), "action.inputType");
-        ArgumentChecker.required(action.outputType(), "action.outputType");
+        ArgumentChecker.required(action.inputMetas(), "action.inputMetas");
+        ArgumentChecker.required(action.outputMetas(), "action.outputMetas");
         if (evaluator == null) {
             this._evaluator = ALWAYS_MATCHED;
         } else {
@@ -55,16 +55,6 @@ class ActionHolder {
     void next(
             final ActionHolder actionHolder
     ) throws BehaviorException {
-//        if (! this._action.outputType().equals(actionHolder.action().inputType())) {
-//            throw BehaviorException.builder()
-//                    .errorCode(BehaviorErrors.UNMATCHED_ACTION)
-//                    .variables(new BehaviorErrors.UnmatchedAction()
-//                            .outputType(this._action.outputType().getCanonicalName())
-//                            .outputAction(this._action.getId())
-//                            .inputType(actionHolder.action().inputType().getCanonicalName())
-//                            .inputAction(actionHolder.action().getId()))
-//                    .build();
-//        }
         this._nextActions.add(actionHolder);
     }
 

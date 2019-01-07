@@ -4,7 +4,7 @@ package uapi.behavior;
  * Created by min on 2017/5/21.
  */
 @FunctionalInterface
-public interface IAnonymousAction<IT, OT> {
+public interface IAnonymousAction {
 
-    OT accept(IT input, IExecutionContext executionContext) throws Exception;
+    ActionResult accept(IExecutionContext executionContext) throws Exception;
 }
