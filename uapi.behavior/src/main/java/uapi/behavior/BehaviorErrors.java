@@ -50,7 +50,8 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int INCOMPATIBLE_ACTION_TYPE                = 26;
     public static final int DUPLICATED_ACTION_LABEL                 = 27;
     public static final int GENERATE_ACTION_LABEL_OVER_MAX          = 28;
-    public static final int INVALIDE_ACTION_INPUT_REF               = 29;
+    public static final int INVALID_ACTION_INPUT_REF                = 29;
+    public static final int REF_ACTION_NOT_EXIST_IN_BEHAVIOR        = 30;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -84,7 +85,8 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(INCOMPATIBLE_ACTION_TYPE, IncompatibleActionType.KEY);
         keyCodeMapping.put(DUPLICATED_ACTION_LABEL, DuplicatedActionLabel.KEY);
         keyCodeMapping.put(GENERATE_ACTION_LABEL_OVER_MAX, GenerateActionLabelOverMax.KEY);
-        keyCodeMapping.put(INVALIDE_ACTION_INPUT_REF, InvalidActionInputRef.KEY);
+        keyCodeMapping.put(INVALID_ACTION_INPUT_REF, InvalidActionInputRef.KEY);
+        keyCodeMapping.put(REF_ACTION_NOT_EXIST_IN_BEHAVIOR, RefActionNotExistInBehavior.KEY);
     }
 
     public BehaviorErrors() {
@@ -825,6 +827,33 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._actionInputRef };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The referenced action [{}] does not exist in behavior [{}]
+     */
+    public static final class RefActionNotExistInBehavior extends IndexedParameters<RefActionNotExistInBehavior> {
+
+        public static final String KEY = "RefActionNotExistInBehavior";
+
+        private String _actionLabel;
+        private ActionIdentify _behaviorId;
+
+        public RefActionNotExistInBehavior actionLabel(final String label) {
+            this._actionLabel = label;
+            return this;
+        }
+
+        public RefActionNotExistInBehavior behaviorId(final ActionIdentify id) {
+            this._behaviorId = id;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._actionLabel, this._behaviorId.toString() };
         }
     }
 }

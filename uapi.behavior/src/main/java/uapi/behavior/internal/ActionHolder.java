@@ -6,6 +6,7 @@ import uapi.behavior.IAction;
 import uapi.common.ArgumentChecker;
 import uapi.common.Functionals;
 import uapi.common.IAttributed;
+import uapi.common.StringHelper;
 import uapi.rx.Looper;
 
 import java.util.LinkedList;
@@ -20,14 +21,20 @@ class ActionHolder {
 
     private final Functionals.Evaluator _evaluator;
     private final IAction _action;
+    private final String _label;
     private final List<ActionHolder> _nextActions;
 
-    ActionHolder(final IAction action) {
-        this(action, null);
+    private ActionHolder _previousAction;
+
+    ActionHolder(
+            final IAction action
+    ) {
+        this(action, null, null);
     }
 
     ActionHolder(
             final IAction action,
+            final String label,
             final Functionals.Evaluator evaluator
     ) {
         ArgumentChecker.required(action, "action");
@@ -40,7 +47,26 @@ class ActionHolder {
             this._evaluator = evaluator;
         }
         this._action = action;
+        this._label = label;
         this._nextActions = new LinkedList<>();
+    }
+
+    /**
+     * Return previously action
+     *
+     * @return  Previously action
+     */
+    ActionHolder previous() {
+        return this._previousAction;
+    }
+
+    /**
+     * Return the label that bind on this action.
+     *
+     * @return  The label of this action
+     */
+    String label() {
+        return this._label;
     }
 
     /**
@@ -55,7 +81,9 @@ class ActionHolder {
     void next(
             final ActionHolder actionHolder
     ) throws BehaviorException {
+        ArgumentChecker.required(actionHolder, "actionHolder");
         this._nextActions.add(actionHolder);
+        actionHolder._previousAction = this;
     }
 
     boolean hasNext() {

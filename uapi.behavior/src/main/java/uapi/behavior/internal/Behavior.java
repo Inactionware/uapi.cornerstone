@@ -536,7 +536,6 @@ public class Behavior
                 final String label,
                 final String... inputs
         ) throws BehaviorException {
-            ActionHolder newAction = new ActionHolder(action, evaluator);
             String actionLabel = label;
             if (StringHelper.isNullOrEmpty(label)) {
                 // Generate action label if no label is specified
@@ -572,8 +571,26 @@ public class Behavior
                 Pair<String, String> inputRef = ActionInputMeta.parse(input);
                 String refLabel = inputRef.getLeftValue();
                 String refName = inputRef.getRightValue();
-
+                if (! this._labeledActions.containsKey(refLabel)) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.REF_ACTION_NOT_EXIST_IN_BEHAVIOR)
+                            .variables(new BehaviorErrors.RefActionNotExistInBehavior()
+                                    .actionLabel(refLabel)
+                                    .behaviorId(Behavior.this._actionId))
+                            .build();
+                }
+                boolean isPrevious = false;
+                ActionHolder previous = this._current;
+                while (previous != null) {
+                    if (actionLabel.equals(previous.label())) {
+                        isPrevious = true;
+                        break;
+                    }
+                    previous = previous.previous();
+                }
             });
+
+            ActionHolder newAction = new ActionHolder(action, actionLabel, evaluator);
 
             // Check new action input is matched to current action output
             // The check only on non-anonymous action
