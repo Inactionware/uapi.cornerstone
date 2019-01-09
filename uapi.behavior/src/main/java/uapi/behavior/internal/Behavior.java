@@ -566,59 +566,37 @@ public class Behavior
                 }
             }
             // Check inputs
-            Looper.on(inputs).foreach(input -> {
-                ArgumentChecker.required(input, "input");
-                Pair<String, String> inputRef = ActionInputMeta.parse(input);
-                String refLabel = inputRef.getLeftValue();
-                String refName = inputRef.getRightValue();
-                if (! this._labeledActions.containsKey(refLabel)) {
-                    throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.REF_ACTION_NOT_EXIST_IN_BEHAVIOR)
-                            .variables(new BehaviorErrors.RefActionNotExistInBehavior()
-                                    .actionLabel(refLabel)
-                                    .behaviorId(Behavior.this._actionId))
-                            .build();
-                }
-                boolean isPrevious = false;
-                ActionHolder previous = this._current;
-                while (previous != null) {
-                    if (actionLabel.equals(previous.label())) {
-                        isPrevious = true;
-                        break;
-                    }
-                    previous = previous.previous();
-                }
-            });
+            this._current.verifyOutput(inputs);
+            ActionHolder newAction = new ActionHolder(action, actionLabel, Behavior.this, evaluator);
 
-            ActionHolder newAction = new ActionHolder(action, actionLabel, evaluator);
 
             // Check new action input is matched to current action output
             // The check only on non-anonymous action
-            if (! this._current.action().isAnonymous() && ! action.isAnonymous()) {
-                if (! action.inputType().isAssignableFrom(this._current.action().outputType())) {
-                    throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.ACTION_IO_MISMATCH)
-                            .variables(new BehaviorErrors.ActionIOMismatch()
-                                    .outputAction(this._current.action().getId())
-                                    .outputType(this._current.action().outputType())
-                                    .inputAction(action.getId())
-                                    .inputType(action.inputType()))
-                            .build();
-                }
-            }
+//            if (! this._current.action().isAnonymous() && ! action.isAnonymous()) {
+//                if (! action.inputType().isAssignableFrom(this._current.action().outputType())) {
+//                    throw BehaviorException.builder()
+//                            .errorCode(BehaviorErrors.ACTION_IO_MISMATCH)
+//                            .variables(new BehaviorErrors.ActionIOMismatch()
+//                                    .outputAction(this._current.action().getId())
+//                                    .outputType(this._current.action().outputType())
+//                                    .inputAction(action.getId())
+//                                    .inputType(action.inputType()))
+//                            .build();
+//                }
+//            }
             // Check action label
-            if (! ArgumentChecker.isEmpty(label)) {
-                ActionHolder existingAction = this._labeledActions.get(label);
-                if (existingAction != null) {
-                    throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.ACTION_LABEL_IS_BIND)
-                            .variables(new BehaviorErrors.ActionLabelIsBind()
-                                    .label(label)
-                                    .actionId(existingAction.action().getId()))
-                            .build();
-                }
-                this._labeledActions.put(label, newAction);
-            }
+//            if (! ArgumentChecker.isEmpty(label)) {
+//                ActionHolder existingAction = this._labeledActions.get(label);
+//                if (existingAction != null) {
+//                    throw BehaviorException.builder()
+//                            .errorCode(BehaviorErrors.ACTION_LABEL_IS_BIND)
+//                            .variables(new BehaviorErrors.ActionLabelIsBind()
+//                                    .label(label)
+//                                    .actionId(existingAction.action().getId()))
+//                            .build();
+//                }
+//                this._labeledActions.put(label, newAction);
+//            }
 
             this._current.next(newAction);
             this._current = newAction;

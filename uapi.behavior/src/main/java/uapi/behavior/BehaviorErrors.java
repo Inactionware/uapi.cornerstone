@@ -52,6 +52,8 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int GENERATE_ACTION_LABEL_OVER_MAX          = 28;
     public static final int INVALID_ACTION_INPUT_REF                = 29;
     public static final int REF_ACTION_NOT_EXIST_IN_BEHAVIOR        = 30;
+    public static final int DUPLICATED_ACTION_OUTPUT                = 31;
+    public static final int NO_OUTPUT_IN_ACTION                     = 32;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -87,6 +89,8 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(GENERATE_ACTION_LABEL_OVER_MAX, GenerateActionLabelOverMax.KEY);
         keyCodeMapping.put(INVALID_ACTION_INPUT_REF, InvalidActionInputRef.KEY);
         keyCodeMapping.put(REF_ACTION_NOT_EXIST_IN_BEHAVIOR, RefActionNotExistInBehavior.KEY);
+        keyCodeMapping.put(DUPLICATED_ACTION_OUTPUT, DuplicatedActionOutput.KEY);
+        keyCodeMapping.put(NO_OUTPUT_IN_ACTION, NoOutputInAction.KEY);
     }
 
     public BehaviorErrors() {
@@ -854,6 +858,60 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._actionLabel, this._behaviorId.toString() };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The output [{}] of action [{}] is duplicated
+     */
+    public static final class DuplicatedActionOutput extends IndexedParameters<DuplicatedActionOutput> {
+
+        public static final String KEY = "DuplicatedActionOutput";
+
+        private String _outputName;
+        private ActionIdentify _actionId;
+
+        public DuplicatedActionOutput outputName(final String name) {
+            this._outputName = name;
+            return this;
+        }
+
+        public DuplicatedActionOutput actionId(final ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._outputName, this._actionId.toString() };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      No output named [{}] is defined in Action [{}]
+     */
+    public static class NoOutputInAction extends IndexedParameters<NoOutputInAction> {
+
+        public static final String KEY = "NoOutputInAction";
+
+        private String _outputName;
+        private ActionIdentify _actionId;
+
+        public NoOutputInAction outputName(final String name) {
+            this._outputName = name;
+            return this;
+        }
+
+        public NoOutputInAction actionId(final ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._outputName, this._actionId.toString() };
         }
     }
 }

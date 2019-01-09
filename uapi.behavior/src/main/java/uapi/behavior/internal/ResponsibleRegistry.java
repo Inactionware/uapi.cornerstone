@@ -17,6 +17,7 @@ import uapi.common.Guarder;
 import uapi.common.Repository;
 import uapi.event.IEventBus;
 import uapi.log.ILogger;
+import uapi.rx.Looper;
 import uapi.service.IServiceLifecycle;
 import uapi.service.annotation.*;
 
@@ -38,7 +39,7 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
     @Inject
     protected IEventBus _eventBus;
 
-    private final Repository<ActionIdentify, IAction<?, ?>> _actionRepo;
+    private final Repository<ActionIdentify, IAction> _actionRepo;
 
     private final Lock _lock;
 
@@ -52,7 +53,7 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
 
     @Inject
     @Optional
-    public void addAction(IAction<?, ?> action) {
+    public void addAction(IAction action) {
         ArgumentChecker.required(action, "action");
         if (action instanceof IInterceptor && action instanceof IInterceptive) {
             throw BehaviorException.builder()
@@ -61,7 +62,22 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
                             .interceptorId(action.getId()))
                     .build();
         }
-        IAction<?, ?> existing = this._actionRepo.put(action);
+        // Check duplicated Action output
+        ActionOutputMeta[] metas = action.outputMetas();
+        for (int i = 0; i < metas.length; i++) {
+            for (int j = i + 1; j < metas.length; j++) {
+                if (metas[i].name().equals(metas[j].name())) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.DUPLICATED_ACTION_OUTPUT)
+                            .variables(new BehaviorErrors.DuplicatedActionOutput()
+                                    .outputName(metas[i].name())
+                                    .actionId(action.getId()))
+                            .build();
+                }
+            }
+        }
+
+        IAction existing = this._actionRepo.put(action);
         if (existing != null) {
             this._logger.warn("The existing action {} was overridden by new action {}", existing, action);
         }
