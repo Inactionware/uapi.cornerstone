@@ -11,8 +11,8 @@ public class BehaviorExecutingEvent extends BehaviorTraceEvent {
 
     public BehaviorExecutingEvent(
             final ExecutionIdentify executionId,
-            final Object originalData,
-            final Object data,
+            final Object[] behaviorInputs,
+            final ActionResult result,
             final ActionIdentify actionId,
             final String sourceName
     ) {
@@ -21,9 +21,8 @@ public class BehaviorExecutingEvent extends BehaviorTraceEvent {
         ArgumentChecker.required(actionId, "actionId");
         set(KEY_EXECUTION_ID, executionId);
         set(KEY_ACTION_ID, actionId);
-        set(KEY_ORIGINAL_DATA, originalData);
-        set(KEY_DATA, data);
-//        set(KEY_RESP_NAME, responsibleName);
+        set(KEY_BEHAVIOR_INPUTS, behaviorInputs);
+        set(KEY_RESULT, result);
     }
 
     public ActionIdentify actionId() {

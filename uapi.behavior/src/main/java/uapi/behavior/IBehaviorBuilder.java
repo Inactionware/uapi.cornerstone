@@ -48,11 +48,12 @@ public interface IBehaviorBuilder {
      *          The action/behavior label which can be used to navigate to it later
      * @param   inputs
      *          Specified inputs for the action/behavior
+     *          If the input is ActionInputReference then the input is a pointer which point to other action's input
      * @return  The behavior builder self
      * @throws  BehaviorException
      *          No action has such id, see {@link BehaviorErrors.ActionNotFound}
      */
-    IBehaviorBuilder then(ActionIdentify id, String label, String... inputs) throws BehaviorException;
+    IBehaviorBuilder then(ActionIdentify id, String label, Object... inputs) throws BehaviorException;
 
     /**
      * Set where is next action/behavior when current branch condition is satisfied.
@@ -80,7 +81,7 @@ public interface IBehaviorBuilder {
      * @throws  BehaviorException
      *          No action in the repository, see {@link BehaviorErrors.ActionNotFound}
      */
-    IBehaviorBuilder then(Class<? extends IAction> actionType, String label, String... inputs) throws BehaviorException;
+    IBehaviorBuilder then(Class<? extends IAction> actionType, String label, Object... inputs) throws BehaviorException;
 
     /**
      * Set next an anonymous action when current branch condition is satisfied.

@@ -38,6 +38,14 @@ public class ExecutionContext implements IExecutionContext {
     }
 
     @Override
+    public void put(
+            final Object key,
+            final Object value
+    ) {
+        put(key, value, Scope.BEHAVIOR);
+    }
+
+    @Override
     public void put(Object key, Object value, Scope scope) {
         ArgumentChecker.required(key, "key");
         ArgumentChecker.required(scope, "scope");

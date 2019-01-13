@@ -54,6 +54,9 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int REF_ACTION_NOT_EXIST_IN_BEHAVIOR        = 30;
     public static final int DUPLICATED_ACTION_OUTPUT                = 31;
     public static final int NO_OUTPUT_IN_ACTION                     = 32;
+    public static final int INPUT_OUTPUT_COUNT_MISMATCH             = 33;
+    public static final int INPUT_OUTPUT_TYPE_MISMATCH              = 34;
+    public static final int INPUT_OBJECT_TYPE_MISMATCH              = 35;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -91,6 +94,9 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(REF_ACTION_NOT_EXIST_IN_BEHAVIOR, RefActionNotExistInBehavior.KEY);
         keyCodeMapping.put(DUPLICATED_ACTION_OUTPUT, DuplicatedActionOutput.KEY);
         keyCodeMapping.put(NO_OUTPUT_IN_ACTION, NoOutputInAction.KEY);
+        keyCodeMapping.put(INPUT_OUTPUT_COUNT_MISMATCH, InputOutputCountMismatch.KEY);
+        keyCodeMapping.put(INPUT_OUTPUT_TYPE_MISMATCH, InputOutputTypeMismatch.KEY);
+        keyCodeMapping.put(INPUT_OBJECT_TYPE_MISMATCH, InputObjectTypeMismatch.KEY);
     }
 
     public BehaviorErrors() {
@@ -912,6 +918,161 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._outputName, this._actionId.toString() };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The output [{}:{}] does not match on input - type: {}, value: {}
+     */
+//    public static final class InputOutputNotMatch extends IndexedParameters<InputOutputNotMatch> {
+//
+//        public static final String KEY = "InputOutputNotMatch";
+//
+//        private ActionOutputMeta _outputMeta;
+//        private Object _input;
+//
+//        public InputOutputNotMatch outputMeta(ActionOutputMeta outputMeta) {
+//            this._outputMeta = outputMeta;
+//            return this;
+//        }
+//
+//        public InputOutputNotMatch input(final Object input) {
+//            this._input = input;
+//            return this;
+//        }
+//
+//        @Override
+//        public Object[] get() {
+//            return new Object[] {
+//                    this._outputMeta.name(),
+//                    this._outputMeta.type(),
+//                    this._input == null ? "null" : this._input.getClass().getCanonicalName(),
+//                    this._input == null ? "null" : this._input
+//            };
+//        }
+//    }
+
+    /**
+     * Error string template:
+     *      The input count [{}] does not match that action [{}] input count [{}] on behavior [{}]
+     */
+    public static final class InputOutputCountMismatch extends IndexedParameters<InputOutputCountMismatch> {
+
+        public static final String KEY = "InputOutputCountMismatch";
+
+        private int _inputCount;
+        private ActionIdentify _actionId;
+        private int _actionInputCount;
+        private ActionIdentify _behaviorId;
+
+        public InputOutputCountMismatch inputCount(final int count) {
+            this._inputCount = count;
+            return this;
+        }
+
+        public InputOutputCountMismatch actionId(final ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        public InputOutputCountMismatch actionInputCount(final int count) {
+            this._actionInputCount = count;
+            return this;
+        }
+
+        public InputOutputCountMismatch behaviorId(final ActionIdentify id) {
+            this._behaviorId = id;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._inputCount, this._actionId, this._actionInputCount, this._behaviorId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The action [{}] output [type: {}, name:{}] can't assign to action [{}] to input [type: {}]
+     */
+    public static final class InputOutputTypeMismatch extends IndexedParameters<InputObjectTypeMismatch> {
+
+        public static final String KEY = "InputOutputTypeMismatch";
+
+        private ActionIdentify _outActionId;
+        private Class<?> _outType;
+        private String _outName;
+        private ActionIdentify _inActionId;
+        private Class<?> _inType;
+
+        public InputOutputTypeMismatch outputActionId(final ActionIdentify id) {
+            this._outActionId = id;
+            return this;
+        }
+
+        public InputOutputTypeMismatch outputType(final Class<?> type) {
+            this._outType = type;
+            return this;
+        }
+
+        public InputOutputTypeMismatch outputName(final String name) {
+            this._outName = name;
+            return this;
+        }
+
+        public InputOutputTypeMismatch inputActionId(final ActionIdentify id) {
+            this._inActionId = id;
+            return this;
+        }
+
+        public InputOutputTypeMismatch inputType(final Class<?> type) {
+            this._inType = type;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._outActionId, this._outType, this._outName, this._inActionId, this._inType };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The input object [type: {}, value: {}] can't assign to action [{}] on input [type: {}]
+     */
+    public static final class InputObjectTypeMismatch extends IndexedParameters<InputObjectTypeMismatch> {
+
+        public static final String KEY = "InputObjectTypeMismatch";
+
+        private Object _inputObj;
+        private Class<?> _inputObjType;
+        private ActionIdentify _actionId;
+        private Class<?> _actionInType;
+
+        public InputObjectTypeMismatch inputObject(final Object obj) {
+            this._inputObj = obj;
+            return this;
+        }
+
+        public InputObjectTypeMismatch inputObjectType(final Class<?> objType) {
+            this._inputObjType = objType;
+            return this;
+        }
+
+        public InputObjectTypeMismatch actionId(final ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        public InputObjectTypeMismatch actionInputType(final Class<?> type) {
+            this._actionInType = type;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._inputObjType, this._inputObj, this._actionId, this._actionInType };
         }
     }
 }

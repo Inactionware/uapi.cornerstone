@@ -17,6 +17,10 @@ public class ActionOutput {
         this._meta = meta;
     }
 
+    public String name() {
+        return this._meta.name();
+    }
+
     public void set(final Object output) {
         ArgumentChecker.required(output, "output");
         if (this._output != null) {

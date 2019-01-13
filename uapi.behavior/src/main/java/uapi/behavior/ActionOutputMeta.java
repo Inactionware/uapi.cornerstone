@@ -9,7 +9,9 @@
 
 package uapi.behavior;
 
+import uapi.behavior.internal.Behavior;
 import uapi.common.ArgumentChecker;
+import uapi.common.StringHelper;
 
 /**
  * The meta class holds basic information for action output argument.
@@ -46,4 +48,15 @@ public final class ActionOutputMeta {
     public String name() {
         return this._name;
     }
+
+//    public void verifyInput(Object input) {
+//        if (! this.type().isAssignableFrom(input.getClass())) {
+//            throw BehaviorException.builder()
+//                    .errorCode(BehaviorErrors.INPUT_OUTPUT_NOT_MATCH)
+//                    .variables(new BehaviorErrors.InputOutputNotMatch()
+//                            .outputMeta(this)
+//                            .input(input))
+//                    .build();
+//        }
+//    }
 }

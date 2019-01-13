@@ -23,6 +23,16 @@ public interface IExecutionContext {
     String KEY_ORI_EVENT    = "OriginalEvent";
 
     /**
+     * Put single k/v data under behavior scope
+     *
+     * @param   key
+     *          The data key
+     * @param   value
+     *          The data value
+     */
+    void put(Object key, Object value);
+
+    /**
      * Put single k/v data under specific scope
      *
      * @param   key

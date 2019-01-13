@@ -56,7 +56,7 @@ public class Behavior
         this._actionRepo = actionRepository;
         this._actionId = new ActionIdentify(name, ActionType.BEHAVIOR);
         EndpointAction entrance = new EndpointAction(EndpointType.ENTRANCE, inputMetas);
-        this._entranceAction = new ActionHolder(entrance);
+        this._entranceAction = new ActionHolder(entrance, this);
 
         this._navigator = new Navigator(this._entranceAction);
         this._sequence = new AtomicInteger(0);
@@ -155,7 +155,7 @@ public class Behavior
     public IBehaviorBuilder then(
             final ActionIdentify id,
             final String label,
-            final String... inputs
+            final Object... inputs
     ) throws BehaviorException {
         ensureNotBuilt();
         ArgumentChecker.required(id, "id");
@@ -168,9 +168,9 @@ public class Behavior
                     .build();
         }
         if (addInterceptor(action, label)) {
-            this._navigator.newNextAction(action, this._lastEvaluator, null);
+            this._navigator.newNextAction(action, this._lastEvaluator, null, inputs);
         } else {
-            this._navigator.newNextAction(action, this._lastEvaluator, label);
+            this._navigator.newNextAction(action, this._lastEvaluator, label, inputs);
         }
         this._lastEvaluator = null;
         return this;
@@ -186,9 +186,10 @@ public class Behavior
     @Override
     public IBehaviorBuilder then(
             final Class<? extends IAction> actionType,
-            final String label
+            final String label,
+            final Object... inputs
     ) throws BehaviorException {
-        return then(ActionIdentify.toActionId(actionType), label);
+        return then(ActionIdentify.toActionId(actionType), label, inputs);
     }
 
     private boolean addInterceptor(IAction action, String label) {
@@ -534,7 +535,7 @@ public class Behavior
                 final IAction action,
                 final Functionals.Evaluator evaluator,
                 final String label,
-                final String... inputs
+                final Object... inputs
         ) throws BehaviorException {
             String actionLabel = label;
             if (StringHelper.isNullOrEmpty(label)) {
@@ -565,9 +566,10 @@ public class Behavior
                             .build();
                 }
             }
-            // Check inputs
-            this._current.verifyOutput(inputs);
-            ActionHolder newAction = new ActionHolder(action, actionLabel, Behavior.this, evaluator);
+            // create new action holder
+            this._current = new ActionHolder(
+                    action, actionLabel, this._current, Behavior.this, evaluator, inputs);
+            this._actions.add(this._current);
 
 
             // Check new action input is matched to current action output
@@ -598,9 +600,9 @@ public class Behavior
 //                this._labeledActions.put(label, newAction);
 //            }
 
-            this._current.next(newAction);
-            this._current = newAction;
-            this._actions.add(newAction);
+//            this._current.next(newAction);
+//            this._current = newAction;
+//            this._actions.add(newAction);
         }
     }
 }
