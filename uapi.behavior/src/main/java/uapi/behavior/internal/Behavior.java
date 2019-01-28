@@ -193,8 +193,8 @@ public class Behavior
     }
 
     private boolean addInterceptor(IAction action, String label) {
-        if (action instanceof IInterceptive) {
-            ActionIdentify interceptorId = ((IInterceptive) action).by();
+        if (action instanceof IIntercepted) {
+            ActionIdentify interceptorId = ((IIntercepted) action).by();
             IAction interceptor;
             interceptor = this._actionRepo.get(interceptorId);
             if (interceptor == null) {

@@ -243,4 +243,12 @@ class ActionHolder {
             }
         });
     }
+
+    ActionResult execute(
+            final Object[] inputs,
+            final ActionOutput[] outputs,
+            final IExecutionContext context
+    ) throws Exception {
+        return this._action.process(inputs, outputs, context);
+    }
 }

@@ -7,7 +7,7 @@ import uapi.common.ArgumentChecker;
 /**
  * An anonymous call
  */
-public class AnonymousCall<I> implements IAction<I, Void> {
+public class AnonymousCall<I> implements IAction {
 
     private final IAnonymousCall<I> _action;
 
@@ -17,7 +17,7 @@ public class AnonymousCall<I> implements IAction<I, Void> {
     }
 
     @Override
-    public Void process(I input, IExecutionContext context) {
+    public ActionResult process(Object[] inputs, ActionOutput[] outputs, IExecutionContext context) {
         try {
             this._action.accept(input, context);
         } catch (Exception ex) {

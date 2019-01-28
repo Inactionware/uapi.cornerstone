@@ -57,6 +57,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int INPUT_OUTPUT_COUNT_MISMATCH             = 33;
     public static final int INPUT_OUTPUT_TYPE_MISMATCH              = 34;
     public static final int INPUT_OBJECT_TYPE_MISMATCH              = 35;
+    public static final int RESERVED_ACTION_OUTPUT_NAME             = 36;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -97,6 +98,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(INPUT_OUTPUT_COUNT_MISMATCH, InputOutputCountMismatch.KEY);
         keyCodeMapping.put(INPUT_OUTPUT_TYPE_MISMATCH, InputOutputTypeMismatch.KEY);
         keyCodeMapping.put(INPUT_OBJECT_TYPE_MISMATCH, InputObjectTypeMismatch.KEY);
+        keyCodeMapping.put(RESERVED_ACTION_OUTPUT_NAME, ReservedActionOutputName.KEY);
     }
 
     public BehaviorErrors() {
@@ -1073,6 +1075,27 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._inputObjType, this._inputObj, this._actionId, this._actionInType };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The action output name is reserved by system - {}
+     */
+    public static final class ReservedActionOutputName extends IndexedParameters<ReservedActionOutputName> {
+
+        public static final String KEY = "ReservedActionOutputName";
+
+        private String _name;
+
+        public ReservedActionOutputName name(final String name) {
+            this._name = name;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._name };
         }
     }
 }

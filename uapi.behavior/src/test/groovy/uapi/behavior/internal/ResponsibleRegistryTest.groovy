@@ -9,16 +9,15 @@
 
 package uapi.behavior.internal
 
-import spock.lang.Ignore
+
 import spock.lang.Specification
 import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorErrors
 import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
-import uapi.behavior.IInterceptive
+import uapi.behavior.IIntercepted
 import uapi.behavior.IInterceptor
-import uapi.behavior.IResponsible
 import uapi.event.IEventBus
 import uapi.log.ILogger
 
@@ -96,7 +95,7 @@ class ResponsibleRegistryTest extends Specification {
 
     def 'Test add interceptive interceptor'() {
         given:
-        def interceptor = Mock(IInterceptiveInterceptor) {
+        def interceptor = Mock(IInterceptedInterceptor) {
             getId() >> new ActionIdentify('aname', ActionType.ACTION)
         }
         def respReg = new ResponsibleRegistry()
@@ -155,5 +154,5 @@ class ResponsibleRegistryTest extends Specification {
         respReg.responsibleCount() == 0
     }
 
-    private interface IInterceptiveInterceptor extends IInterceptor, IInterceptive {}
+    private interface IInterceptedInterceptor extends IInterceptor, IIntercepted {}
 }

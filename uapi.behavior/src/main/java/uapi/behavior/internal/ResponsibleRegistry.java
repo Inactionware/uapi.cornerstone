@@ -17,7 +17,6 @@ import uapi.common.Guarder;
 import uapi.common.Repository;
 import uapi.event.IEventBus;
 import uapi.log.ILogger;
-import uapi.rx.Looper;
 import uapi.service.IServiceLifecycle;
 import uapi.service.annotation.*;
 
@@ -55,7 +54,7 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
     @Optional
     public void addAction(IAction action) {
         ArgumentChecker.required(action, "action");
-        if (action instanceof IInterceptor && action instanceof IInterceptive) {
+        if (action instanceof IInterceptor && action instanceof IIntercepted) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.UNSUPPORTED_INTERCEPTIVE_INTERCEPTOR)
                     .variables(new BehaviorErrors.UnsupportedInterceptiveInterceptor()

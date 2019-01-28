@@ -9,17 +9,31 @@
 
 package uapi.behavior;
 
-import uapi.behavior.internal.Behavior;
 import uapi.common.ArgumentChecker;
-import uapi.common.StringHelper;
 
 /**
  * The meta class holds basic information for action output argument.
  */
 public final class ActionOutputMeta {
 
+    private static final String ANONYMOUS = "_anonymous_";
+
     private final Class<?> _type;
     private final String _name;
+
+    /**
+     * Create anonymous action output meta, it only used system internally
+     *
+     * @param   type
+     *          Action output type
+     */
+    ActionOutputMeta(
+            final Class<?> type
+    ) {
+        ArgumentChecker.required(type, "type");
+        this._type = type;
+        this._name = ANONYMOUS;
+    }
 
     public ActionOutputMeta(
             final Class<?> type,
@@ -27,6 +41,13 @@ public final class ActionOutputMeta {
     ) {
         ArgumentChecker.required(type, "type");
         ArgumentChecker.required(name, "name");
+        if (name.charAt(0) == '_') {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.RESERVED_ACTION_OUTPUT_NAME)
+                    .variables(new BehaviorErrors.ReservedActionOutputName()
+                            .name(name))
+                    .build();
+        }
         this._type = type;
         this._name = name;
     }
