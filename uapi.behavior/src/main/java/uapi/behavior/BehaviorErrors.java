@@ -58,6 +58,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int INPUT_OUTPUT_TYPE_MISMATCH              = 34;
     public static final int INPUT_OBJECT_TYPE_MISMATCH              = 35;
     public static final int RESERVED_ACTION_OUTPUT_NAME             = 36;
+    public static final int UNKNOWN_FAILURE_ON_INTERCEPTOR          = 37;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -99,6 +100,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(INPUT_OUTPUT_TYPE_MISMATCH, InputOutputTypeMismatch.KEY);
         keyCodeMapping.put(INPUT_OBJECT_TYPE_MISMATCH, InputObjectTypeMismatch.KEY);
         keyCodeMapping.put(RESERVED_ACTION_OUTPUT_NAME, ReservedActionOutputName.KEY);
+        keyCodeMapping.put(UNKNOWN_FAILURE_ON_INTERCEPTOR, UnknownFailureOnInterceptor.KEY);
     }
 
     public BehaviorErrors() {
@@ -1096,6 +1098,33 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._name };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Execute Interceptor [{}} failed, intercepted action - {}
+     */
+    public static final class UnknownFailureOnInterceptor extends IndexedParameters<UnknownFailureOnInterceptor> {
+
+        public static final String KEY = "UnknownFailureOnInterceptor";
+
+        private ActionIdentify _interceptorId;
+        private ActionIdentify _actionId;
+
+        public UnknownFailureOnInterceptor interceptorId(final ActionIdentify interceptorId) {
+            this._interceptorId = interceptorId;
+            return this;
+        }
+
+        public UnknownFailureOnInterceptor actionId(final ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] {this._interceptorId, this._actionId };
         }
     }
 }

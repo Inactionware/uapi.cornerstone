@@ -14,16 +14,20 @@ import uapi.common.Attributed;
 
 public class ActionResult extends Attributed {
 
-    private static final String KEY_SUCCESS = "SUCCESS";
-    private static final String KEY_CAUSE   = "CAUSE";
+    private static final String KEY_ACTION_ID   = "ACTION";
+    private static final String KEY_SUCCESS     = "SUCCESS";
+    private static final String KEY_CAUSE       = "CAUSE";
 
-    public ActionResult() {
-        super();
-        super.set(KEY_SUCCESS, true);
+    public ActionResult(final ActionIdentify actionId) {
+        this(actionId, true);
     }
 
-    public ActionResult(final boolean success) {
+    public ActionResult(
+            final ActionIdentify actionId,
+            final boolean success
+    ) {
         super();
+        super.set(KEY_ACTION_ID, actionId);
         super.set(KEY_SUCCESS, success);
     }
 
@@ -33,8 +37,11 @@ public class ActionResult extends Attributed {
      * @param   cause
      *          The exception which cause the failed action
      */
-    public ActionResult(final Exception cause) {
-        this(false);
+    public ActionResult(
+            final ActionIdentify actionId,
+            final Exception cause
+    ) {
+        this(actionId,false);
         ArgumentChecker.required(cause, "cause");
         super.set(KEY_CAUSE, cause);
     }
@@ -64,5 +71,9 @@ public class ActionResult extends Attributed {
 
     public Exception cause() {
         return get(KEY_CAUSE);
+    }
+
+    public ActionIdentify actionId() {
+        return get(KEY_ACTION_ID);
     }
 }

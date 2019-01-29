@@ -61,11 +61,22 @@ public class InterceptedActionHolder extends ActionHolder {
             final ActionOutput[] outputs,
             final IExecutionContext context
     ) throws Exception {
-        Looper.on(this._interceptors).map(interceptor -> {
+        ActionResult interceptResult = Looper.on(this._interceptors).map(interceptor -> {
             ActionResult result = interceptor.process(inputs, outputs, context);
-            Looper.on(outputs).foreachWithIndex((idx, output) -> inputs[idx] = output);
+            Looper.on(outputs).foreachWithIndex((idx, output) -> inputs[idx] = output.get());
             return result;
-        });
-        return this._action.process(inputs, outputs, context);
+        }).terminate(ActionResult::failed, true).last();
+        if (interceptResult.failed()) {
+            if (interceptResult.cause() != null) {
+                throw interceptResult.cause();
+            }
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.UNKNOWN_FAILURE_ON_INTERCEPTOR)
+                    .variables(new BehaviorErrors.UnknownFailureOnInterceptor()
+                            .interceptorId(interceptResult.actionId())
+                            .actionId(super.action().getId()))
+                    .build();
+        }
+        return super.execute(inputs, outputs, context);
     }
 }
