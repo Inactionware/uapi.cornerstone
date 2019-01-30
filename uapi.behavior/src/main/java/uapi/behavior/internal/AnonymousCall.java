@@ -7,19 +7,22 @@ import uapi.common.ArgumentChecker;
 /**
  * An anonymous call
  */
-public class AnonymousCall<I> implements IAction {
+public class AnonymousCall implements IAction {
 
-    private final IAnonymousCall<I> _action;
+    private final IAnonymousCall _action;
 
-    public AnonymousCall(IAnonymousCall<I> action) {
+    public AnonymousCall(IAnonymousCall action) {
         ArgumentChecker.required(action, "action");
         this._action = action;
     }
 
     @Override
-    public ActionResult process(Object[] inputs, ActionOutput[] outputs, IExecutionContext context) {
+    public ActionResult process(
+            final Object[] inputs,
+            final ActionOutput[] outputs,
+            final IExecutionContext context) {
         try {
-            this._action.accept(input, context);
+            this._action.accept(context);
         } catch (Exception ex) {
             throw new GeneralException(ex);
         }
@@ -27,13 +30,13 @@ public class AnonymousCall<I> implements IAction {
     }
 
     @Override
-    public Class inputType() {
-        return Object.class;
+    public ActionInputMeta[] inputMetas() {
+        return new ActionInputMeta[0];
     }
 
     @Override
-    public Class<Void> outputType() {
-        return Void.class;
+    public ActionOutputMeta[] outputMetas() {
+        return new ActionOutputMeta[0];
     }
 
     @Override

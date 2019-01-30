@@ -48,8 +48,9 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
      * @return  The output data
      */
     ActionResult execute(
-            final ExecutionContext executionContext,
-            final Object... inputs
+            final Object[] inputs,
+            final ActionOutput[] behaviorOutputs,
+            final ExecutionContext executionContext
     ) {
         ArgumentChecker.required(executionContext, "executionContext");
         ActionResult result = null;

@@ -11,13 +11,8 @@ package uapi.behavior;
 
 /**
  * A IBehavior is responsible to process input event and output processed data based on specified event.
- *
- * @param   <I>
- *          Input event type
- * @param   <O>
- *          Output data type
  */
-public interface IBehavior<I, O> extends IAction<I, O> {
+public interface IBehavior extends IAction {
 
     /**
      * Indicate the behavior is traceable or not, if the behavior is traceable then some behavior events will be thrown

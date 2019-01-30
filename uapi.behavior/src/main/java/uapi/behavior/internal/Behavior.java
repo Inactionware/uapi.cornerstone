@@ -39,8 +39,8 @@ public class Behavior
 
     private Functionals.Evaluator _lastEvaluator;
 
-    private IAction<BehaviorSuccess, BehaviorEvent> _successAction;
-    private IAction<BehaviorFailure, BehaviorEvent> _failureAction;
+    private IAction _successAction;
+    private IAction _failureAction;
 
     Behavior(
             final Responsible responsible,
@@ -102,8 +102,9 @@ public class Behavior
             final ActionOutput[] outputs,
             final IExecutionContext context
     ) {
+        ensureBuilt();
         Execution execution = newExecution();
-        return (O) execution.execute(input, (ExecutionContext) context);
+        return execution.execute(inputs, outputs, (ExecutionContext) context);
     }
 
     // ----------------------------------------------------
@@ -167,11 +168,12 @@ public class Behavior
                             .actionId(id))
                     .build();
         }
-        if (addInterceptor(action, label)) {
-            this._navigator.newNextAction(action, this._lastEvaluator, null, inputs);
-        } else {
-            this._navigator.newNextAction(action, this._lastEvaluator, label, inputs);
-        }
+//        if (addInterceptor(action, label)) {
+//            this._navigator.newNextAction(action, this._lastEvaluator, null, inputs);
+//        } else {
+//            this._navigator.newNextAction(action, this._lastEvaluator, label, inputs);
+//        }
+        this._navigator.newNextAction(action, this._lastEvaluator, label, inputs);
         this._lastEvaluator = null;
         return this;
     }
@@ -192,81 +194,82 @@ public class Behavior
         return then(ActionIdentify.toActionId(actionType), label, inputs);
     }
 
-    private boolean addInterceptor(IAction action, String label) {
-        if (action instanceof IIntercepted) {
-            ActionIdentify interceptorId = ((IIntercepted) action).by();
-            IAction interceptor;
-            interceptor = this._actionRepo.get(interceptorId);
-            if (interceptor == null) {
-                throw BehaviorException.builder()
-                        .errorCode(BehaviorErrors.INTERCEPTOR_NOT_FOUND)
-                        .variables(new BehaviorErrors.InterceptorNotFound()
-                                .actionId(action.getId())
-                                .interceptorId(interceptorId))
-                        .build();
-            }
-            if (! (interceptor instanceof IInterceptor)) {
-                throw BehaviorException.builder()
-                        .errorCode(BehaviorErrors.ACTION_IS_NOT_INTERCEPTOR)
-                        .variables(new BehaviorErrors.ActionIsNotInterceptor()
-                                .actionId(interceptorId))
-                        .build();
-            }
+//    private boolean addInterceptor(IAction action, String label) {
+//        if (action instanceof IIntercepted) {
+//            ActionIdentify interceptorId = ((IIntercepted) action).by();
+//            IAction interceptor;
+//            interceptor = this._actionRepo.get(interceptorId);
+//            if (interceptor == null) {
+//                throw BehaviorException.builder()
+//                        .errorCode(BehaviorErrors.INTERCEPTOR_NOT_FOUND)
+//                        .variables(new BehaviorErrors.InterceptorNotFound()
+//                                .actionId(action.getId())
+//                                .interceptorId(interceptorId))
+//                        .build();
+//            }
+//            if (! (interceptor instanceof IInterceptor)) {
+//                throw BehaviorException.builder()
+//                        .errorCode(BehaviorErrors.ACTION_IS_NOT_INTERCEPTOR)
+//                        .variables(new BehaviorErrors.ActionIsNotInterceptor()
+//                                .actionId(interceptorId))
+//                        .build();
+//            }
+//
+//            // The input and output type of dependent action must be same as input type of the action
+//            Class<?> interceptorInputType = interceptor.inputType();
+//            if (interceptorInputType != action.inputType()) {
+//                throw BehaviorException.builder()
+//                        .errorCode(BehaviorErrors.INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT)
+//                        .variables(new BehaviorErrors.InterceptorIONotMatchActionInput()
+//                                .interceptorId(interceptorId)
+//                                .actionId(action.getId())
+//                                .interceptorIOType(interceptorInputType)
+//                                .actionInputType(action.inputType()))
+//                        .build();
+//            }
+//
+//            this._navigator.newNextAction(interceptor, this._lastEvaluator, label);
+//            this._lastEvaluator = null;
+//            return true;
+//        }
+//        return false;
+//    }
 
-            // The input and output type of dependent action must be same as input type of the action
-            Class<?> interceptorInputType = interceptor.inputType();
-            if (interceptorInputType != action.inputType()) {
-                throw BehaviorException.builder()
-                        .errorCode(BehaviorErrors.INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT)
-                        .variables(new BehaviorErrors.InterceptorIONotMatchActionInput()
-                                .interceptorId(interceptorId)
-                                .actionId(action.getId())
-                                .interceptorIOType(interceptorInputType)
-                                .actionInputType(action.inputType()))
-                        .build();
-            }
-
-            this._navigator.newNextAction(interceptor, this._lastEvaluator, label);
-            this._lastEvaluator = null;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public IBehaviorBuilder then(
-            final IAnonymousAction action
-    ) {
-        return then(action, null);
-    }
-
-    @Override
-    public IBehaviorBuilder then(
-            final IAnonymousAction action,
-            final String label
-    ) {
-        ensureNotBuilt();
-        ArgumentChecker.required(action, "action");
-        AnonymousAction aAction = new AnonymousAction(action);
-        if (addInterceptor(aAction, label)) {
-            this._navigator.newNextAction(aAction, this._lastEvaluator, null);
-        } else {
-            this._navigator.newNextAction(aAction, this._lastEvaluator, label);
-        }
-        this._lastEvaluator = null;
-        return this;
-    }
+//    @Override
+//    public IBehaviorBuilder then(
+//            final IAnonymousAction action
+//    ) {
+//        return then(action, null);
+//    }
+//
+//    @Override
+//    public IBehaviorBuilder then(
+//            final IAnonymousAction action,
+//            final String label
+//    ) {
+//        ensureNotBuilt();
+//        ArgumentChecker.required(action, "action");
+//        AnonymousAction aAction = new AnonymousAction(action);
+////        if (addInterceptor(aAction, label)) {
+////            this._navigator.newNextAction(aAction, this._lastEvaluator, null);
+////        } else {
+////            this._navigator.newNextAction(aAction, this._lastEvaluator, label);
+////        }
+//        this._navigator.newNextAction(aAction, this._lastEvaluator, label);
+//        this._lastEvaluator = null;
+//        return this;
+//    }
 
     @Override
     public IBehaviorBuilder call(
-            final IAnonymousCall<?> call
+            final IAnonymousCall call
     ) {
         return call(call, null);
     }
 
     @Override
     public IBehaviorBuilder call(
-            final IAnonymousCall<?> call,
+            final IAnonymousCall call,
             final String label
     ) {
         ensureNotBuilt();
@@ -279,7 +282,7 @@ public class Behavior
 
     @Override
     public IBehaviorBuilder onSuccess(
-            final IAnonymousAction<BehaviorSuccess, BehaviorEvent> action
+            final IBehaviorSuccessCall action
     ) {
         ensureNotBuilt();
         ArgumentChecker.required(action, "action");
@@ -290,7 +293,7 @@ public class Behavior
                             .behaviorId(this._actionId))
                     .build();
         }
-        this._successAction = new AnonymousAction(action);
+        this._successAction = new BehaviorSuccessAction(action, getId());
         return this;
     }
 
@@ -315,13 +318,13 @@ public class Behavior
                             .actionId(actionId))
                     .build();
         }
-        this._successAction = (IAction<BehaviorSuccess, BehaviorEvent>) action;
+        this._successAction = action;
         return this;
     }
 
     @Override
     public IBehaviorBuilder onFailure(
-            final IAnonymousAction<BehaviorFailure, BehaviorEvent> action
+            final IBehaviorFailureCall action
     ) {
         ensureNotBuilt();
         ArgumentChecker.required(action, "action");
@@ -332,7 +335,7 @@ public class Behavior
                             .behaviorId(this._actionId))
                     .build();
         }
-        this._failureAction = new AnonymousAction<>(action);
+        this._failureAction = new BehaviorFailureAction(action, getId());
         return this;
     }
 
@@ -357,7 +360,7 @@ public class Behavior
                             .actionId(actionId))
                     .build();
         }
-        this._failureAction = (IAction<BehaviorFailure, BehaviorEvent>) action;
+        this._failureAction = action;
         return this;
     }
 
@@ -567,8 +570,13 @@ public class Behavior
                 }
             }
             // create new action holder
-            this._current = new ActionHolder(
-                    action, actionLabel, this._current, Behavior.this, evaluator, inputs);
+            if (action instanceof IIntercepted) {
+                this._current = new InterceptedActionHolder(
+                        Behavior.this._actionRepo, action, actionLabel, this._current, Behavior.this, evaluator, inputs);
+            } else {
+                this._current = new ActionHolder(
+                        action, actionLabel, this._current, Behavior.this, evaluator, inputs);
+            }
             this._actions.add(this._current);
 
 
