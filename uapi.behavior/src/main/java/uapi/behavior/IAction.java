@@ -22,15 +22,13 @@ public interface IAction extends IIdentifiable<ActionIdentify> {
      *
      * @param   inputs
      *          Action inputs
-     * @param   outputs
+     * @param   output
      *          Action outputs
      * @param   context
      *          The execution context
      * @return  Action result
      */
-    default ActionResult process(Object[] inputs, ActionOutput[] outputs, IExecutionContext context) {
-        return new ActionResult();
-    }
+    default void process(Object[] inputs, ActionOutput output, IExecutionContext context) { }
 
     /**
      * Return input meta data

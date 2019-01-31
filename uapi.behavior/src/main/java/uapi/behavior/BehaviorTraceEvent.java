@@ -8,7 +8,8 @@ public abstract class BehaviorTraceEvent extends BehaviorEvent {
     public static final String TOPIC                = "BehaviorTrace";
     public static final String KEY_EXECUTION_ID     = "ExecutionId";
     public static final String KEY_BEHAVIOR_INPUTS  = "BehaviorInputs";
-    public static final String KEY_RESULT           = "Result";
+    public static final String KEY_CURRENT_OUTPUTS  = "CurrentOutputs";
+    public static final String KEY_CURRENT_RESULT   = "CurrentResult";
     public static final String KEY_EX               = "Exception";
 
     public BehaviorTraceEvent(String sourceName) {
@@ -43,12 +44,21 @@ public abstract class BehaviorTraceEvent extends BehaviorEvent {
     }
 
     /**
+     * Get outputs by current action execution
+     *
+     * @return  The current action outputs
+     */
+    public ActionOutput[] currentOutputs() {
+        return (ActionOutput[]) get(KEY_CURRENT_OUTPUTS);
+    }
+
+    /**
      * Get last outputted data of this behavior
      *
      * @return  The last outputted data
      */
-    public ActionResult result() {
-        return (ActionResult) get(KEY_RESULT);
+    public ActionResult currentResult() {
+        return (ActionResult) get(KEY_CURRENT_RESULT);
     }
 
     /**

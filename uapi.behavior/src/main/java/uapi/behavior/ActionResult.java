@@ -11,12 +11,14 @@ package uapi.behavior;
 
 import uapi.common.ArgumentChecker;
 import uapi.common.Attributed;
+import uapi.common.StringHelper;
 
 public class ActionResult extends Attributed {
 
     private static final String KEY_ACTION_ID   = "ACTION";
     private static final String KEY_SUCCESS     = "SUCCESS";
     private static final String KEY_CAUSE       = "CAUSE";
+    private static final String KEY_MSG         = "MSG";
 
     public ActionResult(final ActionIdentify actionId) {
         this(actionId, true);
@@ -46,6 +48,15 @@ public class ActionResult extends Attributed {
         super.set(KEY_CAUSE, cause);
     }
 
+    public ActionResult(
+            final ActionIdentify actionId,
+            final String message
+    ) {
+        this(actionId,false);
+        ArgumentChecker.required(message, "message");
+        super.set(KEY_MSG, message);
+    }
+
     @Override
     public Object set(
             final Object key,
@@ -71,6 +82,17 @@ public class ActionResult extends Attributed {
 
     public Exception cause() {
         return get(KEY_CAUSE);
+    }
+
+    public String message() {
+        String msg = get(KEY_MSG);
+        if (StringHelper.isNullOrEmpty(msg)) {
+            Exception ex = cause();
+            if (ex != null) {
+                msg = ex.getMessage();
+            }
+        }
+        return msg;
     }
 
     public ActionIdentify actionId() {

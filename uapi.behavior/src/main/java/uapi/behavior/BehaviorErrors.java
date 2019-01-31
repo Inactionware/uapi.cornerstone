@@ -12,6 +12,7 @@ package uapi.behavior;
 import uapi.exception.FileBasedExceptionErrors;
 import uapi.exception.IndexedParameters;
 
+import javax.swing.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,6 +60,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int INPUT_OBJECT_TYPE_MISMATCH              = 35;
     public static final int RESERVED_ACTION_OUTPUT_NAME             = 36;
     public static final int UNKNOWN_FAILURE_ON_INTERCEPTOR          = 37;
+    public static final int INCORRECT_ACTION_OUTPUT_NAME            = 38;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -101,6 +103,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(INPUT_OBJECT_TYPE_MISMATCH, InputObjectTypeMismatch.KEY);
         keyCodeMapping.put(RESERVED_ACTION_OUTPUT_NAME, ReservedActionOutputName.KEY);
         keyCodeMapping.put(UNKNOWN_FAILURE_ON_INTERCEPTOR, UnknownFailureOnInterceptor.KEY);
+        keyCodeMapping.put(INCORRECT_ACTION_OUTPUT_NAME, IncorrectActionOutputName.KEY);
     }
 
     public BehaviorErrors() {
@@ -431,8 +434,8 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 
         private ActionIdentify _leafAction1;
         private ActionIdentify _leafAction2;
-        private Class _leafAction1Output;
-        private Class _leafAction2Output;
+        private ActionOutputMeta[] _leafAction1OutputMetas;
+        private ActionOutputMeta[] _leafAction2OutputMetas;
 
         public InconsistentLeafActions leafAction1(ActionIdentify actionId) {
             this._leafAction1 = actionId;
@@ -444,19 +447,19 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
             return this;
         }
 
-        public InconsistentLeafActions leafAction1Output(Class type) {
-            this._leafAction1Output = type;
+        public InconsistentLeafActions leafAction1Output(ActionOutputMeta[] metas) {
+            this._leafAction1OutputMetas = metas;
             return this;
         }
 
-        public InconsistentLeafActions leafAction2Output(Class type) {
-            this._leafAction2Output = type;
+        public InconsistentLeafActions leafAction2Output(ActionOutputMeta[] metas) {
+            this._leafAction2OutputMetas = metas;
             return this;
         }
 
         @Override
         public Object[] get() {
-            return new Object[] { this._leafAction1Output, this._leafAction2Output, this._leafAction1, this._leafAction2 };
+            return new Object[] { this._leafAction1OutputMetas, this._leafAction2OutputMetas, this._leafAction1, this._leafAction2 };
         }
     }
 
@@ -702,28 +705,49 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 
     /**
      * Error string template:
-     *      The Action output {} is not instance of type - {}
+     *      The output [{}] can not assign to Action [{}] output [{}] because its type incorrect - {} vs. {}
      */
     public static final class ActionOutputTypeNotMatched extends IndexedParameters<ActionOutputTypeNotMatched> {
 
         public static final String KEY = "ActionOutputTypeNotMatched";
 
         private Object _output;
-        private Class<?> _type;
+        private Class<?> _outputType;
+        private ActionIdentify _actionId;
+        private String _name;
+        private Class<?> _requiredType;
 
         public ActionOutputTypeNotMatched output(final Object output) {
             this._output = output;
             return this;
         }
 
-        public ActionOutputTypeNotMatched type(final Class<?> type) {
-            this._type = type;
+        public ActionOutputTypeNotMatched outputType(final Class<?> type) {
+            this._outputType = type;
+            return this;
+        }
+
+        public ActionOutputTypeNotMatched actionId(final ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        public ActionOutputTypeNotMatched outputName(final String name) {
+            this._name = name;
+            return this;
+        }
+
+        public ActionOutputTypeNotMatched requiredType(final Class<?> type) {
+            this._requiredType = type;
             return this;
         }
 
         @Override
         public Object[] get() {
-            return new Object[] { this._output, this._type };
+            return new Object[] {
+                    this._output, this._outputType.getCanonicalName(),
+                    this._actionId, this._name, this._requiredType.getCanonicalName()
+            };
         }
     }
 
@@ -1125,6 +1149,33 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] {this._interceptorId, this._actionId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Can not set output to output name [{}] on action [{}] - unsupported output name
+     */
+    public static final class IncorrectActionOutputName extends IndexedParameters<IncorrectActionOutputName> {
+
+        public static final String KEY = "IncorrectActionOutputName";
+
+        private String _outputName;
+        private ActionIdentify _actionId;
+
+        public IncorrectActionOutputName outputName(final String name) {
+            this._outputName = name;
+            return this;
+        }
+
+        public IncorrectActionOutputName actionId(final ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._outputName, this._actionId };
         }
     }
 }

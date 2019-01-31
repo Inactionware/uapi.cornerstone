@@ -9,29 +9,29 @@ public class BehaviorFinishedEvent extends BehaviorTraceEvent {
 
     public BehaviorFinishedEvent(
             final ExecutionIdentify executionId,
-            final Object originalData,
-            final Object data,
+            final Object[] behaviorInputs,
+            final ActionOutput[] behaviorOutputs,
+            final ActionResult behaviorResult,
             final String sourceName
     ) {
-        super(sourceName);
-        ArgumentChecker.required(executionId, "executionId");
-        set(KEY_EXECUTION_ID, executionId);
-        set(KEY_ORIGINAL_DATA, originalData);
-        set(KEY_DATA, data);
+        this(executionId, behaviorInputs, behaviorOutputs, behaviorResult, sourceName, null);
     }
 
     public BehaviorFinishedEvent(
             final ExecutionIdentify executionId,
-            final Object originalData,
-            final Object data,
+            final Object[] behaviorInputs,
+            final ActionOutput[] behaviorOutputs,
+            final ActionResult behaviorResult,
             final String sourceName,
             final Exception exception
     ) {
         super(sourceName);
         ArgumentChecker.required(executionId, "executionId");
         set(KEY_EXECUTION_ID, executionId);
-        set(KEY_ORIGINAL_DATA, originalData);
-        set(KEY_DATA, data);
+        set(KEY_BEHAVIOR_INPUTS, behaviorInputs);
+        set(KEY_CURRENT_OUTPUTS, behaviorOutputs);
+        set(KEY_CURRENT_RESULT, behaviorResult);
+        set(KEY_SOURCE_NAME, sourceName);
         set(KEY_EX, exception);
     }
 }

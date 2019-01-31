@@ -244,11 +244,11 @@ class ActionHolder {
         });
     }
 
-    ActionResult execute(
+    void execute(
             final Object[] inputs,
-            final ActionOutput[] outputs,
+            final ActionOutput output,
             final IExecutionContext context
     ) throws Exception {
-        return this._action.process(inputs, outputs, context);
+        this._action.process(inputs, output, context);
     }
 }

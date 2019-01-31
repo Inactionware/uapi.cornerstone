@@ -39,8 +39,8 @@ public class Behavior
 
     private Functionals.Evaluator _lastEvaluator;
 
-    private IAction _successAction;
-    private IAction _failureAction;
+    private IBehaviorSuccessCall _successAction;
+    private IBehaviorFailureCall _failureAction;
 
     Behavior(
             final Responsible responsible,
@@ -97,14 +97,14 @@ public class Behavior
     }
 
     @Override
-    public ActionResult process(
+    public void process(
             final Object[] inputs,
-            final ActionOutput[] outputs,
+            final ActionOutput output,
             final IExecutionContext context
     ) {
         ensureBuilt();
         Execution execution = newExecution();
-        return execution.execute(inputs, outputs, (ExecutionContext) context);
+        return execution.execute(inputs, output, (ExecutionContext) context);
     }
 
     // ----------------------------------------------------
@@ -293,34 +293,34 @@ public class Behavior
                             .behaviorId(this._actionId))
                     .build();
         }
-        this._successAction = new BehaviorSuccessAction(action, getId());
-        return this;
-    }
-
-    @Override
-    public IBehaviorBuilder onSuccess(
-            final ActionIdentify actionId
-    ) {
-        ensureNotBuilt();
-        ArgumentChecker.required(actionId, "actionId");
-        if (this._successAction != null) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.SUCCESS_ACTION_EXISTS)
-                    .variables(new BehaviorErrors.FailureActionExists()
-                            .behaviorId(this._actionId))
-                    .build();
-        }
-        IAction action = this._actionRepo.get(actionId);
-        if (action == null) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
-                    .variables(new BehaviorErrors.ActionNotFound()
-                            .actionId(actionId))
-                    .build();
-        }
         this._successAction = action;
         return this;
     }
+
+//    @Override
+//    public IBehaviorBuilder onSuccess(
+//            final ActionIdentify actionId
+//    ) {
+//        ensureNotBuilt();
+//        ArgumentChecker.required(actionId, "actionId");
+//        if (this._successAction != null) {
+//            throw BehaviorException.builder()
+//                    .errorCode(BehaviorErrors.SUCCESS_ACTION_EXISTS)
+//                    .variables(new BehaviorErrors.FailureActionExists()
+//                            .behaviorId(this._actionId))
+//                    .build();
+//        }
+//        IAction action = this._actionRepo.get(actionId);
+//        if (action == null) {
+//            throw BehaviorException.builder()
+//                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
+//                    .variables(new BehaviorErrors.ActionNotFound()
+//                            .actionId(actionId))
+//                    .build();
+//        }
+//        this._successAction = action;
+//        return this;
+//    }
 
     @Override
     public IBehaviorBuilder onFailure(
@@ -335,34 +335,34 @@ public class Behavior
                             .behaviorId(this._actionId))
                     .build();
         }
-        this._failureAction = new BehaviorFailureAction(action, getId());
-        return this;
-    }
-
-    @Override
-    public IBehaviorBuilder onFailure(
-            final ActionIdentify actionId
-    ) {
-        ensureNotBuilt();
-        ArgumentChecker.required(actionId, "actionId");
-        if (this._failureAction != null) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.FAILURE_ACTION_EXISTS)
-                    .variables(new BehaviorErrors.FailureActionExists()
-                            .behaviorId(this._actionId))
-                    .build();
-        }
-        IAction action = this._actionRepo.get(actionId);
-        if (action == null) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
-                    .variables(new BehaviorErrors.ActionNotFound()
-                            .actionId(actionId))
-                    .build();
-        }
         this._failureAction = action;
         return this;
     }
+
+//    @Override
+//    public IBehaviorBuilder onFailure(
+//            final ActionIdentify actionId
+//    ) {
+//        ensureNotBuilt();
+//        ArgumentChecker.required(actionId, "actionId");
+//        if (this._failureAction != null) {
+//            throw BehaviorException.builder()
+//                    .errorCode(BehaviorErrors.FAILURE_ACTION_EXISTS)
+//                    .variables(new BehaviorErrors.FailureActionExists()
+//                            .behaviorId(this._actionId))
+//                    .build();
+//        }
+//        IAction action = this._actionRepo.get(actionId);
+//        if (action == null) {
+//            throw BehaviorException.builder()
+//                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
+//                    .variables(new BehaviorErrors.ActionNotFound()
+//                            .actionId(actionId))
+//                    .build();
+//        }
+//        this._failureAction = action;
+//        return this;
+//    }
 
     @Override
     public INavigator navigator() {
@@ -400,8 +400,23 @@ public class Behavior
                 if (idx == 0) {
                     return;
                 }
-                IAction action1 = leafActions.get(idx - 1).action();
-                IAction action2 = leafActions.get(idx).action();
+                IAction leafAction1 = leafActions.get(idx - 1).action();
+                IAction leafAction2 = leafActions.get(idx).action();
+                ActionOutputMeta[] outMetas1 = leafAction1.outputMetas();
+                ActionOutputMeta[] outMetas2 = leafAction2.outputMetas();
+                if (outMetas1.length != outMetas2.length) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.INCONSISTENT_LEAF_ACTIONS)
+                            .variables(new BehaviorErrors.InconsistentLeafActions()
+                                    .leafAction1(leafAction1.getId())
+                                    .leafAction2(leafAction2.getId())
+                                    .leafAction1Output(outMetas1)
+                                    .leafAction2Output(outMetas2))
+                            .build();
+                }
+                for (ActionOutputMeta meta : outMetas1) {
+
+                }
                 if (!action1.outputType().equals(action2.outputType())) {
                     throw BehaviorException.builder()
                             .errorCode(BehaviorErrors.INCONSISTENT_LEAF_ACTIONS)

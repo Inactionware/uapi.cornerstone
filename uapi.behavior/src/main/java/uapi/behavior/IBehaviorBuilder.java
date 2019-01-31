@@ -140,7 +140,7 @@ public interface IBehaviorBuilder {
      */
     IBehaviorBuilder onSuccess(IBehaviorSuccessCall action);
 
-    IBehaviorBuilder onSuccess(ActionIdentify actionId);
+//    IBehaviorBuilder onSuccess(ActionIdentify actionId);
 
     /**
      * Invoke the action when the behavior is executed failed
@@ -151,7 +151,7 @@ public interface IBehaviorBuilder {
      */
     IBehaviorBuilder onFailure(IBehaviorFailureCall action);
 
-    IBehaviorBuilder onFailure(ActionIdentify actionId);
+//    IBehaviorBuilder onFailure(ActionIdentify actionId);
 
     /**
      * Get navigator which associated with this behavior builder

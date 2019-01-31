@@ -16,14 +16,14 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
     private final boolean _traceable;
     private ActionHolder _current;
 
-    private final IAction _successAction;
-    private final IAction _failureAction;
+    private final IBehaviorSuccessCall _successAction;
+    private final IBehaviorFailureCall _failureAction;
 
     Execution(
             final Behavior behavior,
             final int sequence,
-            final IAction successAction,
-            final IAction failureAction
+            final IBehaviorSuccessCall successAction,
+            final IBehaviorFailureCall failureAction
     ) {
         ArgumentChecker.required(behavior, "behavior");
         this._id = new ExecutionIdentify(behavior.getId(), sequence);
@@ -41,15 +41,14 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
     /**
      * Execute current action until no subsequent action is available
      *
-     * @param   input
+     * @param   inputs
      *          The input data
      * @param   executionContext
      *          The context of current execution
-     * @return  The output data
      */
-    ActionResult execute(
+    void execute(
             final Object[] inputs,
-            final ActionOutput[] behaviorOutputs,
+            final ActionOutput behaviorOutputs,
             final ExecutionContext executionContext
     ) {
         ArgumentChecker.required(executionContext, "executionContext");
@@ -57,6 +56,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         String sourceRespName = executionContext.get(IExecutionContext.KEY_RESP_NAME);
         Exception exception = null;
         Object[] inParams;
+        ActionOutput[] outputs = null;
         try {
             do {
                 if (this._current.previous() == null) {
@@ -76,20 +76,23 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 }
                 // create outputs
                 ActionOutputMeta[] outMetas = this._current.action().outputMetas();
-                ActionOutput[] outputs;
                 if (outMetas.length == 0) {
                     outputs = new ActionOutput[0];
                 } else {
                     outputs = new ActionOutput[outMetas.length];
-                    Looper.on(outMetas).foreachWithIndex((idx, outMeta) -> outputs[idx] = new ActionOutput(outMeta));
+                    for (int idx = 0; idx < outputs.length; idx++) {
+                        outputs[idx] = new ActionOutput(outMetas[idx]);
+                    }
+//                    Looper.on(outMetas).foreachWithIndex((idx, outMeta) -> outputs[idx] = new ActionOutput(outMeta));
                 }
                 // execute action
-                result = this._current.action().process(inputs, outputs, executionContext);
+                this._current.action().process(inputs, outputs, executionContext);
                 if (this._traceable) {
                     BehaviorExecutingEvent event = new BehaviorExecutingEvent(
-                            this._id, inputs, result, this._current.action().getId(), sourceRespName);
+                            this._id, inputs, outputs, result, sourceRespName);
                     executionContext.fireEvent(event);
                 }
+
                 // set output to execution context
                 Looper.on(outputs).foreach(output -> {
                     String key = ActionInputReference.generateKey(this._current.label(), output.name());
@@ -97,13 +100,15 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 });
                 this._current = this._current.findNext(result);
             } while (this._current != null);
+
+
         } catch (Exception ex) {
             exception = ex;
             if (this._failureAction != null) {
                 BehaviorEvent bEvent = null;
                 try {
                     BehaviorFailure bFailure = new BehaviorFailure(this._current.action().getId(), inputs, ex);
-                    bEvent = this._failureAction.process(bFailure, executionContext);
+                    bEvent = this._failureAction.accept(bFailure, executionContext);
                 } catch (Exception eex) {
                     exception = new GeneralException(eex);
                 }
@@ -112,23 +117,40 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 }
             }
         }
-        if (this._successAction != null) {
-            BehaviorEvent bEvent = null;
-            try {
-                BehaviorSuccess bSuccess = new BehaviorSuccess(output);
-                bEvent = this._successAction.process(bSuccess, executionContext);
-            } catch (Exception eex) {
-                exception = new GeneralException(eex);
+
+        if (result.successful()) {
+            if (this._successAction != null) {
+                BehaviorEvent bEvent = null;
+                try {
+                    BehaviorSuccess bSuccess = new BehaviorSuccess(result, outputs);
+                    bEvent = this._successAction.accept(bSuccess, executionContext);
+                } catch (Exception eex) {
+                    exception = new GeneralException(eex);
+                }
+                if (bEvent != null) {
+                    executionContext.fireEvent(bEvent);
+                }
             }
-            if (bEvent != null) {
-                executionContext.fireEvent(bEvent);
+        } else {
+            if (this._failureAction != null) {
+                BehaviorEvent bEvent = null;
+                try {
+                    BehaviorFailure bFailure = new BehaviorFailure(result.actionId(), inParams, result.message(), result.cause());
+                    bEvent = this._failureAction.accept(bFailure, executionContext);
+                } catch (Exception eex) {
+                    exception = new GeneralException(eex);
+                }
+                if (bEvent != null) {
+                    executionContext.fireEvent(bEvent);
+                }
             }
         }
         if (this._traceable) {
             BehaviorFinishedEvent event = new BehaviorFinishedEvent(
-                    this._id, input, output, sourceRespName, exception);
+                    this._id, inputs, outputs, result, sourceRespName, exception);
             executionContext.fireEvent(event);
         }
+
         if (exception != null) {
             if (exception instanceof GeneralException) {
                 throw (RuntimeException) exception;

@@ -12,20 +12,20 @@ public class BehaviorExecutingEvent extends BehaviorTraceEvent {
     public BehaviorExecutingEvent(
             final ExecutionIdentify executionId,
             final Object[] behaviorInputs,
-            final ActionResult result,
-            final ActionIdentify actionId,
+            final ActionOutput[] actionOutputs,
+            final ActionResult actionResult,
             final String sourceName
     ) {
         super(sourceName);
         ArgumentChecker.required(executionId, "executionId");
-        ArgumentChecker.required(actionId, "actionId");
         set(KEY_EXECUTION_ID, executionId);
-        set(KEY_ACTION_ID, actionId);
         set(KEY_BEHAVIOR_INPUTS, behaviorInputs);
-        set(KEY_RESULT, result);
+        set(KEY_CURRENT_OUTPUTS, actionOutputs);
+        set(KEY_CURRENT_RESULT, actionResult);
+        set(KEY_SOURCE_NAME, sourceName);
     }
 
     public ActionIdentify actionId() {
-        return (ActionIdentify) get(KEY_ACTION_ID);
+        return ((ActionResult) get(KEY_CURRENT_RESULT)).actionId();
     }
 }
