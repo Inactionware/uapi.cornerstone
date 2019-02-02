@@ -17,7 +17,7 @@ public class AnonymousCall implements IAction {
     }
 
     @Override
-    public ActionResult process(
+    public void process(
             final Object[] inputs,
             final ActionOutput[] outputs,
             final IExecutionContext context) {
@@ -26,7 +26,6 @@ public class AnonymousCall implements IAction {
         } catch (Exception ex) {
             throw new GeneralException(ex);
         }
-        return null;
     }
 
     @Override

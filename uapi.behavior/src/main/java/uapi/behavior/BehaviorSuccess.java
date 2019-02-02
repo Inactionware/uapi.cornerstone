@@ -2,18 +2,18 @@ package uapi.behavior;
 
 public class BehaviorSuccess {
 
-    private final ActionResult _result;
+    private final Object[] _inputs;
     private final ActionOutput[] _outputs;
 
     public BehaviorSuccess(
-            final ActionResult result,
+            final Object[] inputs,
             final ActionOutput[] outputs) {
-        this._result = result;
+        this._inputs = inputs;
         this._outputs = outputs;
     }
 
-    public ActionResult result() {
-        return this._result;
+    public Object inputs() {
+        return this._inputs;
     }
 
     public ActionOutput[] outputs() {

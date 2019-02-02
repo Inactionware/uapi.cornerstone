@@ -70,6 +70,18 @@ public final class ActionOutputMeta {
         return this._name;
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (! (other instanceof ActionOutputMeta)) {
+            return false;
+        }
+        ActionOutputMeta otherMeta = (ActionOutputMeta) other;
+        return this._name.equals(otherMeta._name) || this._type.equals(otherMeta._type);
+    }
+
 //    public void verifyInput(Object input) {
 //        if (! this.type().isAssignableFrom(input.getClass())) {
 //            throw BehaviorException.builder()

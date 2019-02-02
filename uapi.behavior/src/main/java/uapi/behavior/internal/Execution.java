@@ -4,7 +4,6 @@ import uapi.GeneralException;
 import uapi.IIdentifiable;
 import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
-import uapi.common.StringHelper;
 import uapi.rx.Looper;
 
 /**
@@ -41,37 +40,36 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
     /**
      * Execute current action until no subsequent action is available
      *
-     * @param   inputs
+     * @param   behaviorInputs
      *          The input data
      * @param   executionContext
      *          The context of current execution
      */
     void execute(
-            final Object[] inputs,
-            final ActionOutput behaviorOutputs,
+            final Object[] behaviorInputs,
+            final ActionOutput[] behaviorOutputs,
             final ExecutionContext executionContext
     ) {
         ArgumentChecker.required(executionContext, "executionContext");
-        ActionResult result = null;
         String sourceRespName = executionContext.get(IExecutionContext.KEY_RESP_NAME);
         Exception exception = null;
-        Object[] inParams;
+        Object[] actionInputs;
         ActionOutput[] outputs = null;
         try {
             do {
                 if (this._current.previous() == null) {
                     // First action
-                    inParams = inputs;
+                    actionInputs = behaviorInputs;
                 } else {
-                    inParams = this._current.inputs();
+                    actionInputs = this._current.inputs();
                 }
                 // create input objects
                 ActionInputMeta[] inputMetas = this._current.inputMetas();
-                for (int i = 0; i < inParams.length; i++) {
-                    if (inParams[i] instanceof ActionInputReference) {
-                        ActionInputReference actionInRef = (ActionInputReference) inParams[i];
+                for (int i = 0; i < actionInputs.length; i++) {
+                    if (actionInputs[i] instanceof ActionInputReference) {
+                        ActionInputReference actionInRef = (ActionInputReference) actionInputs[i];
                         String key = actionInRef.toKey();
-                        inParams[i] = executionContext.get(key);
+                        actionInputs[i] = executionContext.get(key);
                     }
                 }
                 // create outputs
@@ -81,33 +79,32 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 } else {
                     outputs = new ActionOutput[outMetas.length];
                     for (int idx = 0; idx < outputs.length; idx++) {
-                        outputs[idx] = new ActionOutput(outMetas[idx]);
+                        outputs[idx] = new ActionOutput(this._current.action().getId(), outMetas[idx]);
                     }
-//                    Looper.on(outMetas).foreachWithIndex((idx, outMeta) -> outputs[idx] = new ActionOutput(outMeta));
                 }
                 // execute action
-                this._current.action().process(inputs, outputs, executionContext);
+                this._current.action().process(actionInputs, outputs, executionContext);
                 if (this._traceable) {
                     BehaviorExecutingEvent event = new BehaviorExecutingEvent(
-                            this._id, inputs, outputs, result, sourceRespName);
+                            sourceRespName, this._id, this._current.action().getId(), actionInputs, outputs, behaviorInputs);
                     executionContext.fireEvent(event);
                 }
 
                 // set output to execution context
                 Looper.on(outputs).foreach(output -> {
-                    String key = ActionInputReference.generateKey(this._current.label(), output.name());
+                    String key = ActionInputReference.generateKey(this._current.label(), output.meta().name());
                     executionContext.put(key, output.get());
                 });
-                this._current = this._current.findNext(result);
+                // find next action
+                ActionOutputs outAttributes = new ActionOutputs(outputs);
+                this._current = this._current.findNext(outAttributes);
             } while (this._current != null);
-
-
         } catch (Exception ex) {
             exception = ex;
             if (this._failureAction != null) {
                 BehaviorEvent bEvent = null;
                 try {
-                    BehaviorFailure bFailure = new BehaviorFailure(this._current.action().getId(), inputs, ex);
+                    BehaviorFailure bFailure = new BehaviorFailure(this._current.action().getId(), behaviorInputs, ex);
                     bEvent = this._failureAction.accept(bFailure, executionContext);
                 } catch (Exception eex) {
                     exception = new GeneralException(eex);
@@ -118,36 +115,21 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
             }
         }
 
-        if (result.successful()) {
-            if (this._successAction != null) {
-                BehaviorEvent bEvent = null;
-                try {
-                    BehaviorSuccess bSuccess = new BehaviorSuccess(result, outputs);
-                    bEvent = this._successAction.accept(bSuccess, executionContext);
-                } catch (Exception eex) {
-                    exception = new GeneralException(eex);
-                }
-                if (bEvent != null) {
-                    executionContext.fireEvent(bEvent);
-                }
+        if (this._successAction != null) {
+            BehaviorEvent bEvent = null;
+            try {
+                BehaviorSuccess bSuccess = new BehaviorSuccess(behaviorInputs, outputs);
+                bEvent = this._successAction.accept(bSuccess, executionContext);
+            } catch (Exception eex) {
+                exception = new GeneralException(eex);
             }
-        } else {
-            if (this._failureAction != null) {
-                BehaviorEvent bEvent = null;
-                try {
-                    BehaviorFailure bFailure = new BehaviorFailure(result.actionId(), inParams, result.message(), result.cause());
-                    bEvent = this._failureAction.accept(bFailure, executionContext);
-                } catch (Exception eex) {
-                    exception = new GeneralException(eex);
-                }
-                if (bEvent != null) {
-                    executionContext.fireEvent(bEvent);
-                }
+            if (bEvent != null) {
+                executionContext.fireEvent(bEvent);
             }
         }
         if (this._traceable) {
             BehaviorFinishedEvent event = new BehaviorFinishedEvent(
-                    this._id, inputs, outputs, result, sourceRespName, exception);
+                    sourceRespName, this._id, behaviorInputs, outputs, exception);
             executionContext.fireEvent(event);
         }
 
@@ -158,6 +140,5 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 throw new GeneralException(exception);
             }
         }
-        return result;
     }
 }

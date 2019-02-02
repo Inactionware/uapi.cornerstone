@@ -246,9 +246,9 @@ class ActionHolder {
 
     void execute(
             final Object[] inputs,
-            final ActionOutput output,
+            final ActionOutput[] outputs,
             final IExecutionContext context
     ) throws Exception {
-        this._action.process(inputs, output, context);
+        this._action.process(inputs, outputs, context);
     }
 }

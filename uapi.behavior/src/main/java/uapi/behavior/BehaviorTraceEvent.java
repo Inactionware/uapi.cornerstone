@@ -5,12 +5,13 @@ package uapi.behavior;
  */
 public abstract class BehaviorTraceEvent extends BehaviorEvent {
 
-    public static final String TOPIC                = "BehaviorTrace";
-    public static final String KEY_EXECUTION_ID     = "ExecutionId";
-    public static final String KEY_BEHAVIOR_INPUTS  = "BehaviorInputs";
-    public static final String KEY_CURRENT_OUTPUTS  = "CurrentOutputs";
-    public static final String KEY_CURRENT_RESULT   = "CurrentResult";
-    public static final String KEY_EX               = "Exception";
+    public static final String TOPIC                    = "BehaviorTrace";
+    public static final String KEY_EXECUTION_ID         = "ExecutionId";
+    public static final String KEY_BEHAVIOR_INPUTS      = "BehaviorInputs";
+    public static final String KEY_CURRENT_ACTION_ID    = "CurrentActionId";
+    public static final String KEY_CURRENT_INPUTS       = "CurrentInputs";
+    public static final String KEY_CURRENT_OUTPUTS      = "CurrentOutputs";
+    public static final String KEY_EX                   = "Exception";
 
     public BehaviorTraceEvent(String sourceName) {
         super(TOPIC, sourceName);
@@ -44,6 +45,15 @@ public abstract class BehaviorTraceEvent extends BehaviorEvent {
     }
 
     /**
+     * Get current executing action id
+     *
+     * @return  action id
+     */
+    public ActionIdentify currentActionId() {
+        return (ActionIdentify) get(KEY_CURRENT_ACTION_ID);
+    }
+
+    /**
      * Get outputs by current action execution
      *
      * @return  The current action outputs
@@ -53,12 +63,12 @@ public abstract class BehaviorTraceEvent extends BehaviorEvent {
     }
 
     /**
-     * Get last outputted data of this behavior
+     * Get inputs by current action execution
      *
      * @return  The last outputted data
      */
-    public ActionResult currentResult() {
-        return (ActionResult) get(KEY_CURRENT_RESULT);
+    public Object[] currentResult() {
+        return (Object[]) get(KEY_CURRENT_INPUTS);
     }
 
     /**

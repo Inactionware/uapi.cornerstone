@@ -1,64 +1,54 @@
 package uapi.behavior;
 
 import uapi.common.ArgumentChecker;
-import uapi.common.Attributed;
-import uapi.rx.Looper;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The class hold output of action
  */
-public class ActionOutput extends Attributed {
+public class ActionOutput {
 
     private final ActionIdentify _actionId;
-    private final Map<String, ActionOutputMeta> _metas;
-
-    public ActionOutput(
-            final ActionIdentify actionId
-    ) {
-        this(actionId, new ActionOutputMeta[0]);
-    }
+    private final ActionOutputMeta _meta;
+    private Object _output;
 
     public ActionOutput(
             final ActionIdentify actionId,
-            final ActionOutputMeta[] metas
+            final ActionOutputMeta meta
     ) {
         ArgumentChecker.required(actionId, "actionId");
-        ArgumentChecker.required(metas, "metas");
+        ArgumentChecker.required(meta, "meta");
         this._actionId = actionId;
-        this._metas = new HashMap<>();
-        // Duplicated action output meta was checked in ResponsibleRegistry::addAction method
-        Looper.on(metas).foreach(meta -> this._metas.put(meta.name(), meta));
+        this._meta = meta;
     }
 
-    @Override
-    public Object set(
-            final Object name,
-            final Object output) {
-        ArgumentChecker.required(name, "name");
+    public void set(final Object output) {
         ArgumentChecker.required(output, "output");
-        ActionOutputMeta meta = this._metas.get(name);
-        if (meta == null) {
+        if (this._output != null) {
             throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.INCORRECT_ACTION_OUTPUT_NAME)
-                    .variables(new BehaviorErrors.IncorrectActionOutputName()
-                            .outputName((String) name)
-                            .actionId(this._actionId))
+                    .errorCode(BehaviorErrors.ACTION_OUTPUT_SET_TWICE)
+                    .variables(new BehaviorErrors.ActionOutputSetTwice()
+                            .name(this._meta.name()))
                     .build();
         }
-        if (! meta.type().isInstance(output)) {
+        if (! this._meta.type().isInstance(output)) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.ACTION_OUTPUT_TYPE_NOT_MATCHED)
                     .variables(new BehaviorErrors.ActionOutputTypeNotMatched()
                             .output(output)
-                            .outputType(output.getClass())
                             .actionId(this._actionId)
-                            .outputName((String) name)
-                            .requiredType(meta.type()))
+                            .outputName(this._meta.name())
+                            .requiredType(this._meta.type()))
                     .build();
         }
-        return super.set(name, output);
+        this._output = output;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T get() {
+        return (T) this._output;
+    }
+
+    public ActionOutputMeta meta() {
+        return this._meta;
     }
 }

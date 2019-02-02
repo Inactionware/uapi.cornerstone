@@ -187,7 +187,7 @@ public class Responsible implements IResponsible {
             exeCtx.put(IExecutionContext.KEY_BEHA_NAME, this._behavior.getId().getName(), Scope.GLOBAL);
             exeCtx.put(IExecutionContext.KEY_ORI_EVENT, event, Scope.GLOBAL);
             // Ignore the output data
-            exec.execute(event, exeCtx);
+            exec.execute(new Object[] { event }, new ActionOutput[0], exeCtx);
         }
     }
 

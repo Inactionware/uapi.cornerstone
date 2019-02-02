@@ -712,18 +712,12 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         public static final String KEY = "ActionOutputTypeNotMatched";
 
         private Object _output;
-        private Class<?> _outputType;
         private ActionIdentify _actionId;
         private String _name;
         private Class<?> _requiredType;
 
         public ActionOutputTypeNotMatched output(final Object output) {
             this._output = output;
-            return this;
-        }
-
-        public ActionOutputTypeNotMatched outputType(final Class<?> type) {
-            this._outputType = type;
             return this;
         }
 
@@ -745,7 +739,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] {
-                    this._output, this._outputType.getCanonicalName(),
+                    this._output, this._output.getClass().getCanonicalName(),
                     this._actionId, this._name, this._requiredType.getCanonicalName()
             };
         }

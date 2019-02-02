@@ -58,13 +58,13 @@ public class InterceptedActionHolder extends ActionHolder {
     @Override
     void execute(
             final Object[] inputs,
-            final ActionOutput output,
+            final ActionOutput[] outputs,
             final IExecutionContext context
     ) throws Exception {
+        ActionOutput[] interceptorOuts = new ActionOutput[0];
         Looper.on(this._interceptors).foreach(interceptor -> {
-            ActionOutput interceptorOut = new ActionOutput(interceptor.getId());
-            interceptor.process(inputs, interceptorOut, context);
+            interceptor.process(inputs, interceptorOuts, context);
         });
-        super.execute(inputs, output, context);
+        super.execute(inputs, outputs, context);
     }
 }

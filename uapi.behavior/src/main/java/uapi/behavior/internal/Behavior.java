@@ -99,12 +99,12 @@ public class Behavior
     @Override
     public void process(
             final Object[] inputs,
-            final ActionOutput output,
+            final ActionOutput[] outputs,
             final IExecutionContext context
     ) {
         ensureBuilt();
         Execution execution = newExecution();
-        return execution.execute(inputs, output, (ExecutionContext) context);
+        execution.execute(inputs, outputs, (ExecutionContext) context);
     }
 
     // ----------------------------------------------------
@@ -297,31 +297,6 @@ public class Behavior
         return this;
     }
 
-//    @Override
-//    public IBehaviorBuilder onSuccess(
-//            final ActionIdentify actionId
-//    ) {
-//        ensureNotBuilt();
-//        ArgumentChecker.required(actionId, "actionId");
-//        if (this._successAction != null) {
-//            throw BehaviorException.builder()
-//                    .errorCode(BehaviorErrors.SUCCESS_ACTION_EXISTS)
-//                    .variables(new BehaviorErrors.FailureActionExists()
-//                            .behaviorId(this._actionId))
-//                    .build();
-//        }
-//        IAction action = this._actionRepo.get(actionId);
-//        if (action == null) {
-//            throw BehaviorException.builder()
-//                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
-//                    .variables(new BehaviorErrors.ActionNotFound()
-//                            .actionId(actionId))
-//                    .build();
-//        }
-//        this._successAction = action;
-//        return this;
-//    }
-
     @Override
     public IBehaviorBuilder onFailure(
             final IBehaviorFailureCall action
@@ -338,31 +313,6 @@ public class Behavior
         this._failureAction = action;
         return this;
     }
-
-//    @Override
-//    public IBehaviorBuilder onFailure(
-//            final ActionIdentify actionId
-//    ) {
-//        ensureNotBuilt();
-//        ArgumentChecker.required(actionId, "actionId");
-//        if (this._failureAction != null) {
-//            throw BehaviorException.builder()
-//                    .errorCode(BehaviorErrors.FAILURE_ACTION_EXISTS)
-//                    .variables(new BehaviorErrors.FailureActionExists()
-//                            .behaviorId(this._actionId))
-//                    .build();
-//        }
-//        IAction action = this._actionRepo.get(actionId);
-//        if (action == null) {
-//            throw BehaviorException.builder()
-//                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
-//                    .variables(new BehaviorErrors.ActionNotFound()
-//                            .actionId(actionId))
-//                    .build();
-//        }
-//        this._failureAction = action;
-//        return this;
-//    }
 
     @Override
     public INavigator navigator() {
@@ -414,29 +364,29 @@ public class Behavior
                                     .leafAction2Output(outMetas2))
                             .build();
                 }
-                for (ActionOutputMeta meta : outMetas1) {
-
-                }
-                if (!action1.outputType().equals(action2.outputType())) {
+                // ensure all action output must have same name and same type
+                int unmatchedPos = Looper.on(Range.from(0).to(outMetas1.length).iterator())
+                        .filter(pos -> outMetas1[pos].equals(outMetas2[pos]))
+                        .first(-1);
+                if (unmatchedPos != -1) {
                     throw BehaviorException.builder()
                             .errorCode(BehaviorErrors.INCONSISTENT_LEAF_ACTIONS)
                             .variables(new BehaviorErrors.InconsistentLeafActions()
-                                    .leafAction1(action1.getId())
-                                    .leafAction2(action2.getId())
-                                    .leafAction1Output(action1.outputType())
-                                    .leafAction2Output(action2.outputType()))
+                                    .leafAction1(leafAction1.getId())
+                                    .leafAction2(leafAction2.getId())
+                                    .leafAction1Output(outMetas1)
+                                    .leafAction2Output(outMetas2))
                             .build();
                 }
             });
         }
 
         // Make all leaf action's next to a exit action
-        Class outputType = leafActions.get(0).action().outputType();
-        IAction exit = new EndpointAction(EndpointType.EXIT, outputType);
-        Looper.on(leafActions).foreach(aHolder -> aHolder.next(new ActionHolder(exit)));
+        IAction exit = new EndpointAction(EndpointType.EXIT, leafActions.get(0).outputMetas());
+        Looper.on(leafActions).foreach(aHolder -> aHolder.next(new ActionHolder(exit, this)));
 
-        this._iType = this._entranceAction.action().inputType();
-        this._oType = outputType;
+        this._iMetas = this._entranceAction.action().inputMetas();
+        this._oMetas = exit.outputMetas();
     }
 
     @Override
@@ -482,14 +432,31 @@ public class Behavior
 
         private final EndpointType _type;
         private final ActionInputMeta[] _inputMetas;
+        private final ActionOutputMeta[] _outputMetas;
 
         private EndpointAction(
                 final EndpointType type,
                 final ActionInputMeta[] inputMetas
         ) {
-            ArgumentChecker.required(inputMetas, "inputMetas");
-            this._inputMetas = inputMetas;
+            this(type, inputMetas, null);
+        }
+
+        private EndpointAction(
+                final EndpointType type,
+                final ActionOutputMeta[] outputMetas
+        ) {
+            this(type, null, outputMetas);
+        }
+
+        private EndpointAction(
+                final EndpointType type,
+                final ActionInputMeta[] inputMetas,
+                final ActionOutputMeta[] outputMetas
+        ) {
+            ArgumentChecker.required(type, "type");
             this._type = type;
+            this._inputMetas = inputMetas == null ? new ActionInputMeta[0] : inputMetas;
+            this._outputMetas = outputMetas == null ? new ActionOutputMeta[0] : outputMetas;
         }
 
         @Override
@@ -500,6 +467,11 @@ public class Behavior
         @Override
         public ActionInputMeta[] inputMetas() {
             return this._inputMetas;
+        }
+
+        @Override
+        public ActionOutputMeta[] outputMetas() {
+            return this._outputMetas;
         }
 
         @Override
