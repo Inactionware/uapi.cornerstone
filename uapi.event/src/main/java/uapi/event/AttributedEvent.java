@@ -50,4 +50,9 @@ public class AttributedEvent extends PlainEvent implements IAttributed {
                 .count();
         return matchedCount == map.size();
     }
+
+    @Override
+    public int count() {
+        return this._attributes.size();
+    }
 }

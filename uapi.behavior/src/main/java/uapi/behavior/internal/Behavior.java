@@ -62,14 +62,16 @@ public class Behavior
         this._sequence = new AtomicInteger(0);
     }
 
-    Behavior(
-            final Responsible responsible,
-            final Repository<ActionIdentify, IAction> actionRepository,
-            final String name,
-            final Class<?> inputType
-    ) {
-        this(responsible, actionRepository, name, new ActionInputMeta[] { new ActionInputMeta(inputType) });
-    }
+//    Behavior(
+//            final Responsible responsible,
+//            final Repository<ActionIdentify, IAction> actionRepository,
+//            final String name,
+//            final Class<?>... inputTypes
+//    ) {
+//        ActionInputMeta[] inputMetas = new ActionInputMeta[inputTypes.length];
+//        Looper.on(inputTypes).foreachWithIndex((idx, type) -> inputMetas[idx] = new ActionInputMeta(type));
+//        this(responsible, actionRepository, name, inputMetas);
+//    }
 
     // ----------------------------------------------------
     // Methods implement from IIdentifiable interface

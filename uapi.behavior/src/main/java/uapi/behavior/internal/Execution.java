@@ -51,6 +51,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
             final ExecutionContext executionContext
     ) {
         ArgumentChecker.required(executionContext, "executionContext");
+        executionContext.put(IExecutionContext.KEY_BEHA_INPUTS, behaviorInputs);
         String sourceRespName = executionContext.get(IExecutionContext.KEY_RESP_NAME);
         Exception exception = null;
         Object[] actionInputs;

@@ -21,6 +21,7 @@ public interface IExecutionContext {
     String KEY_RESP_NAME    = "ResponsibleName";
     String KEY_BEHA_NAME    = "BehaviorName";
     String KEY_ORI_EVENT    = "OriginalEvent";
+    String KEY_BEHA_INPUTS  = "BehaviorInputs";
 
     /**
      * Put single k/v data under behavior scope
@@ -74,6 +75,10 @@ public interface IExecutionContext {
     @SuppressWarnings("unchecked")
     default <T extends BehaviorEvent> T originalEvent() {
         return (T) get(KEY_ORI_EVENT);
+    }
+
+    default Object[] behaviorInputs() {
+        return (Object[]) get(KEY_BEHA_INPUTS);
     }
 
     /**

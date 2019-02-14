@@ -60,13 +60,21 @@ public interface IResponsible {
     /**
      * Create new behavior builder on specific input data type which can handled by the behavior.
      *
-     * @param   type
-     *          The data type which can be handled by the behavior
+     * @param   types
+     *          The data types which can be handled by the behavior
      * @return  The behavior builder
      * @throws  BehaviorException
      *          The name is used in other behavior, error code see {@link BehaviorErrors.BEHAVIOR_ID_IS_USED}
      */
-    IBehaviorBuilder newBehavior(String name, Class<?> type) throws BehaviorException;
+//    IBehaviorBuilder newBehavior(
+//            String name,
+//            Class<?> type
+//    ) throws BehaviorException;
+
+    IBehaviorBuilder newBehavior(
+            String name,
+            Class<?> ... types
+    ) throws BehaviorException;
 
     void on(BehaviorExecutingEventHandler handler);
 

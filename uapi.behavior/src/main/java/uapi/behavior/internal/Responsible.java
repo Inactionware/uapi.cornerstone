@@ -14,9 +14,11 @@ import uapi.common.*;
 import uapi.event.IAttributedEventHandler;
 import uapi.event.IEvent;
 import uapi.event.IEventBus;
+import uapi.rx.Looper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -45,7 +47,7 @@ public class Responsible implements IResponsible {
         this._name = name;
         this._eventBus = eventBus;
         this._actionRepo = actionRepository;
-        this._behaviors = new HashMap<>();
+        this._behaviors = new ConcurrentHashMap<>();
         this._traceEventHandlerRegistered = new AtomicBoolean(false);
     }
 
@@ -68,37 +70,45 @@ public class Responsible implements IResponsible {
             final Class<? extends IEvent> eventType,
             final String eventTopic
     ) throws BehaviorException {
-        ArgumentChecker.required(eventType, "eventType");
         ArgumentChecker.required(eventTopic, "eventTopic");
-        Behavior behavior = new Behavior(this, this._actionRepo, name, eventType);
-        ActionIdentify behaviorId = behavior.getId();
-        if (this._behaviors.containsKey(behaviorId)) {
+        Behavior behavior = createBehavior(name, eventType);
+        BehaviorHolder bHolder = this._behaviors.putIfAbsent(behavior.getId(), new BehaviorHolder(behavior, eventTopic));
+        if (bHolder != null) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.BEHAVIOR_ID_IS_USED)
                     .variables(new BehaviorErrors.BehaviorIdIsUsed()
-                            .behaviorId(behaviorId).get())
+                            .behaviorId(behavior.getId()).get())
                     .build();
         }
-        this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior, eventTopic));
         return behavior;
     }
 
     @Override
     public IBehaviorBuilder newBehavior(
             final String name,
-            final Class<?> type
+            final Class<?>... types
     ) throws BehaviorException {
-        Behavior behavior = new Behavior(this, this._actionRepo, name, type);
-        ActionIdentify behaviorId = behavior.getId();
-        if (this._behaviors.containsKey(behaviorId)) {
+        Behavior behavior = createBehavior(name, types);
+        BehaviorHolder bHolder = this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior));
+        if (bHolder != null) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.BEHAVIOR_ID_IS_USED)
                     .variables(new BehaviorErrors.BehaviorIdIsUsed()
-                            .behaviorId(behaviorId).get())
+                            .behaviorId(behavior.getId()).get())
                     .build();
         }
-        this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior));
         return behavior;
+    }
+
+    private Behavior createBehavior(
+            final String name,
+            final Class<?>... types
+    ) throws BehaviorException {
+        ArgumentChecker.required(name, "name");
+        ArgumentChecker.required(types, "types");
+        ActionInputMeta[] inputMetas = new ActionInputMeta[types.length];
+        Looper.on(types).foreachWithIndex((idx, type) -> inputMetas[idx] = new ActionInputMeta(type));
+        return new Behavior(this, this._actionRepo, name, inputMetas);
     }
 
     @Override
@@ -186,7 +196,6 @@ public class Responsible implements IResponsible {
             exeCtx.put(IExecutionContext.KEY_RESP_NAME, Responsible.this._name, Scope.GLOBAL);
             exeCtx.put(IExecutionContext.KEY_BEHA_NAME, this._behavior.getId().getName(), Scope.GLOBAL);
             exeCtx.put(IExecutionContext.KEY_ORI_EVENT, event, Scope.GLOBAL);
-            // Ignore the output data
             exec.execute(new Object[] { event }, new ActionOutput[0], exeCtx);
         }
     }
