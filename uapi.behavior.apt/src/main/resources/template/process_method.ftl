@@ -1,9 +1,9 @@
 try {
             super.${actionMethodName}(
 <#list actionParameterMetas as actionParameterMeta>
-    <#if actionParameterMeta.type == uapi.behavior.IActionHandlerHelper.ParameterType.INPUT>
-                inputs[${actionParameterMeta.index}]<#sep>, </#sep>
-    <#elseif actionParameterMeta.type == uapi.behavior.IActionHandlerHelper.ParameterType.OUTPUT>
+    <#if actionParameterMeta.type == "INPUT">
+                (${actionParameterMeta.className}) inputs[${actionParameterMeta.index}]<#sep>, </#sep>
+    <#elseif actionParameterMeta.type == "OUTPUT">
                 outputs[${actionParameterMeta.index}]<#sep>, </#sep>
     <#else>
                 context<#sep>, </#sep>

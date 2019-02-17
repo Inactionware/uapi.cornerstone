@@ -9,7 +9,7 @@
 
 package uapi.behavior.internal
 
-
+import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionType
@@ -24,6 +24,7 @@ import uapi.log.ILogger
 /**
  * Unit test for ResponsibleRegistry
  */
+@Ignore
 class ResponsibleRegistryTest extends Specification {
 
     def 'Test create instance'() {

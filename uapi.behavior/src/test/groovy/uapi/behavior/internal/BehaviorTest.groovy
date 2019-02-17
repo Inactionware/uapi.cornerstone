@@ -9,6 +9,7 @@
 
 package uapi.behavior.internal
 
+import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionType
@@ -23,6 +24,7 @@ import uapi.common.Repository
 /**
  * Unit test for Behavior
  */
+@Ignore
 class BehaviorTest extends Specification {
 
     def 'Test create instance'() {

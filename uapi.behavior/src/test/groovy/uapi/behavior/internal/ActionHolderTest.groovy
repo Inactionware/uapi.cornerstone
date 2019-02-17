@@ -9,10 +9,12 @@
 
 package uapi.behavior.internal
 
+import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.GeneralException
 import uapi.InvalidArgumentException
 import uapi.behavior.ActionIdentify
+import uapi.behavior.ActionInputMeta
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
@@ -23,6 +25,7 @@ import uapi.common.IAttributed
 /**
  * Unit test for ActionHolder
  */
+@Ignore
 class ActionHolderTest extends Specification {
 
     def 'Test create instance'() {
@@ -163,21 +166,35 @@ class ActionHolderTest extends Specification {
         thrown(BehaviorException)
     }
 
-    class TestAction1 implements IAction<Void, String> {
+    class TestAction1 implements IAction {
 
+//        @Override
+//        String process(Void input, IExecutionContext context) {
+//            return null
+//        }
+//
+//        @Override
+//        Class<Void> inputType() {
+//            return Void.class
+//        }
+//
+//        @Override
+//        Class<String> outputType() {
+//            return String.class
+//        }
+//
+//        @Override
+//        boolean isAnonymous() {
+//            return false
+//        }
+//
+//        @Override
+//        ActionIdentify getId() {
+//            return ActionIdentify.parse('1@ACTION')
+//        }
         @Override
-        String process(Void input, IExecutionContext context) {
-            return null
-        }
-
-        @Override
-        Class<Void> inputType() {
-            return Void.class
-        }
-
-        @Override
-        Class<String> outputType() {
-            return String.class
+        ActionInputMeta[] inputMetas() {
+            ß
         }
 
         @Override
@@ -187,25 +204,39 @@ class ActionHolderTest extends Specification {
 
         @Override
         ActionIdentify getId() {
-            return ActionIdentify.parse('1@ACTION')
+            return null
         }
     }
 
-    class TestAction2 implements IAction<Integer, Void> {
+    class TestAction2 implements IAction {
 
+//        @Override
+//        Void process(Integer input, IExecutionContext context) {
+//            return null
+//        }
+//
+//        @Override
+//        Class<Integer> inputType() {
+//            return Integer.class
+//        }
+//
+//        @Override
+//        Class<Void> outputType() {
+//            return Void.class
+//        }
+//
+//        @Override
+//        boolean isAnonymous() {
+//            return false
+//        }
+//
+//        @Override
+//        ActionIdentify getId() {
+//            return ActionIdentify.parse('1@ACTION')
+//        }
         @Override
-        Void process(Integer input, IExecutionContext context) {
-            return null
-        }
-
-        @Override
-        Class<Integer> inputType() {
-            return Integer.class
-        }
-
-        @Override
-        Class<Void> outputType() {
-            return Void.class
+        ActionInputMeta[] inputMetas() {
+            return new ActionInputMeta[0]
         }
 
         @Override
@@ -215,25 +246,39 @@ class ActionHolderTest extends Specification {
 
         @Override
         ActionIdentify getId() {
-            return ActionIdentify.parse('1@ACTION')
+            return null
         }
     }
 
-    class TestAction3 implements IAction<String, Void> {
+    class TestAction3 implements IAction {
 
+//        @Override
+//        Void process(String input, IExecutionContext context) {
+//            return null
+//        }
+//
+//        @Override
+//        Class<String> inputType() {
+//            return String.class
+//        }
+//
+//        @Override
+//        Class<Void> outputType() {
+//            return Void.class
+//        }
+//
+//        @Override
+//        boolean isAnonymous() {
+//            return false
+//        }
+//
+//        @Override
+//        ActionIdentify getId() {
+//            return ActionIdentify.parse('1@ACTION')
+//        }
         @Override
-        Void process(String input, IExecutionContext context) {
-            return null
-        }
-
-        @Override
-        Class<String> inputType() {
-            return String.class
-        }
-
-        @Override
-        Class<Void> outputType() {
-            return Void.class
+        ActionInputMeta[] inputMetas() {
+            return new ActionInputMeta[0]
         }
 
         @Override
@@ -243,25 +288,39 @@ class ActionHolderTest extends Specification {
 
         @Override
         ActionIdentify getId() {
-            return ActionIdentify.parse('1@ACTION')
+            return null
         }
     }
 
-    class TestAction4 implements IAction<String, Void> {
+    class TestAction4 implements IAction {
 
+//        @Override
+//        Void process(String input, IExecutionContext context) {
+//            return null
+//        }
+//
+//        @Override
+//        Class<String> inputType() {
+//            return String.class
+//        }
+//
+//        @Override
+//        Class<Void> outputType() {
+//            return Void.class
+//        }
+//
+//        @Override
+//        boolean isAnonymous() {
+//            return false
+//        }
+//
+//        @Override
+//        ActionIdentify getId() {
+//            return ActionIdentify.parse('1@ACTION')
+//        }
         @Override
-        Void process(String input, IExecutionContext context) {
-            return null
-        }
-
-        @Override
-        Class<String> inputType() {
-            return String.class
-        }
-
-        @Override
-        Class<Void> outputType() {
-            return Void.class
+        ActionInputMeta[] inputMetas() {
+            return new ActionInputMeta[0]
         }
 
         @Override
@@ -271,7 +330,7 @@ class ActionHolderTest extends Specification {
 
         @Override
         ActionIdentify getId() {
-            return ActionIdentify.parse('1@ACTION')
+            return null
         }
     }
 }

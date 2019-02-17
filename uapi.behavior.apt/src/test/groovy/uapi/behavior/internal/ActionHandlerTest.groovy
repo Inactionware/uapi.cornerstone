@@ -10,6 +10,7 @@
 package uapi.behavior.internal
 
 import freemarker.template.Template
+import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.GeneralException
 import uapi.behavior.IExecutionContext
@@ -30,6 +31,7 @@ import javax.lang.model.type.TypeMirror
 /**
  * Unit test for ActionHandler
  */
+@Ignore
 class ActionHandlerTest extends Specification {
 
     def actionDoAnno;
