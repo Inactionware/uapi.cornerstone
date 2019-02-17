@@ -14,13 +14,11 @@ import com.google.common.base.Strings;
 import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.Type;
-import uapi.behavior.ActionIdentify;
-import uapi.behavior.IAction;
-import uapi.behavior.IActionHandlerHelper;
-import uapi.behavior.IExecutionContext;
+import uapi.behavior.*;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
 import uapi.codegen.*;
+import uapi.common.Numeric;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.IServiceHandlerHelper;
@@ -40,8 +38,8 @@ import java.util.Set;
 public class ActionHandler extends AnnotationsHandler {
 
     private static final String TEMPLATE_GET_ID         = "template/getId_method.ftl";
-    private static final String TEMPLATE_INPUT_TYPE     = "template/inputType_method.ftl";
-    private static final String TEMPLATE_OUTPUT_TYPE    = "template/outputType_method.ftl";
+    private static final String TEMPLATE_INPUT_METAS = "template/inputMetas_method.ftl";
+    private static final String TEMPLATE_OUTPUT_METAS = "template/outputMetas_method.ftl";
     private static final String TEMPLATE_PROCESS        = "template/process_method.ftl";
 
     private final ActionHandlerHelper _helper = new ActionHandlerHelper();
@@ -81,31 +79,21 @@ public class ActionHandler extends AnnotationsHandler {
             if (Strings.isNullOrEmpty(actionName)) {
                 actionName = classElement.asType().toString();
             }
-            // Check process method
-            IActionHandlerHelper.ActionMethodMeta actionMeta = this._helper.parseActionMethod(classElement);
-            String inputType = actionMeta.inputType();
-            String outputType = actionMeta.outputType();
-            boolean needContext = actionMeta.needContext();
-            String actionMethodName = actionMeta.methodName();
 
+            IActionHandlerHelper.ActionMethodMeta actionMeta = this._helper.parseActionMethod(classElement);
             ClassMeta.Builder clsBuilder = builderContext.findClassBuilder(classElement);
 
             Template tempGetId = builderContext.loadTemplate(TEMPLATE_GET_ID);
-            Template tempInputType = builderContext.loadTemplate(TEMPLATE_INPUT_TYPE);
-            Template tempOutputType = builderContext.loadTemplate(TEMPLATE_OUTPUT_TYPE);
+            Template tempInputMetas = builderContext.loadTemplate(TEMPLATE_INPUT_METAS);
+            Template tempOutputMetas = builderContext.loadTemplate(TEMPLATE_OUTPUT_METAS);
             Template tempProcess = builderContext.loadTemplate(TEMPLATE_PROCESS);
             Map<String, Object> model = new HashMap<>();
             model.put("actionName", actionName);
-            model.put("actionMethodName", actionMethodName);
-            model.put("inputType", inputType);
-            model.put("outputType", outputType);
-            model.put("needContext", needContext);
-            model.put("isInVoid", Type.Q_VOID.equals(inputType));
-            model.put("isOutVoid", Type.Q_VOID.equals(outputType));
+            model.put("actionMethodName", actionMeta.methodName());
+            model.put("actionParameterMetas", actionMeta.parameterMetas());
 
             clsBuilder
-                    .addImplement(StringHelper.makeString(
-                            "{}<{}, {}>", IAction.class.getCanonicalName(), inputType, outputType))
+                    .addImplement(IAction.class.getCanonicalName())
                     .addMethodBuilder(MethodMeta.builder()
                             .setName("getId")
                             .addModifier(Modifier.PUBLIC)
@@ -116,14 +104,14 @@ public class ActionHandler extends AnnotationsHandler {
                             .setName("inputType")
                             .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
-                            .setReturnTypeName(StringHelper.makeString("java.lang.Class<{}>", inputType))
-                            .addCodeBuilder(CodeMeta.builder().setTemplate(tempInputType).setModel(model)))
+                            .setReturnTypeName(Type.toArrayType(ActionInputMeta.class))
+                            .addCodeBuilder(CodeMeta.builder().setTemplate(tempInputMetas).setModel(model)))
                     .addMethodBuilder(MethodMeta.builder()
                             .setName("outputType")
                             .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
-                            .setReturnTypeName(StringHelper.makeString("java.lang.Class<{}>", outputType))
-                            .addCodeBuilder(CodeMeta.builder().setTemplate(tempOutputType).setModel(model)))
+                            .setReturnTypeName(Type.toArrayType(ActionOutputMeta.class))
+                            .addCodeBuilder(CodeMeta.builder().setTemplate(tempOutputMetas).setModel(model)))
                     .addMethodBuilder(MethodMeta.builder()
                             .setName("isAnonymous")
                             .addModifier(Modifier.PUBLIC)
@@ -134,15 +122,16 @@ public class ActionHandler extends AnnotationsHandler {
                             .setName("process")
                             .addModifier(Modifier.PUBLIC)
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
-                            .setReturnTypeName(outputType)
                             .addParameterBuilder(ParameterMeta.builder()
-                                    .setName("input").setType(inputType))
+                                    .setName("inputs").setType(Type.toArrayType(Object.class)))
+                            .addParameterBuilder(ParameterMeta.builder()
+                                    .setName("outputs").setType(Type.toArrayType(ActionOutput.class)))
                             .addParameterBuilder(ParameterMeta.builder()
                                     .setName("context").setType(IExecutionContext.class.getCanonicalName()))
                             .addCodeBuilder(CodeMeta.builder().setTemplate(tempProcess).setModel(model)));
 
             // Add IAction as this service's id
-            IServiceHandlerHelper svcHelper = (IServiceHandlerHelper) builderContext.getHelper(IServiceHandlerHelper.name);
+            IServiceHandlerHelper svcHelper = builderContext.getHelper(IServiceHandlerHelper.name);
             svcHelper.addServiceId(clsBuilder, IAction.class.getCanonicalName());
         });
     }
@@ -168,42 +157,65 @@ public class ActionHandler extends AnnotationsHandler {
             }
             ExecutableElement actionDoElement = (ExecutableElement) actionDoElements.get(0);
             String actionMethodName = actionDoElement.getSimpleName().toString();
-            List paramElements = actionDoElement.getParameters();
-            String inputType;
-            String outputType;
-            boolean needContext = false;
-            if (paramElements.size() == 0) {
-                throw new GeneralException(
-                        "The method annotated with ActionDo must contains 1 or 2 parameters - {}::{}",
-                        classElement.getSimpleName().toString(), actionMethodName);
-            } else if (paramElements.size() > 2) {
-                throw new GeneralException(
-                        "The method annotated with ActionDo must contains more than 2 parameters - {}::{}",
-                        classElement.getSimpleName().toString(), actionMethodName);
-            } else {
-                VariableElement inputParamElement = (VariableElement) paramElements.get(0);
-                inputType = inputParamElement.asType().toString();
-                if (paramElements.size() == 1) {
-                    if (IExecutionContext.class.getCanonicalName().equals(inputType)) {
-                        inputType = Type.VOID;
-                        needContext = true;
-                    }
-                } else if (paramElements.size() == 2) {
-                    VariableElement contextParamElement = (VariableElement) paramElements.get(1);
-                    if (! IExecutionContext.class.getCanonicalName().equals(contextParamElement.asType().toString())) {
-                        throw new GeneralException(
-                                "The second parameter of method which annotated with ActionDo must be IExecutionContext - {}::{}",
-                                classElement.getSimpleName().toString(), actionMethodName);
-                    }
-                    needContext = true;
+            List<? extends VariableElement> paramElements = actionDoElement.getParameters();
+            ParameterMeta[] paramMetas = new ParameterMeta[paramElements.size()];
+            Numeric.MutableInteger idxIn = Numeric.mutableInteger();
+            Numeric.MutableInteger idxOut = Numeric.mutableInteger();
+            Looper.on(paramElements).foreachWithIndex((idx, paramElement) -> {
+                String className = paramElement.asType().toString();
+                ParameterMeta paramMeta;
+                if (IExecutionContext.class.getCanonicalName().equals(className)) {
+                    // Check context parameter
+                    paramMeta = ParameterMeta.newContextMeta();
+                } else if (ActionOutput.class.getCanonicalName().equals(className)) {
+                    // Check output parameter
+                    paramMeta = ParameterMeta.newOutputMeta(idxOut.value(), paramElement.getSimpleName().toString());
+                    idxOut.increase();
+                } else {
+                    // All other is input parameter
+                    paramMeta = ParameterMeta.newInputMeta(idxIn.value(), className);
+                    idxIn.increase();
                 }
-            }
-            outputType = actionDoElement.getReturnType().toString();
-            // convert native type to associated qualified type
-            inputType = Type.toQType(inputType);
-            outputType = Type.toQType(outputType);
 
-            return new ActionMethodMeta(inputType, outputType, actionMethodName, needContext);
+                paramMetas[idx] = paramMeta;
+            });
+            return new ActionMethodMeta(actionMethodName, paramMetas);
+
+//            String inputType;
+//            String outputType;
+//            boolean needContext = false;
+//            if (paramElements.size() == 0) {
+//                throw new GeneralException(
+//                        "The method annotated with ActionDo must contains 1 or 2 parameters - {}::{}",
+//                        classElement.getSimpleName().toString(), actionMethodName);
+//            } else if (paramElements.size() > 2) {
+//                throw new GeneralException(
+//                        "The method annotated with ActionDo must contains more than 2 parameters - {}::{}",
+//                        classElement.getSimpleName().toString(), actionMethodName);
+//            } else {
+//                VariableElement inputParamElement = (VariableElement) paramElements.get(0);
+//                inputType = inputParamElement.asType().toString();
+//                if (paramElements.size() == 1) {
+//                    if (IExecutionContext.class.getCanonicalName().equals(inputType)) {
+//                        inputType = Type.VOID;
+//                        needContext = true;
+//                    }
+//                } else if (paramElements.size() == 2) {
+//                    VariableElement contextParamElement = (VariableElement) paramElements.get(1);
+//                    if (! IExecutionContext.class.getCanonicalName().equals(contextParamElement.asType().toString())) {
+//                        throw new GeneralException(
+//                                "The second parameter of method which annotated with ActionDo must be IExecutionContext - {}::{}",
+//                                classElement.getSimpleName().toString(), actionMethodName);
+//                    }
+//                    needContext = true;
+//                }
+//            }
+//            outputType = actionDoElement.getReturnType().toString();
+//            // convert native type to associated qualified type
+//            inputType = Type.toQType(inputType);
+//            outputType = Type.toQType(outputType);
+//
+//            return new ActionMethodMeta(inputType, outputType, actionMethodName, needContext);
         }
     }
 }

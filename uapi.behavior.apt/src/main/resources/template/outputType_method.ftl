@@ -1,1 +1,0 @@
-return ${outputType}.class;
