@@ -62,17 +62,6 @@ public class Behavior
         this._sequence = new AtomicInteger(0);
     }
 
-//    Behavior(
-//            final Responsible responsible,
-//            final Repository<ActionIdentify, IAction> actionRepository,
-//            final String name,
-//            final Class<?>... inputTypes
-//    ) {
-//        ActionInputMeta[] inputMetas = new ActionInputMeta[inputTypes.length];
-//        Looper.on(inputTypes).foreachWithIndex((idx, type) -> inputMetas[idx] = new ActionInputMeta(type));
-//        this(responsible, actionRepository, name, inputMetas);
-//    }
-
     // ----------------------------------------------------
     // Methods implement from IIdentifiable interface
     // ----------------------------------------------------
@@ -170,11 +159,6 @@ public class Behavior
                             .actionId(id))
                     .build();
         }
-//        if (addInterceptor(action, label)) {
-//            this._navigator.newNextAction(action, this._lastEvaluator, null, inputs);
-//        } else {
-//            this._navigator.newNextAction(action, this._lastEvaluator, label, inputs);
-//        }
         this._navigator.newNextAction(action, this._lastEvaluator, label, inputs);
         this._lastEvaluator = null;
         return this;
@@ -195,72 +179,6 @@ public class Behavior
     ) throws BehaviorException {
         return then(ActionIdentify.toActionId(actionType), label, inputs);
     }
-
-//    private boolean addInterceptor(IAction action, String label) {
-//        if (action instanceof IIntercepted) {
-//            ActionIdentify interceptorId = ((IIntercepted) action).by();
-//            IAction interceptor;
-//            interceptor = this._actionRepo.get(interceptorId);
-//            if (interceptor == null) {
-//                throw BehaviorException.builder()
-//                        .errorCode(BehaviorErrors.INTERCEPTOR_NOT_FOUND)
-//                        .variables(new BehaviorErrors.InterceptorNotFound()
-//                                .actionId(action.getId())
-//                                .interceptorId(interceptorId))
-//                        .build();
-//            }
-//            if (! (interceptor instanceof IInterceptor)) {
-//                throw BehaviorException.builder()
-//                        .errorCode(BehaviorErrors.ACTION_IS_NOT_INTERCEPTOR)
-//                        .variables(new BehaviorErrors.ActionIsNotInterceptor()
-//                                .actionId(interceptorId))
-//                        .build();
-//            }
-//
-//            // The input and output type of dependent action must be same as input type of the action
-//            Class<?> interceptorInputType = interceptor.inputType();
-//            if (interceptorInputType != action.inputType()) {
-//                throw BehaviorException.builder()
-//                        .errorCode(BehaviorErrors.INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT)
-//                        .variables(new BehaviorErrors.InterceptorIONotMatchActionInput()
-//                                .interceptorId(interceptorId)
-//                                .actionId(action.getId())
-//                                .interceptorIOType(interceptorInputType)
-//                                .actionInputType(action.inputType()))
-//                        .build();
-//            }
-//
-//            this._navigator.newNextAction(interceptor, this._lastEvaluator, label);
-//            this._lastEvaluator = null;
-//            return true;
-//        }
-//        return false;
-//    }
-
-//    @Override
-//    public IBehaviorBuilder then(
-//            final IAnonymousAction action
-//    ) {
-//        return then(action, null);
-//    }
-//
-//    @Override
-//    public IBehaviorBuilder then(
-//            final IAnonymousAction action,
-//            final String label
-//    ) {
-//        ensureNotBuilt();
-//        ArgumentChecker.required(action, "action");
-//        AnonymousAction aAction = new AnonymousAction(action);
-////        if (addInterceptor(aAction, label)) {
-////            this._navigator.newNextAction(aAction, this._lastEvaluator, null);
-////        } else {
-////            this._navigator.newNextAction(aAction, this._lastEvaluator, label);
-////        }
-//        this._navigator.newNextAction(aAction, this._lastEvaluator, label);
-//        this._lastEvaluator = null;
-//        return this;
-//    }
 
     @Override
     public IBehaviorBuilder call(
@@ -567,39 +485,6 @@ public class Behavior
                         action, actionLabel, this._current, Behavior.this, evaluator, inputs);
             }
             this._actions.add(this._current);
-
-
-            // Check new action input is matched to current action output
-            // The check only on non-anonymous action
-//            if (! this._current.action().isAnonymous() && ! action.isAnonymous()) {
-//                if (! action.inputType().isAssignableFrom(this._current.action().outputType())) {
-//                    throw BehaviorException.builder()
-//                            .errorCode(BehaviorErrors.ACTION_IO_MISMATCH)
-//                            .variables(new BehaviorErrors.ActionIOMismatch()
-//                                    .outputAction(this._current.action().getId())
-//                                    .outputType(this._current.action().outputType())
-//                                    .inputAction(action.getId())
-//                                    .inputType(action.inputType()))
-//                            .build();
-//                }
-//            }
-            // Check action label
-//            if (! ArgumentChecker.isEmpty(label)) {
-//                ActionHolder existingAction = this._labeledActions.get(label);
-//                if (existingAction != null) {
-//                    throw BehaviorException.builder()
-//                            .errorCode(BehaviorErrors.ACTION_LABEL_IS_BIND)
-//                            .variables(new BehaviorErrors.ActionLabelIsBind()
-//                                    .label(label)
-//                                    .actionId(existingAction.action().getId()))
-//                            .build();
-//                }
-//                this._labeledActions.put(label, newAction);
-//            }
-
-//            this._current.next(newAction);
-//            this._current = newAction;
-//            this._actions.add(newAction);
         }
     }
 }

@@ -81,15 +81,4 @@ public final class ActionOutputMeta {
         ActionOutputMeta otherMeta = (ActionOutputMeta) other;
         return this._name.equals(otherMeta._name) || this._type.equals(otherMeta._type);
     }
-
-//    public void verifyInput(Object input) {
-//        if (! this.type().isAssignableFrom(input.getClass())) {
-//            throw BehaviorException.builder()
-//                    .errorCode(BehaviorErrors.INPUT_OUTPUT_NOT_MATCH)
-//                    .variables(new BehaviorErrors.InputOutputNotMatch()
-//                            .outputMeta(this)
-//                            .input(input))
-//                    .build();
-//        }
-//    }
 }

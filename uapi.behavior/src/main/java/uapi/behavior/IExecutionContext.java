@@ -11,8 +11,6 @@ package uapi.behavior;
 
 import java.util.Map;
 
-import uapi.behavior.BehaviorEvent;
-
 /**
  * Store context during execution time
  */

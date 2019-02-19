@@ -34,7 +34,6 @@ public class BehaviorFailure {
     ) {
         ArgumentChecker.required(failureAction, "failureAction");
         ArgumentChecker.required(failureInputs, "failureInput");
-//        ArgumentChecker.required(cause, "cause");
 
         this._failureAction = failureAction;
         this._failureInputs = failureInputs;

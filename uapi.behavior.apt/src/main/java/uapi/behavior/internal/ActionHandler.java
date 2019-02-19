@@ -19,7 +19,6 @@ import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
 import uapi.codegen.*;
 import uapi.common.Numeric;
-import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.IServiceHandlerHelper;
 import uapi.service.annotation.Service;
@@ -181,42 +180,6 @@ public class ActionHandler extends AnnotationsHandler {
                 paramMetas[idx] = paramMeta;
             });
             return new ActionMethodMeta(actionMethodName, paramMetas);
-
-//            String inputType;
-//            String outputType;
-//            boolean needContext = false;
-//            if (paramElements.size() == 0) {
-//                throw new GeneralException(
-//                        "The method annotated with ActionDo must contains 1 or 2 parameters - {}::{}",
-//                        classElement.getSimpleName().toString(), actionMethodName);
-//            } else if (paramElements.size() > 2) {
-//                throw new GeneralException(
-//                        "The method annotated with ActionDo must contains more than 2 parameters - {}::{}",
-//                        classElement.getSimpleName().toString(), actionMethodName);
-//            } else {
-//                VariableElement inputParamElement = (VariableElement) paramElements.get(0);
-//                inputType = inputParamElement.asType().toString();
-//                if (paramElements.size() == 1) {
-//                    if (IExecutionContext.class.getCanonicalName().equals(inputType)) {
-//                        inputType = Type.VOID;
-//                        needContext = true;
-//                    }
-//                } else if (paramElements.size() == 2) {
-//                    VariableElement contextParamElement = (VariableElement) paramElements.get(1);
-//                    if (! IExecutionContext.class.getCanonicalName().equals(contextParamElement.asType().toString())) {
-//                        throw new GeneralException(
-//                                "The second parameter of method which annotated with ActionDo must be IExecutionContext - {}::{}",
-//                                classElement.getSimpleName().toString(), actionMethodName);
-//                    }
-//                    needContext = true;
-//                }
-//            }
-//            outputType = actionDoElement.getReturnType().toString();
-//            // convert native type to associated qualified type
-//            inputType = Type.toQType(inputType);
-//            outputType = Type.toQType(outputType);
-//
-//            return new ActionMethodMeta(inputType, outputType, actionMethodName, needContext);
         }
     }
 }

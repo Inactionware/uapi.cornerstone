@@ -1,7 +1,6 @@
 package uapi.behavior;
 
 import uapi.common.Functionals;
-import uapi.event.IEventFinishCallback;
 
 /**
  * A builder for behavior creation
@@ -84,30 +83,6 @@ public interface IBehaviorBuilder {
     IBehaviorBuilder then(Class<? extends IAction> actionType, String label, Object... inputs) throws BehaviorException;
 
     /**
-     * Set next an anonymous action when current branch condition is satisfied.
-     *
-     * @param   action
-     *          The anonymous action
-     * @return  The behavior builder self
-     * @throws  BehaviorException
-     *          Any cause when set action
-     */
-//    IBehaviorBuilder then(IAnonymousAction action) throws BehaviorException;
-
-    /**
-     * Set next an anonymous action with specific label when current branch condition is satisfied.
-     *
-     * @param   action
-     *          The anonymous action
-     * @param   label
-     *          The action/behavior label which can be used to navigate to it later
-     * @return  The behavior builder self
-     * @throws  BehaviorException
-     *          Any cause when set action
-     */
-//    IBehaviorBuilder then(IAnonymousAction action, String label) throws BehaviorException;
-
-    /**
      * Set next an anonymous action which return nothing when current branch condition is satisfied.
      *
      * @param   call
@@ -140,8 +115,6 @@ public interface IBehaviorBuilder {
      */
     IBehaviorBuilder onSuccess(IBehaviorSuccessCall action);
 
-//    IBehaviorBuilder onSuccess(ActionIdentify actionId);
-
     /**
      * Invoke the action when the behavior is executed failed
      *
@@ -150,8 +123,6 @@ public interface IBehaviorBuilder {
      * @return  The behavior builder self
      */
     IBehaviorBuilder onFailure(IBehaviorFailureCall action);
-
-//    IBehaviorBuilder onFailure(ActionIdentify actionId);
 
     /**
      * Get navigator which associated with this behavior builder

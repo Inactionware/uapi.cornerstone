@@ -29,11 +29,6 @@ public class Application {
     private static final String BEHAVIOR_STARTUP            = "startUp";
     private static final String BEHAVIOR_SHUTDOWN           = "shutdown";
 
-//    private final IAnonymousAction DEFAULT_FAILURE_ACTION = (failure, ctx) -> {
-//        this._logger.error(failure.cause(), "Fail to process behavior - {}", ctx.behaviorName());
-//        return null;
-//    };
-
     private final IBehaviorFailureCall DEFAULT_FAILURE_ACTION = (failure, ctx) -> {
         this._logger.error(failure.cause(), "Fail to process behavior - {}", ctx.behaviorName());
         return null;
