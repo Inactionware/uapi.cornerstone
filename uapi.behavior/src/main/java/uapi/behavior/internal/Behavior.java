@@ -209,7 +209,7 @@ public class Behavior
         if (this._successAction != null) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.SUCCESS_ACTION_EXISTS)
-                    .variables(new BehaviorErrors.FailureActionExists()
+                    .variables(new BehaviorErrors.SuccessActionExists()
                             .behaviorId(this._actionId))
                     .build();
         }

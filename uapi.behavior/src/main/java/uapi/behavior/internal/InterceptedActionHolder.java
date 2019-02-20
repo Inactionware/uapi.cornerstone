@@ -24,7 +24,9 @@ public class InterceptedActionHolder extends ActionHolder {
             final String label,
             final ActionHolder previousAction,
             final Behavior behavior,
-            final Functionals.Evaluator evaluator, Object... inputs) {
+            final Functionals.Evaluator evaluator,
+            final Object... inputs
+    ) {
         super(action, label, previousAction, behavior, evaluator, inputs);
 
         if (action instanceof IIntercepted) {
@@ -62,9 +64,7 @@ public class InterceptedActionHolder extends ActionHolder {
             final IExecutionContext context
     ) throws Exception {
         ActionOutput[] interceptorOuts = new ActionOutput[0];
-        Looper.on(this._interceptors).foreach(interceptor -> {
-            interceptor.process(inputs, interceptorOuts, context);
-        });
+        Looper.on(this._interceptors).foreach(interceptor -> interceptor.process(inputs, interceptorOuts, context));
         super.execute(inputs, outputs, context);
     }
 }

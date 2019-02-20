@@ -70,31 +70,31 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(NOT_ONLY_NEXT_ACTION, NotOnlyNextAction.KEY);
         keyCodeMapping.put(BEHAVIOR_ID_IS_USED, BehaviorIdIsUsed.KEY);
         keyCodeMapping.put(NO_ACTION_WITH_LABEL, NoActionWithLabel.KEY);
-        keyCodeMapping.put(ACTION_LABEL_IS_BIND, ActionLabelIsBind.KEY);
+//        keyCodeMapping.put(ACTION_LABEL_IS_BIND, ActionLabelIsBind.KEY);
         keyCodeMapping.put(EVALUATOR_IS_SET, EvaluatorIsSet.KEY);
         keyCodeMapping.put(ACTION_NOT_FOUND, ActionNotFound.KEY);
         keyCodeMapping.put(EVALUATOR_NOT_USED, EvaluatorNotUsed.KEY);
         keyCodeMapping.put(NO_ACTION_IN_BEHAVIOR, NoActionInBehavior.KEY);
-        keyCodeMapping.put(ACTION_IO_MISMATCH, ActionIOMismatch.KEY);
+//        keyCodeMapping.put(ACTION_IO_MISMATCH, ActionIOMismatch.KEY);
         keyCodeMapping.put(PUBLISH_UNREG_BEHAVIOR, PublishUnregBehavior.KEY);
         keyCodeMapping.put(BEHAVIOR_IS_PUBLISHED, BehaviorIsPublished.KEY);
         keyCodeMapping.put(INCONSISTENT_LEAF_ACTIONS, InconsistentLeafActions.KEY);
         keyCodeMapping.put(DUPLICATED_RESPONSIBLE_NAME, DuplicatedResponsibleName.KEY);
         keyCodeMapping.put(UNSUPPORTED_BEHAVIOR_EVENT_TYPE, UnsupportedBehaviorTraceEventType.KEY);
-        keyCodeMapping.put(UNSUPPORTED_INJECTED_SERVICE, UnsupportedInjectedService.KEY);
+//        keyCodeMapping.put(UNSUPPORTED_INJECTED_SERVICE, UnsupportedInjectedService.KEY);
         keyCodeMapping.put(FAILURE_ACTION_EXISTS, FailureActionExists.KEY);
         keyCodeMapping.put(SUCCESS_ACTION_EXISTS, SuccessActionExists.KEY);
         keyCodeMapping.put(INTERCEPTOR_NOT_FOUND, InterceptorNotFound.KEY);
         keyCodeMapping.put(ACTION_IS_NOT_INTERCEPTOR, ActionIsNotInterceptor.KEY);
-        keyCodeMapping.put(INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT, InterceptorIONotMatchActionInput.KEY);
+//        keyCodeMapping.put(INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT, InterceptorIONotMatchActionInput.KEY);
         keyCodeMapping.put(UNSUPPORTED_INTERCEPTIVE_INTERCEPTOR, UnsupportedInterceptiveInterceptor.KEY);
-        keyCodeMapping.put(RESERVED_RESULT_KEY, ReservedResultKey.KEY);
+//        keyCodeMapping.put(RESERVED_RESULT_KEY, ReservedResultKey.KEY);
         keyCodeMapping.put(ACTION_OUTPUT_TYPE_NOT_MATCHED, ActionOutputTypeNotMatched.KEY);
         keyCodeMapping.put(ACTION_OUTPUT_SET_TWICE, ActionOutputSetTwice.KEY);
         keyCodeMapping.put(INCOMPATIBLE_ACTION_TYPE, IncompatibleActionType.KEY);
         keyCodeMapping.put(DUPLICATED_ACTION_LABEL, DuplicatedActionLabel.KEY);
         keyCodeMapping.put(GENERATE_ACTION_LABEL_OVER_MAX, GenerateActionLabelOverMax.KEY);
-        keyCodeMapping.put(INVALID_ACTION_INPUT_REF, InvalidActionInputRef.KEY);
+//        keyCodeMapping.put(INVALID_ACTION_INPUT_REF, InvalidActionInputRef.KEY);
         keyCodeMapping.put(REF_ACTION_NOT_EXIST_IN_BEHAVIOR, RefActionNotExistInBehavior.KEY);
         keyCodeMapping.put(DUPLICATED_ACTION_OUTPUT, DuplicatedActionOutput.KEY);
         keyCodeMapping.put(NO_OUTPUT_IN_ACTION, NoOutputInAction.KEY);
@@ -102,8 +102,8 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(INPUT_OUTPUT_TYPE_MISMATCH, InputOutputTypeMismatch.KEY);
         keyCodeMapping.put(INPUT_OBJECT_TYPE_MISMATCH, InputObjectTypeMismatch.KEY);
         keyCodeMapping.put(RESERVED_ACTION_OUTPUT_NAME, ReservedActionOutputName.KEY);
-        keyCodeMapping.put(UNKNOWN_FAILURE_ON_INTERCEPTOR, UnknownFailureOnInterceptor.KEY);
-        keyCodeMapping.put(INCORRECT_ACTION_OUTPUT_NAME, IncorrectActionOutputName.KEY);
+//        keyCodeMapping.put(UNKNOWN_FAILURE_ON_INTERCEPTOR, UnknownFailureOnInterceptor.KEY);
+//        keyCodeMapping.put(INCORRECT_ACTION_OUTPUT_NAME, IncorrectActionOutputName.KEY);
     }
 
     public BehaviorErrors() {
@@ -236,28 +236,28 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
      * Error string template:
      *      The label [{}] has been bind to action [{}]
      */
-    public static final class ActionLabelIsBind extends IndexedParameters<ActionLabelIsBind> {
-
-        private static final String KEY = "ActionLabelIsBind";
-
-        private String _label;
-        private ActionIdentify _actionId;
-
-        public ActionLabelIsBind label(String label) {
-            this._label = label;
-            return this;
-        }
-
-        public ActionLabelIsBind actionId(ActionIdentify actionId) {
-            this._actionId = actionId;
-            return this;
-        }
-
-        @Override
-        public Object[] get() {
-            return new Object[] { this._label, this._actionId };
-        }
-    }
+//    public static final class ActionLabelIsBind extends IndexedParameters<ActionLabelIsBind> {
+//
+//        private static final String KEY = "ActionLabelIsBind";
+//
+//        private String _label;
+//        private ActionIdentify _actionId;
+//
+//        public ActionLabelIsBind label(String label) {
+//            this._label = label;
+//            return this;
+//        }
+//
+//        public ActionLabelIsBind actionId(ActionIdentify actionId) {
+//            this._actionId = actionId;
+//            return this;
+//        }
+//
+//        @Override
+//        public Object[] get() {
+//            return new Object[] { this._label, this._actionId };
+//        }
+//    }
 
     /**
      * Error string template:
@@ -335,40 +335,40 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
      * Error string template:
      *      Incorrect output/input type [{} vs. {}] between actions - {} and {}
      */
-    public static final class ActionIOMismatch extends IndexedParameters<ActionIOMismatch> {
-
-        private static final String KEY = "ActionIOMismatch";
-
-        private Class _outputType;
-        private Class _inputType;
-        private ActionIdentify _outputAction;
-        private ActionIdentify _inputAction;
-
-        public ActionIOMismatch outputType(final Class outputType) {
-            this._outputType = outputType;
-            return this;
-        }
-
-        public ActionIOMismatch inputType(final Class inputType) {
-            this._inputType = inputType;
-            return this;
-        }
-
-        public ActionIOMismatch outputAction(final ActionIdentify outputAction) {
-            this._outputAction = outputAction;
-            return this;
-        }
-
-        public ActionIOMismatch inputAction(final ActionIdentify inputAction) {
-            this._inputAction = inputAction;
-            return this;
-        }
-
-        @Override
-        public Object[] get() {
-            return new Object[] { this._outputType, this._inputType, this._outputAction, this._inputAction };
-        }
-    }
+//    public static final class ActionIOMismatch extends IndexedParameters<ActionIOMismatch> {
+//
+//        private static final String KEY = "ActionIOMismatch";
+//
+//        private Class _outputType;
+//        private Class _inputType;
+//        private ActionIdentify _outputAction;
+//        private ActionIdentify _inputAction;
+//
+//        public ActionIOMismatch outputType(final Class outputType) {
+//            this._outputType = outputType;
+//            return this;
+//        }
+//
+//        public ActionIOMismatch inputType(final Class inputType) {
+//            this._inputType = inputType;
+//            return this;
+//        }
+//
+//        public ActionIOMismatch outputAction(final ActionIdentify outputAction) {
+//            this._outputAction = outputAction;
+//            return this;
+//        }
+//
+//        public ActionIOMismatch inputAction(final ActionIdentify inputAction) {
+//            this._inputAction = inputAction;
+//            return this;
+//        }
+//
+//        @Override
+//        public Object[] get() {
+//            return new Object[] { this._outputType, this._inputType, this._outputAction, this._inputAction };
+//        }
+//    }
 
     /**
      * Error string template
@@ -509,28 +509,28 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
      * Error string template:
      *      The service was injected to service {} is not supported - {}
      */
-    public static final class UnsupportedInjectedService extends IndexedParameters<UnsupportedInjectedService> {
-
-        private static final String KEY = "UnsupportedInjectedService";
-
-        private String _injectedSvc;
-        private String _injectSvc;
-
-        public UnsupportedInjectedService injectedService(String serviceId) {
-            this._injectedSvc = serviceId;
-            return this;
-        }
-
-        public UnsupportedInjectedService injectService(String serviceId) {
-            this._injectSvc = serviceId;
-            return this;
-        }
-
-        @Override
-        public Object[] get() {
-            return new Object[] { this._injectSvc, this._injectedSvc };
-        }
-    }
+//    public static final class UnsupportedInjectedService extends IndexedParameters<UnsupportedInjectedService> {
+//
+//        private static final String KEY = "UnsupportedInjectedService";
+//
+//        private String _injectedSvc;
+//        private String _injectSvc;
+//
+//        public UnsupportedInjectedService injectedService(String serviceId) {
+//            this._injectedSvc = serviceId;
+//            return this;
+//        }
+//
+//        public UnsupportedInjectedService injectService(String serviceId) {
+//            this._injectSvc = serviceId;
+//            return this;
+//        }
+//
+//        @Override
+//        public Object[] get() {
+//            return new Object[] { this._injectSvc, this._injectedSvc };
+//        }
+//    }
 
     /**
      * Error string template:
@@ -626,40 +626,40 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
      * Error string template
      *      The IO type [{}] of interceptor {} does not match input type [{}] of action {
      */
-    public static final class InterceptorIONotMatchActionInput extends IndexedParameters<InterceptorIONotMatchActionInput> {
-
-        public static final String KEY = "InterceptorIONotMatchActionInput";
-
-        private Class<?> _interceptorIOType;
-        private Class<?> _actionInputType;
-        private ActionIdentify _interceptorId;
-        private ActionIdentify _actionId;
-
-        public InterceptorIONotMatchActionInput interceptorIOType(Class<?> type) {
-            this._interceptorIOType = type;
-            return this;
-        }
-
-        public InterceptorIONotMatchActionInput actionInputType(Class<?> type) {
-            this._actionInputType = type;
-            return this;
-        }
-
-        public InterceptorIONotMatchActionInput interceptorId(ActionIdentify actionId) {
-            this._interceptorId = actionId;
-            return this;
-        }
-
-        public InterceptorIONotMatchActionInput actionId(ActionIdentify actionId) {
-            this._actionId = actionId;
-            return this;
-        }
-
-        @Override
-        public Object[] get() {
-            return new Object[] { this._interceptorIOType, this._interceptorId, this._actionInputType, this._actionId };
-        }
-    }
+//    public static final class InterceptorIONotMatchActionInput extends IndexedParameters<InterceptorIONotMatchActionInput> {
+//
+//        public static final String KEY = "InterceptorIONotMatchActionInput";
+//
+//        private Class<?> _interceptorIOType;
+//        private Class<?> _actionInputType;
+//        private ActionIdentify _interceptorId;
+//        private ActionIdentify _actionId;
+//
+//        public InterceptorIONotMatchActionInput interceptorIOType(Class<?> type) {
+//            this._interceptorIOType = type;
+//            return this;
+//        }
+//
+//        public InterceptorIONotMatchActionInput actionInputType(Class<?> type) {
+//            this._actionInputType = type;
+//            return this;
+//        }
+//
+//        public InterceptorIONotMatchActionInput interceptorId(ActionIdentify actionId) {
+//            this._interceptorId = actionId;
+//            return this;
+//        }
+//
+//        public InterceptorIONotMatchActionInput actionId(ActionIdentify actionId) {
+//            this._actionId = actionId;
+//            return this;
+//        }
+//
+//        @Override
+//        public Object[] get() {
+//            return new Object[] { this._interceptorIOType, this._interceptorId, this._actionInputType, this._actionId };
+//        }
+//    }
 
     /**
      * Error string template:
@@ -686,22 +686,22 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
      * Error string template:
      *      The Action result key is reserved - {}
      */
-    public static final class ReservedResultKey extends IndexedParameters<ReservedResultKey> {
-
-        public static final String KEY = "ReservedResultKey";
-
-        private String _key;
-
-        public ReservedResultKey key(String key) {
-            this._key = key;
-            return this;
-        }
-
-        @Override
-        public Object[] get() {
-            return new Object[] { this._key };
-        }
-    }
+//    public static final class ReservedResultKey extends IndexedParameters<ReservedResultKey> {
+//
+//        public static final String KEY = "ReservedResultKey";
+//
+//        private String _key;
+//
+//        public ReservedResultKey key(String key) {
+//            this._key = key;
+//            return this;
+//        }
+//
+//        @Override
+//        public Object[] get() {
+//            return new Object[] { this._key };
+//        }
+//    }
 
     /**
      * Error string template:
@@ -845,22 +845,22 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
      * Error string template:
      *      The action input reference is invalid - {}
      */
-    public static final class InvalidActionInputRef extends IndexedParameters<InvalidActionInputRef> {
-
-        public static final String KEY = "InvalidActionInputRef";
-
-        private String _actionInputRef;
-
-        public InvalidActionInputRef inputReference(String ref) {
-            this._actionInputRef = ref;
-            return this;
-        }
-
-        @Override
-        public Object[] get() {
-            return new Object[] { this._actionInputRef };
-        }
-    }
+//    public static final class InvalidActionInputRef extends IndexedParameters<InvalidActionInputRef> {
+//
+//        public static final String KEY = "InvalidActionInputRef";
+//
+//        private String _actionInputRef;
+//
+//        public InvalidActionInputRef inputReference(String ref) {
+//            this._actionInputRef = ref;
+//            return this;
+//        }
+//
+//        @Override
+//        public Object[] get() {
+//            return new Object[] { this._actionInputRef };
+//        }
+//    }
 
     /**
      * Error string template:
@@ -942,38 +942,6 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
             return new Object[] { this._outputName, this._actionId.toString() };
         }
     }
-
-    /**
-     * Error string template:
-     *      The output [{}:{}] does not match on input - type: {}, value: {}
-     */
-//    public static final class InputOutputNotMatch extends IndexedParameters<InputOutputNotMatch> {
-//
-//        public static final String KEY = "InputOutputNotMatch";
-//
-//        private ActionOutputMeta _outputMeta;
-//        private Object _input;
-//
-//        public InputOutputNotMatch outputMeta(ActionOutputMeta outputMeta) {
-//            this._outputMeta = outputMeta;
-//            return this;
-//        }
-//
-//        public InputOutputNotMatch input(final Object input) {
-//            this._input = input;
-//            return this;
-//        }
-//
-//        @Override
-//        public Object[] get() {
-//            return new Object[] {
-//                    this._outputMeta.name(),
-//                    this._outputMeta.type(),
-//                    this._input == null ? "null" : this._input.getClass().getCanonicalName(),
-//                    this._input == null ? "null" : this._input
-//            };
-//        }
-//    }
 
     /**
      * Error string template:
@@ -1123,53 +1091,53 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
      * Error string template:
      *      Execute Interceptor [{}} failed, intercepted action - {}
      */
-    public static final class UnknownFailureOnInterceptor extends IndexedParameters<UnknownFailureOnInterceptor> {
-
-        public static final String KEY = "UnknownFailureOnInterceptor";
-
-        private ActionIdentify _interceptorId;
-        private ActionIdentify _actionId;
-
-        public UnknownFailureOnInterceptor interceptorId(final ActionIdentify interceptorId) {
-            this._interceptorId = interceptorId;
-            return this;
-        }
-
-        public UnknownFailureOnInterceptor actionId(final ActionIdentify actionId) {
-            this._actionId = actionId;
-            return this;
-        }
-
-        @Override
-        public Object[] get() {
-            return new Object[] {this._interceptorId, this._actionId };
-        }
-    }
+//    public static final class UnknownFailureOnInterceptor extends IndexedParameters<UnknownFailureOnInterceptor> {
+//
+//        public static final String KEY = "UnknownFailureOnInterceptor";
+//
+//        private ActionIdentify _interceptorId;
+//        private ActionIdentify _actionId;
+//
+//        public UnknownFailureOnInterceptor interceptorId(final ActionIdentify interceptorId) {
+//            this._interceptorId = interceptorId;
+//            return this;
+//        }
+//
+//        public UnknownFailureOnInterceptor actionId(final ActionIdentify actionId) {
+//            this._actionId = actionId;
+//            return this;
+//        }
+//
+//        @Override
+//        public Object[] get() {
+//            return new Object[] {this._interceptorId, this._actionId };
+//        }
+//    }
 
     /**
      * Error string template:
      *      Can not set output to output name [{}] on action [{}] - unsupported output name
      */
-    public static final class IncorrectActionOutputName extends IndexedParameters<IncorrectActionOutputName> {
-
-        public static final String KEY = "IncorrectActionOutputName";
-
-        private String _outputName;
-        private ActionIdentify _actionId;
-
-        public IncorrectActionOutputName outputName(final String name) {
-            this._outputName = name;
-            return this;
-        }
-
-        public IncorrectActionOutputName actionId(final ActionIdentify actionId) {
-            this._actionId = actionId;
-            return this;
-        }
-
-        @Override
-        public Object[] get() {
-            return new Object[] { this._outputName, this._actionId };
-        }
-    }
+//    public static final class IncorrectActionOutputName extends IndexedParameters<IncorrectActionOutputName> {
+//
+//        public static final String KEY = "IncorrectActionOutputName";
+//
+//        private String _outputName;
+//        private ActionIdentify _actionId;
+//
+//        public IncorrectActionOutputName outputName(final String name) {
+//            this._outputName = name;
+//            return this;
+//        }
+//
+//        public IncorrectActionOutputName actionId(final ActionIdentify actionId) {
+//            this._actionId = actionId;
+//            return this;
+//        }
+//
+//        @Override
+//        public Object[] get() {
+//            return new Object[] { this._outputName, this._actionId };
+//        }
+//    }
 }
