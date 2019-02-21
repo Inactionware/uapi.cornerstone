@@ -7,26 +7,27 @@ import uapi.common.ArgumentChecker;
  */
 public class BehaviorExecutingEvent extends BehaviorTraceEvent {
 
-    private static final String KEY_ACTION_ID   = "ActionId";
+    private static final String KEY_ACTION_ID       = "ActionId";
 
     public BehaviorExecutingEvent(
+            final String sourceName,
             final ExecutionIdentify executionId,
-            final Object originalData,
-            final Object data,
             final ActionIdentify actionId,
-            final String sourceName
+            final Object[] actionInputs,
+            final ActionOutput[] actionOutputs,
+            final Object[] behaviorInputs
     ) {
         super(sourceName);
         ArgumentChecker.required(executionId, "executionId");
-        ArgumentChecker.required(actionId, "actionId");
         set(KEY_EXECUTION_ID, executionId);
+        set(KEY_BEHAVIOR_INPUTS, behaviorInputs);
         set(KEY_ACTION_ID, actionId);
-        set(KEY_ORIGINAL_DATA, originalData);
-        set(KEY_DATA, data);
-//        set(KEY_RESP_NAME, responsibleName);
+        set(KEY_CURRENT_INPUTS, actionInputs);
+        set(KEY_CURRENT_OUTPUTS, actionOutputs);
+        set(KEY_SOURCE_NAME, sourceName);
     }
 
-    public ActionIdentify actionId() {
+    public ActionIdentify executingActionId() {
         return (ActionIdentify) get(KEY_ACTION_ID);
     }
 }

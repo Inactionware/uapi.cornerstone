@@ -12,9 +12,6 @@ package uapi.behavior;
 import uapi.common.ArgumentChecker;
 import uapi.event.AttributedEvent;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * The implementation for IBehaviorEvent interface
  */

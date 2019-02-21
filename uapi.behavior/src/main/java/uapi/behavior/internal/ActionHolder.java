@@ -1,11 +1,16 @@
+/*
+ * Copyright (c) 2018. The UAPI Authors
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at the LICENSE file.
+ *
+ * You must gained the permission from the authors if you want to
+ * use the project into a commercial product.
+ */
+
 package uapi.behavior.internal;
 
-import uapi.behavior.BehaviorErrors;
-import uapi.behavior.BehaviorException;
-import uapi.behavior.IAction;
-import uapi.common.ArgumentChecker;
-import uapi.common.Functionals;
-import uapi.common.IAttributed;
+import uapi.behavior.*;
+import uapi.common.*;
 import uapi.rx.Looper;
 
 import java.util.LinkedList;
@@ -19,28 +24,76 @@ class ActionHolder {
     private static final Functionals.Evaluator ALWAYS_MATCHED = attributed -> true;
 
     private final Functionals.Evaluator _evaluator;
+    private final Behavior _behavior;
     private final IAction _action;
+    private final String _label;
     private final List<ActionHolder> _nextActions;
+    private final ActionHolder _previousAction;
+    private final Object[] _inputs;
 
-    ActionHolder(final IAction action) {
-        this(action, null);
+    ActionHolder(
+            final IAction action,
+            final Behavior behavior
+    ) {
+        this(action, null, null, behavior, null);
     }
 
     ActionHolder(
             final IAction action,
-            final Functionals.Evaluator evaluator
+            final String label,
+            final ActionHolder previousAction,
+            final Behavior behavior,
+            final Functionals.Evaluator evaluator,
+            final Object... inputs
     ) {
         ArgumentChecker.required(action, "action");
         ArgumentChecker.required(action.getId(), "action.id");
-        ArgumentChecker.required(action.inputType(), "action.inputType");
-        ArgumentChecker.required(action.outputType(), "action.outputType");
+        ArgumentChecker.required(action.inputMetas(), "action.inputMetas");
+        ArgumentChecker.required(action.outputMetas(), "action.outputMetas");
+        ArgumentChecker.required(behavior, "behavior");
         if (evaluator == null) {
             this._evaluator = ALWAYS_MATCHED;
         } else {
             this._evaluator = evaluator;
         }
+        this._behavior = behavior;
         this._action = action;
+        this._label = label;
         this._nextActions = new LinkedList<>();
+        this._previousAction = previousAction;
+        this._inputs = inputs;
+        verify();
+        this._previousAction.next(this);
+    }
+
+    ActionOutputMeta[] outputMetas() {
+        return this._action.outputMetas();
+    }
+
+    ActionInputMeta[] inputMetas() {
+        return this._action.inputMetas();
+    }
+
+    Object[] inputs() {
+        return this._inputs;
+    }
+
+    /**
+     * Return previously action
+     *
+     * @return  Previously action
+     */
+    ActionHolder previous() {
+        return this._previousAction;
+    }
+
+    /**
+     * Return the label that bind on this action.
+     *
+     * @return  The label of this action
+     */
+    String label() {
+        return this._label;
     }
 
     /**
@@ -55,16 +108,7 @@ class ActionHolder {
     void next(
             final ActionHolder actionHolder
     ) throws BehaviorException {
-//        if (! this._action.outputType().equals(actionHolder.action().inputType())) {
-//            throw BehaviorException.builder()
-//                    .errorCode(BehaviorErrors.UNMATCHED_ACTION)
-//                    .variables(new BehaviorErrors.UnmatchedAction()
-//                            .outputType(this._action.outputType().getCanonicalName())
-//                            .outputAction(this._action.getId())
-//                            .inputType(actionHolder.action().inputType().getCanonicalName())
-//                            .inputAction(actionHolder.action().getId()))
-//                    .build();
-//        }
+        ArgumentChecker.required(actionHolder, "actionHolder");
         this._nextActions.add(actionHolder);
     }
 
@@ -123,5 +167,88 @@ class ActionHolder {
                             .data(data))
                     .build();
         }
+    }
+
+    void verify() {
+        ActionInputMeta[] inputMetas = this._action.inputMetas();
+        if (inputMetas.length != this._inputs.length) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.INPUT_OUTPUT_COUNT_MISMATCH)
+                    .variables(new BehaviorErrors.InputOutputCountMismatch()
+                            .inputCount(this._inputs.length)
+                            .actionId(this._action.getId())
+                            .actionInputCount(inputMetas.length)
+                            .behaviorId(this._behavior.getId()))
+                    .build();
+        }
+
+        Looper.on(this._action.inputMetas()).foreachWithIndex((idx, inputMeta) -> {
+            Object input = this._inputs[idx];
+            if (input instanceof ActionInputReference) {
+                ActionInputReference inputRef = (ActionInputReference) input;
+                String refAction = inputRef.label();
+                boolean foundPrevious = false;
+                ActionHolder previous = this._previousAction;
+                // Check does referenced action exist or not
+                while (previous != null) {
+                    if (refAction.equals(previous.label())) {
+                        foundPrevious = true;
+                        break;
+                    }
+                    previous = previous.previous();
+                }
+                if (! foundPrevious) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.REF_ACTION_NOT_EXIST_IN_BEHAVIOR)
+                            .variables(new BehaviorErrors.RefActionNotExistInBehavior()
+                                    .actionLabel(refAction)
+                                    .behaviorId(this._behavior.getId()))
+                            .build();
+                }
+                // Check the referenced action has specific output
+                String refName = inputRef.name();
+                ActionOutputMeta matchedOutMeta = Looper.on(previous._action.outputMetas())
+                        .filter(meta -> meta.name().equals(refName)).first();
+                if (matchedOutMeta == null) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.NO_OUTPUT_IN_ACTION)
+                            .variables(new BehaviorErrors.NoOutputInAction()
+                                    .outputName(refName)
+                                    .actionId(previous._action.getId()))
+                            .build();
+                }
+                // Check the referenced action output type does match required input type
+                if (! matchedOutMeta.type().isAssignableFrom(inputMeta.type())) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.INPUT_OUTPUT_TYPE_MISMATCH)
+                            .variables(new BehaviorErrors.InputOutputTypeMismatch()
+                                    .outputActionId(previous._action.getId())
+                                    .outputType(matchedOutMeta.type())
+                                    .outputName(matchedOutMeta.name())
+                                    .inputActionId(this._action.getId())
+                                    .inputType(inputMeta.type()))
+                            .build();
+                }
+            } else {
+                if (input == null || ! inputMeta.type().isAssignableFrom(input.getClass())) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.INPUT_OBJECT_TYPE_MISMATCH)
+                            .variables(new BehaviorErrors.InputObjectTypeMismatch()
+                                    .inputObject(input == null ? "null" : input)
+                                    .inputObjectType(input == null ? null : input.getClass())
+                                    .actionId(this._action.getId())
+                                    .actionInputType(inputMeta.type()))
+                            .build();
+                }
+            }
+        });
+    }
+
+    void execute(
+            final Object[] inputs,
+            final ActionOutput[] outputs,
+            final IExecutionContext context
+    ) throws Exception {
+        this._action.process(inputs, outputs, context);
     }
 }

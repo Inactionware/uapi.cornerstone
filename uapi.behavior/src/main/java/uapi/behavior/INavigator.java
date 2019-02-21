@@ -13,13 +13,6 @@ public interface INavigator {
     IBehaviorBuilder moveToStarting();
 
     /**
-     * Move current cursor to previous action
-     *
-     * @return  The associated behavior builder
-     */
-//    IBehaviorBuilder moveToPrevious();
-
-    /**
      * Move current cursor to specific labeled action.
      *
      * @param   label

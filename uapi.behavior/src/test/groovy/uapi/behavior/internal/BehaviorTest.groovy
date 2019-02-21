@@ -9,13 +9,14 @@
 
 package uapi.behavior.internal
 
+import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorErrors
 import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
-import uapi.behavior.IInterceptive
+import uapi.behavior.IIntercepted
 import uapi.behavior.IInterceptor
 import uapi.common.IAttributed
 import uapi.common.Repository
@@ -23,6 +24,7 @@ import uapi.common.Repository
 /**
  * Unit test for Behavior
  */
+@Ignore
 class BehaviorTest extends Specification {
 
     def 'Test create instance'() {
@@ -132,7 +134,7 @@ class BehaviorTest extends Specification {
         def actionId = new ActionIdentify(a1Name, ActionType.ACTION)
         def interceptorId = new ActionIdentify(depName, ActionType.ACTION)
         def repo = Mock(Repository) {
-            get(actionId) >> Mock(IInterceptiveAction) {
+            get(actionId) >> Mock(IInterceptedAction) {
                 getId() >> actionId
                 inputType() >> a1IType
                 outputType() >> a1OType
@@ -163,7 +165,7 @@ class BehaviorTest extends Specification {
         def actionId = new ActionIdentify(a1Name, ActionType.ACTION)
         def interceptorId = new ActionIdentify(depName, ActionType.ACTION)
         def repo = Mock(Repository) {
-            get(actionId) >> Mock(IInterceptiveAction) {
+            get(actionId) >> Mock(IInterceptedAction) {
                 getId() >> actionId
                 inputType() >> a1IType
                 outputType() >> a1OType
@@ -189,7 +191,7 @@ class BehaviorTest extends Specification {
         def actionId = new ActionIdentify(a1Name, ActionType.ACTION)
         def interceptorId = new ActionIdentify(depName, ActionType.ACTION)
         def repo = Mock(Repository) {
-            get(actionId) >> Mock(IInterceptiveAction) {
+            get(actionId) >> Mock(IInterceptedAction) {
                 getId() >> actionId
                 inputType() >> a1IType
                 outputType() >> a1OType
@@ -394,5 +396,5 @@ class BehaviorTest extends Specification {
         noExceptionThrown()
     }
 
-    private interface IInterceptiveAction extends IInterceptive, IAction {}
+    private interface IInterceptedAction extends IIntercepted, IAction {}
 }

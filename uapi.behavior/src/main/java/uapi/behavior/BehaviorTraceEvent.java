@@ -1,18 +1,17 @@
 package uapi.behavior;
 
-import uapi.event.AttributedEvent;
-
 /**
- * The interface contains methods which should be used for trace behavior execution
+ * The clss contains methods which should be used for trace behavior execution
  */
 public abstract class BehaviorTraceEvent extends BehaviorEvent {
 
-    public static final String TOPIC                = "BehaviorTrace";
-    public static final String KEY_EXECUTION_ID     = "ExecutionId";
-    public static final String KEY_ORIGINAL_DATA    = "OriginalData";
-    public static final String KEY_DATA             = "Data";
-    public static final String KEY_EX               = "Exception";
-//    public static final String KEY_RESP_NAME         = "ResponsibleName";
+    public static final String TOPIC                    = "BehaviorTrace";
+    public static final String KEY_EXECUTION_ID         = "ExecutionId";
+    public static final String KEY_BEHAVIOR_INPUTS      = "BehaviorInputs";
+    public static final String KEY_CURRENT_ACTION_ID    = "CurrentActionId";
+    public static final String KEY_CURRENT_INPUTS       = "CurrentInputs";
+    public static final String KEY_CURRENT_OUTPUTS      = "CurrentOutputs";
+    public static final String KEY_EX                   = "Exception";
 
     public BehaviorTraceEvent(String sourceName) {
         super(TOPIC, sourceName);
@@ -41,17 +40,35 @@ public abstract class BehaviorTraceEvent extends BehaviorEvent {
      *
      * @return  The original input data
      */
-    public Object originalData() {
-        return get(KEY_ORIGINAL_DATA);
+    public Object[] behaviorInputs() {
+        return (Object[]) get(KEY_BEHAVIOR_INPUTS);
     }
 
     /**
-     * Get last outputted data of this behavior
+     * Get current executing action id
+     *
+     * @return  action id
+     */
+    public ActionIdentify currentActionId() {
+        return (ActionIdentify) get(KEY_CURRENT_ACTION_ID);
+    }
+
+    /**
+     * Get outputs by current action execution
+     *
+     * @return  The current action outputs
+     */
+    public ActionOutput[] currentOutputs() {
+        return (ActionOutput[]) get(KEY_CURRENT_OUTPUTS);
+    }
+
+    /**
+     * Get inputs by current action execution
      *
      * @return  The last outputted data
      */
-    public Object data() {
-        return get(KEY_DATA);
+    public Object[] currentResult() {
+        return (Object[]) get(KEY_CURRENT_INPUTS);
     }
 
     /**
@@ -62,8 +79,4 @@ public abstract class BehaviorTraceEvent extends BehaviorEvent {
     public Exception exception() {
         return (Exception) get(KEY_EX);
     }
-
-//    public String responsibleName() {
-//        return (String) get(KEY_RESP_NAME);
-//    }
 }

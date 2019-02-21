@@ -29,7 +29,7 @@ public class Application {
     private static final String BEHAVIOR_STARTUP            = "startUp";
     private static final String BEHAVIOR_SHUTDOWN           = "shutdown";
 
-    private final IAnonymousAction<BehaviorFailure, BehaviorEvent> DEFAULT_FAILURE_ACTION = (failure, ctx) -> {
+    private final IBehaviorFailureCall DEFAULT_FAILURE_ACTION = (failure, ctx) -> {
         this._logger.error(failure.cause(), "Fail to process behavior - {}", ctx.behaviorName());
         return null;
     };
@@ -56,15 +56,14 @@ public class Application {
                 .onFailure(DEFAULT_FAILURE_ACTION)
                 .build();
         responsible.newBehavior(BEHAVIOR_SHUTDOWN, SystemShuttingDownEvent.class, SystemShuttingDownEvent.TOPIC)
-                .then((input, ctx) -> {
+                .call(ctx -> {
                     this._logger.info("Application is going to shutdown...");
                     // Wait until AppShutdownEvent handling finish
                     ctx.fireEvent(new AppShutdownEvent(responsible.name()), true);
-                    List<IService> appSvcs = ((SystemShuttingDownEvent) input).applicationServices();
+                    List<IService> appSvcs = ((SystemShuttingDownEvent) ctx.originalEvent()).applicationServices();
                     List<String[]> appSvcIds = Looper.on(appSvcs).map(IService::getIds).toList();
                     Looper.on(appSvcIds).foreach(this._registry::deactivateServices);
                     this._logger.info("Application shutdown success.");
-                    return input;
                 })
                 .onFailure(DEFAULT_FAILURE_ACTION)
                 .build();

@@ -165,7 +165,7 @@ class ApplicationTest extends Specification {
         }
 
         @Override
-        IBehaviorBuilder newBehavior(String name, Class<?> type) throws BehaviorException {
+        IBehaviorBuilder newBehavior(String name, Class<?>... types) throws BehaviorException {
             return this._behavior
         }
 

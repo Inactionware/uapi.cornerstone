@@ -22,41 +22,41 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * A Behavior represent a serial actions to process input data to output data
  */
-public class Behavior<I, O>
-        extends Builder<IBehavior<I, O>>
-        implements IBehavior<I, O>, IBehaviorBuilder {
+public class Behavior
+        extends Builder<IBehavior>
+        implements IBehavior, IBehaviorBuilder {
 
     private final ActionIdentify _actionId;
-    private Class<I> _iType;
-    private Class<O> _oType;
+    private ActionInputMeta[] _iMetas;
+    private ActionOutputMeta[] _oMetas;
     private boolean _traceable;
 
     private final Responsible _responsible;
-    private final Repository<ActionIdentify, IAction<?, ?>> _actionRepo;
+    private final Repository<ActionIdentify, IAction> _actionRepo;
     private final ActionHolder _entranceAction;
     private final Navigator _navigator;
     private final AtomicInteger _sequence;
 
     private Functionals.Evaluator _lastEvaluator;
 
-    private IAction<BehaviorSuccess, BehaviorEvent> _successAction;
-    private IAction<BehaviorFailure, BehaviorEvent> _failureAction;
+    private IBehaviorSuccessCall _successAction;
+    private IBehaviorFailureCall _failureAction;
 
     Behavior(
             final Responsible responsible,
-            final Repository<ActionIdentify, IAction<?, ?>> actionRepository,
+            final Repository<ActionIdentify, IAction> actionRepository,
             final String name,
-            final Class inputType
+            final ActionInputMeta[] inputMetas
     ) {
         ArgumentChecker.required(responsible, "responsible");
         ArgumentChecker.required(actionRepository, "responsible");
         ArgumentChecker.required(name, "name");
-        ArgumentChecker.required(inputType, "inputType");
+        ArgumentChecker.required(inputMetas, "inputMetas");
         this._responsible = responsible;
         this._actionRepo = actionRepository;
         this._actionId = new ActionIdentify(name, ActionType.BEHAVIOR);
-        EndpointAction entrance = new EndpointAction(EndpointType.ENTRANCE, inputType);
-        this._entranceAction = new ActionHolder(entrance);
+        EndpointAction entrance = new EndpointAction(EndpointType.ENTRANCE, inputMetas);
+        this._entranceAction = new ActionHolder(entrance, this);
 
         this._navigator = new Navigator(this._entranceAction);
         this._sequence = new AtomicInteger(0);
@@ -76,24 +76,26 @@ public class Behavior<I, O>
     // ----------------------------------------------------
 
     @Override
-    public Class<I> inputType() {
+    public ActionInputMeta[] inputMetas() {
         ensureBuilt();
-        return this._iType;
+        return this._iMetas;
     }
 
     @Override
-    public Class<O> outputType() {
+    public ActionOutputMeta[] outputMetas() {
         ensureBuilt();
-        return this._oType;
+        return this._oMetas;
     }
 
     @Override
-    public O process(
-            final I input,
+    public void process(
+            final Object[] inputs,
+            final ActionOutput[] outputs,
             final IExecutionContext context
     ) {
+        ensureBuilt();
         Execution execution = newExecution();
-        return (O) execution.execute(input, (ExecutionContext) context);
+        execution.execute(inputs, outputs, (ExecutionContext) context);
     }
 
     // ----------------------------------------------------
@@ -144,11 +146,12 @@ public class Behavior<I, O>
     @Override
     public IBehaviorBuilder then(
             final ActionIdentify id,
-            final String label
+            final String label,
+            final Object... inputs
     ) throws BehaviorException {
         ensureNotBuilt();
         ArgumentChecker.required(id, "id");
-        IAction<?, ?> action = this._actionRepo.get(id);
+        IAction action = this._actionRepo.get(id);
         if (action == null) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
@@ -156,11 +159,7 @@ public class Behavior<I, O>
                             .actionId(id))
                     .build();
         }
-        if (addInterceptor(action, label)) {
-            this._navigator.newNextAction(action, this._lastEvaluator, null);
-        } else {
-            this._navigator.newNextAction(action, this._lastEvaluator, label);
-        }
+        this._navigator.newNextAction(action, this._lastEvaluator, label, inputs);
         this._lastEvaluator = null;
         return this;
     }
@@ -175,86 +174,22 @@ public class Behavior<I, O>
     @Override
     public IBehaviorBuilder then(
             final Class<? extends IAction> actionType,
-            final String label
+            final String label,
+            final Object... inputs
     ) throws BehaviorException {
-        return then(ActionIdentify.toActionId(actionType), label);
-    }
-
-    private boolean addInterceptor(IAction<?, ?> action, String label) {
-        if (action instanceof IInterceptive) {
-            ActionIdentify interceptorId = ((IInterceptive) action).by();
-            IAction<?, ?> interceptor;
-            interceptor = this._actionRepo.get(interceptorId);
-            if (interceptor == null) {
-                throw BehaviorException.builder()
-                        .errorCode(BehaviorErrors.INTERCEPTOR_NOT_FOUND)
-                        .variables(new BehaviorErrors.InterceptorNotFound()
-                                .actionId(action.getId())
-                                .interceptorId(interceptorId))
-                        .build();
-            }
-            if (! (interceptor instanceof IInterceptor)) {
-                throw BehaviorException.builder()
-                        .errorCode(BehaviorErrors.ACTION_IS_NOT_INTERCEPTOR)
-                        .variables(new BehaviorErrors.ActionIsNotInterceptor()
-                                .actionId(interceptorId))
-                        .build();
-            }
-
-            // The input and output type of dependent action must be same as input type of the action
-            Class<?> interceptorInputType = interceptor.inputType();
-            if (interceptorInputType != action.inputType()) {
-                throw BehaviorException.builder()
-                        .errorCode(BehaviorErrors.INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT)
-                        .variables(new BehaviorErrors.InterceptorIONotMatchActionInput()
-                                .interceptorId(interceptorId)
-                                .actionId(action.getId())
-                                .interceptorIOType(interceptorInputType)
-                                .actionInputType(action.inputType()))
-                        .build();
-            }
-
-            this._navigator.newNextAction(interceptor, this._lastEvaluator, label);
-            this._lastEvaluator = null;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public IBehaviorBuilder then(
-            final IAnonymousAction<?, ?> action
-    ) {
-        return then(action, null);
-    }
-
-    @Override
-    public IBehaviorBuilder then(
-            final IAnonymousAction<?, ?> action,
-            final String label
-    ) {
-        ensureNotBuilt();
-        ArgumentChecker.required(action, "action");
-        AnonymousAction aAction = new AnonymousAction(action);
-        if (addInterceptor(aAction, label)) {
-            this._navigator.newNextAction(aAction, this._lastEvaluator, null);
-        } else {
-            this._navigator.newNextAction(aAction, this._lastEvaluator, label);
-        }
-        this._lastEvaluator = null;
-        return this;
+        return then(ActionIdentify.toActionId(actionType), label, inputs);
     }
 
     @Override
     public IBehaviorBuilder call(
-            final IAnonymousCall<?> call
+            final IAnonymousCall call
     ) {
         return call(call, null);
     }
 
     @Override
     public IBehaviorBuilder call(
-            final IAnonymousCall<?> call,
+            final IAnonymousCall call,
             final String label
     ) {
         ensureNotBuilt();
@@ -267,49 +202,24 @@ public class Behavior<I, O>
 
     @Override
     public IBehaviorBuilder onSuccess(
-            final IAnonymousAction<BehaviorSuccess, BehaviorEvent> action
+            final IBehaviorSuccessCall action
     ) {
         ensureNotBuilt();
         ArgumentChecker.required(action, "action");
         if (this._successAction != null) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.SUCCESS_ACTION_EXISTS)
-                    .variables(new BehaviorErrors.FailureActionExists()
+                    .variables(new BehaviorErrors.SuccessActionExists()
                             .behaviorId(this._actionId))
                     .build();
         }
-        this._successAction = new AnonymousAction<>(action);
-        return this;
-    }
-
-    @Override
-    public IBehaviorBuilder onSuccess(
-            final ActionIdentify actionId
-    ) {
-        ensureNotBuilt();
-        ArgumentChecker.required(actionId, "actionId");
-        if (this._successAction != null) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.SUCCESS_ACTION_EXISTS)
-                    .variables(new BehaviorErrors.FailureActionExists()
-                            .behaviorId(this._actionId))
-                    .build();
-        }
-        IAction<?, ?> action = this._actionRepo.get(actionId);
-        if (action == null) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
-                    .variables(new BehaviorErrors.ActionNotFound()
-                            .actionId(actionId))
-                    .build();
-        }
-        this._successAction = (IAction<BehaviorSuccess, BehaviorEvent>) action;
+        this._successAction = action;
         return this;
     }
 
     @Override
     public IBehaviorBuilder onFailure(
-            final IAnonymousAction<BehaviorFailure, BehaviorEvent> action
+            final IBehaviorFailureCall action
     ) {
         ensureNotBuilt();
         ArgumentChecker.required(action, "action");
@@ -320,32 +230,7 @@ public class Behavior<I, O>
                             .behaviorId(this._actionId))
                     .build();
         }
-        this._failureAction = new AnonymousAction<>(action);
-        return this;
-    }
-
-    @Override
-    public IBehaviorBuilder onFailure(
-            final ActionIdentify actionId
-    ) {
-        ensureNotBuilt();
-        ArgumentChecker.required(actionId, "actionId");
-        if (this._failureAction != null) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.FAILURE_ACTION_EXISTS)
-                    .variables(new BehaviorErrors.FailureActionExists()
-                            .behaviorId(this._actionId))
-                    .build();
-        }
-        IAction<?, ?> action = this._actionRepo.get(actionId);
-        if (action == null) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
-                    .variables(new BehaviorErrors.ActionNotFound()
-                            .actionId(actionId))
-                    .build();
-        }
-        this._failureAction = (IAction<BehaviorFailure, BehaviorEvent>) action;
+        this._failureAction = action;
         return this;
     }
 
@@ -385,28 +270,43 @@ public class Behavior<I, O>
                 if (idx == 0) {
                     return;
                 }
-                IAction action1 = leafActions.get(idx - 1).action();
-                IAction action2 = leafActions.get(idx).action();
-                if (!action1.outputType().equals(action2.outputType())) {
+                IAction leafAction1 = leafActions.get(idx - 1).action();
+                IAction leafAction2 = leafActions.get(idx).action();
+                ActionOutputMeta[] outMetas1 = leafAction1.outputMetas();
+                ActionOutputMeta[] outMetas2 = leafAction2.outputMetas();
+                if (outMetas1.length != outMetas2.length) {
                     throw BehaviorException.builder()
                             .errorCode(BehaviorErrors.INCONSISTENT_LEAF_ACTIONS)
                             .variables(new BehaviorErrors.InconsistentLeafActions()
-                                    .leafAction1(action1.getId())
-                                    .leafAction2(action2.getId())
-                                    .leafAction1Output(action1.outputType())
-                                    .leafAction2Output(action2.outputType()))
+                                    .leafAction1(leafAction1.getId())
+                                    .leafAction2(leafAction2.getId())
+                                    .leafAction1Output(outMetas1)
+                                    .leafAction2Output(outMetas2))
+                            .build();
+                }
+                // ensure all action output must have same name and same type
+                int unmatchedPos = Looper.on(Range.from(0).to(outMetas1.length).iterator())
+                        .filter(pos -> outMetas1[pos].equals(outMetas2[pos]))
+                        .first(-1);
+                if (unmatchedPos != -1) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.INCONSISTENT_LEAF_ACTIONS)
+                            .variables(new BehaviorErrors.InconsistentLeafActions()
+                                    .leafAction1(leafAction1.getId())
+                                    .leafAction2(leafAction2.getId())
+                                    .leafAction1Output(outMetas1)
+                                    .leafAction2Output(outMetas2))
                             .build();
                 }
             });
         }
 
         // Make all leaf action's next to a exit action
-        Class outputType = leafActions.get(0).action().outputType();
-        IAction exit = new EndpointAction(EndpointType.EXIT, outputType);
-        Looper.on(leafActions).foreach(aHolder -> aHolder.next(new ActionHolder(exit)));
+        IAction exit = new EndpointAction(EndpointType.EXIT, leafActions.get(0).outputMetas());
+        Looper.on(leafActions).foreach(aHolder -> aHolder.next(new ActionHolder(exit, this)));
 
-        this._iType = this._entranceAction.action().inputType();
-        this._oType = outputType;
+        this._iMetas = this._entranceAction.action().inputMetas();
+        this._oMetas = exit.outputMetas();
     }
 
     @Override
@@ -420,7 +320,7 @@ public class Behavior<I, O>
     }
 
     @Override
-    protected IBehavior<I, O> createInstance() {
+    protected IBehavior createInstance() {
         return this;
     }
 
@@ -451,17 +351,32 @@ public class Behavior<I, O>
     private final class EndpointAction implements IAction {
 
         private final EndpointType _type;
-        private final Class<?> _inputType;
-        private final Class<?> _outputType;
+        private final ActionInputMeta[] _inputMetas;
+        private final ActionOutputMeta[] _outputMetas;
 
         private EndpointAction(
                 final EndpointType type,
-                final Class inputType
+                final ActionInputMeta[] inputMetas
         ) {
-            ArgumentChecker.required(inputType, "inputType");
-            this._inputType = inputType;
-            this._outputType = inputType;
+            this(type, inputMetas, null);
+        }
+
+        private EndpointAction(
+                final EndpointType type,
+                final ActionOutputMeta[] outputMetas
+        ) {
+            this(type, null, outputMetas);
+        }
+
+        private EndpointAction(
+                final EndpointType type,
+                final ActionInputMeta[] inputMetas,
+                final ActionOutputMeta[] outputMetas
+        ) {
+            ArgumentChecker.required(type, "type");
             this._type = type;
+            this._inputMetas = inputMetas == null ? new ActionInputMeta[0] : inputMetas;
+            this._outputMetas = outputMetas == null ? new ActionOutputMeta[0] : outputMetas;
         }
 
         @Override
@@ -470,23 +385,18 @@ public class Behavior<I, O>
         }
 
         @Override
-        public Class inputType() {
-            return this._inputType;
+        public ActionInputMeta[] inputMetas() {
+            return this._inputMetas;
         }
 
         @Override
-        public Class outputType() {
-            return this._outputType;
+        public ActionOutputMeta[] outputMetas() {
+            return this._outputMetas;
         }
 
         @Override
         public boolean isAnonymous() {
             return false;
-        }
-
-        @Override
-        public Object process(Object input, IExecutionContext context) {
-            return input;
         }
     }
 
@@ -495,6 +405,8 @@ public class Behavior<I, O>
     }
 
     private final class Navigator implements INavigator {
+
+        private static final int MAX_TRY_ID_COUNT       = 10;
 
         private ActionHolder _current;
         private final ActionHolder _starting;
@@ -532,40 +444,47 @@ public class Behavior<I, O>
         private void newNextAction(
                 final IAction action,
                 final Functionals.Evaluator evaluator,
-                final String label
+                final String label,
+                final Object... inputs
         ) throws BehaviorException {
-            ActionHolder newAction = new ActionHolder(action, evaluator);
-            // Check new action input is matched to current action output
-            // The check only on non-anonymous action
-            if (! this._current.action().isAnonymous() && ! action.isAnonymous()) {
-                if (! action.inputType().isAssignableFrom(this._current.action().outputType())) {
-                    throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.ACTION_IO_MISMATCH)
-                            .variables(new BehaviorErrors.ActionIOMismatch()
-                                    .outputAction(this._current.action().getId())
-                                    .outputType(this._current.action().outputType())
-                                    .inputAction(action.getId())
-                                    .inputType(action.inputType()))
-                            .build();
+            String actionLabel = label;
+            if (StringHelper.isNullOrEmpty(label)) {
+                // Generate action label if no label is specified
+                String actionId = action.getId().toString();
+                actionLabel = actionId;
+                int idx = 1;
+                while (this._labeledActions.containsKey(actionLabel)) {
+                    if (idx > MAX_TRY_ID_COUNT) {
+                        throw BehaviorException.builder()
+                                .errorCode(BehaviorErrors.GENERATE_ACTION_LABEL_OVER_MAX)
+                                .variables(new BehaviorErrors.GenerateActionLabelOverMax()
+                                        .actionId(action.getId())
+                                        .maxCount(MAX_TRY_ID_COUNT))
+                                .build();
+                    }
+                    actionLabel = StringHelper.makeString("{}-{}", actionId, idx);
+                    idx++;
                 }
-            }
-            // Check action label
-            if (! ArgumentChecker.isEmpty(label)) {
-                ActionHolder existingAction = this._labeledActions.get(label);
-                if (existingAction != null) {
+            } else {
+                // Customized action label
+                if (this._labeledActions.containsKey(label)) {
                     throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.ACTION_LABEL_IS_BIND)
-                            .variables(new BehaviorErrors.ActionLabelIsBind()
+                            .errorCode(BehaviorErrors.DUPLICATED_ACTION_LABEL)
+                            .variables(new BehaviorErrors.DuplicatedActionLabel()
                                     .label(label)
-                                    .actionId(existingAction.action().getId()))
+                                    .behaviorId(Behavior.this._actionId))
                             .build();
                 }
-                this._labeledActions.put(label, newAction);
             }
-
-            this._current.next(newAction);
-            this._current = newAction;
-            this._actions.add(newAction);
+            // create new action holder
+            if (action instanceof IIntercepted) {
+                this._current = new InterceptedActionHolder(
+                        Behavior.this._actionRepo, action, actionLabel, this._current, Behavior.this, evaluator, inputs);
+            } else {
+                this._current = new ActionHolder(
+                        action, actionLabel, this._current, Behavior.this, evaluator, inputs);
+            }
+            this._actions.add(this._current);
         }
     }
 }

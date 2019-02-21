@@ -1,5 +1,6 @@
 package uapi.app.internal
 
+import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.app.AppException
 import uapi.log.ILogger
@@ -9,6 +10,7 @@ import uapi.service.IService
 /**
  * Unit tests for StartupApplication
  */
+@Ignore
 class StartupApplicationTest extends Specification {
 
     def 'Test create instance'() {

@@ -1,37 +1,15 @@
 try {
-<#if needContext>
-    <#if isOutVoid>
-        <#if isInVoid>
-            super.${actionMethodName}(context);
-            return null;
-        <#else>
-            super.${actionMethodName}(input, context);
-            return null;
-        </#if>
+            super.${actionMethodName}(
+<#list actionParameterMetas as actionParameterMeta>
+    <#if actionParameterMeta.type == "INPUT">
+                (${actionParameterMeta.className}) inputs[${actionParameterMeta.index}]<#sep>, </#sep>
+    <#elseif actionParameterMeta.type == "OUTPUT">
+                outputs[${actionParameterMeta.index}]<#sep>, </#sep>
     <#else>
-        <#if isInVoid>
-            return super.${actionMethodName}(context);
-        <#else>
-            return super.${actionMethodName}(input, context);
-        </#if>
+                context<#sep>, </#sep>
     </#if>
-<#else>
-    <#if isOutVoid>
-        <#if isInVoid>
-            super.${actionMethodName}();
-            return null;
-        <#else>
-            super.${actionMethodName}(input);
-            return null;
-        </#if>
-    <#else>
-        <#if isInVoid>
-            return super.${actionMethodName}();
-        <#else>
-            return super.${actionMethodName}(input);
-        </#if>
-    </#if>
-</#if>
+</#list>
+            );
         } catch (Exception ex) {
             throw new uapi.GeneralException(ex);
         }

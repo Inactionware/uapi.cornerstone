@@ -9,11 +9,13 @@
 
 package uapi.behavior
 
+import spock.lang.Ignore
 import spock.lang.Specification
 
 /**
  * Unit test for BehaviorExecutingEvent
  */
+@Ignore
 class BehaviorExecutingEventTest extends Specification {
 
     def 'Test create instance'() {

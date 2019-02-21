@@ -1,7 +1,6 @@
 package uapi.behavior;
 
 import uapi.common.Functionals;
-import uapi.event.IEventFinishCallback;
 
 /**
  * A builder for behavior creation
@@ -46,11 +45,14 @@ public interface IBehaviorBuilder {
      *          The id of next action/behavior
      * @param   label
      *          The action/behavior label which can be used to navigate to it later
+     * @param   inputs
+     *          Specified inputs for the action/behavior
+     *          If the input is ActionInputReference then the input is a pointer which point to other action's input
      * @return  The behavior builder self
      * @throws  BehaviorException
      *          No action has such id, see {@link BehaviorErrors.ActionNotFound}
      */
-    IBehaviorBuilder then(ActionIdentify id, String label) throws BehaviorException;
+    IBehaviorBuilder then(ActionIdentify id, String label, Object... inputs) throws BehaviorException;
 
     /**
      * Set where is next action/behavior when current branch condition is satisfied.
@@ -72,35 +74,13 @@ public interface IBehaviorBuilder {
      *          The action type of next action/behavior
      * @param   label
      *          The action/behavior label which can be used to navigate to it late
+     * @param   inputs
+     *          The inputs for the action/behavior
      * @return  The behavior builder instance
      * @throws  BehaviorException
      *          No action in the repository, see {@link BehaviorErrors.ActionNotFound}
      */
-    IBehaviorBuilder then(Class<? extends IAction> actionType, String label) throws BehaviorException;
-
-    /**
-     * Set next an anonymous action when current branch condition is satisfied.
-     *
-     * @param   action
-     *          The anonymous action
-     * @return  The behavior builder self
-     * @throws  BehaviorException
-     *          Any cause when set action
-     */
-    IBehaviorBuilder then(IAnonymousAction<?, ?> action) throws BehaviorException;
-
-    /**
-     * Set next an anonymous action with specific label when current branch condition is satisfied.
-     *
-     * @param   action
-     *          The anonymous action
-     * @param   label
-     *          The action/behavior label which can be used to navigate to it later
-     * @return  The behavior builder self
-     * @throws  BehaviorException
-     *          Any cause when set action
-     */
-    IBehaviorBuilder then(IAnonymousAction<?, ?> action, String label) throws BehaviorException;
+    IBehaviorBuilder then(Class<? extends IAction> actionType, String label, Object... inputs) throws BehaviorException;
 
     /**
      * Set next an anonymous action which return nothing when current branch condition is satisfied.
@@ -111,7 +91,7 @@ public interface IBehaviorBuilder {
      * @throws  BehaviorException
      *          Any cause when set the action
      */
-    IBehaviorBuilder call(IAnonymousCall<?> call) throws BehaviorException;
+    IBehaviorBuilder call(IAnonymousCall call) throws BehaviorException;
 
     /**
      * Set next an anonymous action which return nothing with specific label when current branch condition is satisfied.
@@ -124,7 +104,7 @@ public interface IBehaviorBuilder {
      * @throws  BehaviorException
      *          Any cause when set the action
      */
-    IBehaviorBuilder call(IAnonymousCall<?> call, String label) throws BehaviorException;
+    IBehaviorBuilder call(IAnonymousCall call, String label) throws BehaviorException;
 
     /**
      * Invoke the action when the behavior is executed successful
@@ -133,9 +113,7 @@ public interface IBehaviorBuilder {
      *          The action which will be invoked on behavior successful
      * @return  The behavior builder self
      */
-    IBehaviorBuilder onSuccess(IAnonymousAction<BehaviorSuccess, BehaviorEvent> action);
-
-    IBehaviorBuilder onSuccess(ActionIdentify actionId);
+    IBehaviorBuilder onSuccess(IBehaviorSuccessCall action);
 
     /**
      * Invoke the action when the behavior is executed failed
@@ -144,9 +122,7 @@ public interface IBehaviorBuilder {
      *          The action which will be invoked on behavior failed
      * @return  The behavior builder self
      */
-    IBehaviorBuilder onFailure(IAnonymousAction<BehaviorFailure, BehaviorEvent> action);
-
-    IBehaviorBuilder onFailure(ActionIdentify actionId);
+    IBehaviorBuilder onFailure(IBehaviorFailureCall action);
 
     /**
      * Get navigator which associated with this behavior builder

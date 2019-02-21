@@ -17,37 +17,80 @@ public interface IActionHandlerHelper extends IHandlerHelper {
 
     final class ActionMethodMeta {
 
-        private final String _inType;
-        private final String _outType;
         private final String _methodName;
-        private final boolean _needContext;
+        private final ParameterMeta[] _paramMetas;
 
         public ActionMethodMeta(
-                final String inType,
-                final String outType,
                 final String methodName,
-                final boolean needContext
+                final ParameterMeta[] parameterMetas
         ) {
-            this._inType = inType;
-            this._outType = outType;
             this._methodName = methodName;
-            this._needContext = needContext;
-        }
-
-        public String inputType() {
-            return this._inType;
-        }
-
-        public String outputType() {
-            return this._outType;
+            this._paramMetas = parameterMetas;
         }
 
         public String methodName() {
             return this._methodName;
         }
 
-        public boolean needContext() {
-            return this._needContext;
+        public ParameterMeta[] parameterMetas() {
+            return this._paramMetas;
         }
+    }
+
+    final class ParameterMeta {
+
+        private final ParameterType _type;
+        private final int _idx;
+        private final String _className;
+        private final String _name;
+
+        public static ParameterMeta newInputMeta(
+                final int index,
+                final String className
+        ) {
+            return new ParameterMeta(ParameterType.INPUT, index, className, null);
+        }
+
+        public static ParameterMeta newOutputMeta(
+                final int index,
+                final String name
+        ) {
+            return new ParameterMeta(ParameterType.OUTPUT, index, ActionOutput.class.getCanonicalName(), name);
+        }
+
+        public static ParameterMeta newContextMeta() {
+            return new ParameterMeta(ParameterType.CONTEXT, 0, null, null);
+        }
+
+        private ParameterMeta(
+                ParameterType type,
+                int index,
+                String className,
+                String name) {
+            this._type = type;
+            this._idx = index;
+            this._className = className;
+            this._name = name;
+        }
+
+        public ParameterType getType() {
+            return this._type;
+        }
+
+        public int getIndex() {
+            return this._idx;
+        }
+
+        public String getClassName() {
+            return this._className;
+        }
+
+        public String getName() {
+            return this._name;
+        }
+    }
+
+    enum ParameterType {
+        INPUT, OUTPUT, CONTEXT
     }
 }
