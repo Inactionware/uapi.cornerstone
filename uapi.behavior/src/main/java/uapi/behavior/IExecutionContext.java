@@ -20,6 +20,8 @@ public interface IExecutionContext {
     String KEY_BEHA_NAME    = "BehaviorName";
     String KEY_ORI_EVENT    = "OriginalEvent";
     String KEY_BEHA_INPUTS  = "BehaviorInputs";
+    String KEY_BEHA_IN_1    = "BehaviorInputs.1";
+    String KEY_BEHA_IN_2    = "BehaviorInputs.2";
 
     /**
      * Put single k/v data under behavior scope

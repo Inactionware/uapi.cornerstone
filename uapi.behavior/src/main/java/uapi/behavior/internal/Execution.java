@@ -141,5 +141,11 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 throw new GeneralException(exception);
             }
         }
+
+        // TODO: Write outputs back to behavior outputs
+        if (outputs.length != behaviorInputs.length) {
+            //throw;
+        }
+        Looper.on(outputs).foreachWithIndex((idx, output) -> behaviorOutputs[idx].set(output.get()));
     }
 }
