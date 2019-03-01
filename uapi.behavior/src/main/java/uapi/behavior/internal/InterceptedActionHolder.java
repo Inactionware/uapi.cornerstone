@@ -10,6 +10,7 @@
 package uapi.behavior.internal;
 
 import uapi.behavior.*;
+import uapi.common.CollectionHelper;
 import uapi.common.Functionals;
 import uapi.common.Repository;
 import uapi.rx.Looper;
@@ -48,6 +49,24 @@ public class InterceptedActionHolder extends ActionHolder {
                             .errorCode(BehaviorErrors.ACTION_IS_NOT_INTERCEPTOR)
                             .variables(new BehaviorErrors.ActionIsNotInterceptor()
                                     .actionId(interceptorId))
+                            .build();
+                }
+                // Check interceptor which input metas should be same as intercepted action's input meta
+                if (CollectionHelper.equals(action.inputMetas(), interceptor.inputMetas())) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.INCONSISTENT_INTERCEPTOR_INPUT_METAS)
+                            .variables(new BehaviorErrors.InconsistentInterceptorInputMetas()
+                                    .interceptorInputMetas(interceptor.inputMetas())
+                                    .intercepedActionInputMetas(action.inputMetas()))
+                            .build();
+                }
+                // The interceptor output must be 0
+                if (interceptor.outputMetas().length != 0) {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.INTERCEPTOR_HAS_OUTPU_META)
+                            .variables(new BehaviorErrors.InterceptorHasOutputMeta()
+                                    .interceptorId(interceptor.getId())
+                                    .outputMeta(interceptor.outputMetas()))
                             .build();
                 }
                 return (IInterceptor) interceptor;

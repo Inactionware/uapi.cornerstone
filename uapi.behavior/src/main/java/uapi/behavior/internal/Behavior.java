@@ -476,6 +476,7 @@ public class Behavior
                             .build();
                 }
             }
+
             // create new action holder
             if (action instanceof IIntercepted) {
                 this._current = new InterceptedActionHolder(

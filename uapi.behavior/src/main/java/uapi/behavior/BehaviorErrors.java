@@ -9,6 +9,7 @@
 
 package uapi.behavior;
 
+import uapi.common.CollectionHelper;
 import uapi.exception.FileBasedExceptionErrors;
 import uapi.exception.IndexedParameters;
 
@@ -61,6 +62,8 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int RESERVED_ACTION_OUTPUT_NAME             = 36;
     public static final int UNKNOWN_FAILURE_ON_INTERCEPTOR          = 37;
     public static final int INCORRECT_ACTION_OUTPUT_NAME            = 38;
+    public static final int INCONSISTENT_INTERCEPTOR_INPUT_METAS    = 39;
+    public static final int INTERCEPTOR_HAS_OUTPU_META              = 40;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -104,6 +107,8 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(RESERVED_ACTION_OUTPUT_NAME, ReservedActionOutputName.KEY);
 //        keyCodeMapping.put(UNKNOWN_FAILURE_ON_INTERCEPTOR, UnknownFailureOnInterceptor.KEY);
 //        keyCodeMapping.put(INCORRECT_ACTION_OUTPUT_NAME, IncorrectActionOutputName.KEY);
+        keyCodeMapping.put(INCONSISTENT_INTERCEPTOR_INPUT_METAS, InconsistentInterceptorInputMetas.KEY);
+        keyCodeMapping.put(INTERCEPTOR_HAS_OUTPU_META, InterceptorHasOutputMeta.KEY);
     }
 
     public BehaviorErrors() {
@@ -1140,4 +1145,60 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 //            return new Object[] { this._outputName, this._actionId };
 //        }
 //    }
+
+    /**
+     * Error string template:
+     *      The Interceptor input metas {} does not match intercepted action input metas {}
+     */
+    public static final class InconsistentInterceptorInputMetas extends IndexedParameters<InconsistentInterceptorInputMetas> {
+
+        public static final String KEY = "InconsistentInterceptorInputMetas";
+
+        private ActionInputMeta[] _iInputMetas;
+        private ActionInputMeta[] _aInputMetas;
+
+        public InconsistentInterceptorInputMetas interceptorInputMetas(final ActionInputMeta[] inputMetas) {
+            this._iInputMetas = inputMetas;
+            return this;
+        }
+
+        public InconsistentInterceptorInputMetas intercepedActionInputMetas(final ActionInputMeta[] inputMetas) {
+            this._aInputMetas = inputMetas;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] {
+                    CollectionHelper.asString(this._iInputMetas),
+                    CollectionHelper.asString(this._aInputMetas)
+            };
+        }
+    }
+
+    /**
+     * Error String template:
+     *      Interceptor does not support output, interceptor - {}, output meta - {}
+     */
+    public static final class InterceptorHasOutputMeta extends IndexedParameters<InterceptorHasOutputMeta> {
+
+        public static final String KEY = "InterceptorHasOutputMeta";
+
+        private ActionIdentify _interceptorId;
+        private ActionOutputMeta[] _outMetas;
+
+        public InterceptorHasOutputMeta interceptorId(final ActionIdentify actionId) {
+            this._interceptorId = actionId;
+            return this;
+        }
+
+        public InterceptorHasOutputMeta outputMeta(final ActionOutputMeta[] outputMetas) {
+            this._outMetas = outputMetas;
+            return this;
+        }
+
+        public Object[] get() {
+            return new Object[] { this._interceptorId, CollectionHelper.asString(this._outMetas) };
+        }
+    }
 }
