@@ -35,6 +35,7 @@ public class Behavior
     private final Repository<ActionIdentify, IAction> _actionRepo;
     private final ActionHolder _entranceAction;
     private final Navigator _navigator;
+    private final IWired _wired;
     private final AtomicInteger _sequence;
 
     private Functionals.Evaluator _lastEvaluator;
@@ -55,10 +56,11 @@ public class Behavior
         this._responsible = responsible;
         this._actionRepo = actionRepository;
         this._actionId = new ActionIdentify(name, ActionType.BEHAVIOR);
-        EndpointAction entrance = new EndpointAction(EndpointType.ENTRANCE, inputMetas);
+        HeadAction entrance = new HeadAction(inputMetas);
         this._entranceAction = new ActionHolder(entrance, this);
 
         this._navigator = new Navigator(this._entranceAction);
+        this._wired = new Wired();
         this._sequence = new AtomicInteger(0);
     }
 
@@ -240,6 +242,12 @@ public class Behavior
         return this._navigator;
     }
 
+    @Override
+    public IWired wired() {
+        ensureNotBuilt();
+        return this._wired;
+    }
+
     // ----------------------------------------------------
     // Methods extend from Builder class
     // ----------------------------------------------------
@@ -284,9 +292,9 @@ public class Behavior
                                     .leafAction2Output(outMetas2))
                             .build();
                 }
-                // ensure all action output must have same name and same type
+                // ensure all action output must have same type
                 int unmatchedPos = Looper.on(Range.from(0).to(outMetas1.length).iterator())
-                        .filter(pos -> outMetas1[pos].equals(outMetas2[pos]))
+                        .filter(pos -> outMetas1[pos].type().equals(outMetas2[pos].type()))
                         .first(-1);
                 if (unmatchedPos != -1) {
                     throw BehaviorException.builder()
@@ -302,11 +310,11 @@ public class Behavior
         }
 
         // Make all leaf action's next to a exit action
-        IAction exit = new EndpointAction(EndpointType.EXIT, leafActions.get(0).outputMetas());
-        Looper.on(leafActions).foreach(aHolder -> aHolder.next(new ActionHolder(exit, this)));
+//        IAction exit = new EndpointAction(EndpointType.EXIT, leafActions.get(0).outputMetas());
+//        Looper.on(leafActions).foreach(aHolder -> aHolder.next(new ActionHolder(exit, this)));
 
         this._iMetas = this._entranceAction.action().inputMetas();
-        this._oMetas = exit.outputMetas();
+//        this._oMetas = exit.outputMetas();
     }
 
     @Override
@@ -344,44 +352,32 @@ public class Behavior
     int actionSize() {
         return Looper.on(this._navigator._actions)
                 .map(ActionHolder::action)
-                .filter(action -> ! (action.getClass().isAssignableFrom(EndpointAction.class)))
+                .filter(action -> ! (action.getClass().isAssignableFrom(HeadAction.class)))
                 .count();
     }
 
-    private final class EndpointAction implements IAction {
+    private final class HeadAction implements IAction {
 
-        private final EndpointType _type;
-        private final ActionInputMeta[] _inputMetas;
+        private final ActionIdentify _id;
+        private final ActionInputMeta[] _inputMetas = new ActionInputMeta[0];
         private final ActionOutputMeta[] _outputMetas;
 
-        private EndpointAction(
-                final EndpointType type,
-                final ActionInputMeta[] inputMetas
+        private HeadAction(
+                final ActionInputMeta[] behaviorInputMetas
         ) {
-            this(type, inputMetas, null);
-        }
+            ArgumentChecker.required(behaviorInputMetas, "behaviorInputMetas");
 
-        private EndpointAction(
-                final EndpointType type,
-                final ActionOutputMeta[] outputMetas
-        ) {
-            this(type, null, outputMetas);
-        }
-
-        private EndpointAction(
-                final EndpointType type,
-                final ActionInputMeta[] inputMetas,
-                final ActionOutputMeta[] outputMetas
-        ) {
-            ArgumentChecker.required(type, "type");
-            this._type = type;
-            this._inputMetas = inputMetas == null ? new ActionInputMeta[0] : inputMetas;
-            this._outputMetas = outputMetas == null ? new ActionOutputMeta[0] : outputMetas;
+            this._id = ActionIdentify.toActionId(HeadAction.class);
+            this._outputMetas = new ActionOutputMeta[behaviorInputMetas.length];
+            Looper.on(behaviorInputMetas).foreachWithIndex((idx, inMeta) -> {
+                String outName = StringHelper.makeString("{}.{}", this._id.getName());
+                this._outputMetas[idx] = new ActionOutputMeta(inMeta.type(), outName);
+            });
         }
 
         @Override
         public ActionIdentify getId() {
-            return new ActionIdentify(this._type.name(), ActionType.ACTION);
+            return this._id;
         }
 
         @Override
@@ -398,6 +394,56 @@ public class Behavior
         public boolean isAnonymous() {
             return false;
         }
+
+        @Override
+        public void process(Object[] inputs, ActionOutput[] outputs, IExecutionContext context) {
+            Object[] behaviorInputs = context.behaviorInputs();
+            Looper.on(behaviorInputs).foreachWithIndex((idx, input) -> outputs[idx].set(input));
+        }
+    }
+
+    private class TailAction implements IAction {
+
+        private final ActionIdentify _id;
+        private final ActionInputMeta[] _inMetas;
+        private final ActionOutputMeta[] _outMetas;
+
+        private TailAction(final ActionOutputMeta[] leafActionOutputMetas) {
+            ArgumentChecker.required(leafActionOutputMetas, "leafActionOutputMetas");
+
+            this._id = ActionIdentify.toActionId(TailAction.class);
+            this._inMetas = new ActionInputMeta[leafActionOutputMetas.length];
+            this._outMetas = new ActionOutputMeta[leafActionOutputMetas.length];
+            Looper.on(leafActionOutputMetas).foreachWithIndex((idx, outMeta) -> {
+                this._inMetas[idx] = new ActionInputMeta(leafActionOutputMetas[idx].type());
+                this._outMetas[idx] = new ActionOutputMeta(leafActionOutputMetas[idx].type());
+            });
+        }
+
+        @Override
+        public ActionIdentify getId() {
+            return this._id;
+        }
+
+        @Override
+        public ActionInputMeta[] inputMetas() {
+            return this._inMetas;
+        }
+
+        @Override
+        public ActionOutputMeta[] outputMetas() {
+            return this._outMetas;
+        }
+
+        @Override
+        public boolean isAnonymous() {
+            return false;
+        }
+
+        @Override
+        public void process(Object[] inputs, ActionOutput[] outputs, IExecutionContext context) {
+            Looper.on(inputs).foreachWithIndex((idx, input) -> outputs[idx].set(input));
+        }
     }
 
     private enum EndpointType {
@@ -409,13 +455,13 @@ public class Behavior
         private static final int MAX_TRY_ID_COUNT       = 10;
 
         private ActionHolder _current;
-        private final ActionHolder _starting;
+        private ActionHolder _starting;
         private final Map<String, ActionHolder> _labeledActions;
         private final List<ActionHolder> _actions;
 
         private Navigator(final ActionHolder starting) {
-            this._starting = starting;
-            this._current = starting;
+//            this._starting = starting;
+//            this._current = starting;
             this._labeledActions = new HashMap<>();
             this._actions = new LinkedList<>();
         }
@@ -450,7 +496,7 @@ public class Behavior
             String actionLabel = label;
             if (StringHelper.isNullOrEmpty(label)) {
                 // Generate action label if no label is specified
-                String actionId = action.getId().toString();
+                String actionId = action.getId().getName();
                 actionLabel = actionId;
                 int idx = 1;
                 while (this._labeledActions.containsKey(actionLabel)) {
@@ -477,6 +523,11 @@ public class Behavior
                 }
             }
 
+            // Create inputs if the action does not specified inputs
+            if (inputs.length == 0) {
+
+            }
+
             // create new action holder
             if (action instanceof IIntercepted) {
                 this._current = new InterceptedActionHolder(
@@ -486,6 +537,67 @@ public class Behavior
                         action, actionLabel, this._current, Behavior.this, evaluator, inputs);
             }
             this._actions.add(this._current);
+        }
+    }
+
+    private final class Wired implements IWired {
+
+        @Override
+        public IReference toOutput(String actionLabel, String outputName) {
+            return new NamedOutput(actionLabel, outputName);
+        }
+
+        @Override
+        public IReference toOutput(String actionLabel, int actionIndex) {
+            return new IndexedOutput(actionLabel, actionIndex);
+        }
+    }
+
+    private final class NamedOutput implements IReference {
+
+        private final String _label;
+        private final String _name;
+
+        private NamedOutput(
+                final String label,
+                final String name
+        ) {
+            ArgumentChecker.required(label, "label");
+            ArgumentChecker.required(name, "name");
+            this._label = label;
+            this._name = name;
+        }
+
+        private String actionLabel() {
+            return this._label;
+        }
+
+        private String outputName() {
+            return this._name;
+        }
+    }
+
+    private final class IndexedOutput implements IReference {
+
+        private final String _label;
+        private final int _idx;
+
+        private IndexedOutput(
+                final String label,
+                final int index
+        ) {
+            ArgumentChecker.required(label, "label");
+            ArgumentChecker.checkInt(index, "index", 0, Integer.MAX_VALUE);
+            this._label = label;
+            this._idx = index;
+        }
+
+        private String actionLabel() {
+            return this._label;
+        }
+
+        private int outputIndex() {
+            return this._idx;
         }
     }
 }

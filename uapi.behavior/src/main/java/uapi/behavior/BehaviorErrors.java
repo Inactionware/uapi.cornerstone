@@ -59,11 +59,12 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int INPUT_OUTPUT_COUNT_MISMATCH             = 33;
     public static final int INPUT_OUTPUT_TYPE_MISMATCH              = 34;
     public static final int INPUT_OBJECT_TYPE_MISMATCH              = 35;
-    public static final int RESERVED_ACTION_OUTPUT_NAME             = 36;
+//    public static final int RESERVED_ACTION_OUTPUT_NAME             = 36;
     public static final int UNKNOWN_FAILURE_ON_INTERCEPTOR          = 37;
     public static final int INCORRECT_ACTION_OUTPUT_NAME            = 38;
     public static final int INCONSISTENT_INTERCEPTOR_INPUT_METAS    = 39;
     public static final int INTERCEPTOR_HAS_OUTPU_META              = 40;
+    public static final int NO_DEFAULT_NEXT_ACTION                  = 41;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -104,11 +105,13 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(INPUT_OUTPUT_COUNT_MISMATCH, InputOutputCountMismatch.KEY);
         keyCodeMapping.put(INPUT_OUTPUT_TYPE_MISMATCH, InputOutputTypeMismatch.KEY);
         keyCodeMapping.put(INPUT_OBJECT_TYPE_MISMATCH, InputObjectTypeMismatch.KEY);
-        keyCodeMapping.put(RESERVED_ACTION_OUTPUT_NAME, ReservedActionOutputName.KEY);
+//        keyCodeMapping.put(RESERVED_ACTION_OUTPUT_NAME, ReservedActionOutputName.KEY);
 //        keyCodeMapping.put(UNKNOWN_FAILURE_ON_INTERCEPTOR, UnknownFailureOnInterceptor.KEY);
 //        keyCodeMapping.put(INCORRECT_ACTION_OUTPUT_NAME, IncorrectActionOutputName.KEY);
         keyCodeMapping.put(INCONSISTENT_INTERCEPTOR_INPUT_METAS, InconsistentInterceptorInputMetas.KEY);
         keyCodeMapping.put(INTERCEPTOR_HAS_OUTPU_META, InterceptorHasOutputMeta.KEY);
+        keyCodeMapping.put(NO_DEFAULT_NEXT_ACTION, NoDefaultNextAction.KEY);
+
     }
 
     public BehaviorErrors() {
@@ -1075,22 +1078,22 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
      * Error string template:
      *      The action output name is reserved by system - {}
      */
-    public static final class ReservedActionOutputName extends IndexedParameters<ReservedActionOutputName> {
-
-        public static final String KEY = "ReservedActionOutputName";
-
-        private String _name;
-
-        public ReservedActionOutputName name(final String name) {
-            this._name = name;
-            return this;
-        }
-
-        @Override
-        public Object[] get() {
-            return new Object[] { this._name };
-        }
-    }
+//    public static final class ReservedActionOutputName extends IndexedParameters<ReservedActionOutputName> {
+//
+//        public static final String KEY = "ReservedActionOutputName";
+//
+//        private String _name;
+//
+//        public ReservedActionOutputName name(final String name) {
+//            this._name = name;
+//            return this;
+//        }
+//
+//        @Override
+//        public Object[] get() {
+//            return new Object[] { this._name };
+//        }
+//    }
 
     /**
      * Error string template:
@@ -1199,6 +1202,32 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 
         public Object[] get() {
             return new Object[] { this._interceptorId, CollectionHelper.asString(this._outMetas) };
+        }
+    }
+
+    /**
+     * Error String template:
+     *      The action [{}] in behavior [{}] has next action but it does not define a default next action
+     */
+    public static final class NoDefaultNextAction extends IndexedParameters<NoDefaultNextAction> {
+
+        public static final String KEY = "ActionHasNoDefaultNext";
+
+        private ActionIdentify _actionId;
+        private ActionIdentify _behaviorId;
+
+        public NoDefaultNextAction actionId(final ActionIdentify actionId) {
+            this._actionId = actionId;
+            return this;
+        }
+
+        public NoDefaultNextAction behaviorId(final ActionIdentify actionId) {
+            this._behaviorId = actionId;
+            return this;
+        }
+        @Override
+        public Object[] get() {
+            return new Object[] { this._actionId, this._behaviorId };
         }
     }
 }

@@ -92,10 +92,15 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 }
 
                 // set output to execution context
-                Looper.on(outputs).foreach(output -> {
-                    String key = ActionInputReference.generateKey(this._current.label(), output.meta().name());
-                    executionContext.put(key, output.get());
-                });
+                Looper.on(outputs)
+                        .filter(output -> ! output.meta().isAnonymous())
+                        .foreach(output -> {
+                            if (! output.meta().isAnonymous()) {
+                                String key = ActionInputReference.generateKey(this._current.label(), output.meta().name());
+                                executionContext.put(key, output.get());
+                            }
+                        });
+
                 // find next action
                 ActionOutputs outAttributes = new ActionOutputs(outputs);
                 this._current = this._current.findNext(outAttributes);
@@ -142,10 +147,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
             }
         }
 
-        // TODO: Write outputs back to behavior outputs
-        if (outputs.length != behaviorInputs.length) {
-            //throw;
-        }
+        // Write outputs back to behavior outputs
         Looper.on(outputs).foreachWithIndex((idx, output) -> behaviorOutputs[idx].set(output.get()));
     }
 }

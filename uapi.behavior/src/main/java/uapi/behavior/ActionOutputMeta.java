@@ -16,7 +16,7 @@ import uapi.common.ArgumentChecker;
  */
 public final class ActionOutputMeta {
 
-    private static final String ANONYMOUS = "_anonymous_";
+//    private static final String ANONYMOUS = "_anonymous_";
 
     private final Class<?> _type;
     private final String _name;
@@ -27,12 +27,12 @@ public final class ActionOutputMeta {
      * @param   type
      *          Action output type
      */
-    ActionOutputMeta(
+    public ActionOutputMeta(
             final Class<?> type
     ) {
         ArgumentChecker.required(type, "type");
         this._type = type;
-        this._name = ANONYMOUS;
+        this._name = null;
     }
 
     public ActionOutputMeta(
@@ -40,14 +40,14 @@ public final class ActionOutputMeta {
             final String name
     ) {
         ArgumentChecker.required(type, "type");
-        ArgumentChecker.required(name, "name");
-        if (name.charAt(0) == '_') {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.RESERVED_ACTION_OUTPUT_NAME)
-                    .variables(new BehaviorErrors.ReservedActionOutputName()
-                            .name(name))
-                    .build();
-        }
+//        ArgumentChecker.required(name, "name");
+//        if (name.charAt(0) == '_') {
+//            throw BehaviorException.builder()
+//                    .errorCode(BehaviorErrors.RESERVED_ACTION_OUTPUT_NAME)
+//                    .variables(new BehaviorErrors.ReservedActionOutputName()
+//                            .name(name))
+//                    .build();
+//        }
         this._type = type;
         this._name = name;
     }
@@ -70,6 +70,10 @@ public final class ActionOutputMeta {
         return this._name;
     }
 
+    public boolean isAnonymous() {
+        return this._name == null;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other == null) {
@@ -79,6 +83,6 @@ public final class ActionOutputMeta {
             return false;
         }
         ActionOutputMeta otherMeta = (ActionOutputMeta) other;
-        return this._name.equals(otherMeta._name) || this._type.equals(otherMeta._type);
+        return this._name.equals(otherMeta._name) && this._type.equals(otherMeta._type);
     }
 }

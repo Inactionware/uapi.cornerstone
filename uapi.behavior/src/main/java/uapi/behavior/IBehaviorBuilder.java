@@ -132,6 +132,13 @@ public interface IBehaviorBuilder {
     INavigator navigator();
 
     /**
+     * Get reference object which can used to wired action input and output
+     *
+     * @return  A reference
+     */
+    IWired wired();
+
+    /**
      * Build behavior
      *
      * @return  Behavior instance

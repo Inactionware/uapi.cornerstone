@@ -30,6 +30,7 @@ class ActionHolder {
     private final List<ActionHolder> _nextActions;
     private final ActionHolder _previousAction;
     private final Object[] _inputs;
+    private boolean _hasDefaultNext = false;
 
     ActionHolder(
             final IAction action,
@@ -110,6 +111,9 @@ class ActionHolder {
     ) throws BehaviorException {
         ArgumentChecker.required(actionHolder, "actionHolder");
         this._nextActions.add(actionHolder);
+        if (actionHolder._evaluator == ALWAYS_MATCHED) {
+            this._hasDefaultNext = true;
+        }
     }
 
     boolean hasNext() {
@@ -170,6 +174,17 @@ class ActionHolder {
     }
 
     void verify() {
+        // The action must have a default next action if it has next action
+        if (hasNext() && ! this._hasDefaultNext) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.NO_DEFAULT_NEXT_ACTION)
+                    .variables(new BehaviorErrors.NoDefaultNextAction()
+                            .actionId(this._action.getId())
+                            .behaviorId(this._behavior.getId()))
+                    .build();
+        }
+
+        // Check action input
         ActionInputMeta[] inputMetas = this._action.inputMetas();
         if (inputMetas.length != this._inputs.length) {
             throw BehaviorException.builder()

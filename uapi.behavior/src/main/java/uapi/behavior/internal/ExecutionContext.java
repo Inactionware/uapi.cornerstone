@@ -28,12 +28,14 @@ public class ExecutionContext implements IExecutionContext {
 
     private final Map<Object, Object> _globalData;
     private final Map<Object, Object> _data;
+    private final Map<String, ActionOutputHolder> _outputs;
     private final IEventBus _eventBus;
 
     public ExecutionContext(final IEventBus eventBus) {
         ArgumentChecker.required(eventBus, "eventBus");
         this._globalData = new ConcurrentHashMap<>();
         this._data = new HashMap<>();
+        this._outputs = new HashMap<>();
         this._eventBus = eventBus;
     }
 
