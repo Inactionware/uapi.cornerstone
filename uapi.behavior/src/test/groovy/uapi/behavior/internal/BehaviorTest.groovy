@@ -119,7 +119,7 @@ class BehaviorTest extends Specification {
 
         when:
         def behavior = new Behavior(Mock(Responsible), repo, behaviorName, behaviorInput)
-        behavior.then(a1).navigator().moveToStarting().then(a2).build()
+        behavior.then(a1).navigator().moveToHead().then(a2).build()
 
         then:
         thrown(BehaviorException)

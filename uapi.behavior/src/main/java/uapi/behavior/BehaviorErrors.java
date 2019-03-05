@@ -13,7 +13,6 @@ import uapi.common.CollectionHelper;
 import uapi.exception.FileBasedExceptionErrors;
 import uapi.exception.IndexedParameters;
 
-import javax.swing.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,7 +31,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int EVALUATOR_IS_SET                        = 6;
     public static final int ACTION_NOT_FOUND                        = 7;
     public static final int EVALUATOR_NOT_USED                      = 8;
-    public static final int NO_ACTION_IN_BEHAVIOR                   = 9;
+    public static final int EMPTY_BEHAVIOR = 9;
     public static final int ACTION_IO_MISMATCH                      = 10;
     public static final int PUBLISH_UNREG_BEHAVIOR                  = 11;
     public static final int BEHAVIOR_IS_PUBLISHED                   = 12;
@@ -63,8 +62,11 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int UNKNOWN_FAILURE_ON_INTERCEPTOR          = 37;
     public static final int INCORRECT_ACTION_OUTPUT_NAME            = 38;
     public static final int INCONSISTENT_INTERCEPTOR_INPUT_METAS    = 39;
-    public static final int INTERCEPTOR_HAS_OUTPU_META              = 40;
+    public static final int INTERCEPTOR_HAS_OUTPUT_META              = 40;
     public static final int NO_DEFAULT_NEXT_ACTION                  = 41;
+    public static final int NAMED_OUTPUT_REF_NOT_FOUND              = 42;
+    public static final int INDEXED_OUTPUT_REF_INVALID              = 43;
+    public static final int AUTO_WIRE_IO_NOT_MATCH                  = 44;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -78,7 +80,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(EVALUATOR_IS_SET, EvaluatorIsSet.KEY);
         keyCodeMapping.put(ACTION_NOT_FOUND, ActionNotFound.KEY);
         keyCodeMapping.put(EVALUATOR_NOT_USED, EvaluatorNotUsed.KEY);
-        keyCodeMapping.put(NO_ACTION_IN_BEHAVIOR, NoActionInBehavior.KEY);
+        keyCodeMapping.put(EMPTY_BEHAVIOR, EmpthBehavior.KEY);
 //        keyCodeMapping.put(ACTION_IO_MISMATCH, ActionIOMismatch.KEY);
         keyCodeMapping.put(PUBLISH_UNREG_BEHAVIOR, PublishUnregBehavior.KEY);
         keyCodeMapping.put(BEHAVIOR_IS_PUBLISHED, BehaviorIsPublished.KEY);
@@ -109,9 +111,11 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 //        keyCodeMapping.put(UNKNOWN_FAILURE_ON_INTERCEPTOR, UnknownFailureOnInterceptor.KEY);
 //        keyCodeMapping.put(INCORRECT_ACTION_OUTPUT_NAME, IncorrectActionOutputName.KEY);
         keyCodeMapping.put(INCONSISTENT_INTERCEPTOR_INPUT_METAS, InconsistentInterceptorInputMetas.KEY);
-        keyCodeMapping.put(INTERCEPTOR_HAS_OUTPU_META, InterceptorHasOutputMeta.KEY);
+        keyCodeMapping.put(INTERCEPTOR_HAS_OUTPUT_META, InterceptorHasOutputMeta.KEY);
         keyCodeMapping.put(NO_DEFAULT_NEXT_ACTION, NoDefaultNextAction.KEY);
-
+        keyCodeMapping.put(NAMED_OUTPUT_REF_NOT_FOUND, NamedOutputRefNotFound.KEY);
+        keyCodeMapping.put(INDEXED_OUTPUT_REF_INVALID, IndexedOutputRefInvalid.KEY);
+        keyCodeMapping.put(AUTO_WIRE_IO_NOT_MATCH, AutoWireIONotMatch.KEY);
     }
 
     public BehaviorErrors() {
@@ -320,15 +324,15 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 
     /**
      * Error string template:
-     *      The behavior builder has no action defined - {}
+     *      The behavior is empty - {}
      */
-    public static final class NoActionInBehavior extends IndexedParameters<NoActionInBehavior> {
+    public static final class EmpthBehavior extends IndexedParameters<EmpthBehavior> {
 
-        private static final String KEY = "NoActionInBehavior";
+        private static final String KEY = "EmpthBehavior";
 
         private ActionIdentify _behaviorId;
 
-        public NoActionInBehavior behaviorId(ActionIdentify behaviorId) {
+        public EmpthBehavior behaviorId(ActionIdentify behaviorId) {
             this._behaviorId = behaviorId;
             return this;
         }
@@ -1211,7 +1215,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
      */
     public static final class NoDefaultNextAction extends IndexedParameters<NoDefaultNextAction> {
 
-        public static final String KEY = "ActionHasNoDefaultNext";
+        public static final String KEY = "NoDefaultNextAction";
 
         private ActionIdentify _actionId;
         private ActionIdentify _behaviorId;
@@ -1225,9 +1229,119 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
             this._behaviorId = actionId;
             return this;
         }
+
         @Override
         public Object[] get() {
             return new Object[] { this._actionId, this._behaviorId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The reference to output [{}.{}] was not found in behavior - {}
+     */
+    public static final class NamedOutputRefNotFound extends IndexedParameters<NamedOutputRefNotFound> {
+
+        public static final String KEY = "NamedOutputRefNotFound";
+
+        private String _label;
+        private String _outName;
+        private ActionIdentify _behaviorId;
+
+        public NamedOutputRefNotFound actionLabel(final String label) {
+            this._label = label;
+            return this;
+        }
+
+        public NamedOutputRefNotFound outputName(final String name) {
+            this._outName = name;
+            return this;
+        }
+
+        public NamedOutputRefNotFound behaviorId(final ActionIdentify behaviorId) {
+            this._behaviorId = behaviorId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._label, this._outName, this._behaviorId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The reference to output [{}.{}] in behavior [{}] has invalid index
+     */
+    public static final class IndexedOutputRefInvalid extends IndexedParameters<IndexedOutputRefInvalid> {
+
+        public static final String KEY = "IndexedOutputRefInvalid";
+
+        private String _label;
+        private int _idx;
+        private ActionIdentify _behaviorId;
+
+        public IndexedOutputRefInvalid actionLabel(final String label) {
+            this._label = label;
+            return this;
+        }
+
+        public IndexedOutputRefInvalid index(final int index) {
+            this._idx = index;
+            return this;
+        }
+
+        public IndexedOutputRefInvalid behaviorId(final ActionIdentify behaviorId) {
+            this._behaviorId = behaviorId;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._label, this._idx, this._behaviorId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Auto wire actions [{} -> {}] have unmatched input and output [{} -> {}]
+     */
+    public static final class AutoWireIONotMatch extends IndexedParameters<AutoWireIONotMatch> {
+
+        public static final String KEY = "AutoWireIONotMatch";
+
+        private ActionIdentify _fromActionId;
+        private ActionIdentify _toActionId;
+        private ActionOutputMeta[] _fromActionOutputMetas;
+        private ActionInputMeta[] _toActionInputMetas;
+
+        public AutoWireIONotMatch fromActionId(final ActionIdentify actionId) {
+            this._fromActionId = actionId;
+            return this;
+        }
+
+        public AutoWireIONotMatch toActionId(final ActionIdentify actionId) {
+            this._toActionId = actionId;
+            return this;
+        }
+
+        public AutoWireIONotMatch fromActionOutputMetas(final ActionOutputMeta[] outputMetas) {
+            this._fromActionOutputMetas = outputMetas;
+            return this;
+        }
+
+        public AutoWireIONotMatch toActionInputMetas(final ActionInputMeta[] inputMetas) {
+            this._toActionInputMetas = inputMetas;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] {
+                    this._fromActionId, this._toActionId,
+                    CollectionHelper.asString(this._fromActionOutputMetas),
+                    CollectionHelper.asString(this._toActionInputMetas)
+            };
         }
     }
 }

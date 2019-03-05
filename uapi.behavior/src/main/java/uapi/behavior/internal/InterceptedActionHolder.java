@@ -63,7 +63,7 @@ public class InterceptedActionHolder extends ActionHolder {
                 // The interceptor output must be 0
                 if (interceptor.outputMetas().length != 0) {
                     throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.INTERCEPTOR_HAS_OUTPU_META)
+                            .errorCode(BehaviorErrors.INTERCEPTOR_HAS_OUTPUT_META)
                             .variables(new BehaviorErrors.InterceptorHasOutputMeta()
                                     .interceptorId(interceptor.getId())
                                     .outputMeta(interceptor.outputMetas()))
