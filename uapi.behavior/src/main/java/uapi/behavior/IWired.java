@@ -11,7 +11,7 @@ package uapi.behavior;
 
 public interface IWired {
 
-    IReference toOutput(String actionLabel, String outputName);
+    IOutputReference toOutput(String actionLabel, String outputName);
 
-    IReference toOutput(String actionLabel, int actionIndex);
+    IOutputReference toOutput(String actionLabel, int actionIndex);
 }

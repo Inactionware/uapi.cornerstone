@@ -9,7 +9,6 @@
 
 package uapi.behavior.internal;
 
-import uapi.behavior.ActionInputReference;
 import uapi.behavior.ActionOutputMeta;
 import uapi.rx.Looper;
 
@@ -19,34 +18,31 @@ import java.util.Map;
 /**
  * A class is used to holder action output data
  */
-public class ActionOutputHolder {
+class ActionOutputHolder {
 
     private final ActionOutputMeta[] _outMetas;
     private final Map<String, Object> _namedDatas;
-    private final Object[] _outDatas;
+    private final Object[] _outData;
 
     ActionOutputHolder(
             final ActionOutputMeta[] outputMetas,
-            final Object[] outputDatas
+            final Object[] outputData
     ) {
         this._outMetas = outputMetas;
-        this._outDatas = outputDatas;
+        this._outData = outputData;
         this._namedDatas = new HashMap<>();
         Looper.on(outputMetas).foreachWithIndex((idx, meta) -> {
             if (! meta.isAnonymous()) {
-                this._namedDatas.put(meta.name(), outputDatas[idx]);
+                this._namedDatas.put(meta.name(), outputData[idx]);
             }
         });
     }
 
-    Object getData(final ActionInputReference inRef) {
-        Object data = null;
-        if (inRef.name() != null) {
-            data = this._namedDatas.get(inRef.name());
-        }
-        if (data != null) {
-            return data;
-        }
-        return data;
+    Object getData(final String name) {
+        return this._namedDatas.get(name);
+    }
+
+    Object getData(final int index) {
+        return this._outData[index];
     }
 }

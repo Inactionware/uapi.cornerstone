@@ -4,6 +4,7 @@ import uapi.GeneralException;
 import uapi.IIdentifiable;
 import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
+import uapi.common.Attributed;
 import uapi.rx.Looper;
 
 /**
@@ -27,7 +28,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         ArgumentChecker.required(behavior, "behavior");
         this._id = new ExecutionIdentify(behavior.getId(), sequence);
         this._traceable = behavior.traceable();
-        this._current = behavior.entranceAction();
+        this._current = behavior.headAction();
         this._successAction = successAction;
         this._failureAction = failureAction;
     }
@@ -58,19 +59,13 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         ActionOutput[] outputs = null;
         try {
             do {
-                if (this._current.previous() == null) {
-                    // First action
-                    actionInputs = behaviorInputs;
-                } else {
-                    actionInputs = this._current.inputs();
-                }
+                actionInputs = this._current.inputs();
                 // create input objects
-                ActionInputMeta[] inputMetas = this._current.inputMetas();
                 for (int i = 0; i < actionInputs.length; i++) {
-                    if (actionInputs[i] instanceof ActionInputReference) {
-                        ActionInputReference actionInRef = (ActionInputReference) actionInputs[i];
-                        String key = actionInRef.toKey();
-                        actionInputs[i] = executionContext.get(key);
+                    Object input = actionInputs[i];
+                    if (input instanceof IOutputReference) {
+                        input = executionContext.getOutput((IOutputReference) actionInputs[i]);
+                        actionInputs[i] = input;
                     }
                 }
                 // create outputs
@@ -102,8 +97,10 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                         });
 
                 // find next action
-                ActionOutputs outAttributes = new ActionOutputs(outputs);
-                this._current = this._current.findNext(outAttributes);
+                final ActionOutput[] tmp = outputs;
+                Attributed outAttrs = Attributed.apply(
+                        attr -> Looper.on(tmp).foreach(output -> attr.set(output.meta().name(), output.get())));
+                this._current = this._current.findNext(outAttrs);
             } while (this._current != null);
         } catch (Exception ex) {
             exception = ex;

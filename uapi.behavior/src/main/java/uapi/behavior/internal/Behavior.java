@@ -344,7 +344,7 @@ public class Behavior
                 this._failureAction);
     }
 
-    ActionHolder entranceAction() {
+    ActionHolder headAction() {
         ensureBuilt();
         return this._headAction;
     }
@@ -567,17 +567,17 @@ public class Behavior
     private final class Wired implements IWired {
 
         @Override
-        public IReference toOutput(String actionLabel, String outputName) {
+        public IOutputReference toOutput(String actionLabel, String outputName) {
             return new NamedOutput(actionLabel, outputName);
         }
 
         @Override
-        public IReference toOutput(String actionLabel, int actionIndex) {
+        public IOutputReference toOutput(String actionLabel, int actionIndex) {
             return new IndexedOutput(actionLabel, actionIndex);
         }
     }
 
-    private final class NamedOutput implements IReference {
+    public final class NamedOutput implements IOutputReference {
 
         private final String _label;
         private final String _name;
@@ -615,16 +615,17 @@ public class Behavior
             this._name = name;
         }
 
-        private String actionLabel() {
+        @Override
+        public String actionLabel() {
             return this._label;
         }
 
-        private String outputName() {
+        String outputName() {
             return this._name;
         }
     }
 
-    private final class IndexedOutput implements IReference {
+    public final class IndexedOutput implements IOutputReference {
 
         private final String _label;
         private final int _idx;
@@ -659,11 +660,12 @@ public class Behavior
             this._idx = index;
         }
 
-        private String actionLabel() {
+        @Override
+        public String actionLabel() {
             return this._label;
         }
 
-        private int outputIndex() {
+        int outputIndex() {
             return this._idx;
         }
     }

@@ -9,5 +9,7 @@
 
 package uapi.behavior;
 
-public interface IReference {
+public interface IOutputReference {
+
+    String actionLabel();
 }

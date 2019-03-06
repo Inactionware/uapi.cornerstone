@@ -57,7 +57,7 @@ class BehaviorTest extends Specification {
         bb.outputType() == behaviorOutputType
         bb.traceable()
         ((Behavior) bb).newExecution() != null
-        ((Behavior) bb).entranceAction() != null
+        ((Behavior) bb).headAction() != null
 
         where:
         behaviorName    | behaviorInputType     | behaviorOutputType    | actionInputType   | actionOutputType
