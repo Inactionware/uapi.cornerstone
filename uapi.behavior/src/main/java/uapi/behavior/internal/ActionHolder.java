@@ -34,9 +34,10 @@ class ActionHolder {
 
     ActionHolder(
             final IAction action,
+            final String label,
             final Behavior behavior
     ) {
-        this(action, null, null, behavior, null);
+        this(action, label, null, behavior, null);
     }
 
     ActionHolder(
@@ -62,9 +63,11 @@ class ActionHolder {
         this._label = label;
         this._nextActions = new LinkedList<>();
         this._previousAction = previousAction;
+        if (previousAction != null) {
+            this._previousAction.next(this);
+        }
         this._inputs = inputs;
         verify();
-        this._previousAction.next(this);
     }
 
     ActionOutputMeta[] outputMetas() {

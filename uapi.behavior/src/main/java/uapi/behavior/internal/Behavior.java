@@ -26,6 +26,10 @@ public class Behavior
         extends Builder<IBehavior>
         implements IBehavior, IBehaviorBuilder {
 
+    private static final String ACTION_LABEL_PREFIX = "__";
+    private static final String LABEL_HEAD_ACTION   = ACTION_LABEL_PREFIX + "HEAD";
+    private static final String LABEL_TAIL_ACTION   = ACTION_LABEL_PREFIX + "TAIL";
+
     private final ActionIdentify _actionId;
     private ActionInputMeta[] _iMetas;
     private ActionOutputMeta[] _oMetas;
@@ -57,7 +61,7 @@ public class Behavior
         this._actionRepo = actionRepository;
         this._actionId = new ActionIdentify(name, ActionType.BEHAVIOR);
         HeadAction head = new HeadAction(inputMetas);
-        this._headAction = new ActionHolder(head, this);
+        this._headAction = new ActionHolder(head, LABEL_HEAD_ACTION, this);
 
         this._navigator = new Navigator(this._headAction);
         this._wired = new Wired();
@@ -314,7 +318,7 @@ public class Behavior
 //        Looper.on(leafActions).foreach(aHolder -> aHolder.next(new ActionHolder(exit, this)));
 
         this._iMetas = this._headAction.action().inputMetas();
-//        this._oMetas = exit.outputMetas();
+        this._oMetas = leafActions.get(0).outputMetas();
     }
 
     @Override
