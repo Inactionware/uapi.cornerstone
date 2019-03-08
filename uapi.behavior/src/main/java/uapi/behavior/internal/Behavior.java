@@ -374,8 +374,7 @@ public class Behavior
             this._id = ActionIdentify.toActionId(HeadAction.class);
             this._outputMetas = new ActionOutputMeta[behaviorInputMetas.length];
             Looper.on(behaviorInputMetas).foreachWithIndex((idx, inMeta) -> {
-                String outName = StringHelper.makeString("{}.{}", this._id.getName());
-                this._outputMetas[idx] = new ActionOutputMeta(inMeta.type(), outName);
+                this._outputMetas[idx] = new ActionOutputMeta(inMeta.type());
             });
         }
 
@@ -644,7 +643,7 @@ public class Behavior
             boolean found = false;
             while (currentAction != null) {
                 if (currentAction.label().equals(label)) {
-                    if (index >= currentAction.outputMetas().length) {
+                    if (index < currentAction.outputMetas().length) {
                         found = true;
                     }
                     break;
