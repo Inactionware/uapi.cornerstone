@@ -202,9 +202,9 @@ class ActionHolder {
 
         Looper.on(this._action.inputMetas()).foreachWithIndex((idx, inputMeta) -> {
             Object input = this._inputs[idx];
-            if (input instanceof ActionInputReference) {
-                ActionInputReference inputRef = (ActionInputReference) input;
-                String refAction = inputRef.label();
+            if (input instanceof IOutputReference) {
+                IOutputReference outRef = (IOutputReference) input;
+                String refAction = outRef.actionLabel();
                 boolean foundPrevious = false;
                 ActionHolder previous = this._previousAction;
                 // Check does referenced action exist or not
@@ -224,15 +224,30 @@ class ActionHolder {
                             .build();
                 }
                 // Check the referenced action has specific output
-                String refName = inputRef.name();
-                ActionOutputMeta matchedOutMeta = Looper.on(previous._action.outputMetas())
-                        .filter(meta -> meta.name().equals(refName)).first();
+                ActionOutputMeta matchedOutMeta = null;
+                if (outRef instanceof Behavior.NamedOutput) {
+                    String refName = ((Behavior.NamedOutput) outRef).outputName();
+                    matchedOutMeta = Looper.on(previous._action.outputMetas())
+                            .filter(meta -> meta.name().equals(refName)).first();
+                } else if (outRef instanceof Behavior.IndexedOutput) {
+                    int refIdx = ((Behavior.IndexedOutput) outRef).outputIndex();
+                    if (refIdx < previous._action.outputMetas().length) {
+                        matchedOutMeta = previous._action.outputMetas()[refIdx];
+                    }
+                } else {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.UNSUPPORTED_OUTPUT_REF)
+                            .variables(new BehaviorErrors.UnsupportedOutputRef()
+                                    .referenceType(outRef.getClass()))
+                            .build();
+                }
                 if (matchedOutMeta == null) {
                     throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.NO_OUTPUT_IN_ACTION)
-                            .variables(new BehaviorErrors.NoOutputInAction()
-                                    .outputName(refName)
-                                    .actionId(previous._action.getId()))
+                            .errorCode(BehaviorErrors.REF_OUTPUT_NOT_FOUND_IN_BEHAVIOR)
+                            .variables(new BehaviorErrors.RefOutputNotFoundInBehavior()
+                                    .behaviorId(this._behavior.getId())
+                                    .outputReference(outRef)
+                                    .referenceActionId(previous._action.getId()))
                             .build();
                 }
                 // Check the referenced action output type does match required input type

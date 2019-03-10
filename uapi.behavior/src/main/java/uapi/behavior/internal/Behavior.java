@@ -626,6 +626,11 @@ public class Behavior
         String outputName() {
             return this._name;
         }
+
+        @Override
+        public String toString() {
+            return StringHelper.makeString("{}@{}", this._name, this._label);
+        }
     }
 
     public final class IndexedOutput implements IOutputReference {
@@ -670,6 +675,11 @@ public class Behavior
 
         int outputIndex() {
             return this._idx;
+        }
+
+        @Override
+        public String toString() {
+            return StringHelper.makeString("{}@{}", this._idx, this._label);
         }
     }
 }

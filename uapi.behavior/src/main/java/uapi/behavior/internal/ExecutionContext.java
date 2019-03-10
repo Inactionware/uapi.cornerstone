@@ -111,6 +111,12 @@ public class ExecutionContext implements IExecutionContext {
         this._eventBus.fire(event, callback, sync);
     }
 
+    void setOutputs(final String actionLabel, final ActionOutputHolder outputHolder) {
+        ArgumentChecker.required(actionLabel, "actionLabel");
+        ArgumentChecker.required(outputHolder, "outputHolder");
+        this._outputs.put(actionLabel, outputHolder);
+    }
+
     Object getOutput(final IOutputReference ref) {
         String actionLabel = ref.actionLabel();
         if (ref instanceof Behavior.NamedOutput) {

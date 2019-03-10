@@ -56,7 +56,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         String sourceRespName = executionContext.get(IExecutionContext.KEY_RESP_NAME);
         Exception exception = null;
         Object[] actionInputs;
-        ActionOutput[] outputs = null;
+        ActionOutput[] actionOutputs = null;
         try {
             do {
                 actionInputs = this._current.inputs();
@@ -71,35 +71,40 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 // create outputs
                 ActionOutputMeta[] outMetas = this._current.action().outputMetas();
                 if (outMetas.length == 0) {
-                    outputs = new ActionOutput[0];
+                    actionOutputs = new ActionOutput[0];
                 } else {
-                    outputs = new ActionOutput[outMetas.length];
-                    for (int idx = 0; idx < outputs.length; idx++) {
-                        outputs[idx] = new ActionOutput(this._current.action().getId(), outMetas[idx]);
+                    actionOutputs = new ActionOutput[outMetas.length];
+                    for (int idx = 0; idx < actionOutputs.length; idx++) {
+                        actionOutputs[idx] = new ActionOutput(this._current.action().getId(), outMetas[idx]);
                     }
                 }
                 // execute action
-                this._current.action().process(actionInputs, outputs, executionContext);
+                this._current.action().process(actionInputs, actionOutputs, executionContext);
                 if (this._traceable) {
                     BehaviorExecutingEvent event = new BehaviorExecutingEvent(
-                            sourceRespName, this._id, this._current.action().getId(), actionInputs, outputs, behaviorInputs);
+                            sourceRespName, this._id, this._current.action().getId(), actionInputs, actionOutputs, behaviorInputs);
                     executionContext.fireEvent(event);
                 }
 
                 // set output to execution context
-                Looper.on(outputs)
-                        .filter(output -> ! output.meta().isAnonymous())
-                        .foreach(output -> {
-                            if (! output.meta().isAnonymous()) {
-                                String key = ActionInputReference.generateKey(this._current.label(), output.meta().name());
-                                executionContext.put(key, output.get());
-                            }
-                        });
+                Object[] outputs = Looper.on(actionOutputs).map(ActionOutput::get).toArray();
+                ActionOutputHolder outHolder = new ActionOutputHolder(outMetas, outputs);
+                executionContext.setOutputs(this._current.label(), outHolder);
+//                Looper.on(outputs)
+//                        .filter(output -> ! output.meta().isAnonymous())
+//                        .foreach(output -> {
+//                            if (! output.meta().isAnonymous()) {
+//                                String key = ActionInputReference.generateKey(this._current.label(), output.meta().name());
+//                                executionContext.put(key, output.get());
+//                            }
+//                        });
 
                 // find next action
-                final ActionOutput[] tmp = outputs;
+                final ActionOutput[] tmp = actionOutputs;
                 Attributed outAttrs = Attributed.apply(
-                        attr -> Looper.on(tmp).foreach(output -> attr.set(output.meta().name(), output.get())));
+                        attr -> Looper.on(tmp).foreachWithIndex((idx, output) ->
+                            attr.set(output.meta().name() != null ? output.meta().name() : idx, output.get())
+                        ));
                 this._current = this._current.findNext(outAttrs);
             } while (this._current != null);
         } catch (Exception ex) {
@@ -121,7 +126,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         if (this._successAction != null) {
             BehaviorEvent bEvent = null;
             try {
-                BehaviorSuccess bSuccess = new BehaviorSuccess(behaviorInputs, outputs);
+                BehaviorSuccess bSuccess = new BehaviorSuccess(behaviorInputs, actionOutputs);
                 bEvent = this._successAction.accept(bSuccess, executionContext);
             } catch (Exception eex) {
                 exception = new GeneralException(eex);
@@ -132,7 +137,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         }
         if (this._traceable) {
             BehaviorFinishedEvent event = new BehaviorFinishedEvent(
-                    sourceRespName, this._id, behaviorInputs, outputs, exception);
+                    sourceRespName, this._id, behaviorInputs, actionOutputs, exception);
             executionContext.fireEvent(event);
         }
 
@@ -145,6 +150,6 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         }
 
         // Write outputs back to behavior outputs
-        Looper.on(outputs).foreachWithIndex((idx, output) -> behaviorOutputs[idx].set(output.get()));
+        Looper.on(actionOutputs).foreachWithIndex((idx, output) -> behaviorOutputs[idx].set(output.get()));
     }
 }

@@ -31,7 +31,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int EVALUATOR_IS_SET                        = 6;
     public static final int ACTION_NOT_FOUND                        = 7;
     public static final int EVALUATOR_NOT_USED                      = 8;
-    public static final int EMPTY_BEHAVIOR = 9;
+    public static final int EMPTY_BEHAVIOR                          = 9;
     public static final int ACTION_IO_MISMATCH                      = 10;
     public static final int PUBLISH_UNREG_BEHAVIOR                  = 11;
     public static final int BEHAVIOR_IS_PUBLISHED                   = 12;
@@ -54,7 +54,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int INVALID_ACTION_INPUT_REF                = 29;
     public static final int REF_ACTION_NOT_EXIST_IN_BEHAVIOR        = 30;
     public static final int DUPLICATED_ACTION_OUTPUT                = 31;
-    public static final int NO_OUTPUT_IN_ACTION                     = 32;
+    public static final int REF_OUTPUT_NOT_FOUND_IN_BEHAVIOR        = 32;
     public static final int INPUT_OUTPUT_COUNT_MISMATCH             = 33;
     public static final int INPUT_OUTPUT_TYPE_MISMATCH              = 34;
     public static final int INPUT_OBJECT_TYPE_MISMATCH              = 35;
@@ -104,7 +104,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 //        keyCodeMapping.put(INVALID_ACTION_INPUT_REF, InvalidActionInputRef.KEY);
         keyCodeMapping.put(REF_ACTION_NOT_EXIST_IN_BEHAVIOR, RefActionNotExistInBehavior.KEY);
         keyCodeMapping.put(DUPLICATED_ACTION_OUTPUT, DuplicatedActionOutput.KEY);
-        keyCodeMapping.put(NO_OUTPUT_IN_ACTION, NoOutputInAction.KEY);
+        keyCodeMapping.put(REF_OUTPUT_NOT_FOUND_IN_BEHAVIOR, RefOutputNotFoundInBehavior.KEY);
         keyCodeMapping.put(INPUT_OUTPUT_COUNT_MISMATCH, InputOutputCountMismatch.KEY);
         keyCodeMapping.put(INPUT_OUTPUT_TYPE_MISMATCH, InputOutputTypeMismatch.KEY);
         keyCodeMapping.put(INPUT_OBJECT_TYPE_MISMATCH, InputObjectTypeMismatch.KEY);
@@ -932,28 +932,34 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
 
     /**
      * Error string template:
-     *      No output named [{}] is defined in Action [{}]
+     *      The referenced output [{}] is not found in Behavior [{}], which is referenced by [{}]
      */
-    public static class NoOutputInAction extends IndexedParameters<NoOutputInAction> {
+    public static class RefOutputNotFoundInBehavior extends IndexedParameters<RefOutputNotFoundInBehavior> {
 
-        public static final String KEY = "NoOutputInAction";
+        public static final String KEY = "RefOutputNotFoundInBehavior";
 
-        private String _outputName;
-        private ActionIdentify _actionId;
+        private IOutputReference _ref;
+        private ActionIdentify _behaviorId;
+        private ActionIdentify _refActionId;
 
-        public NoOutputInAction outputName(final String name) {
-            this._outputName = name;
+        public RefOutputNotFoundInBehavior outputReference(final IOutputReference ref) {
+            this._ref = ref;
             return this;
         }
 
-        public NoOutputInAction actionId(final ActionIdentify actionId) {
-            this._actionId = actionId;
+        public RefOutputNotFoundInBehavior behaviorId(final ActionIdentify actionId) {
+            this._behaviorId = actionId;
+            return this;
+        }
+
+        public RefOutputNotFoundInBehavior referenceActionId(final ActionIdentify actionId) {
+            this._refActionId = actionId;
             return this;
         }
 
         @Override
         public Object[] get() {
-            return new Object[] { this._outputName, this._actionId.toString() };
+            return new Object[] { this._ref, this._behaviorId.toString(), this._refActionId.toString() };
         }
     }
 
