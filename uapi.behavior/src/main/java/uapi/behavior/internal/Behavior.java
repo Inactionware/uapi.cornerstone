@@ -272,7 +272,7 @@ public class Behavior
             // Impossible happen
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.EMPTY_BEHAVIOR)
-                    .variables(new BehaviorErrors.EmpthBehavior()
+                    .variables(new BehaviorErrors.EmptyBehavior()
                             .behaviorId(this._actionId))
                     .build();
         }

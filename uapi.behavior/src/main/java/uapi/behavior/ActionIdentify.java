@@ -43,17 +43,6 @@ public class ActionIdentify implements IPartibleIdentify<String> {
         } else {
             return new ActionIdentify(className, ActionType.ACTION);
         }
-//        if (IAction.class.isAssignableFrom(actionType)) {
-//            return new ActionIdentify(className, ActionType.ACTION);
-//        } else if (IBehavior.class.isAssignableFrom(actionType)) {
-//            return new ActionIdentify(className, ActionType.BEHAVIOR);
-//        } else {
-//            throw BehaviorException.builder()
-//                    .errorCode(BehaviorErrors.INCOMPATIBLE_ACTION_TYPE)
-//                    .variables(new BehaviorErrors.IncompatibleActionType()
-//                            .type(actionType))
-//                    .build();
-//        }
     }
 
     public ActionIdentify(

@@ -90,14 +90,6 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 Object[] outputs = Looper.on(actionOutputs).map(ActionOutput::get).toArray();
                 ActionOutputHolder outHolder = new ActionOutputHolder(outMetas, outputs);
                 executionContext.setOutputs(this._current.label(), outHolder);
-//                Looper.on(outputs)
-//                        .filter(output -> ! output.meta().isAnonymous())
-//                        .foreach(output -> {
-//                            if (! output.meta().isAnonymous()) {
-//                                String key = ActionInputReference.generateKey(this._current.label(), output.meta().name());
-//                                executionContext.put(key, output.get());
-//                            }
-//                        });
 
                 // find next action
                 final ActionOutput[] tmp = actionOutputs;

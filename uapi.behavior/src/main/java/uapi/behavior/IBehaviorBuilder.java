@@ -47,7 +47,7 @@ public interface IBehaviorBuilder {
      *          The action/behavior label which can be used to navigate to it later
      * @param   inputs
      *          Specified inputs for the action/behavior
-     *          If the input is ActionInputReference then the input is a pointer which point to other action's input
+     *          If the input is IOutputReference then the input is a pointer which point to other action's output
      * @return  The behavior builder self
      * @throws  BehaviorException
      *          No action has such id, see {@link BehaviorErrors.ActionNotFound}
