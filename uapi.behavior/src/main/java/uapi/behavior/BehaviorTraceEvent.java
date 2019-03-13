@@ -1,7 +1,7 @@
 package uapi.behavior;
 
 /**
- * The clss contains methods which should be used for trace behavior execution
+ * The class contains methods which should be used for trace behavior execution
  */
 public abstract class BehaviorTraceEvent extends BehaviorEvent {
 

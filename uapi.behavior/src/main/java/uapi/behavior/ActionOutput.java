@@ -5,11 +5,11 @@ import uapi.common.ArgumentChecker;
 /**
  * The class hold output of action
  */
-public class ActionOutput {
+public class ActionOutput<T> {
 
     private final ActionIdentify _actionId;
     private final ActionOutputMeta _meta;
-    private Object _output;
+    private T _output;
 
     public ActionOutput(
             final ActionIdentify actionId,
@@ -21,7 +21,7 @@ public class ActionOutput {
         this._meta = meta;
     }
 
-    public void set(final Object output) {
+    public void set(final T output) {
         ArgumentChecker.required(output, "output");
         if (this._output != null) {
             throw BehaviorException.builder()
@@ -43,9 +43,8 @@ public class ActionOutput {
         this._output = output;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T get() {
-        return (T) this._output;
+    public T get() {
+        return this._output;
     }
 
     public ActionOutputMeta meta() {

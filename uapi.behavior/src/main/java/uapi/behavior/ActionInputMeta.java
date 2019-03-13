@@ -10,6 +10,7 @@
 package uapi.behavior;
 
 import uapi.common.ArgumentChecker;
+import uapi.common.StringHelper;
 
 /**
  * The meta class hold bass information for action input argument.
@@ -32,5 +33,27 @@ public final class ActionInputMeta {
      */
     public Class<?> type() {
         return this._type;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (! (obj instanceof ActionInputMeta)) {
+            return false;
+        }
+        ActionInputMeta other = (ActionInputMeta) obj;
+        return this._type.equals(other._type);
+    }
+
+    @Override
+    public int hashCode() {
+        return this._type.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.makeString("ActionInputMeta[type={}]", this._type.getCanonicalName());
     }
 }

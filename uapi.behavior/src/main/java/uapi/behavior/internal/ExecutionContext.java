@@ -9,10 +9,7 @@
 
 package uapi.behavior.internal;
 
-import uapi.behavior.BehaviorEvent;
-import uapi.behavior.BehaviorTraceEvent;
-import uapi.behavior.IExecutionContext;
-import uapi.behavior.Scope;
+import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
 import uapi.event.IEventBus;
 import uapi.event.IEventFinishCallback;
@@ -28,12 +25,14 @@ public class ExecutionContext implements IExecutionContext {
 
     private final Map<Object, Object> _globalData;
     private final Map<Object, Object> _data;
+    private final Map<String, ActionOutputHolder> _outputs;
     private final IEventBus _eventBus;
 
     public ExecutionContext(final IEventBus eventBus) {
         ArgumentChecker.required(eventBus, "eventBus");
         this._globalData = new ConcurrentHashMap<>();
         this._data = new HashMap<>();
+        this._outputs = new HashMap<>();
         this._eventBus = eventBus;
     }
 
@@ -110,5 +109,28 @@ public class ExecutionContext implements IExecutionContext {
             final boolean sync
     ) {
         this._eventBus.fire(event, callback, sync);
+    }
+
+    void setOutputs(final String actionLabel, final ActionOutputHolder outputHolder) {
+        ArgumentChecker.required(actionLabel, "actionLabel");
+        ArgumentChecker.required(outputHolder, "outputHolder");
+        this._outputs.put(actionLabel, outputHolder);
+    }
+
+    Object getOutput(final IOutputReference ref) {
+        String actionLabel = ref.actionLabel();
+        if (ref instanceof Behavior.NamedOutput) {
+            Behavior.NamedOutput namedOut = (Behavior.NamedOutput) ref;
+            return this._outputs.get(actionLabel).getData(namedOut.outputName());
+        } else if (ref instanceof Behavior.IndexedOutput) {
+            Behavior.IndexedOutput idxOut = (Behavior.IndexedOutput) ref;
+            return this._outputs.get(actionLabel).getData(idxOut.outputIndex());
+        } else {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.UNSUPPORTED_OUTPUT_REF)
+                    .variables(new BehaviorErrors.UnsupportedOutputRef()
+                            .referenceType(ref.getClass()))
+                    .build();
+        }
     }
 }

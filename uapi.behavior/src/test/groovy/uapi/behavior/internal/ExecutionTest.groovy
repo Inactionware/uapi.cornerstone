@@ -6,7 +6,6 @@ import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorExecutingEvent
 import uapi.behavior.BehaviorFinishedEvent
-import uapi.behavior.BehaviorFinishedEventHandler
 import uapi.behavior.ExecutionIdentify
 import uapi.behavior.IAction
 import uapi.behavior.IExecutionContext
@@ -47,7 +46,7 @@ class ExecutionTest extends Specification {
         def behavior = Mock(Behavior) {
             getId() >> new ActionIdentify('bname', ActionType.BEHAVIOR)
             traceable() >> false
-            entranceAction() >> actionHolder
+            headAction() >> actionHolder
         }
 
         when:
@@ -76,7 +75,7 @@ class ExecutionTest extends Specification {
         def behavior = Mock(Behavior) {
             getId() >> new ActionIdentify('bname', ActionType.BEHAVIOR)
             traceable() >> true
-            entranceAction() >> actionHolder
+            headAction() >> actionHolder
         }
         def execCtx = Mock(ExecutionContext) {
             get(IExecutionContext.KEY_RESP_NAME) >> 'respName'

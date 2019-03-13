@@ -59,9 +59,9 @@ public class Responsible implements IResponsible {
     @Override
     public IBehaviorBuilder newBehavior(
             final String name,
-            final String eventType
+            final String eventTopic
     ) throws BehaviorException {
-        return newBehavior(name, BehaviorEvent.class, eventType);
+        return newBehavior(name, BehaviorEvent.class, eventTopic);
     }
 
     @Override

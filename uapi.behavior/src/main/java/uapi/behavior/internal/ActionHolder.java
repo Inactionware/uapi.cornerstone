@@ -9,6 +9,7 @@
 
 package uapi.behavior.internal;
 
+import uapi.Type;
 import uapi.behavior.*;
 import uapi.common.*;
 import uapi.rx.Looper;
@@ -30,12 +31,14 @@ class ActionHolder {
     private final List<ActionHolder> _nextActions;
     private final ActionHolder _previousAction;
     private final Object[] _inputs;
+    private boolean _hasDefaultNext = false;
 
     ActionHolder(
             final IAction action,
+            final String label,
             final Behavior behavior
     ) {
-        this(action, null, null, behavior, null);
+        this(action, label, null, behavior, null);
     }
 
     ActionHolder(
@@ -61,9 +64,11 @@ class ActionHolder {
         this._label = label;
         this._nextActions = new LinkedList<>();
         this._previousAction = previousAction;
+        if (previousAction != null) {
+            this._previousAction.next(this);
+        }
         this._inputs = inputs;
         verify();
-        this._previousAction.next(this);
     }
 
     ActionOutputMeta[] outputMetas() {
@@ -110,6 +115,9 @@ class ActionHolder {
     ) throws BehaviorException {
         ArgumentChecker.required(actionHolder, "actionHolder");
         this._nextActions.add(actionHolder);
+        if (actionHolder._evaluator == ALWAYS_MATCHED) {
+            this._hasDefaultNext = true;
+        }
     }
 
     boolean hasNext() {
@@ -170,6 +178,17 @@ class ActionHolder {
     }
 
     void verify() {
+        // The action must have a default next action if it has next action
+        if (hasNext() && ! this._hasDefaultNext) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.NO_DEFAULT_NEXT_ACTION)
+                    .variables(new BehaviorErrors.NoDefaultNextAction()
+                            .actionId(this._action.getId())
+                            .behaviorId(this._behavior.getId()))
+                    .build();
+        }
+
+        // Check action input
         ActionInputMeta[] inputMetas = this._action.inputMetas();
         if (inputMetas.length != this._inputs.length) {
             throw BehaviorException.builder()
@@ -184,9 +203,9 @@ class ActionHolder {
 
         Looper.on(this._action.inputMetas()).foreachWithIndex((idx, inputMeta) -> {
             Object input = this._inputs[idx];
-            if (input instanceof ActionInputReference) {
-                ActionInputReference inputRef = (ActionInputReference) input;
-                String refAction = inputRef.label();
+            if (input instanceof IOutputReference) {
+                IOutputReference outRef = (IOutputReference) input;
+                String refAction = outRef.actionLabel();
                 boolean foundPrevious = false;
                 ActionHolder previous = this._previousAction;
                 // Check does referenced action exist or not
@@ -206,19 +225,34 @@ class ActionHolder {
                             .build();
                 }
                 // Check the referenced action has specific output
-                String refName = inputRef.name();
-                ActionOutputMeta matchedOutMeta = Looper.on(previous._action.outputMetas())
-                        .filter(meta -> meta.name().equals(refName)).first();
+                ActionOutputMeta matchedOutMeta = null;
+                if (outRef instanceof Behavior.NamedOutput) {
+                    String refName = ((Behavior.NamedOutput) outRef).outputName();
+                    matchedOutMeta = Looper.on(previous._action.outputMetas())
+                            .filter(meta -> meta.name().equals(refName)).first();
+                } else if (outRef instanceof Behavior.IndexedOutput) {
+                    int refIdx = ((Behavior.IndexedOutput) outRef).outputIndex();
+                    if (refIdx < previous._action.outputMetas().length) {
+                        matchedOutMeta = previous._action.outputMetas()[refIdx];
+                    }
+                } else {
+                    throw BehaviorException.builder()
+                            .errorCode(BehaviorErrors.UNSUPPORTED_OUTPUT_REF)
+                            .variables(new BehaviorErrors.UnsupportedOutputRef()
+                                    .referenceType(outRef.getClass()))
+                            .build();
+                }
                 if (matchedOutMeta == null) {
                     throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.NO_OUTPUT_IN_ACTION)
-                            .variables(new BehaviorErrors.NoOutputInAction()
-                                    .outputName(refName)
-                                    .actionId(previous._action.getId()))
+                            .errorCode(BehaviorErrors.REF_OUTPUT_NOT_FOUND_IN_BEHAVIOR)
+                            .variables(new BehaviorErrors.RefOutputNotFoundInBehavior()
+                                    .behaviorId(this._behavior.getId())
+                                    .outputReference(outRef)
+                                    .referenceActionId(previous._action.getId()))
                             .build();
                 }
                 // Check the referenced action output type does match required input type
-                if (! matchedOutMeta.type().isAssignableFrom(inputMeta.type())) {
+                if (! Type.isAssignable(matchedOutMeta.type(), inputMeta.type())) {
                     throw BehaviorException.builder()
                             .errorCode(BehaviorErrors.INPUT_OUTPUT_TYPE_MISMATCH)
                             .variables(new BehaviorErrors.InputOutputTypeMismatch()

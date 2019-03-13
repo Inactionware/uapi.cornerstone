@@ -1,5 +1,6 @@
 package uapi.behavior;
 
+import uapi.codegen.IBuilderContext;
 import uapi.codegen.IHandlerHelper;
 
 import javax.lang.model.element.Element;
@@ -13,7 +14,7 @@ public interface IActionHandlerHelper extends IHandlerHelper {
         return name;
     }
 
-    ActionMethodMeta parseActionMethod(final Element classElement);
+    ActionMethodMeta parseActionMethod(final IBuilderContext builderContext, final Element classElement);
 
     final class ActionMethodMeta {
 
@@ -53,9 +54,10 @@ public interface IActionHandlerHelper extends IHandlerHelper {
 
         public static ParameterMeta newOutputMeta(
                 final int index,
-                final String name
+                final String name,
+                final String className
         ) {
-            return new ParameterMeta(ParameterType.OUTPUT, index, ActionOutput.class.getCanonicalName(), name);
+            return new ParameterMeta(ParameterType.OUTPUT, index, className, name);
         }
 
         public static ParameterMeta newContextMeta() {

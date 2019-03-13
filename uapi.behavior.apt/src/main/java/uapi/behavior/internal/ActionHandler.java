@@ -24,6 +24,7 @@ import uapi.service.IServiceHandlerHelper;
 import uapi.service.annotation.Service;
 
 import javax.lang.model.element.*;
+import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.List;
@@ -79,7 +80,7 @@ public class ActionHandler extends AnnotationsHandler {
                 actionName = classElement.asType().toString();
             }
 
-            IActionHandlerHelper.ActionMethodMeta actionMeta = this._helper.parseActionMethod(classElement);
+            IActionHandlerHelper.ActionMethodMeta actionMeta = this._helper.parseActionMethod(builderContext, classElement);
             ClassMeta.Builder clsBuilder = builderContext.findClassBuilder(classElement);
 
             Template tempGetId = builderContext.loadTemplate(TEMPLATE_GET_ID);
@@ -139,7 +140,10 @@ public class ActionHandler extends AnnotationsHandler {
     private final class ActionHandlerHelper implements IActionHandlerHelper {
 
         @Override
-        public ActionMethodMeta parseActionMethod(Element classElement) {
+        public ActionMethodMeta parseActionMethod(
+                final IBuilderContext builderContext,
+                final Element classElement
+        ) {
             // Check process method
             List actionDoElements = Looper.on(classElement.getEnclosedElements())
                     .filter(element -> element.getKind() == ElementKind.METHOD)
@@ -167,9 +171,17 @@ public class ActionHandler extends AnnotationsHandler {
                 if (IExecutionContext.class.getCanonicalName().equals(className)) {
                     // Check context parameter
                     paramMeta = ParameterMeta.newContextMeta();
-                } else if (ActionOutput.class.getCanonicalName().equals(className)) {
+                } else if (className.indexOf(ActionOutput.class.getCanonicalName()) == 0) {
                     // Check output parameter
-                    paramMeta = ParameterMeta.newOutputMeta(idxOut.value(), paramElement.getSimpleName().toString());
+                    List<? extends TypeMirror> genericTypes = builderContext.getGenericTypes(paramElement);
+                    if (genericTypes.size() != 1) {
+                        throw new GeneralException(
+                                "The action output parameter type must define generic type - Action: {}, Method: {}, Parameter: {}",
+                                classElement.getSimpleName().toString(), actionMethodName, paramElement.getSimpleName().toString()
+                        );
+                    }
+                    paramMeta = ParameterMeta.newOutputMeta(
+                            idxOut.value(), paramElement.getSimpleName().toString(), genericTypes.get(0).toString());
                     idxOut.increase();
                 } else {
                     // All other is input parameter

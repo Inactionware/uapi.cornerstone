@@ -10,7 +10,7 @@ public interface INavigator {
      *
      * @return  The associated behavior builder
      */
-    IBehaviorBuilder moveToStarting();
+    IBehaviorBuilder moveToHead();
 
     /**
      * Move current cursor to specific labeled action.

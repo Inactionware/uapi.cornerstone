@@ -38,16 +38,10 @@ public class ActionIdentify implements IPartibleIdentify<String> {
         ArgumentChecker.required(actionType, "actionType");
         String className = actionType.getCanonicalName();
         className = className.replace('$', (char) 0);
-        if (IAction.class.isAssignableFrom(actionType)) {
-            return new ActionIdentify(className, ActionType.ACTION);
-        } else if (IBehavior.class.isAssignableFrom(actionType)) {
+        if (IBehavior.class.isAssignableFrom(actionType)) {
             return new ActionIdentify(className, ActionType.BEHAVIOR);
         } else {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.INCOMPATIBLE_ACTION_TYPE)
-                    .variables(new BehaviorErrors.IncompatibleActionType()
-                            .type(actionType))
-                    .build();
+            return new ActionIdentify(className, ActionType.ACTION);
         }
     }
 
