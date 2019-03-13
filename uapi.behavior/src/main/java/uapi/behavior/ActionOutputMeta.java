@@ -16,8 +16,6 @@ import uapi.common.ArgumentChecker;
  */
 public final class ActionOutputMeta {
 
-//    private static final String ANONYMOUS = "_anonymous_";
-
     private final Class<?> _type;
     private final String _name;
 
@@ -40,14 +38,6 @@ public final class ActionOutputMeta {
             final String name
     ) {
         ArgumentChecker.required(type, "type");
-//        ArgumentChecker.required(name, "name");
-//        if (name.charAt(0) == '_') {
-//            throw BehaviorException.builder()
-//                    .errorCode(BehaviorErrors.RESERVED_ACTION_OUTPUT_NAME)
-//                    .variables(new BehaviorErrors.ReservedActionOutputName()
-//                            .name(name))
-//                    .build();
-//        }
         this._type = type;
         this._name = name;
     }

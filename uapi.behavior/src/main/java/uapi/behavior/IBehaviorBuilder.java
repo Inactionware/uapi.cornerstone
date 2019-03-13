@@ -64,7 +64,7 @@ public interface IBehaviorBuilder {
      * @throws  BehaviorException
      *          No such action in the repository, see {@link BehaviorErrors.ActionNotFound}
      */
-    IBehaviorBuilder then(Class<? extends IAction> actionType) throws BehaviorException;
+    IBehaviorBuilder then(Class<?> actionType) throws BehaviorException;
 
     /**
      * Set where is next action/behavior when current branch condition is satisfied and specify a label for it.
@@ -80,7 +80,7 @@ public interface IBehaviorBuilder {
      * @throws  BehaviorException
      *          No action in the repository, see {@link BehaviorErrors.ActionNotFound}
      */
-    IBehaviorBuilder then(Class<? extends IAction> actionType, String label, Object... inputs) throws BehaviorException;
+    IBehaviorBuilder then(Class<?> actionType, String label, Object... inputs) throws BehaviorException;
 
     /**
      * Set next an anonymous action which return nothing when current branch condition is satisfied.

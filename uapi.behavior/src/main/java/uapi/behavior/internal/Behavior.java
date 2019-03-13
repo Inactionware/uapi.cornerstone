@@ -172,14 +172,14 @@ public class Behavior
 
     @Override
     public IBehaviorBuilder then(
-            final Class<? extends IAction> actionType
+            final Class<?> actionType
     ) throws BehaviorException {
         return then(ActionIdentify.toActionId(actionType));
     }
 
     @Override
     public IBehaviorBuilder then(
-            final Class<? extends IAction> actionType,
+            final Class<?> actionType,
             final String label,
             final Object... inputs
     ) throws BehaviorException {
@@ -549,9 +549,9 @@ public class Behavior
                                 .build();
                     }
                 });
-                int idx = 0;
+                Numeric.MutableInteger idx = Numeric.mutableInteger(0);
                 actionInputs = Looper.on(outMetas)
-                        .map(outMeta -> Behavior.this.wired().toOutput(this._current.label(), idx))
+                        .map(outMeta -> Behavior.this.wired().toOutput(this._current.label(), idx.getAndIncrease()))
                         .toArray();
             }
 
