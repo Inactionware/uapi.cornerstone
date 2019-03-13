@@ -10,6 +10,7 @@
 package uapi.behavior;
 
 import uapi.common.ArgumentChecker;
+import uapi.common.StringHelper;
 
 /**
  * The meta class holds basic information for action output argument.
@@ -74,5 +75,10 @@ public final class ActionOutputMeta {
         }
         ActionOutputMeta otherMeta = (ActionOutputMeta) other;
         return this._name.equals(otherMeta._name) && this._type.equals(otherMeta._type);
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.makeString("ActionOutputMeta[name={}, type={}]", this._name, this._type);
     }
 }

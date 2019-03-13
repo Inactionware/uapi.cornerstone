@@ -9,6 +9,7 @@
 
 package uapi.behavior.internal;
 
+import uapi.Type;
 import uapi.behavior.*;
 import uapi.common.*;
 import uapi.rx.Looper;
@@ -251,7 +252,7 @@ class ActionHolder {
                             .build();
                 }
                 // Check the referenced action output type does match required input type
-                if (! matchedOutMeta.type().isAssignableFrom(inputMeta.type())) {
+                if (! Type.isAssignable(matchedOutMeta.type(), inputMeta.type())) {
                     throw BehaviorException.builder()
                             .errorCode(BehaviorErrors.INPUT_OUTPUT_TYPE_MISMATCH)
                             .variables(new BehaviorErrors.InputOutputTypeMismatch()

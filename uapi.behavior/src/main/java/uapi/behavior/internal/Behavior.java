@@ -9,6 +9,7 @@
 
 package uapi.behavior.internal;
 
+import uapi.Type;
 import uapi.behavior.*;
 import uapi.common.*;
 import uapi.rx.Looper;
@@ -297,18 +298,20 @@ public class Behavior
                             .build();
                 }
                 // ensure all action output must have same type
-                int unmatchedPos = Looper.on(Range.from(0).to(outMetas1.length).iterator())
-                        .filter(pos -> outMetas1[pos].type().equals(outMetas2[pos].type()))
-                        .first(-1);
-                if (unmatchedPos != -1) {
-                    throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.INCONSISTENT_LEAF_ACTIONS)
-                            .variables(new BehaviorErrors.InconsistentLeafActions()
-                                    .leafAction1(leafAction1.getId())
-                                    .leafAction2(leafAction2.getId())
-                                    .leafAction1Output(outMetas1)
-                                    .leafAction2Output(outMetas2))
-                            .build();
+                if (outMetas1.length > 0) {
+                    int unmatchedPos = Looper.on(Range.from(0).to(outMetas1.length).iterator())
+                            .filter(pos -> outMetas1[pos].type().equals(outMetas2[pos].type()))
+                            .first(-1);
+                    if (unmatchedPos != -1) {
+                        throw BehaviorException.builder()
+                                .errorCode(BehaviorErrors.INCONSISTENT_LEAF_ACTIONS)
+                                .variables(new BehaviorErrors.InconsistentLeafActions()
+                                        .leafAction1(leafAction1.getId())
+                                        .leafAction2(leafAction2.getId())
+                                        .leafAction1Output(outMetas1)
+                                        .leafAction2Output(outMetas2))
+                                .build();
+                    }
                 }
             });
         }
@@ -538,7 +541,8 @@ public class Behavior
                             .build();
                 }
                 Looper.on(inMetas).foreachWithIndex((idx, inMeta) -> {
-                    if (! inMeta.type().equals(outMetas[idx].type())) {
+                    if (! Type.isAssignable(outMetas[idx].type(), inMeta.type())) {
+//                    if (! inMeta.type().equals(outMetas[idx].type())) {
                         throw BehaviorException.builder()
                                 .errorCode(BehaviorErrors.AUTO_WIRE_IO_NOT_MATCH)
                                 .variables(new BehaviorErrors.AutoWireIONotMatch()
@@ -564,6 +568,7 @@ public class Behavior
                         action, actionLabel, this._current, Behavior.this, evaluator, actionInputs);
             }
             this._actions.add(this._current);
+            this._labeledActions.put(actionLabel, this._current);
         }
     }
 
