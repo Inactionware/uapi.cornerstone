@@ -62,6 +62,7 @@ public class Behavior
         this._actionRepo = actionRepository;
         this._actionId = new ActionIdentify(name, ActionType.BEHAVIOR);
         HeadAction head = new HeadAction(inputMetas);
+        this._iMetas = inputMetas;
         this._headAction = new ActionHolder(head, LABEL_HEAD_ACTION, this);
 
         this._navigator = new Navigator(this._headAction);
@@ -320,7 +321,7 @@ public class Behavior
 //        IAction exit = new EndpointAction(EndpointType.EXIT, leafActions.get(0).outputMetas());
 //        Looper.on(leafActions).foreach(aHolder -> aHolder.next(new ActionHolder(exit, this)));
 
-        this._iMetas = this._headAction.action().inputMetas();
+//        this._iMetas = this._headAction.action().inputMetas();
         this._oMetas = leafActions.get(0).outputMetas();
     }
 
