@@ -54,7 +54,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int INPUT_OUTPUT_TYPE_MISMATCH              = 34;
     public static final int INPUT_OBJECT_TYPE_MISMATCH              = 35;
     public static final int INCONSISTENT_INTERCEPTOR_INPUT_METAS    = 39;
-    public static final int INTERCEPTOR_HAS_OUTPUT_META              = 40;
+    public static final int INTERCEPTOR_HAS_OUTPUT_META             = 40;
     public static final int NO_DEFAULT_NEXT_ACTION                  = 41;
     public static final int NAMED_OUTPUT_REF_NOT_FOUND              = 42;
     public static final int INDEXED_OUTPUT_REF_INVALID              = 43;

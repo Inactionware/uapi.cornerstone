@@ -1,7 +1,7 @@
 package uapi.behavior;
 
 /**
- * Created by xquan on 6/16/2017.
+ * The interface is used add anonymous action to Behavior
  */
 public interface IAnonymousCall {
 

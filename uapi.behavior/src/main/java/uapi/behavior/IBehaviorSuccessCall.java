@@ -9,6 +9,9 @@
 
 package uapi.behavior;
 
+/**
+ * It will be invoked when Behavior execution is successful
+ */
 @FunctionalInterface
 public interface IBehaviorSuccessCall {
 

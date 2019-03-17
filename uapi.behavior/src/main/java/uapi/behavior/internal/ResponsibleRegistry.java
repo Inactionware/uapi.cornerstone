@@ -119,12 +119,6 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
         return this._actionRepo.count();
     }
 
-    private void addConstructor(IResponsibleConstructor constructor) {
-        ArgumentChecker.required(constructor, "constructor");
-        IResponsible responsible = register(constructor.name());
-        constructor.construct(responsible);
-    }
-
     @Override
     public void onDependencyInject(String serviceId, Object service) {
         if (IAction.class.getCanonicalName().equals(serviceId) && service instanceof IAction) {

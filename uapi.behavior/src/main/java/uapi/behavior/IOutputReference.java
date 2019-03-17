@@ -9,7 +9,15 @@
 
 package uapi.behavior;
 
+/**
+ * The interface is used to wire Action input to Action output
+ */
 public interface IOutputReference {
 
+    /**
+     * The referenced Action label
+     *
+     * @return  The Action label
+     */
     String actionLabel();
 }

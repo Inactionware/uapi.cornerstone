@@ -321,7 +321,6 @@ public class Behavior
 //        IAction exit = new EndpointAction(EndpointType.EXIT, leafActions.get(0).outputMetas());
 //        Looper.on(leafActions).foreach(aHolder -> aHolder.next(new ActionHolder(exit, this)));
 
-//        this._iMetas = this._headAction.action().inputMetas();
         this._oMetas = leafActions.get(0).outputMetas();
     }
 
