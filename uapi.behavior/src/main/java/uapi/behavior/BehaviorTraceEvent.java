@@ -67,7 +67,7 @@ public abstract class BehaviorTraceEvent extends BehaviorEvent {
      *
      * @return  The last outputted data
      */
-    public Object[] currentResult() {
+    public Object[] currentInputs() {
         return (Object[]) get(KEY_CURRENT_INPUTS);
     }
 
