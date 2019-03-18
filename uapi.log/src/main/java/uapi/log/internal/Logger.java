@@ -10,7 +10,7 @@
 package uapi.log.internal;
 
 import org.slf4j.LoggerFactory;
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.common.StringHelper;
 import uapi.log.ILogger;
 import uapi.service.GenericAttributes;

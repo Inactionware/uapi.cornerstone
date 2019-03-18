@@ -10,7 +10,7 @@
 package uapi.behavior.internal;
 
 import uapi.GeneralException;
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
 import uapi.common.Guarder;

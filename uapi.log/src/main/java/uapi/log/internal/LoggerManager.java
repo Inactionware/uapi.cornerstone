@@ -9,15 +9,8 @@
 
 package uapi.log.internal;
 
-import org.slf4j.LoggerFactory;
-import uapi.InvalidArgumentException;
-import uapi.Tags;
-import uapi.codegen.IGenerated;
-import uapi.common.ArgumentChecker;
 import uapi.log.ILogger;
 import uapi.service.IServiceFactory;
-import uapi.service.annotation.Service;
-import uapi.service.annotation.Tag;
 
 //@Service
 //@Tag(Tags.LOG)

@@ -9,7 +9,7 @@
 
 package uapi.config.internal;
 
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.config.Configuration;
 import uapi.config.IConfigTracer;

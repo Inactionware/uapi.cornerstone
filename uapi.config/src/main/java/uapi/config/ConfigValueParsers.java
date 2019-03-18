@@ -10,7 +10,7 @@
 package uapi.config;
 
 import uapi.GeneralException;
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.rx.Looper;
 import uapi.service.IServiceLifecycle;
@@ -18,7 +18,6 @@ import uapi.service.annotation.Inject;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 

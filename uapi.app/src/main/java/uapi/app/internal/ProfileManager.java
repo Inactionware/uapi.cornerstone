@@ -9,7 +9,7 @@
 
 package uapi.app.internal;
 
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.common.StringHelper;
 import uapi.config.annotation.Config;
 import uapi.log.ILogger;

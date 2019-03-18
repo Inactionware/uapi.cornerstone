@@ -10,7 +10,7 @@
 package uapi.config.internal;
 
 import com.fasterxml.jackson.jr.ob.JSON;
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.common.Functionals;
 import uapi.config.IConfigFileParser;
 import uapi.service.annotation.Inject;

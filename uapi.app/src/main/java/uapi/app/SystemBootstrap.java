@@ -1,6 +1,6 @@
 package uapi.app;
 
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.app.internal.AppServiceLoader;
 import uapi.app.internal.SystemStartingUpEvent;
 import uapi.common.CollectionHelper;

@@ -91,7 +91,7 @@ public interface IBehaviorBuilder {
      * @throws  BehaviorException
      *          Any cause when set the action
      */
-    IBehaviorBuilder call(IAnonymousCall call) throws BehaviorException;
+    IBehaviorBuilder call(uapi.behavior.Functionals.AnonymousCall call) throws BehaviorException;
 
     /**
      * Set next an anonymous action which return nothing with specific label when current branch condition is satisfied.
@@ -104,7 +104,7 @@ public interface IBehaviorBuilder {
      * @throws  BehaviorException
      *          Any cause when set the action
      */
-    IBehaviorBuilder call(IAnonymousCall call, String label) throws BehaviorException;
+    IBehaviorBuilder call(uapi.behavior.Functionals.AnonymousCall call, String label) throws BehaviorException;
 
     /**
      * Invoke the action when the behavior is executed successful
@@ -113,7 +113,7 @@ public interface IBehaviorBuilder {
      *          The action which will be invoked on behavior successful
      * @return  The behavior builder self
      */
-    IBehaviorBuilder onSuccess(IBehaviorSuccessCall action);
+    IBehaviorBuilder onSuccess(uapi.behavior.Functionals.BehaviorSuccessAction action);
 
     /**
      * Invoke the action when the behavior is executed failed
@@ -122,7 +122,7 @@ public interface IBehaviorBuilder {
      *          The action which will be invoked on behavior failed
      * @return  The behavior builder self
      */
-    IBehaviorBuilder onFailure(IBehaviorFailureCall action);
+    IBehaviorBuilder onFailure(uapi.behavior.Functionals.BehaviorFailureAction action);
 
     /**
      * Get navigator which associated with this behavior builder
