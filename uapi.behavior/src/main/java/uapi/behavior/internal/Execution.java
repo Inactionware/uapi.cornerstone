@@ -16,14 +16,14 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
     private final boolean _traceable;
     private ActionHolder _current;
 
-    private final IBehaviorSuccessCall _successAction;
-    private final IBehaviorFailureCall _failureAction;
+    private final Functionals.BehaviorSuccessAction _successAction;
+    private final Functionals.BehaviorFailureAction _failureAction;
 
     Execution(
             final Behavior behavior,
             final int sequence,
-            final IBehaviorSuccessCall successAction,
-            final IBehaviorFailureCall failureAction
+            final Functionals.BehaviorSuccessAction successAction,
+            final Functionals.BehaviorFailureAction failureAction
     ) {
         ArgumentChecker.required(behavior, "behavior");
         this._id = new ExecutionIdentify(behavior.getId(), sequence);

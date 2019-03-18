@@ -10,7 +10,7 @@
 package uapi.behavior.internal;
 
 import uapi.GeneralException;
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.behavior.*;
 import uapi.common.ArgumentChecker;
 import uapi.common.Guarder;
@@ -117,12 +117,6 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
 
     public int actionCount() {
         return this._actionRepo.count();
-    }
-
-    private void addConstructor(IResponsibleConstructor constructor) {
-        ArgumentChecker.required(constructor, "constructor");
-        IResponsible responsible = register(constructor.name());
-        constructor.construct(responsible);
     }
 
     @Override

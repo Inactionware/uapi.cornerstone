@@ -9,7 +9,7 @@
 
 package uapi.config.internal;
 
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.Type;
 import uapi.common.CollectionHelper;
 import uapi.config.IConfigValueParser;

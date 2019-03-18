@@ -14,7 +14,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import uapi.GeneralException;
 import uapi.InvalidArgumentException;
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.codegen.IGenerated;
 import uapi.common.ArgumentChecker;
 import uapi.common.CollectionHelper;

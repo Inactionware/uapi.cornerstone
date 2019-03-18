@@ -52,7 +52,4 @@ public interface IAction extends IIdentifiable<ActionIdentify> {
      * @return  Return true if the action is anonymous otherwise return false
      */
     boolean isAnonymous();
-
-    @Override
-    ActionIdentify getId();
 }

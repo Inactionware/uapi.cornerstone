@@ -1,7 +1,7 @@
 package uapi.app
 
 import spock.lang.Specification
-import uapi.Tags
+import uapi.service.Tags
 import uapi.app.internal.AppServiceLoader
 import uapi.app.internal.SystemShuttingDownEvent
 import uapi.app.internal.SystemStartingUpEvent

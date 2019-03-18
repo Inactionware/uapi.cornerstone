@@ -50,4 +50,9 @@ public class ActionOutput<T> {
     public ActionOutputMeta meta() {
         return this._meta;
     }
+
+    @Override
+    public String toString() {
+        return this._output != null ? this._output.toString() : null;
+    }
 }

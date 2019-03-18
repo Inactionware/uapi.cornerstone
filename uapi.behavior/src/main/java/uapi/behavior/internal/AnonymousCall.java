@@ -9,9 +9,9 @@ import uapi.common.ArgumentChecker;
  */
 public class AnonymousCall implements IAction {
 
-    private final IAnonymousCall _action;
+    private final Functionals.AnonymousCall _action;
 
-    public AnonymousCall(IAnonymousCall action) {
+    public AnonymousCall(Functionals.AnonymousCall action) {
         ArgumentChecker.required(action, "action");
         this._action = action;
     }

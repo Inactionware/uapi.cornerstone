@@ -9,9 +9,30 @@
 
 package uapi.behavior;
 
+/**
+ * The interface is used wire to a specific Action output
+ */
 public interface IWired {
 
+    /**
+     * Wire to specific Action output by its name
+     *
+     * @param   actionLabel
+     *          The label of Action which will be wired
+     * @param   outputName
+     *          The output name
+     * @return  The reference object
+     */
     IOutputReference toOutput(String actionLabel, String outputName);
 
-    IOutputReference toOutput(String actionLabel, int actionIndex);
+    /**
+     * Wire to specific Action output by its index
+     *
+     * @param   actionLabel
+     *          The label of Action which will be wired
+     * @param   outputIndex
+     *          The output index
+     * @return  The reference object
+     */
+    IOutputReference toOutput(String actionLabel, int outputIndex);
 }

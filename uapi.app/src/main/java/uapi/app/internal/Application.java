@@ -1,6 +1,6 @@
 package uapi.app.internal;
 
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.app.*;
 import uapi.behavior.*;
 import uapi.behavior.annotation.Action;
@@ -29,7 +29,7 @@ public class Application {
     private static final String BEHAVIOR_STARTUP            = "startUp";
     private static final String BEHAVIOR_SHUTDOWN           = "shutdown";
 
-    private final IBehaviorFailureCall DEFAULT_FAILURE_ACTION = (failure, ctx) -> {
+    private final Functionals.BehaviorFailureAction DEFAULT_FAILURE_ACTION = (failure, ctx) -> {
         this._logger.error(failure.cause(), "Fail to process behavior - {}", ctx.behaviorName());
         return null;
     };

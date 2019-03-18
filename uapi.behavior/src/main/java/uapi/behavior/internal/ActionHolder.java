@@ -12,6 +12,7 @@ package uapi.behavior.internal;
 import uapi.Type;
 import uapi.behavior.*;
 import uapi.common.*;
+import uapi.common.Functionals;
 import uapi.rx.Looper;
 
 import java.util.LinkedList;

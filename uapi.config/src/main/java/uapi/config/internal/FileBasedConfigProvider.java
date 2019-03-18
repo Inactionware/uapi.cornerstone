@@ -10,7 +10,7 @@
 package uapi.config.internal;
 
 import uapi.GeneralException;
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.config.*;
 import uapi.service.annotation.*;

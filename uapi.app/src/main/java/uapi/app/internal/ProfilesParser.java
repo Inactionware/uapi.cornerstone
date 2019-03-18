@@ -9,7 +9,7 @@
 
 package uapi.app.internal;
 
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.app.AppErrors;
 import uapi.app.AppException;
 import uapi.config.IConfigValueParser;

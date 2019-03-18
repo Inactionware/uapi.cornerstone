@@ -12,6 +12,7 @@ package uapi.behavior.internal;
 import uapi.Type;
 import uapi.behavior.*;
 import uapi.common.*;
+import uapi.common.Functionals;
 import uapi.rx.Looper;
 
 import java.util.HashMap;
@@ -45,8 +46,8 @@ public class Behavior
 
     private Functionals.Evaluator _lastEvaluator;
 
-    private IBehaviorSuccessCall _successAction;
-    private IBehaviorFailureCall _failureAction;
+    private uapi.behavior.Functionals.BehaviorSuccessAction _successAction;
+    private uapi.behavior.Functionals.BehaviorFailureAction _failureAction;
 
     Behavior(
             final Responsible responsible,
@@ -190,14 +191,14 @@ public class Behavior
 
     @Override
     public IBehaviorBuilder call(
-            final IAnonymousCall call
+            final uapi.behavior.Functionals.AnonymousCall call
     ) {
         return call(call, null);
     }
 
     @Override
     public IBehaviorBuilder call(
-            final IAnonymousCall call,
+            final uapi.behavior.Functionals.AnonymousCall call,
             final String label
     ) {
         ensureNotBuilt();
@@ -210,7 +211,7 @@ public class Behavior
 
     @Override
     public IBehaviorBuilder onSuccess(
-            final IBehaviorSuccessCall action
+            final uapi.behavior.Functionals.BehaviorSuccessAction action
     ) {
         ensureNotBuilt();
         ArgumentChecker.required(action, "action");
@@ -227,7 +228,7 @@ public class Behavior
 
     @Override
     public IBehaviorBuilder onFailure(
-            final IBehaviorFailureCall action
+            final uapi.behavior.Functionals.BehaviorFailureAction action
     ) {
         ensureNotBuilt();
         ArgumentChecker.required(action, "action");
@@ -321,7 +322,6 @@ public class Behavior
 //        IAction exit = new EndpointAction(EndpointType.EXIT, leafActions.get(0).outputMetas());
 //        Looper.on(leafActions).foreach(aHolder -> aHolder.next(new ActionHolder(exit, this)));
 
-//        this._iMetas = this._headAction.action().inputMetas();
         this._oMetas = leafActions.get(0).outputMetas();
     }
 

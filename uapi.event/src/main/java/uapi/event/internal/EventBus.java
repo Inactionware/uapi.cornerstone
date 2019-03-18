@@ -10,7 +10,7 @@
 package uapi.event.internal;
 
 import uapi.GeneralException;
-import uapi.Tags;
+import uapi.service.Tags;
 import uapi.common.ArgumentChecker;
 import uapi.common.IAttributed;
 import uapi.common.IntervalTime;
