@@ -9,16 +9,12 @@
 
 package uapi.behavior
 
-import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.InvalidArgumentException
-import uapi.behavior.ActionIdentify
-import uapi.behavior.ActionType
 
 /**
  * Unit test for ActionIdentify
  */
-@Ignore
 class ActionIdentifyTest extends Specification {
 
     def 'Test create instance'() {
