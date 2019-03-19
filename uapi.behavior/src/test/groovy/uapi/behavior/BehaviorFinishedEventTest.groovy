@@ -9,30 +9,28 @@
 
 package uapi.behavior
 
-import spock.lang.Ignore
 import spock.lang.Specification
 
 /**
  * Unit test for BehaviorFinishedEvent
  */
-@Ignore
 class BehaviorFinishedEventTest extends Specification {
 
     def 'Test create instance'() {
         when:
         def exeId = new ExecutionIdentify(behaviorName, ActionType.BEHAVIOR, sequence)
-        def instance = new BehaviorFinishedEvent(exeId, oriData, data, 'respName')
+        def instance = new BehaviorFinishedEvent(srcName, exeId, inputs, outputs, null)
 
         then:
         noExceptionThrown()
         instance.topic() == BehaviorTraceEvent.TOPIC
         instance.executionId() == exeId
         instance.behaviorName() == behaviorName
-        instance.originalData() == oriData
-        instance.data() == data
+        instance.behaviorInputs() == inputs
+        instance.behaviorOutputs() == outputs
 
         where:
-        behaviorName    | sequence  | oriData   | data
-        'BName'         | 2         | 'abc'     | 'cba'
+        srcName | behaviorName    | sequence  | inputs                  | outputs
+        'src'   | 'BName'         | 2         | ['abc'] as String[]     | [] as ActionOutput[]
     }
 }

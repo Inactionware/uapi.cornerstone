@@ -5,13 +5,14 @@ package uapi.behavior;
  */
 public abstract class BehaviorTraceEvent extends BehaviorEvent {
 
-    public static final String TOPIC                    = "BehaviorTrace";
-    public static final String KEY_EXECUTION_ID         = "ExecutionId";
-    public static final String KEY_BEHAVIOR_INPUTS      = "BehaviorInputs";
-    public static final String KEY_CURRENT_ACTION_ID    = "CurrentActionId";
-    public static final String KEY_CURRENT_INPUTS       = "CurrentInputs";
-    public static final String KEY_CURRENT_OUTPUTS      = "CurrentOutputs";
-    public static final String KEY_EX                   = "Exception";
+    public static final String TOPIC                        = "BehaviorTrace";
+
+    protected static final String KEY_EXECUTION_ID          = "ExecutionId";
+    protected static final String KEY_BEHAVIOR_INPUTS       = "BehaviorInputs";
+    protected static final String KEY_CURRENT_ACTION_ID     = "CurrentActionId";
+    protected static final String KEY_CURRENT_INPUTS        = "CurrentInputs";
+    protected static final String KEY_CURRENT_OUTPUTS       = "CurrentOutputs";
+    protected static final String KEY_EX                    = "Exception";
 
     public BehaviorTraceEvent(String sourceName) {
         super(TOPIC, sourceName);

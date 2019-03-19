@@ -15,6 +15,7 @@ import uapi.GeneralException
 import uapi.InvalidArgumentException
 import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionInputMeta
+import uapi.behavior.ActionOutputMeta
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
@@ -32,10 +33,10 @@ class ActionHolderTest extends Specification {
         when:
         def action = Mock(IAction) {
             getId() >> Mock(ActionIdentify)
-            inputType() >> String.class
-            outputType() >> String.class
+            inputMetas() >> ([new ActionInputMeta(String.class)] as ActionInputMeta[])
+            outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         }
-        def actionHolder = new ActionHolder(action)
+        def actionHolder = new ActionHolder(action, 'label', null, Mock(Behavior), null, 'input')
 
         then:
         noExceptionThrown()
@@ -47,10 +48,11 @@ class ActionHolderTest extends Specification {
         when:
         def action = Mock(IAction) {
             getId() >> Mock(ActionIdentify)
-            inputType() >> String.class
-            outputType() >> String.class
+            inputMetas() >> ([new ActionInputMeta(String.class)] as ActionInputMeta[])
+            outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         }
-        def actionHolder = new ActionHolder(action, Mock(Functionals.Evaluator))
+        def actionHolder = new ActionHolder(
+                action, 'label', null, Mock(Behavior), Mock(Functionals.Evaluator), 'input')
 
         then:
         noExceptionThrown()
@@ -59,34 +61,46 @@ class ActionHolderTest extends Specification {
     }
 
     def 'Test set next action by unmatched input type'() {
+        given:
+        def action = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+
+        def action2 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> ([new ActionInputMeta(String.class)] as ActionInputMeta[])
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+
         when:
-        def instance = new ActionHolder(new TestAction1())
-        instance.next(new ActionHolder(new TestAction2()))
+        def instance = new ActionHolder(action, 'label', Mock(Behavior))
+        instance.next(new ActionHolder(action2, 'label', Mock(Behavior)))
 
         then:
-//        thrown(BehaviorException)
-        noExceptionThrown()
-        instance.hasNext()
+        thrown(BehaviorException)
+        ! instance.hasNext()
     }
 
     def 'Test set next action'() {
+        given:
+        def action = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+
         when:
-        def instance = new ActionHolder(new TestAction1())
-        instance.next(new ActionHolder(new TestAction3()))
+        def instance = new ActionHolder(action, 'label', Mock(Behavior))
+        instance.next(new ActionHolder(action, 'label', Mock(Behavior)))
 
         then:
         noExceptionThrown()
         instance.hasNext()
     }
 
-//    def 'Test find next action but no next action'() {
-//        when:
-//        def instance = new ActionHolder(new TestAction1())
-//        instance.findNext(new Object())
-//
-//        then:
-//        thrown(GeneralException)
-//    }
+    /// Not verified below
 
     def 'Test find next action with one next action'() {
         when:
