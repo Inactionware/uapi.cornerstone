@@ -586,7 +586,7 @@ public class Behavior
         }
     }
 
-    public final class NamedOutput implements IOutputReference {
+    public class NamedOutput implements IOutputReference {
 
         private final String _label;
         private final String _name;
@@ -639,7 +639,7 @@ public class Behavior
         }
     }
 
-    public final class IndexedOutput implements IOutputReference {
+    public class IndexedOutput implements IOutputReference {
 
         private final String _label;
         private final int _idx;

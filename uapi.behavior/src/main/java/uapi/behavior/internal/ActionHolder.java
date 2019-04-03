@@ -111,7 +111,7 @@ class ActionHolder {
      *          If this action's output type is not matched next action's input type,
      *          see {@link BehaviorErrors.UnmatchedAction}
      */
-    void next(
+    private void next(
             final ActionHolder actionHolder
     ) throws BehaviorException {
         ArgumentChecker.required(actionHolder, "actionHolder");
@@ -230,7 +230,7 @@ class ActionHolder {
                 if (outRef instanceof Behavior.NamedOutput) {
                     String refName = ((Behavior.NamedOutput) outRef).outputName();
                     matchedOutMeta = Looper.on(previous._action.outputMetas())
-                            .filter(meta -> meta.name().equals(refName)).first();
+                            .filter(meta -> meta.name().equals(refName)).first(null);
                 } else if (outRef instanceof Behavior.IndexedOutput) {
                     int refIdx = ((Behavior.IndexedOutput) outRef).outputIndex();
                     if (refIdx < previous._action.outputMetas().length) {

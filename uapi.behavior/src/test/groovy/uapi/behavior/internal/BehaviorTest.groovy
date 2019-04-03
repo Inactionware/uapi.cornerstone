@@ -12,6 +12,8 @@ package uapi.behavior.internal
 import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.behavior.ActionIdentify
+import uapi.behavior.ActionInputMeta
+import uapi.behavior.ActionOutputMeta
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorErrors
 import uapi.behavior.BehaviorException
@@ -29,20 +31,22 @@ class BehaviorTest extends Specification {
 
     def 'Test create instance'() {
         when:
-        new Behavior(Mock(Responsible), Mock(Repository), 'aaa', String.class)
+        ActionInputMeta[] inMetas = new ActionInputMeta[1]
+        inMetas[0] = new ActionInputMeta(String.class)
+        new Behavior(Mock(Responsible), Mock(Repository), 'aaa', inMetas)
 
         then:
         noExceptionThrown()
     }
-
+///Verified here
     def 'Test create and build instance'() {
         given:
         def actionId = new ActionIdentify('name', ActionType.ACTION)
         def repo = Mock(Repository) {
             get(actionId) >> Mock(IAction) {
                 getId() >> actionId
-                inputType() >> actionInputType
-                outputType() >> actionOutputType
+                inputMetas() >> [ new ActionInputMeta(actionInputType) ] as ActionInputMeta[]
+                outputMetas() >> [ new ActionOutputMeta(actionOutputType) ] as ActionOutputMeta[]
             }
         }
 
