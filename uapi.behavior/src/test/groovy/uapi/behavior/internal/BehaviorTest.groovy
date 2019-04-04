@@ -38,27 +38,32 @@ class BehaviorTest extends Specification {
         then:
         noExceptionThrown()
     }
-///Verified here
+
     def 'Test create and build instance'() {
         given:
         def actionId = new ActionIdentify('name', ActionType.ACTION)
+        ActionInputMeta[] inMetas = new ActionInputMeta[1]
+        inMetas[0] = new ActionInputMeta(actionInputType)
+        ActionOutputMeta[] outMetas = new ActionOutputMeta[1]
+        outMetas[0] = new ActionOutputMeta(actionOutputType)
         def repo = Mock(Repository) {
             get(actionId) >> Mock(IAction) {
                 getId() >> actionId
-                inputMetas() >> [ new ActionInputMeta(actionInputType) ] as ActionInputMeta[]
-                outputMetas() >> [ new ActionOutputMeta(actionOutputType) ] as ActionOutputMeta[]
+                inputMetas() >> inMetas
+                outputMetas() >> outMetas
             }
         }
 
+
         when:
-        def behavior = new Behavior(Mock(Responsible), repo, behaviorName, behaviorInputType)
+        def behavior = new Behavior(Mock(Responsible), repo, behaviorName, inMetas)
         def bb = behavior.traceable(true).then(actionId).build()
 
         then:
         noExceptionThrown()
-        bb.id == new ActionIdentify('aaa', ActionType.BEHAVIOR)
-        bb.inputType() == behaviorInputType
-        bb.outputType() == behaviorOutputType
+        bb.id == new ActionIdentify(behaviorName, ActionType.BEHAVIOR)
+        bb.inputMetas() == inMetas
+        bb.outputMetas() == outMetas
         bb.traceable()
         ((Behavior) bb).newExecution() != null
         ((Behavior) bb).headAction() != null
@@ -71,16 +76,22 @@ class BehaviorTest extends Specification {
     def 'Test validation on incorrect behavior and first action input type mismatch'() {
         given:
         def actionId = new ActionIdentify('name', ActionType.ACTION)
+        ActionInputMeta[] inMetas = new ActionInputMeta[1]
+        inMetas[0] = new ActionInputMeta(actionInputType)
+        ActionOutputMeta[] outMetas = new ActionOutputMeta[1]
+        outMetas[0] = new ActionOutputMeta(actionOutputType)
         def repo = Mock(Repository) {
             get(actionId) >> Mock(IAction) {
                 getId() >> actionId
-                inputType() >> actionInputType
-                outputType() >> actionOutputType
+                inputMetas() >> inMetas
+                outputMetas() >> outMetas
             }
         }
+        def bInMetas = new ActionInputMeta[1]
+        bInMetas[0] = new ActionInputMeta(behaviorInputType)
 
         when:
-        def behavior = new Behavior(Mock(Responsible), repo, behaviorName, behaviorInputType)
+        def behavior = new Behavior(Mock(Responsible), repo, behaviorName, bInMetas)
         behavior.then(actionId).build()
 
         then:
@@ -93,7 +104,9 @@ class BehaviorTest extends Specification {
 
     def 'Test validation when evaluator is not used'() {
         when:
-        def behavior = new Behavior(Mock(Responsible), Mock(Repository), behaviorName, behaviorInputType)
+        def bInMetas = new ActionInputMeta[1]
+        bInMetas[0] = new ActionInputMeta(behaviorInputType)
+        def behavior = new Behavior(Mock(Responsible), Mock(Repository), behaviorName, bInMetas)
         behavior.when({data -> true}).build()
 
         then:
@@ -108,31 +121,42 @@ class BehaviorTest extends Specification {
         given:
         def a1 = new ActionIdentify(a1Name, ActionType.ACTION)
         def a2 = new ActionIdentify(a2Name, ActionType.ACTION)
+        def a1InMetas = new ActionInputMeta[1]
+        a1InMetas[0] = new ActionInputMeta(a1IType)
+        def a1OutMetas = new ActionOutputMeta[1]
+        a1OutMetas[0] = new ActionOutputMeta(a1OType)
+        def a2InMetas = new ActionInputMeta[1]
+        a2InMetas[0] = new ActionInputMeta(a2IType)
+        def a2OutMetas = new ActionOutputMeta[1]
+        a2OutMetas[0] = new ActionOutputMeta(a2OType)
         def repo = Mock(Repository) {
             get(a1) >> Mock(IAction) {
                 getId() >> a1
-                inputType() >> a1IType
-                outputType() >> a1OType
+                inputMetas() >> a1InMetas
+                outputMetas() >> a1OutMetas
             }
             get(a2) >> Mock(IAction) {
                 getId() >> a2
-                inputType() >> a2IType
-                outputType() >> a2OType
+                inputMetas() >> a2InMetas
+                outputMetas() >> a2OutMetas
             }
         }
+        def bInMetas = new ActionInputMeta[1]
+        bInMetas[0] = new ActionInputMeta(behaviorInput)
 
         when:
-        def behavior = new Behavior(Mock(Responsible), repo, behaviorName, behaviorInput)
+        def behavior = new Behavior(Mock(Responsible), repo, behaviorName, bInMetas)
         behavior.then(a1).navigator().moveToHead().then(a2).build()
 
         then:
-        thrown(BehaviorException)
+        def ex = thrown(BehaviorException)
+        ex.errorCode() == BehaviorErrors.INCONSISTENT_LEAF_ACTIONS
 
         where:
         behaviorName    | behaviorInput     | a1Name    | a1IType       | a1OType       | a2Name    | a2IType       | a2OType
         'bName'         | String.class      | 'a1'      | String.class  | Integer.class | 'a2'      | String.class  | String.class
     }
-
+///Verified here
     def 'Test add interceptive action'() {
         given:
         def actionId = new ActionIdentify(a1Name, ActionType.ACTION)

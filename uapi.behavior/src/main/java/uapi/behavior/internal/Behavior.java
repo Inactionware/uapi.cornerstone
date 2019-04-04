@@ -301,8 +301,8 @@ public class Behavior
                 }
                 // ensure all action output must have same type
                 if (outMetas1.length > 0) {
-                    int unmatchedPos = Looper.on(Range.from(0).to(outMetas1.length).iterator())
-                            .filter(pos -> outMetas1[pos].type().equals(outMetas2[pos].type()))
+                    int unmatchedPos = Looper.on(Range.from(0).to(outMetas1.length - 1).iterator())
+                            .filter(pos -> ! outMetas1[pos].type().equals(outMetas2[pos].type()))
                             .first(-1);
                     if (unmatchedPos != -1) {
                         throw BehaviorException.builder()
