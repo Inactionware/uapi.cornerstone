@@ -52,7 +52,7 @@ public class InterceptedActionHolder extends ActionHolder {
                             .build();
                 }
                 // Check interceptor which input metas should be same as intercepted action's input meta
-                if (CollectionHelper.equals(action.inputMetas(), interceptor.inputMetas())) {
+                if (! CollectionHelper.equals(action.inputMetas(), interceptor.inputMetas())) {
                     throw BehaviorException.builder()
                             .errorCode(BehaviorErrors.INCONSISTENT_INTERCEPTOR_INPUT_METAS)
                             .variables(new BehaviorErrors.InconsistentInterceptorInputMetas()
@@ -70,7 +70,7 @@ public class InterceptedActionHolder extends ActionHolder {
                             .build();
                 }
                 return (IInterceptor) interceptor;
-            }).toArray();
+            }).toArray(new IInterceptor[0]);
         } else {
             this._interceptors = new IInterceptor[0];
         }

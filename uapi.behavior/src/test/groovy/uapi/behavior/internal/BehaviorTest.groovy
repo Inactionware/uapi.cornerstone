@@ -156,32 +156,42 @@ class BehaviorTest extends Specification {
         behaviorName    | behaviorInput     | a1Name    | a1IType       | a1OType       | a2Name    | a2IType       | a2OType
         'bName'         | String.class      | 'a1'      | String.class  | Integer.class | 'a2'      | String.class  | String.class
     }
-///Verified here
+
     def 'Test add interceptive action'() {
         given:
         def actionId = new ActionIdentify(a1Name, ActionType.ACTION)
         def interceptorId = new ActionIdentify(depName, ActionType.ACTION)
+        def interceptors = [interceptorId] as ActionIdentify[]
+        def a1InMetas = new ActionInputMeta[1]
+        a1InMetas[0] = new ActionInputMeta(a1IType)
+        def a1OutMetas = new ActionOutputMeta[1]
+        a1OutMetas[0] = new ActionOutputMeta(a1OType)
+        def depInMetas = new ActionInputMeta[1]
+        depInMetas[0] = new ActionInputMeta(depIType)
+        def depOutMetas = new ActionOutputMeta[0]
         def repo = Mock(Repository) {
             get(actionId) >> Mock(IInterceptedAction) {
                 getId() >> actionId
-                inputType() >> a1IType
-                outputType() >> a1OType
-                by() >> interceptorId
+                inputMetas() >> a1InMetas
+                outputMetas() >> a1OutMetas
+                by() >> interceptors
             }
             get(interceptorId) >> Mock(IInterceptor) {
                 getId() >> interceptorId
-                inputType() >> depIType
-                outputType() >> depIType
+                inputMetas() >> depInMetas
+                outputMetas() >> depOutMetas
             }
         }
+        def bInMetas = new ActionInputMeta[1]
+        bInMetas[0] = new ActionInputMeta(bInput)
 
         when:
-        def behavior = new Behavior(Mock(Responsible), repo, bName, bInput)
+        def behavior = new Behavior(Mock(Responsible), repo, bName, bInMetas)
         behavior.then(actionId).build()
 
         then:
         noExceptionThrown()
-        behavior.actionSize() == 2
+        behavior.actionSize() == 1
 
         where:
         bName   | bInput        | a1Name    | a1IType       | a1OType       | depName   | depIType
@@ -192,17 +202,26 @@ class BehaviorTest extends Specification {
         given:
         def actionId = new ActionIdentify(a1Name, ActionType.ACTION)
         def interceptorId = new ActionIdentify(depName, ActionType.ACTION)
+        def interceptors = [interceptorId] as ActionIdentify[]
+        def a1InMetas = new ActionInputMeta[1]
+        a1InMetas[0] = new ActionInputMeta(a1IType)
+        def a1OutMetas = new ActionOutputMeta[1]
+        a1OutMetas[0] = new ActionOutputMeta(a1OType)
+        def depInMetas = new ActionInputMeta[1]
+        depInMetas[0] = new ActionInputMeta(depIType)
         def repo = Mock(Repository) {
             get(actionId) >> Mock(IInterceptedAction) {
                 getId() >> actionId
-                inputType() >> a1IType
-                outputType() >> a1OType
-                by() >> interceptorId
+                inputMetas() >> a1InMetas
+                outputMetas() >> a1OutMetas
+                by() >> interceptors
             }
         }
+        def bInMetas = new ActionInputMeta[1]
+        bInMetas[0] = new ActionInputMeta(bInput)
 
         when:
-        def behavior = new Behavior(Mock(Responsible), repo, bName, bInput)
+        def behavior = new Behavior(Mock(Responsible), repo, bName, bInMetas)
         behavior.then(actionId).build()
 
         then:
@@ -218,34 +237,44 @@ class BehaviorTest extends Specification {
         given:
         def actionId = new ActionIdentify(a1Name, ActionType.ACTION)
         def interceptorId = new ActionIdentify(depName, ActionType.ACTION)
+        def interceptors = [interceptorId] as ActionIdentify[]
+        def a1InMetas = new ActionInputMeta[1]
+        a1InMetas[0] = new ActionInputMeta(a1IType)
+        def a1OutMetas = new ActionOutputMeta[1]
+        a1OutMetas[0] = new ActionOutputMeta(a1OType)
+        def depInMetas = new ActionInputMeta[1]
+        depInMetas[0] = new ActionInputMeta(depIType)
+        def depOutMetas = new ActionOutputMeta[0]
         def repo = Mock(Repository) {
             get(actionId) >> Mock(IInterceptedAction) {
                 getId() >> actionId
-                inputType() >> a1IType
-                outputType() >> a1OType
-                by() >> interceptorId
+                inputMetas() >> a1InMetas
+                outputMetas() >> a1OutMetas
+                by() >> interceptors
             }
             get(interceptorId) >> Mock(IInterceptor) {
                 getId() >> interceptorId
-                inputType() >> depIType
-                outputType() >> depIType
+                inputMetas() >> depInMetas
+                outputMetas() >> depOutMetas
             }
         }
+        def bInMetas = new ActionInputMeta[1]
+        bInMetas[0] = new ActionInputMeta(bInput)
 
         when:
-        def behavior = new Behavior(Mock(Responsible), repo, bName, bInput)
+        def behavior = new Behavior(Mock(Responsible), repo, bName, bInMetas)
         behavior.then(actionId).build()
 
         then:
         def ex = thrown(BehaviorException)
-        ex.errorCode() == BehaviorErrors.INTERCEPTOR_IO_NOT_MATCH_ACTION_INPUT
+        ex.errorCode() == errCode
 
         where:
-        bName   | bInput        | a1Name    | a1IType       | a1OType       | depName   | depIType
-        'bName' | String.class  |'a1'       | String.class  | Integer.class |'dep'      | Integer.class
-        'bName' | String.class  |'a1'       | Integer.class | Integer.class |'dep'      | String.class
+        bName   | bInput        | a1Name    | a1IType       | a1OType       | depName   | depIType      | errCode
+        'bName' | String.class  |'a1'       | String.class  | Integer.class |'dep'      | Integer.class | BehaviorErrors.INCONSISTENT_INTERCEPTOR_INPUT_METAS
+        'bName' | String.class  |'a1'       | Integer.class | Integer.class |'dep'      | String.class  | BehaviorErrors.AUTO_WIRE_IO_NOT_MATCH
     }
-
+///Verified here
     def 'Test process'() {
         given:
         def aId = new ActionIdentify(aName, ActionType.ACTION)
