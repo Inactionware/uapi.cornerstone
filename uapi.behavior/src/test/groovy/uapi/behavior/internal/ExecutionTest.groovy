@@ -3,6 +3,7 @@ package uapi.behavior.internal
 import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.behavior.ActionIdentify
+import uapi.behavior.ActionOutput
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorExecutingEvent
 import uapi.behavior.BehaviorFinishedEvent
@@ -33,11 +34,12 @@ class ExecutionTest extends Specification {
         bName   | seq
         'B'     | 1
     }
-
+/// Verified here
     def 'Test execute'() {
         given:
+
         def action = Mock(IAction) {
-            process(input, _) >> output
+            process(_, _, _) >> output
         }
         def actionHolder = Mock(ActionHolder) {
             findNext(_) >> null
@@ -50,12 +52,13 @@ class ExecutionTest extends Specification {
         }
 
         when:
+        def inputs = [input] as Object[]
+        def outptus = [new ActionOutput<String>(Mock(ActionIdentify), output)] as ActionOutput[]
         def execution = new Execution(behavior, 1, null, null)
-        def result = execution.execute(input, Mock(ExecutionContext))
+        execution.execute(inputs, outputs, Mock(ExecutionContext))
 
         then:
         noExceptionThrown()
-        result == output
 
         where:
         input   | output
