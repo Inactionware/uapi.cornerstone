@@ -1,8 +1,9 @@
 package uapi.behavior.internal
 
-import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.behavior.ActionIdentify
+import uapi.behavior.ActionOutput
+import uapi.behavior.ActionOutputMeta
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorExecutingEvent
 import uapi.behavior.BehaviorFinishedEvent
@@ -13,7 +14,7 @@ import uapi.behavior.IExecutionContext
 /**
  * Unit test for Execution
  */
-@Ignore
+//@Ignore
 class ExecutionTest extends Specification {
 
     def 'Test create instance'() {
@@ -36,13 +37,16 @@ class ExecutionTest extends Specification {
 
     def 'Test execute'() {
         given:
+        def inputs = [input] as Object[]
         def action = Mock(IAction) {
-            process(input, _) >> output
+            1 * process(_, _, _)
         }
+        action.outputMetas() >> new ActionOutputMeta[0]
         def actionHolder = Mock(ActionHolder) {
             findNext(_) >> null
         }
         actionHolder.action() >> action
+        actionHolder.inputs() >> inputs
         def behavior = Mock(Behavior) {
             getId() >> new ActionIdentify('bname', ActionType.BEHAVIOR)
             traceable() >> false
@@ -50,12 +54,13 @@ class ExecutionTest extends Specification {
         }
 
         when:
+        def outMeta = new ActionOutputMeta(String.class)
+        def outputs = [new ActionOutput<String>(Mock(ActionIdentify), outMeta)] as ActionOutput[]
         def execution = new Execution(behavior, 1, null, null)
-        def result = execution.execute(input, Mock(ExecutionContext))
+        execution.execute(inputs, outputs, Mock(ExecutionContext))
 
         then:
         noExceptionThrown()
-        result == output
 
         where:
         input   | output
@@ -64,14 +69,17 @@ class ExecutionTest extends Specification {
 
     def 'Test traceable execution'() {
         given:
+        def inputs = [input] as Object[]
         def action = Mock(IAction) {
             getId() >> new ActionIdentify('aname', ActionType.ACTION)
-            process(input, _) >> output
+            1 * process(_, _, _)
         }
+        action.outputMetas() >> new ActionOutputMeta[0]
         def actionHolder = Mock(ActionHolder) {
             findNext(_) >> null
         }
         actionHolder.action() >> action
+        actionHolder.inputs() >> inputs
         def behavior = Mock(Behavior) {
             getId() >> new ActionIdentify('bname', ActionType.BEHAVIOR)
             traceable() >> true
@@ -79,17 +87,18 @@ class ExecutionTest extends Specification {
         }
         def execCtx = Mock(ExecutionContext) {
             get(IExecutionContext.KEY_RESP_NAME) >> 'respName'
-            1 * fireEvent(_ as BehaviorExecutingEvent)
-            1 * fireEvent(_ as BehaviorFinishedEvent)
         }
 
         when:
+        def outMeta = new ActionOutputMeta(String.class)
+        def outputs = [new ActionOutput<String>(Mock(ActionIdentify), outMeta)] as ActionOutput[]
         def execution = new Execution(behavior, 1, null, null)
-        def result = execution.execute(input, execCtx)
+        execution.execute(inputs, outputs, execCtx)
 
         then:
         noExceptionThrown()
-        result == output
+        1 * execCtx.fireEvent(_ as BehaviorExecutingEvent)
+        1 * execCtx.fireEvent(_ as BehaviorFinishedEvent)
 
         where:
         input   | output

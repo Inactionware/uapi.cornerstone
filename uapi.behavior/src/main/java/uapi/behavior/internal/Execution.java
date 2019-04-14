@@ -142,6 +142,10 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         }
 
         // Write outputs back to behavior outputs
-        Looper.on(actionOutputs).foreachWithIndex((idx, output) -> behaviorOutputs[idx].set(output.get()));
+        Looper.on(actionOutputs).foreachWithIndex((idx, output) -> {
+            if (output.get() != null) {
+                behaviorOutputs[idx].set(output.get());
+            }
+        });
     }
 }

@@ -29,9 +29,7 @@ public final class ActionOutputMeta {
     public ActionOutputMeta(
             final Class<?> type
     ) {
-        ArgumentChecker.required(type, "type");
-        this._type = type;
-        this._name = null;
+        this(type, null);
     }
 
     public ActionOutputMeta(

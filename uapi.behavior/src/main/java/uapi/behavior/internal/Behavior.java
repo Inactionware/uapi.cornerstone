@@ -301,8 +301,8 @@ public class Behavior
                 }
                 // ensure all action output must have same type
                 if (outMetas1.length > 0) {
-                    int unmatchedPos = Looper.on(Range.from(0).to(outMetas1.length).iterator())
-                            .filter(pos -> outMetas1[pos].type().equals(outMetas2[pos].type()))
+                    int unmatchedPos = Looper.on(Range.from(0).to(outMetas1.length - 1).iterator())
+                            .filter(pos -> ! outMetas1[pos].type().equals(outMetas2[pos].type()))
                             .first(-1);
                     if (unmatchedPos != -1) {
                         throw BehaviorException.builder()
@@ -586,7 +586,7 @@ public class Behavior
         }
     }
 
-    public final class NamedOutput implements IOutputReference {
+    public class NamedOutput implements IOutputReference {
 
         private final String _label;
         private final String _name;
@@ -639,7 +639,7 @@ public class Behavior
         }
     }
 
-    public final class IndexedOutput implements IOutputReference {
+    public class IndexedOutput implements IOutputReference {
 
         private final String _label;
         private final int _idx;

@@ -9,24 +9,19 @@
 
 package uapi.behavior.internal
 
-import spock.lang.Ignore
 import spock.lang.Specification
-import uapi.GeneralException
-import uapi.InvalidArgumentException
 import uapi.behavior.ActionIdentify
 import uapi.behavior.ActionInputMeta
 import uapi.behavior.ActionOutputMeta
-import uapi.behavior.ActionType
+import uapi.behavior.BehaviorErrors
 import uapi.behavior.BehaviorException
 import uapi.behavior.IAction
-import uapi.behavior.IExecutionContext
 import uapi.common.Functionals
 import uapi.common.IAttributed
 
 /**
  * Unit test for ActionHolder
  */
-@Ignore
 class ActionHolderTest extends Specification {
 
     def 'Test create instance'() {
@@ -100,32 +95,51 @@ class ActionHolderTest extends Specification {
         instance.hasNext()
     }
 
-    /// Not verified below
-
     def 'Test find next action with one next action'() {
         when:
-        def instance = new ActionHolder(new TestAction1())
-        def nextAction = new TestAction3()
-        instance.next(new ActionHolder(nextAction))
-        ActionHolder next = instance.findNext(new Object())
+        def action1 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+        def holder1 = new ActionHolder(action1, 'label1', Mock(Behavior))
+        def action2 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+        holder1.next(new ActionHolder(action2, 'label2', Mock(Behavior)))
+        ActionHolder next = holder1.findNext(new Object())
 
         then:
         noExceptionThrown()
         next != null
-        next.action() == nextAction
+        next.action() == action2
     }
 
     def 'Test find next action with more next action'() {
         when:
-        def instance = new ActionHolder(new TestAction1())
-        def nextAction1 = new TestAction3()
-        def nextAction2 = new TestAction4()
-        instance.next(new ActionHolder(nextAction1, Mock(Functionals.Evaluator) {
+        def instance = new ActionHolder(Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }, 'label', Mock(Behavior))
+        def nextAction1 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+        def nextAction2 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+        new ActionHolder(nextAction1, 'label2', instance, Mock(Behavior), Mock(Functionals.Evaluator) {
             accept(_ as IAttributed) >> false
-        }))
-        instance.next(new ActionHolder(nextAction2, Mock(Functionals.Evaluator) {
+        })
+        new ActionHolder(nextAction2, 'label3', instance, Mock(Behavior), Mock(Functionals.Evaluator) {
             accept(_ as IAttributed) >> true
-        }))
+        })
         ActionHolder next = instance.findNext(Mock(IAttributed))
 
         then:
@@ -136,13 +150,25 @@ class ActionHolderTest extends Specification {
 
     def 'Test find next action by default'() {
         when:
-        def instance = new ActionHolder(new TestAction1())
-        def nextAction1 = new TestAction3()
-        def nextAction2 = new TestAction4()
-        instance.next(new ActionHolder(nextAction1))
-        instance.next(new ActionHolder(nextAction2, Mock(Functionals.Evaluator) {
+        def instance = new ActionHolder(Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }, 'label', Mock(Behavior))
+        def nextAction1 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+        def nextAction2 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+        new ActionHolder(nextAction1, 'label1', instance, Mock(Behavior), null)
+        new ActionHolder(nextAction2, 'label2', instance, Mock(Behavior), Mock(Functionals.Evaluator) {
             accept(_ as IAttributed) >> false
-        }))
+        })
         ActionHolder next = instance.findNext(Mock(IAttributed))
 
         then:
@@ -153,11 +179,23 @@ class ActionHolderTest extends Specification {
 
     def 'Test find next but it has multiple default next'() {
         when:
-        def instance = new ActionHolder(new TestAction1())
-        def nextAction1 = new TestAction3()
-        def nextAction2 = new TestAction4()
-        instance.next(new ActionHolder(nextAction1))
-        instance.next(new ActionHolder(nextAction2))
+        def instance = new ActionHolder(Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }, 'label', Mock(Behavior))
+        def nextAction1 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+        def nextAction2 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+        new ActionHolder(nextAction1, 'label1', instance, Mock(Behavior), null)
+        new ActionHolder(nextAction2, 'label2', instance, Mock(Behavior), null)
         ActionHolder next = instance.findNext(Mock(IAttributed))
 
         then:
@@ -166,185 +204,203 @@ class ActionHolderTest extends Specification {
 
     def 'Test find next but it has multiple non-default next'() {
         when:
-        def instance = new ActionHolder(new TestAction1())
-        def nextAction1 = new TestAction3()
-        def nextAction2 = new TestAction4()
+        def instance = new ActionHolder(Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }, 'label', Mock(Behavior))
+        def nextAction1 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+        def nextAction2 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
+        }
         def evaluator = Mock(Functionals.Evaluator) {
             accept(_ as IAttributed) >> true
         }
-        instance.next(new ActionHolder(nextAction1, evaluator))
-        instance.next(new ActionHolder(nextAction2, evaluator))
+        new ActionHolder(nextAction1, 'label1', instance, Mock(Behavior), evaluator)
+        new ActionHolder(nextAction2, 'label2', instance, Mock(Behavior), evaluator)
         ActionHolder next = instance.findNext(Mock(IAttributed))
 
         then:
         thrown(BehaviorException)
     }
 
-    class TestAction1 implements IAction {
-
-//        @Override
-//        String process(Void input, IExecutionContext context) {
-//            return null
-//        }
-//
-//        @Override
-//        Class<Void> inputType() {
-//            return Void.class
-//        }
-//
-//        @Override
-//        Class<String> outputType() {
-//            return String.class
-//        }
-//
-//        @Override
-//        boolean isAnonymous() {
-//            return false
-//        }
-//
-//        @Override
-//        ActionIdentify getId() {
-//            return ActionIdentify.parse('1@ACTION')
-//        }
-        @Override
-        ActionInputMeta[] inputMetas() {
-            ß
+    def 'Test named input ref verification'() {
+        when:
+        ActionInputMeta[] inMetas = new ActionInputMeta[1]
+        inMetas[0] =  new ActionInputMeta(String.class)
+        ActionOutputMeta[] outMetas = new ActionOutputMeta[1]
+        outMetas[0] = new ActionOutputMeta(String.class, 'name')
+        def instance = new ActionHolder(Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> outMetas
+        }, 'label', Mock(Behavior))
+        def nextAction1 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> inMetas
+            outputMetas() >> new ActionOutputMeta[0]
         }
+        new ActionHolder(nextAction1, 'label1', instance, Mock(Behavior), null, Mock(Behavior.NamedOutput) {
+            actionLabel() >> 'label'
+            outputName() >> 'name'
+        })
 
-        @Override
-        boolean isAnonymous() {
-            return false
-        }
-
-        @Override
-        ActionIdentify getId() {
-            return null
-        }
+        then:
+        noExceptionThrown()
     }
 
-    class TestAction2 implements IAction {
-
-//        @Override
-//        Void process(Integer input, IExecutionContext context) {
-//            return null
-//        }
-//
-//        @Override
-//        Class<Integer> inputType() {
-//            return Integer.class
-//        }
-//
-//        @Override
-//        Class<Void> outputType() {
-//            return Void.class
-//        }
-//
-//        @Override
-//        boolean isAnonymous() {
-//            return false
-//        }
-//
-//        @Override
-//        ActionIdentify getId() {
-//            return ActionIdentify.parse('1@ACTION')
-//        }
-        @Override
-        ActionInputMeta[] inputMetas() {
-            return new ActionInputMeta[0]
+    def 'Test name input ref action does not exist'() {
+        when:
+        def behavior = Mock(Behavior) {
+            getId() >> Mock(ActionIdentify) {
+                toString() >> 'behavior_id'
+            }
         }
-
-        @Override
-        boolean isAnonymous() {
-            return false
+        ActionInputMeta[] inMetas = new ActionInputMeta[1]
+        inMetas[0] =  new ActionInputMeta(String.class)
+        ActionOutputMeta[] outMetas = new ActionOutputMeta[1]
+        outMetas[0] = new ActionOutputMeta(String.class, 'name')
+        def instance = new ActionHolder(Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> outMetas
+        }, 'label', behavior)
+        def nextAction1 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> inMetas
+            outputMetas() >> new ActionOutputMeta[0]
         }
+        new ActionHolder(nextAction1, 'label1', instance, behavior, null, Mock(Behavior.NamedOutput) {
+            actionLabel() >> 'aaa'
+            outputName() >> 'name'
+        })
 
-        @Override
-        ActionIdentify getId() {
-            return null
-        }
+        then:
+        def ex = thrown(BehaviorException)
+        ex.errorCode() == BehaviorErrors.REF_ACTION_NOT_EXIST_IN_BEHAVIOR
     }
 
-    class TestAction3 implements IAction {
-
-//        @Override
-//        Void process(String input, IExecutionContext context) {
-//            return null
-//        }
-//
-//        @Override
-//        Class<String> inputType() {
-//            return String.class
-//        }
-//
-//        @Override
-//        Class<Void> outputType() {
-//            return Void.class
-//        }
-//
-//        @Override
-//        boolean isAnonymous() {
-//            return false
-//        }
-//
-//        @Override
-//        ActionIdentify getId() {
-//            return ActionIdentify.parse('1@ACTION')
-//        }
-        @Override
-        ActionInputMeta[] inputMetas() {
-            return new ActionInputMeta[0]
+    def 'Test name input ref input does not exist'() {
+        when:
+        def behavior = Mock(Behavior) {
+            getId() >> Mock(ActionIdentify) {
+                toString() >> 'behavior_id'
+            }
         }
-
-        @Override
-        boolean isAnonymous() {
-            return false
+        ActionInputMeta[] inMetas = new ActionInputMeta[1]
+        inMetas[0] =  new ActionInputMeta(String.class)
+        ActionOutputMeta[] outMetas = new ActionOutputMeta[1]
+        outMetas[0] = new ActionOutputMeta(String.class, 'name')
+        def instance = new ActionHolder(Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> outMetas
+        }, 'label', behavior)
+        def nextAction1 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> inMetas
+            outputMetas() >> new ActionOutputMeta[0]
         }
+        new ActionHolder(nextAction1, 'label1', instance, behavior, null, Mock(Behavior.NamedOutput) {
+            actionLabel() >> 'label'
+            outputName() >> 'aaa'
+        })
 
-        @Override
-        ActionIdentify getId() {
-            return null
-        }
+        then:
+        def ex = thrown(BehaviorException)
+        ex.errorCode() == BehaviorErrors.REF_OUTPUT_NOT_FOUND_IN_BEHAVIOR
     }
 
-    class TestAction4 implements IAction {
-
-//        @Override
-//        Void process(String input, IExecutionContext context) {
-//            return null
-//        }
-//
-//        @Override
-//        Class<String> inputType() {
-//            return String.class
-//        }
-//
-//        @Override
-//        Class<Void> outputType() {
-//            return Void.class
-//        }
-//
-//        @Override
-//        boolean isAnonymous() {
-//            return false
-//        }
-//
-//        @Override
-//        ActionIdentify getId() {
-//            return ActionIdentify.parse('1@ACTION')
-//        }
-        @Override
-        ActionInputMeta[] inputMetas() {
-            return new ActionInputMeta[0]
+    def 'Test indexed input ref verification'() {
+        when:
+        ActionInputMeta[] inMetas = new ActionInputMeta[1]
+        inMetas[0] =  new ActionInputMeta(String.class)
+        ActionOutputMeta[] outMetas = new ActionOutputMeta[1]
+        outMetas[0] = new ActionOutputMeta(String.class, 'name')
+        def instance = new ActionHolder(Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> outMetas
+        }, 'label', Mock(Behavior))
+        def nextAction1 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> inMetas
+            outputMetas() >> new ActionOutputMeta[0]
         }
+        new ActionHolder(nextAction1, 'label1', instance, Mock(Behavior), null, Mock(Behavior.IndexedOutput) {
+            actionLabel() >> 'label'
+            outputIndex() >> 0
+        })
 
-        @Override
-        boolean isAnonymous() {
-            return false
-        }
+        then:
+        noExceptionThrown()
+    }
 
-        @Override
-        ActionIdentify getId() {
-            return null
+    def 'Test indexed input ref index does not exist'() {
+        when:
+        def behavior = Mock(Behavior) {
+            getId() >> Mock(ActionIdentify) {
+                toString() >> 'behavior_id'
+            }
         }
+        ActionInputMeta[] inMetas = new ActionInputMeta[1]
+        inMetas[0] =  new ActionInputMeta(String.class)
+        ActionOutputMeta[] outMetas = new ActionOutputMeta[1]
+        outMetas[0] = new ActionOutputMeta(String.class, 'name')
+        def instance = new ActionHolder(Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> outMetas
+        }, 'label', behavior)
+        def nextAction1 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> inMetas
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+        new ActionHolder(nextAction1, 'label1', instance, behavior, null, Mock(Behavior.IndexedOutput) {
+            actionLabel() >> 'label'
+            outputIndex() >> 1
+        })
+
+        then:
+        def ex = thrown(BehaviorException)
+        ex.errorCode() == BehaviorErrors.REF_OUTPUT_NOT_FOUND_IN_BEHAVIOR
+    }
+
+    def 'Test input ref type does not match'() {
+        when:
+        def behavior = Mock(Behavior) {
+            getId() >> Mock(ActionIdentify) {
+                toString() >> 'behavior_id'
+            }
+        }
+        ActionInputMeta[] inMetas = new ActionInputMeta[1]
+        inMetas[0] =  new ActionInputMeta(String.class)
+        ActionOutputMeta[] outMetas = new ActionOutputMeta[1]
+        outMetas[0] = new ActionOutputMeta(Integer.class, 'name')
+        def instance = new ActionHolder(Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> outMetas
+        }, 'label', behavior)
+        def nextAction1 = Mock(IAction) {
+            getId() >> Mock(ActionIdentify)
+            inputMetas() >> inMetas
+            outputMetas() >> new ActionOutputMeta[0]
+        }
+        new ActionHolder(nextAction1, 'label1', instance, behavior, null, Mock(Behavior.IndexedOutput) {
+            actionLabel() >> 'label'
+            outputIndex() >> 0
+        })
+
+        then:
+        def ex = thrown(BehaviorException)
+        ex.errorCode() == BehaviorErrors.INPUT_OUTPUT_TYPE_MISMATCH
     }
 }
