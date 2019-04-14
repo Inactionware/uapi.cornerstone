@@ -10,7 +10,6 @@
 package uapi.behavior.internal
 
 import freemarker.template.Template
-import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.GeneralException
 import uapi.behavior.IExecutionContext
@@ -31,7 +30,6 @@ import javax.lang.model.type.TypeMirror
 /**
  * Unit test for ActionHandler
  */
-@Ignore
 class ActionHandlerTest extends Specification {
 
     def actionDoAnno;
@@ -146,110 +144,6 @@ class ActionHandlerTest extends Specification {
 
         then:
         thrown(GeneralException)
-    }
-
-    def 'Test handle element with ActionDo method which has no argument'() {
-        when:
-        def handler = new ActionHandler()
-        def element = Mock(Element) {
-            getKind() >> ElementKind.CLASS
-            getSimpleName() >> Mock(Name) {
-                toString() >> 'TestClass'
-            }
-            asType() >> Mock(TypeMirror) {
-                toString() >> 'TestClass'
-            }
-            getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
-            getEnclosedElements() >> [Mock(ExecutableElement) {
-                getKind() >> ElementKind.METHOD
-                getAnnotation(ActionDo.class) >> actionDoAnno
-                getSimpleName() >> Mock(Name) {
-                    toString() >> 'MethodName'
-                }
-                getParameters() >> []
-            }]
-        }
-        def builderCtx = Mock(IBuilderContext) {
-            checkAnnotations(element, Service.class as Class[]) >> true
-        }
-        handler.handleAnnotatedElements(builderCtx, Action.class, [ element ] as Set)
-
-        then:
-        thrown(GeneralException)
-    }
-
-    def 'Test handle element with ActionDo method which has to match arguments'() {
-        when:
-        def handler = new ActionHandler()
-        def element = Mock(Element) {
-            getKind() >> ElementKind.CLASS
-            getSimpleName() >> Mock(Name) {
-                toString() >> 'TestClass'
-            }
-            asType() >> Mock(TypeMirror) {
-                toString() >> 'TestClass'
-            }
-            getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
-            getEnclosedElements() >> [Mock(ExecutableElement) {
-                getKind() >> ElementKind.METHOD
-                getAnnotation(ActionDo.class) >> actionDoAnno
-                getSimpleName() >> Mock(Name) {
-                    toString() >> 'MethodName'
-                }
-                getParameters() >> [Mock(VariableElement), Mock(VariableElement), Mock(VariableElement)]
-            }]
-        }
-        def builderCtx = Mock(IBuilderContext) {
-            checkAnnotations(element, Service.class as Class[]) >> true
-        }
-        handler.handleAnnotatedElements(builderCtx, Action.class, [ element ] as Set)
-
-        then:
-        thrown(GeneralException)
-    }
-
-    def 'Test handle element with ActionDo method which second argument is not instance of IExecutionContext'() {
-        when:
-        def handler = new ActionHandler()
-        def element = Mock(Element) {
-            getKind() >> ElementKind.CLASS
-            getSimpleName() >> Mock(Name) {
-                toString() >> 'TestClass'
-            }
-            asType() >> Mock(TypeMirror) {
-                toString() >> 'TestClass'
-            }
-            getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
-            getEnclosedElements() >> [Mock(ExecutableElement) {
-                getKind() >> ElementKind.METHOD
-                getAnnotation(ActionDo.class) >> actionDoAnno
-                getSimpleName() >> Mock(Name) {
-                    toString() >> 'MethodName'
-                }
-                getParameters() >> [Mock(VariableElement) {
-                    asType() >> Mock(TypeMirror) {
-                        toString() >> Object.class.canonicalName
-                    }
-                }, Mock(VariableElement) {
-                    asType() >> Mock(TypeMirror) {
-                        toString() >> secondType
-                    }
-                }]
-            }]
-        }
-        def builderCtx = Mock(IBuilderContext) {
-            checkAnnotations(element, Service.class as Class[]) >> true
-        }
-        handler.handleAnnotatedElements(builderCtx, Action.class, [ element ] as Set)
-
-        then:
-        thrown(GeneralException)
-
-        where:
-        secondType                  | placeholder
-        Object.class.canonicalName  | null
-        String.class.canonicalName  | null
-        List.class.canonicalName    | null
     }
 
     def 'Test handle element'() {
