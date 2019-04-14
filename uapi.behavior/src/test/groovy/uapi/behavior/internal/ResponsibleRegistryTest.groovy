@@ -9,9 +9,10 @@
 
 package uapi.behavior.internal
 
-import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.behavior.ActionIdentify
+import uapi.behavior.ActionInputMeta
+import uapi.behavior.ActionOutputMeta
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorErrors
 import uapi.behavior.BehaviorException
@@ -24,7 +25,6 @@ import uapi.log.ILogger
 /**
  * Unit test for ResponsibleRegistry
  */
-@Ignore
 class ResponsibleRegistryTest extends Specification {
 
     def 'Test create instance'() {
@@ -48,6 +48,8 @@ class ResponsibleRegistryTest extends Specification {
         respReg._logger = logger
         respReg.addAction(Mock(IAction) {
             getId() >> new ActionIdentify('aname', ActionType.ACTION)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
         })
 
         then:
@@ -67,9 +69,13 @@ class ResponsibleRegistryTest extends Specification {
         respReg._logger = logger
         respReg.addAction(Mock(IAction) {
             getId() >> new ActionIdentify('aname', ActionType.ACTION)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
         })
         respReg.addAction(Mock(IAction) {
             getId() >> new ActionIdentify('aname', ActionType.ACTION)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
         })
 
         then:
@@ -82,6 +88,8 @@ class ResponsibleRegistryTest extends Specification {
         given:
         def interceptor = Mock(IInterceptor) {
             getId() >> new ActionIdentify('aname', ActionType.ACTION)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
         }
         def respReg = new ResponsibleRegistry()
 
@@ -98,6 +106,8 @@ class ResponsibleRegistryTest extends Specification {
         given:
         def interceptor = Mock(IInterceptedInterceptor) {
             getId() >> new ActionIdentify('aname', ActionType.ACTION)
+            inputMetas() >> new ActionInputMeta[0]
+            outputMetas() >> new ActionOutputMeta[0]
         }
         def respReg = new ResponsibleRegistry()
 

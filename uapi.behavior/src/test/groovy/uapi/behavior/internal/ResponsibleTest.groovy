@@ -9,9 +9,10 @@
 
 package uapi.behavior.internal
 
-import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.behavior.ActionIdentify
+import uapi.behavior.ActionInputMeta
+import uapi.behavior.ActionOutputMeta
 import uapi.behavior.ActionType
 import uapi.behavior.BehaviorEvent
 import uapi.behavior.BehaviorException
@@ -26,12 +27,10 @@ import uapi.event.IEvent
 import uapi.event.IEventBus
 import uapi.event.IEventFinishCallback
 import uapi.event.IEventHandler
-import uapi.event.PlainEvent
 
 /**
  * Unit test for Responsible
  */
-@Ignore
 class ResponsibleTest extends Specification {
 
     def 'Test create instance'() {
@@ -88,10 +87,9 @@ class ResponsibleTest extends Specification {
         def actionId = new ActionIdentify('action', ActionType.ACTION)
         def action = Mock(IAction) {
             getId() >> new ActionIdentify('action', ActionType.ACTION)
-            inputType() >> String.class
-            outputType() >> String.class
-            process(_, _) >> 'Out Data'
         }
+        action.inputMetas() >> ([new ActionInputMeta(String.class)] as ActionInputMeta[])
+        action.outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         def repo = Mock(Repository) {
             get(actionId) >> action
             1 * put(_)
@@ -114,9 +112,8 @@ class ResponsibleTest extends Specification {
         def actionId = new ActionIdentify('action', ActionType.ACTION)
         def action = Mock(IAction) {
             getId() >> new ActionIdentify('action', ActionType.ACTION)
-            inputType() >> BehaviorEvent.class
-            outputType() >> String.class
-            process(_, _) >> 'Out Data'
+            inputMetas() >> ([new ActionInputMeta(BehaviorEvent.class)] as ActionInputMeta[])
+            outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         }
         def repo = Mock(Repository) {
             get(actionId) >> action
@@ -151,9 +148,8 @@ class ResponsibleTest extends Specification {
         def actionId = new ActionIdentify('action', ActionType.ACTION)
         def action = Mock(IAction) {
             getId() >> new ActionIdentify('action', ActionType.ACTION)
-            inputType() >> String.class
-            outputType() >> String.class
-            process(_, _) >> 'Out Data'
+            inputMetas() >> ([new ActionInputMeta(String.class)] as ActionInputMeta[])
+            outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         }
         def repo = Mock(Repository) {
             get(actionId) >> action
@@ -247,9 +243,8 @@ class ResponsibleTest extends Specification {
         def actionId = new ActionIdentify('action', ActionType.ACTION)
         def action = Mock(IAction) {
             getId() >> new ActionIdentify('action', ActionType.ACTION)
-            inputType() >> String.class
-            outputType() >> String.class
-            process(_, _) >> 'Out Data'
+            inputMetas() >> ([new ActionInputMeta(String.class)] as ActionInputMeta[])
+            outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         }
         def repo = Mock(Repository) {
             get(actionId) >> action
