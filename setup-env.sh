@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # The configuration repo branch/tag name which will be checked out
-cfgBranch=master
+cfgBranch=uapi/v1
 
 rm -rf .config
 mkdir .config
