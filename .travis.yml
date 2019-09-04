@@ -6,7 +6,7 @@ install:
 script: ./gradlew jacocoRootReport --refresh-dependencies --stacktrace
 after_success:
     - ./gradlew bintrayUpload
-    - ./gradlew uploadCoverageToCodacy
+    # - ./gradlew uploadCoverageToCodacy
 #    - bash <(curl -s https://codecov.io/bash)
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock

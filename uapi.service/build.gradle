@@ -8,7 +8,7 @@
  */
 
 plugins {
-    id 'com.jfrog.bintray' version '1.7.2'
+    id 'com.jfrog.bintray' version '1.8.4'
 }
 
 dependencies {
@@ -16,7 +16,11 @@ dependencies {
         coordinate(baseProjects.common),
         coordinate(baseProjects.exception),
         coordinate(baseProjects.state),
-        coordinate(baseProjects.codegen)
+        coordinate(baseProjects.codegen),
+
+        coordinate(libs.guava),
+        coordinate(libs.auto_service),
+        coordinate(libs.freemarker)
     )
 }
 

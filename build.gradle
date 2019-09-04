@@ -82,17 +82,17 @@ subprojects {
         }
     }
 
-    jacocoTestReport {
-        afterEvaluate {
-            classDirectories = files(classDirectories.files.collect {
-                fileTree(dir: it, exclude: generatedSources)
-            })
-        }
-        reports {
-            xml.enabled = true
-            html.enabled = true
-        }
-    }
+    // jacocoTestReport {
+    //     afterEvaluate {
+    //         classDirectories = files(classDirectories.files.collect {
+    //             fileTree(dir: it, exclude: generatedSources)
+    //         })
+    //     }
+    //     reports {
+    //         xml.enabled = true
+    //         html.enabled = true
+    //     }
+    // }
 
     jacoco {
         toolVersion = libs.jacoco.version
@@ -101,9 +101,9 @@ subprojects {
     build.dependsOn jacocoTestReport
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = libs.gradle.version
-}
+// task wrapper(type: Wrapper) {
+//     gradleVersion = libs.gradle.version
+// }
 
 def publishedProjects = subprojects.findAll { it.path != ':uapi.example' }
 
@@ -111,10 +111,10 @@ task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
     description = 'Generates an aggregate report from all subprojects'
     dependsOn(publishedProjects.test)
 
-    additionalSourceDirs = files(publishedProjects.sourceSets.main.allSource.srcDirs)
-    sourceDirectories = files(publishedProjects.sourceSets.main.allSource.srcDirs)
-    classDirectories = files(publishedProjects.sourceSets.main.output)
-    executionData = files(publishedProjects.jacocoTestReport.executionData)
+    getAdditionalSourceDirs().from(files(publishedProjects.sourceSets.main.allSource.srcDirs))
+    getSourceDirectories().from(publishedProjects.sourceSets.main.allSource.srcDirs)
+    getClassDirectories().from(publishedProjects.sourceSets.main.output)
+    getExecutionData().from(publishedProjects.jacocoTestReport.executionData)
 
     reports {
         html.enabled = true // human readable
@@ -130,17 +130,17 @@ configurations {
     codacy
 }
 
-dependencies {
-    codacy group: 'com.codacy', name: 'codacy-coverage-reporter', version: '1.0.7'
-}
+// dependencies {
+//     codacy group: 'com.codacy', name: 'codacy-coverage-reporter', version: '1.0.7'
+// }
 
-task uploadCoverageToCodacy(type: JavaExec) {
-    main = "com.codacy.CodacyCoverageReporter"
-    classpath = configurations.codacy
-    args = [
-            "-l",
-            "Java",
-            "-r",
-            "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
-    ]
-}
+// task uploadCoverageToCodacy(type: JavaExec) {
+//     main = "com.codacy.CodacyCoverageReporter"
+//     classpath = configurations.codacy
+//     args = [
+//             "-l",
+//             "Java",
+//             "-r",
+//             "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
+//     ]
+// }
