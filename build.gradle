@@ -82,28 +82,12 @@ subprojects {
         }
     }
 
-    // jacocoTestReport {
-    //     afterEvaluate {
-    //         classDirectories = files(classDirectories.files.collect {
-    //             fileTree(dir: it, exclude: generatedSources)
-    //         })
-    //     }
-    //     reports {
-    //         xml.enabled = true
-    //         html.enabled = true
-    //     }
-    // }
-
     jacoco {
         toolVersion = libs.jacoco.version
     }
 
     build.dependsOn jacocoTestReport
 }
-
-// task wrapper(type: Wrapper) {
-//     gradleVersion = libs.gradle.version
-// }
 
 def publishedProjects = subprojects.findAll { it.path != ':uapi.example' }
 
@@ -114,7 +98,7 @@ task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
     getAdditionalSourceDirs().from(files(publishedProjects.sourceSets.main.allSource.srcDirs))
     getSourceDirectories().from(publishedProjects.sourceSets.main.allSource.srcDirs)
     getClassDirectories().from(publishedProjects.sourceSets.main.output)
-    getExecutionData().from(publishedProjects.jacocoTestReport.executionData)
+    getExecutionData().from(files(subprojects.jacocoTestReport.executionData).filter { f -> f.exists() })
 
     reports {
         html.enabled = true // human readable
