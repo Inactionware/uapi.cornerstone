@@ -7,12 +7,6 @@
  * use the project into a commercial product
  */
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-}
-
 ext {
     thisRepo = 'cornerstone'
 }
@@ -24,17 +18,6 @@ apply from: '.config/uapi/functions.gradle'
 
 apply plugin: 'jacoco'
 
-allprojects {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        jcenter()
-        maven { url "http://dl.bintray.com/typesafe/maven-releases" }
-        maven { url "http://dl.bintray.com/inactionware/maven-snapshot" }
-        maven { url "http://dl.bintray.com/inactionware/maven-release" }
-    }
-}
-
 subprojects {
     apply plugin: 'java'
     apply plugin: 'groovy'
@@ -44,8 +27,8 @@ subprojects {
 
     group = "${allCfg.group}"
     version = getBuildVersion(project.name)
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 11
+    targetCompatibility = 11
 
     configurations {
         codacy
@@ -104,27 +87,8 @@ task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
         html.enabled = true // human readable
         xml.enabled = true // required by coveralls
     }
-
-    doFirst {
-        executionData = files(executionData.findAll { it.exists() })
-    }
 }
 
 configurations {
     codacy
 }
-
-// dependencies {
-//     codacy group: 'com.codacy', name: 'codacy-coverage-reporter', version: '1.0.7'
-// }
-
-// task uploadCoverageToCodacy(type: JavaExec) {
-//     main = "com.codacy.CodacyCoverageReporter"
-//     classpath = configurations.codacy
-//     args = [
-//             "-l",
-//             "Java",
-//             "-r",
-//             "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
-//     ]
-// }

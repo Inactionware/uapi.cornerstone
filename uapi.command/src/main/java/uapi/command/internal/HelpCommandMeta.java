@@ -13,8 +13,10 @@ public class HelpCommandMeta implements ICommandMeta {
 
     public static final String NAME             = "help";
 
-    public static final String NAME_INDENT      = StringHelper.duplicate(" ", 4);
+    public static final String NAME_INDENT      = " ".repeat(4);
     public static final int WIDTH_NAME_COLUMN   = 24;
+
+    private static final String SPACE           = " ";
 
     private final String _parentPath;
     private final ICommand _cmd;
@@ -98,7 +100,7 @@ public class HelpCommandMeta implements ICommandMeta {
                                 "{}{}{}{}{}\n",
                                 NAME_INDENT,
                                 paramMeta.name(),
-                                StringHelper.duplicate(" ", WIDTH_NAME_COLUMN - paramMeta.name().length()),
+                                SPACE.repeat(WIDTH_NAME_COLUMN - paramMeta.name().length()),
                                 paramMeta.required() ? "" : "optional, ",
                                 paramMeta.description()));
                     } else {
@@ -106,7 +108,7 @@ public class HelpCommandMeta implements ICommandMeta {
                                 "{}{}\n{}{}{}\n",
                                 NAME_INDENT,
                                 paramMeta.name(),
-                                StringHelper.duplicate("", WIDTH_NAME_COLUMN + NAME_INDENT.length()),
+                                SPACE.repeat(WIDTH_NAME_COLUMN + NAME_INDENT.length()),
                                 paramMeta.required() ? "" : "optional, ",
                                 paramMeta.description()
                         ));
@@ -140,7 +142,7 @@ public class HelpCommandMeta implements ICommandMeta {
                                 "{}{}{}{}\n",
                                 NAME_INDENT,
                                 buffer.toString(),
-                                StringHelper.duplicate(" ", WIDTH_NAME_COLUMN - buffer.length()),
+                                SPACE.repeat(WIDTH_NAME_COLUMN - buffer.length()),
                                 opt.description()
                         ));
                     } else {
@@ -148,7 +150,7 @@ public class HelpCommandMeta implements ICommandMeta {
                                 "{}{}\n{}{}\n",
                                 NAME_INDENT,
                                 buffer.toString(),
-                                StringHelper.duplicate(" ", WIDTH_NAME_COLUMN + NAME_INDENT.length()),
+                                SPACE.repeat(WIDTH_NAME_COLUMN + NAME_INDENT.length()),
                                 opt.description()
                         ));
                     }
@@ -165,7 +167,7 @@ public class HelpCommandMeta implements ICommandMeta {
                                 "{}{}{}{}\n",
                                 NAME_INDENT,
                                 cmd.name(),
-                                StringHelper.duplicate(" ", WIDTH_NAME_COLUMN - cmd.name().length()),
+                                SPACE.repeat(WIDTH_NAME_COLUMN - cmd.name().length()),
                                 cmd.description()
                         ));
                     } else {
@@ -173,7 +175,7 @@ public class HelpCommandMeta implements ICommandMeta {
                                 "{}{}\n{}{}\n",
                                 NAME_INDENT,
                                 cmd.name(),
-                                StringHelper.duplicate(" ", WIDTH_NAME_COLUMN + NAME_INDENT.length()),
+                                SPACE.repeat(WIDTH_NAME_COLUMN + NAME_INDENT.length()),
                                 cmd.description()
                         ));
                     }

@@ -208,7 +208,7 @@ class EventBusTest extends Specification{
             topic() >> eventTopic
         }
         IEvent event = Mock(IAttributedEvent) {
-            1 * contains([1: '1']) >> true
+            1 * contains([1: '1'] as Map) >> true
             topic() >> eventTopic
         }
         EventBus eventBus = new EventBus()
