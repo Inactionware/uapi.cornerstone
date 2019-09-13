@@ -51,40 +51,40 @@ public class OnInjectParser {
                         element.getSimpleName().toString());
             }
             builderCtx.checkModifiers(element, OnInject.class, Modifier.PRIVATE, Modifier.STATIC);
-            Element classElemt = element.getEnclosingElement();
+            var classElemt = element.getEnclosingElement();
             builderCtx.checkModifiers(classElemt, OnInject.class, Modifier.PRIVATE, Modifier.FINAL);
 
             // Check method
-            String methodName = element.getSimpleName().toString();
-            ExecutableElement methodElement = (ExecutableElement) element;
-            String returnType = methodElement.getReturnType().toString();
+            var methodName = element.getSimpleName().toString();
+            var methodElement = (ExecutableElement) element;
+            var returnType = methodElement.getReturnType().toString();
             if (! Type.VOID.equals(returnType)) {
                 throw new GeneralException(
                         "Expect the method [{}] with OnInject annotation should return void, but it return - {}",
                         methodName, returnType);
             }
-            List paramElements = methodElement.getParameters();
+            var paramElements = methodElement.getParameters();
             if (paramElements.size() != 1) {
                 throw new GeneralException(
                         "Expect the method [{}] with OnInject annotation is allowed 1 parameter only, but found - {}",
                         methodName, paramElements.size());
             }
             // get injected service type
-            VariableElement paramElem = (VariableElement) paramElements.get(0);
-            String serviceType = paramElem.asType().toString();
+            var paramElem = (VariableElement) paramElements.get(0);
+            var serviceType = paramElem.asType().toString();
             // Remove generic type
             if (serviceType.contains("<")) {
                 serviceType = serviceType.substring(0, serviceType.indexOf("<"));
             }
 
             // get inject service id
-            OnInject onInject = element.getAnnotation(OnInject.class);
-            String serviceId = onInject.value();
+            var onInject = element.getAnnotation(OnInject.class);
+            var serviceId = onInject.value();
             if (StringHelper.isNullOrEmpty(serviceId)) {
                 serviceId = serviceType;
             }
 
-            ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
+            var clsBuilder = builderCtx.findClassBuilder(classElemt);
             this._helper.addInjectMethod(builderCtx, clsBuilder, methodName, serviceId, serviceType);
         });
     }
@@ -111,8 +111,8 @@ public class OnInjectParser {
             ArgumentChecker.required(builderContext, "builderContext");
             ArgumentChecker.required(classBuilder, "classBuilder");
 
-            Map<String, Object> tempInjectModel = classBuilder.createTransienceIfAbsent(MODEL_ON_INJECT, HashMap::new);
-            Object existingMethods = tempInjectModel.get(VAR_METHODS);
+            var tempInjectModel = classBuilder.createTransienceIfAbsent(MODEL_ON_INJECT, HashMap::new);
+            var existingMethods = tempInjectModel.get(VAR_METHODS);
             List<Map<String, String>> methods;
             if (existingMethods == null) {
                 methods = new ArrayList<>();
@@ -128,17 +128,17 @@ public class OnInjectParser {
                 methods.add(method);
             }
 
-            List<MethodMeta.Builder> methodBuilders = classBuilder.findMethodBuilders(METHOD_NAME);
+            var methodBuilders = classBuilder.findMethodBuilders(METHOD_NAME);
             if (methodBuilders.size() > 0) {
-                MethodMeta.Builder mbuilder = Looper.on(methodBuilders)
+                var mbuilder = Looper.on(methodBuilders)
                         .filter(builder -> builder.getReturnTypeName().equals(Type.VOID))
                         .filter(builder -> builder.getParameterCount() == 2)
                         .filter(builder -> {
-                            ParameterMeta.Builder paramBuilder = builder.findParameterBuilder(PARAM_SVC_ID);
+                            var paramBuilder = builder.findParameterBuilder(PARAM_SVC_ID);
                             return paramBuilder != null && paramBuilder.getType().equals(Type.Q_STRING);
                         })
                         .filter(builder -> {
-                            ParameterMeta.Builder paramBuilder = builder.findParameterBuilder(PARAM_SVC);
+                            var paramBuilder = builder.findParameterBuilder(PARAM_SVC);
                             return paramBuilder != null && paramBuilder.getType().equals(Type.Q_OBJECT);
                         })
                         .first();
@@ -147,7 +147,7 @@ public class OnInjectParser {
                 }
             }
 
-            Template tempOnInject = builderContext.loadTemplate(TEMP_ON_INJECT);
+            var tempOnInject = builderContext.loadTemplate(TEMP_ON_INJECT);
             classBuilder
                     .addImplement(IServiceLifecycle.class.getCanonicalName())
                     .addMethodBuilder(MethodMeta.builder()

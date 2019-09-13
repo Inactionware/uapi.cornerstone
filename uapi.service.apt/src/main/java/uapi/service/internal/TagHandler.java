@@ -55,13 +55,13 @@ public class TagHandler extends AnnotationsHandler {
             }
             builderContext.checkModifiers(classElement, Tag.class, Modifier.PRIVATE, Modifier.FINAL);
 
-            Template tempGetIds = builderContext.loadTemplate(TEMPLATE_GET_TAGS);
-            Tag tag = classElement.getAnnotation(Tag.class);
-            Map<String, String[]> modelGetTags = new HashMap<>();
+            var tempGetIds = builderContext.loadTemplate(TEMPLATE_GET_TAGS);
+            var tag = classElement.getAnnotation(Tag.class);
+            var modelGetTags = new HashMap<String, String[]>();
             modelGetTags.put(VAR_TAGS, tag.value());
 
-            ClassMeta.Builder classBuilder = builderContext.findClassBuilder(classElement);
-            boolean isPrototype = classBuilder.getTransience(ServiceHandler.VAR_IS_PROTOTYPE, false);
+            var classBuilder = builderContext.findClassBuilder(classElement);
+            var isPrototype = classBuilder.getTransience(ServiceHandler.VAR_IS_PROTOTYPE, false);
             if (isPrototype) {
                 String prototypeClassName = classBuilder.getTransience(ServiceHandler.VAR_PROTOTYPE_CLASS_NAME);
                 classBuilder = builderContext.findClassBuilder(prototypeClassName, false);

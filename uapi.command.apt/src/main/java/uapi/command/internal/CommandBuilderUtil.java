@@ -11,10 +11,10 @@ public class CommandBuilderUtil {
             final Element classElement,
             final IBuilderContext builderContext
     ) {
-        String pkgName = builderContext.getElementUtils().getPackageOf(classElement).getQualifiedName().toString();
-        String className = classElement.getSimpleName().toString();
-        String execClassName = className + "_Meta_Generated";
-        ClassMeta.Builder cmdMetaBuilder = builderContext.findClassBuilder(pkgName, execClassName, false);
+        var pkgName = builderContext.getElementUtils().getPackageOf(classElement).getQualifiedName().toString();
+        var className = classElement.getSimpleName().toString();
+        var execClassName = className + "_Meta_Generated";
+        var cmdMetaBuilder = builderContext.findClassBuilder(pkgName, execClassName, false);
         if (cmdMetaBuilder == null) {
             cmdMetaBuilder = builderContext.newClassBuilder(pkgName, execClassName);
         }
@@ -25,10 +25,10 @@ public class CommandBuilderUtil {
             final Element classElement,
             final IBuilderContext builderContext
     ) {
-        String cmdPkgName = builderContext.getElementUtils().getPackageOf(classElement).getQualifiedName().toString();
-        String cmdClassName = classElement.getSimpleName().toString();
-        String execClassName = cmdClassName + "_Executor_Generated";
-        ClassMeta.Builder cmdExecBuilder = builderContext.findClassBuilder(cmdPkgName, execClassName, false);
+        var cmdPkgName = builderContext.getElementUtils().getPackageOf(classElement).getQualifiedName().toString();
+        var cmdClassName = classElement.getSimpleName().toString();
+        var execClassName = cmdClassName + "_Executor_Generated";
+        var cmdExecBuilder = builderContext.findClassBuilder(cmdPkgName, execClassName, false);
         if (cmdExecBuilder == null) {
             cmdExecBuilder = builderContext.newClassBuilder(cmdPkgName, execClassName);
         }

@@ -57,7 +57,7 @@ public class Profile implements IProfile {
 
     @Override
     public boolean isAllow(IService service) {
-        String[] tags = new String[0];
+        var tags = new String[0];
         if (service instanceof ITagged) {
             tags = ((ITagged) service).getTags();
         }

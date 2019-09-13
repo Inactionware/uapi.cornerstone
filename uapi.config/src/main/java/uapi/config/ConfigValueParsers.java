@@ -34,7 +34,7 @@ public class ConfigValueParsers implements IServiceLifecycle {
     public IConfigValueParser findParser(String inType, String outType) {
         ArgumentChecker.notEmpty(inType, "inType");
         ArgumentChecker.notEmpty(outType, "outType");
-        List<IConfigValueParser> matcheds = Looper.on(this._parsers)
+        var matcheds = Looper.on(this._parsers)
                 .filter(parser -> parser.isSupport(inType, outType))
                 .toList();
         if (matcheds == null || matcheds.size() == 0) {
@@ -50,7 +50,7 @@ public class ConfigValueParsers implements IServiceLifecycle {
 
     public IConfigValueParser findParser(String name) {
         ArgumentChecker.notEmpty(name, "name");
-        List<IConfigValueParser> matches = Looper.on(this._parsers)
+        var matches = Looper.on(this._parsers)
                 .filter(parser -> parser.getName().equals(name))
                 .toList();
         if (matches == null || matches.size() == 0) {

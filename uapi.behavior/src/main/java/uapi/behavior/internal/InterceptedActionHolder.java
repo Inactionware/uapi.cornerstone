@@ -31,8 +31,8 @@ public class InterceptedActionHolder extends ActionHolder {
         super(action, label, previousAction, behavior, evaluator, inputs);
 
         if (action instanceof IIntercepted) {
-            IIntercepted intercepted = (IIntercepted) action;
-            ActionIdentify[] interceptorIds = intercepted.by();
+            var intercepted = (IIntercepted) action;
+            var interceptorIds = intercepted.by();
             this._interceptors = Looper.on(interceptorIds).map(interceptorId -> {
                 IAction interceptor;
                 interceptor = actionRepo.get(interceptorId);

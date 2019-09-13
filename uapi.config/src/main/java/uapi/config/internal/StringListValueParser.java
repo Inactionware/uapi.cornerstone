@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Service({ IConfigValueParser.class })
 @Tag(Tags.CONFIG)
-public class StringListValueParser implements IConfigValueParser {
+public class StringListValueParser implements IConfigValueParser<List<String>> {
 
     private static final String[] supportedTypesIn = new String[] {
             List.class.getCanonicalName(),

@@ -62,7 +62,7 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
                     .build();
         }
         // Check duplicated Action output
-        ActionOutputMeta[] metas = action.outputMetas();
+        var metas = action.outputMetas();
         for (int i = 0; i < metas.length; i++) {
             for (int j = i + 1; j < metas.length; j++) {
                 if (metas[i].name().equals(metas[j].name())) {
@@ -76,7 +76,7 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
             }
         }
 
-        IAction existing = this._actionRepo.put(action);
+        var existing = this._actionRepo.put(action);
         if (existing != null) {
             this._logger.warn("The existing action {} was overridden by new action {}", existing, action);
         }
@@ -90,7 +90,7 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
     @Override
     public IResponsible register(String name) throws BehaviorException {
         ArgumentChecker.required(name, "name");
-        Responsible responsible = new Responsible(name, this._eventBus, this._actionRepo);
+        var responsible = new Responsible(name, this._eventBus, this._actionRepo);
         Guarder.by(this._lock).run(() -> {
             if (this._responsibles.containsKey(name)) {
                 throw BehaviorException.builder()

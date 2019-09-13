@@ -74,10 +74,10 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             Object svc;
             if (from.equals(QualifiedServiceId.FROM_ANY)) {
                 // Search from any loader
-                Iterator<IServiceLoader> svcLoadersIte = Registry.this._orderedSvcLoaders.iterator();
-                boolean loaded = false;
+                var svcLoadersIte = Registry.this._orderedSvcLoaders.iterator();
+                var loaded = false;
                 while (svcLoadersIte.hasNext()) {
-                    IServiceLoader svcLoader = svcLoadersIte.next();
+                    var svcLoader = svcLoadersIte.next();
                     svc = svcLoader.load(qSvcId.getId(), dependency.getServiceType());
                     if (svc == null) {
                         continue;
@@ -94,7 +94,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                 }
             } else {
                 // Search specific service loader
-                IServiceLoader svcLoader = this._svcLoaders.get(from);
+                var svcLoader = this._svcLoaders.get(from);
                 if (svcLoader == null) {
                     getLogger().error("Can't load service {} because no service loader for {}", qSvcId, from);
                     return null;
@@ -111,7 +111,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
         this._svcReadyListener = (dependency, service) -> {
             // Register new service
-            QualifiedServiceId qSvcId = dependency.getServiceId();
+            var qSvcId = dependency.getServiceId();
             registerService(qSvcId.getFrom(), service, new String[]{qSvcId.getId()}, new Dependency[0]);
         };
     }
@@ -173,7 +173,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             final String serviceId
     ) throws ServiceException {
         ArgumentChecker.notEmpty(serviceId, "serviceId");
-        List<Object> svcs = findServices(serviceId);
+        var svcs = findServices(serviceId);
         if (svcs.size() == 1) {
             return (T) svcs.get(0);
         }
@@ -206,7 +206,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     ) throws ServiceException {
         ArgumentChecker.required(serviceId, "serviceId");
         ArgumentChecker.required(attributes, "attributes");
-        ServiceHolder svcHolder = findServiceHolder(serviceId, QualifiedServiceId.FROM_LOCAL);
+        var svcHolder = findServiceHolder(serviceId, QualifiedServiceId.FROM_LOCAL);
         if (svcHolder == null) {
             throw ServiceException.builder()
                     .errorCode(ServiceErrors.NO_SERVICE_FOUND)
@@ -219,9 +219,9 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                     .variables(new ServiceErrors.NotAPrototypeService().serviceId(serviceId))
                     .build();
         }
-        IInstance instance = ((PrototypeServiceHolder) svcHolder).newInstance(attributes);
+        var instance = ((PrototypeServiceHolder) svcHolder).newInstance(attributes);
         register(instance);
-        ServiceHolder instanceHolder = findServiceHolder(instance.getIds()[0]);
+        var instanceHolder = findServiceHolder(instance.getIds()[0]);
         if (instanceHolder == null) {
             throw ServiceException.builder()
                     .errorCode(ServiceErrors.INSTANCE_SERVICE_REGISTER_FAILED)
@@ -247,7 +247,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             final String serviceId
     ) {
         ArgumentChecker.notEmpty(serviceId, "serviceId");
-        List<ServiceHolder> svcHolders = findServiceHolders(serviceId);
+        var svcHolders = findServiceHolders(serviceId);
         if (svcHolders == null || svcHolders.size() == 0) {
             return Collections.emptyList();
         }
@@ -284,7 +284,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             final String tag
     ) {
         ArgumentChecker.notEmpty(tag, "tag");
-        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock.readLock()).runForResult(() ->
+        var svcHolders = Guarder.by(this._svcRepoLock.readLock()).runForResult(() ->
             Looper.on(this._svcRepo.values())
                     .filter(svcHolder -> CollectionHelper.isContains(svcHolder.serviceTags(), tag))
                     .toList()
@@ -300,7 +300,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             final String tag
     ) {
         ArgumentChecker.notEmpty(tag, "tag");
-        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock.readLock()).runForResult(() ->
+        var svcHolders = Guarder.by(this._svcRepoLock.readLock()).runForResult(() ->
                 Looper.on(this._svcRepo.values())
                         .filter(svcHolder -> CollectionHelper.isContains(svcHolder.serviceTags(), tag))
                         .toList()
@@ -314,7 +314,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     @Override
     public void deactivateServices(String[] serviceIds) {
         ArgumentChecker.required(serviceIds, "serviceIds");
-        List<ServiceHolder> svcHolders = Guarder.by(this._svcRepoLock.readLock()).runForResult(() ->
+        var svcHolders = Guarder.by(this._svcRepoLock.readLock()).runForResult(() ->
             Looper.on(this._svcRepo.values())
                 .filter(svcHolder -> CollectionHelper.isContains(serviceIds, svcHolder.getId()))
                 .toList()
@@ -350,7 +350,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             final String serviceId,
             final String serviceFrom
     ) {
-        List<ServiceHolder> found = findServiceHolders(serviceId);
+        var found = findServiceHolders(serviceId);
         if (found == null || found.size() == 0) {
             return null;
         }
@@ -384,8 +384,8 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
     private void registerService(
             final IService svc) {
-        final String[] svcIds = svc.getIds();
-        final Dependency[] dependencies =
+        final var svcIds = svc.getIds();
+        final var dependencies =
                 svc instanceof IInjectable ? ((IInjectable) svc).getDependencies() : new Dependency[0];
         registerService(QualifiedServiceId.FROM_LOCAL, svc, svcIds, dependencies);
     }
@@ -424,7 +424,6 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                         Looper.on(this._svcRepo.values())
                                 .filter(existingSvc -> svcHolder.isDependsOn(existingSvc.getQualifiedId()))
                                 .foreach(hostSvcs::add);
-//                                .foreach(existingSvc -> setDependency(svcHolder, existingSvc, initInstanceAttributes(svcHolder.getId())));
 
                     });
                     Looper.on(hostSvcs).foreach(existingSvc -> setDependency(svcHolder, existingSvc, initInstanceAttributes(svcHolder)));
@@ -435,45 +434,20 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                         Looper.on(this._svcRepo.values())
                                 .filter(existingSvc -> existingSvc.isDependsOn(svcHolder.getQualifiedId()))
                                 .foreach(hostSvcs::add);
-//                                .foreach(existingSvc -> setDependency(existingSvc, svcHolder, initInstanceAttributes(existingSvc.getId())));
                     });
                     Looper.on(hostSvcs).foreach(existingSvc -> setDependency(existingSvc, svcHolder, initInstanceAttributes(existingSvc)));
                     hostSvcs.clear();
 
                     Guarder.by(this._svcRepoLock.writeLock()).run(() -> this._svcRepo.put(svcHolder.getId(), svcHolder));
                 });
-
-//            Looper.on(svcIds)
-//                    .map(svcId -> new ServiceHolder(svcFrom, svc, svcId, dependencies, this._satisfyDecider))
-//                    .next(svcHolder -> {
-//                        if (svcHolder.getQualifiedId().isExternalService()) {
-//                            this._svcActivator.activateService(svcHolder);
-//                        }
-//                    }).foreach(svcHolder -> {
-//                        Guarder.by(this._svcRepoLock.readLock()).run(() -> {
-//                            // Check whether the new register service depends on existing service
-//                            Looper.on(this._svcRepo.values())
-//                                    .filter(existingSvc -> svcHolder.isDependsOn(existingSvc.getQualifiedId()))
-//                                    .foreach(existingSvc -> svcHolder.setDependency(existingSvc, this._svcActivator));
-//                            // Check whether existing service depends on the new register service
-//                            Looper.on(this._svcRepo.values())
-//                                    .filter(existingSvc -> existingSvc.isDependsOn(svcHolder.getQualifiedId()))
-//                                    .foreach(existingSvc -> existingSvc.setDependency(svcHolder, this._svcActivator));
-//                        });
-//                        Guarder.by(this._svcRepoLock.writeLock()).run(() -> this._svcRepo.put(svcHolder.getId(), svcHolder));
-//                    });
     }
-
-//    private Map<String, ?> initInstanceAttributes(ServiceHolder refSvc) {
-//        return initInstanceAttributes(new HashMap<>(), refSvc.getId());
-//    }
 
     private Map<String, ?> initInstanceAttributes(ServiceHolder refSvcHolder) {
         Map<String, Object> attributes = new HashMap<>();
 
-        String refId = refSvcHolder.getId();
-        String refBy = refSvcHolder.getId();
-        Object refSvc = refSvcHolder.getService();
+        var refId = refSvcHolder.getId();
+        var refBy = refSvcHolder.getId();
+        var refSvc = refSvcHolder.getService();
         if (refSvc != null) {
             if (refSvc instanceof IGenerated) {
                 refBy = ((IGenerated) refSvc).originalType().getCanonicalName();
@@ -492,14 +466,11 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             final ServiceHolder dependencySvc,
             final Map<String, ?> attributes
     ) {
-//        if (hostSvc.isDependencySet(dependencySvc)) {
-//            return;
-//        }
         if (dependencySvc instanceof PrototypeServiceHolder) {
             // Get service instance and register it then set instance service holder
-            IInstance instance = ((PrototypeServiceHolder) dependencySvc).newInstance(attributes);
+            var instance = ((PrototypeServiceHolder) dependencySvc).newInstance(attributes);
             register(instance);
-            ServiceHolder instanceHolder = findServiceHolder(instance.getIds()[0], QualifiedServiceId.FROM_LOCAL);
+            var instanceHolder = findServiceHolder(instance.getIds()[0], QualifiedServiceId.FROM_LOCAL);
             if (instanceHolder == null) {
                 throw new GeneralException("Register instance service is failed, prototype service is - {}", dependencySvc.getId());
             }
@@ -518,7 +489,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     ) throws InvalidArgumentException, GeneralException {
         ArgumentChecker.notNull(injection, "injection");
         if (ISatisfyHook.class.getName().equals(injection.getId())) {
-            Object injectedObj = injection.getObject();
+            var injectedObj = injection.getObject();
             if (! (injectedObj instanceof ISatisfyHook)) {
                 throw new InvalidArgumentException(
                         "The injected object {} can't be converted to {}",
@@ -544,7 +515,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                         "The injected object {} can't be converted to {}",
                         injection.getObject(), IServiceLoader.class.getName());
             }
-            IServiceLoader svcLoader = (IServiceLoader) injection.getObject();
+            var svcLoader = (IServiceLoader) injection.getObject();
             this._svcLoaders.put(svcLoader.getId(), svcLoader);
             this._orderedSvcLoaders.add(svcLoader);
             svcLoader.register(this._svcReadyListener);
@@ -601,10 +572,10 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
         @Override
         public boolean isSatisfied(IServiceReference serviceRef) {
-            boolean containsNull = false;
-            boolean isSatisfied = true;
+            var containsNull = false;
+            var isSatisfied = true;
             for (WeakReference<ISatisfyHook> hookRef : Registry.this._satisfyHooks) {
-                ISatisfyHook hook = hookRef.get();
+                var hook = hookRef.get();
                 if (hook == null) {
                     containsNull = true;
                     continue;

@@ -69,27 +69,21 @@ public class ConfigHandler extends AnnotationsHandler {
             }
             builderContext.checkModifiers(fieldElement, Config.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
-            Element classElement = fieldElement.getEnclosingElement();
+            var classElement = fieldElement.getEnclosingElement();
             builderContext.checkModifiers(classElement, Config.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
             builderContext.checkAnnotations(classElement, Service.class);
 
             // Get field which is reference IRegistry instance
-            Element svcRegElem = builderContext.findFieldWith(classElement, IRegistry.class, Inject.class);
-//            if (svcRegElem == null) {
-//                throw new KernelException(
-//                        "The {} must define a field with type {} and annotated with {}",
-//                        classElement, IRegistry.class.getName(), Inject.class.getName());
+            var svcRegElem = builderContext.findFieldWith(classElement, IRegistry.class, Inject.class);
 
-//            }
-            String svcRegFieldName = "_registry";
-            boolean isSvcRegFieldDefined = false;
+            var svcRegFieldName = "_registry";
+            var isSvcRegFieldDefined = false;
             if (svcRegElem != null) {
                 svcRegFieldName = svcRegElem.getSimpleName().toString();
                 isSvcRegFieldDefined = true;
             }
-//            String svcRegFieldName = svcRegElem.getSimpleName().toString();
 
-            ClassMeta.Builder classBuilder = builderContext.findClassBuilder(classElement);
+            var classBuilder = builderContext.findClassBuilder(classElement);
             classBuilder.putTransience(FIELD_SVC_REG, svcRegFieldName);
             classBuilder.putTransience(IS_FIELD_SVC_REG_DEFINED, isSvcRegFieldDefined);
             List<ConfigInfo> cfgInfos = classBuilder.getTransience(CONFIG_INFOS);
@@ -97,10 +91,10 @@ public class ConfigHandler extends AnnotationsHandler {
                 cfgInfos = new ArrayList<>();
                 classBuilder.putTransience(CONFIG_INFOS, cfgInfos);
             }
-            ConfigInfo cfgInfo = new ConfigInfo();
-            Config cfg = fieldElement.getAnnotation(Config.class);
-            AnnotationMirror cfgMirror = MoreElements.getAnnotationMirror(fieldElement, Config.class).get();
-            String parserType = getTypeInAnnotation(cfgMirror, "parser");
+            var cfgInfo = new ConfigInfo();
+            var cfg = fieldElement.getAnnotation(Config.class);
+            var cfgMirror = MoreElements.getAnnotationMirror(fieldElement, Config.class).get();
+            var parserType = getTypeInAnnotation(cfgMirror, "parser");
             // The parser is set to IConfigValueParser.class means no customized parser was defined
             if (! IConfigValueParser.class.getCanonicalName().equals(parserType)) {
                 cfgInfo.parserName = parserType;
@@ -112,9 +106,9 @@ public class ConfigHandler extends AnnotationsHandler {
             cfgInfos.add(cfgInfo);
         });
 
-        Template tempGetPaths = builderContext.loadTemplate(TEMPLATE_GET_PATHS);
-        Template tempIsOptionalConfig = builderContext.loadTemplate(TEMPLATE_IS_OPTIONAL_CONFIG);
-        Template tempConfig = builderContext.loadTemplate(TEMPLATE_CONFIG);
+        var tempGetPaths = builderContext.loadTemplate(TEMPLATE_GET_PATHS);
+        var tempIsOptionalConfig = builderContext.loadTemplate(TEMPLATE_IS_OPTIONAL_CONFIG);
+        var tempConfig = builderContext.loadTemplate(TEMPLATE_CONFIG);
 
         Looper.on(builderContext.getBuilders()).foreach(classBuilder -> {
             List<ConfigInfo> configInfos = classBuilder.getTransience(CONFIG_INFOS);
@@ -122,14 +116,14 @@ public class ConfigHandler extends AnnotationsHandler {
             if (configInfos == null) {
                 return;
             }
-            Map<String, Object> tempModel = new HashMap<>();
+            var tempModel = new HashMap<String, Object>();
             tempModel.put("configInfos", configInfos);
             tempModel.put("fieldSvcReg", fieldSvcReg);
 
             Boolean isFieldSvcRegDef = classBuilder.getTransience(IS_FIELD_SVC_REG_DEFINED);
             String fieldRegName = classBuilder.getTransience(FIELD_SVC_REG);
             if (! isFieldSvcRegDef) {
-                IInjectableHandlerHelper helper = (IInjectableHandlerHelper) builderContext.getHelper(IInjectableHandlerHelper.name);
+                var helper = (IInjectableHandlerHelper) builderContext.getHelper(IInjectableHandlerHelper.name);
                 helper.addDependency(
                         builderContext,
                         classBuilder,
@@ -138,12 +132,6 @@ public class ConfigHandler extends AnnotationsHandler {
                         IRegistry.class.getCanonicalName(),
                         QualifiedServiceId.FROM_LOCAL,
                         false, false, null, true);
-//                classBuilder
-//                        .addFieldBuilder(FieldMeta.builder()
-//                                .addModifier(Modifier.PRIVATE)
-//                                .setTypeName(IRegistry.class.getCanonicalName())
-//                                .setName(fieldSvcReg)
-//                                .setIsList(false));
             }
             classBuilder
                     .addImplement(IConfigurable.class.getCanonicalName())

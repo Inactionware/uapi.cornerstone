@@ -47,17 +47,17 @@ public abstract class SystemBootstrap {
         long startTime = System.currentTimeMillis();
 
         Iterable<IService> svcLoaders = appSvcLoader.loadServices();
-        final List<IRegistry> svcRegistries = new ArrayList<>();
-        final List<IService> sysSvcs = new ArrayList<>();
-        final List<IService> appSvcs = new ArrayList<>();
+        final var svcRegistries = new ArrayList<IRegistry>();
+        final var sysSvcs = new ArrayList<IService>();
+        final var appSvcs = new ArrayList<IService>();
         Looper.on(svcLoaders)
                 .foreach(svc -> {
                     if (svc instanceof IRegistry) {
                         svcRegistries.add((IRegistry) svc);
                     }
                     if (svc instanceof ITagged) {
-                        ITagged taggedSvc = (ITagged) svc;
-                        String[] tags = taggedSvc.getTags();
+                        var taggedSvc = (ITagged) svc;
+                        var tags = taggedSvc.getTags();
                         if (CollectionHelper.contains(tags, sysSvcTags) != null) {
                             sysSvcs.add(svc);
                         } else {
@@ -81,10 +81,10 @@ public abstract class SystemBootstrap {
                     .build();
         }
 
-        IRegistry svcRegistry = svcRegistries.get(0);
+        var svcRegistry = svcRegistries.get(0);
         // Register basic service first
-        svcRegistry.register(sysSvcs.toArray(new IService[sysSvcs.size()]));
-        String svcRegType = svcRegistry.getClass().getCanonicalName();
+        svcRegistry.register(sysSvcs.toArray(new IService[0]));
+        var svcRegType = svcRegistry.getClass().getCanonicalName();
         svcRegistry = svcRegistry.findService(IRegistry.class);
         if (svcRegistry == null) {
             throw AppException.builder()
@@ -104,7 +104,7 @@ public abstract class SystemBootstrap {
 
         // Send system starting up event
         SystemStartingUpEvent sysLaunchedEvent = new SystemStartingUpEvent(startTime, appSvcs);
-        IEventBus eventBus = svcRegistry.findService(IEventBus.class);
+        var eventBus = svcRegistry.findService(IEventBus.class);
         eventBus.fire(sysLaunchedEvent);
 
         afterSystemLaunching(svcRegistry, appSvcs);

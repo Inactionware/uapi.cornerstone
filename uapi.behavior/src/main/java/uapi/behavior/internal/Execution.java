@@ -69,7 +69,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                     }
                 }
                 // create outputs
-                ActionOutputMeta[] outMetas = this._current.action().outputMetas();
+                var outMetas = this._current.action().outputMetas();
                 if (outMetas.length == 0) {
                     actionOutputs = new ActionOutput[0];
                 } else {
@@ -81,19 +81,19 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
                 // execute action
                 this._current.action().process(actionInputs, actionOutputs, executionContext);
                 if (this._traceable) {
-                    BehaviorExecutingEvent event = new BehaviorExecutingEvent(
+                    var event = new BehaviorExecutingEvent(
                             sourceRespName, this._id, this._current.action().getId(), actionInputs, actionOutputs, behaviorInputs);
                     executionContext.fireEvent(event);
                 }
 
                 // set output to execution context
-                Object[] outputs = Looper.on(actionOutputs).map(ActionOutput::get).toArray();
-                ActionOutputHolder outHolder = new ActionOutputHolder(outMetas, outputs);
+                var outputs = Looper.on(actionOutputs).map(ActionOutput::get).toArray();
+                var outHolder = new ActionOutputHolder(outMetas, outputs);
                 executionContext.setOutputs(this._current.label(), outHolder);
 
                 // find next action
                 final ActionOutput[] tmp = actionOutputs;
-                Attributed outAttrs = Attributed.apply(
+                var outAttrs = Attributed.apply(
                         attr -> Looper.on(tmp).foreachWithIndex((idx, output) ->
                             attr.set(output.meta().name() != null ? output.meta().name() : idx, output.get())
                         ));
@@ -104,7 +104,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
             if (this._failureAction != null) {
                 BehaviorEvent bEvent = null;
                 try {
-                    BehaviorFailure bFailure = new BehaviorFailure(this._current.action().getId(), behaviorInputs, ex);
+                    var bFailure = new BehaviorFailure(this._current.action().getId(), behaviorInputs, ex);
                     bEvent = this._failureAction.accept(bFailure, executionContext);
                 } catch (Exception eex) {
                     exception = new GeneralException(eex);
@@ -118,7 +118,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
         if (this._successAction != null) {
             BehaviorEvent bEvent = null;
             try {
-                BehaviorSuccess bSuccess = new BehaviorSuccess(behaviorInputs, actionOutputs);
+                var bSuccess = new BehaviorSuccess(behaviorInputs, actionOutputs);
                 bEvent = this._successAction.accept(bSuccess, executionContext);
             } catch (Exception eex) {
                 exception = new GeneralException(eex);
@@ -128,7 +128,7 @@ public class Execution implements IIdentifiable<ExecutionIdentify> {
             }
         }
         if (this._traceable) {
-            BehaviorFinishedEvent event = new BehaviorFinishedEvent(
+            var event = new BehaviorFinishedEvent(
                     sourceRespName, this._id, behaviorInputs, actionOutputs, exception);
             executionContext.fireEvent(event);
         }

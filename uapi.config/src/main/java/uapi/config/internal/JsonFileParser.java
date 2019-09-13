@@ -28,8 +28,7 @@ import java.util.Map;
  */
 @Service({ IConfigFileParser.class })
 @Tag(Tags.CONFIG)
-public class JsonFileParser
-        implements IConfigFileParser {
+public class JsonFileParser implements IConfigFileParser {
 
     private static final String JSON_FILE_EXT   = "json";
 
@@ -59,14 +58,8 @@ public class JsonFileParser
             final File file,
             final Functionals.Extractor<FileInputStream, Map, IOException> extractor
     ) throws IOException {
-        FileInputStream input = null;
-        try {
-            input = new FileInputStream(file);
+        try (FileInputStream input = new FileInputStream(file)) {
             return extractor.accept(input);
-        } finally {
-            if (input != null) {
-                input.close();
-            }
         }
     }
 }

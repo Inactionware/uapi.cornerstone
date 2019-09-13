@@ -19,7 +19,7 @@ import uapi.service.annotation.Tag;
 
 @Service({ IConfigValueParser.class })
 @Tag(Tags.CONFIG)
-public class CapacityParser implements IConfigValueParser {
+public class CapacityParser implements IConfigValueParser<Capacity> {
 
     private static final String[] supportTypesIn = new String[] { String.class.getCanonicalName() };
     private static final String[] supportTypesOut = new String[] { Capacity.class.getCanonicalName() };

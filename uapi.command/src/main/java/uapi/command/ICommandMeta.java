@@ -33,7 +33,6 @@ public interface ICommandMeta {
         namedValues.put("namespace", commandMeta.namespace() != null ? commandMeta.namespace() : "");
         namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
         namedValues.put("parent", commandMeta.parentPath());
-        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
         namedValues.put("name", commandMeta.name());
         return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
     }
@@ -119,13 +118,6 @@ public interface ICommandMeta {
     }
 
     default String id() {
-//        Map<String, String> namedValues = new HashMap<>();
-//        namedValues.put("namespace", namespace() != null ? namespace() : "");
-//        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
-//        namedValues.put("parent", parentPath());
-//        namedValues.put("sep", ICommandMeta.PATH_SEPARATOR);
-//        namedValues.put("name", name());
-//        return StringHelper.makeString("{namespace}{sep}{parent}{sep}{name}", namedValues);
         return makeId(this);
     }
 }

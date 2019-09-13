@@ -45,28 +45,28 @@ public class RunParser {
                 throw new GeneralException(
                         "The element {} must be a method element", methodElement.getSimpleName().toString());
             }
-            Element classElement = methodElement.getEnclosingElement();
+            var classElement = methodElement.getEnclosingElement();
             builderContext.checkAnnotations(classElement, Service.class, Command.class);
             builderContext.checkModifiers(methodElement, Run.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
-            String runMethodName = methodElement.getSimpleName().toString();
+            var runMethodName = methodElement.getSimpleName().toString();
             // The run method must be no argument and return boolean to figure out success or failure
-            ExecutableElement execElement = (ExecutableElement) methodElement;
-            List paramElements = execElement.getParameters();
+            var execElement = (ExecutableElement) methodElement;
+            var paramElements = execElement.getParameters();
             if (paramElements.size() != 0) {
                 throw new GeneralException(
                         "The method annotated with Run must be has no input parameter - {}", runMethodName);
             }
-            String returnType = execElement.getReturnType().toString();
+            var returnType = execElement.getReturnType().toString();
             if (! Type.BOOLEAN.equals(returnType) && ! Type.Q_BOOLEAN.equals(returnType)) {
                 throw new GeneralException(
                         "The method annotated with Run must return a boolean type - {}", runMethodName);
             }
 
-            ClassMeta.Builder cmdMetaBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
+            var cmdMetaBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
             CommandModel cmdModel = cmdMetaBuilder.getTransience(CommandHandler.CMD_MODEL);
 
-            ClassMeta.Builder cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(classElement, builderContext);
+            var cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(classElement, builderContext);
             Map<String, Object> model = cmdExecBuilder.getTransience(MODEL_COMMAND_EXECUTOR);
             if (model != null) {
                 throw new GeneralException(
@@ -74,7 +74,7 @@ public class RunParser {
                         classElement.getSimpleName().toString());
             }
             model = new HashMap<>();
-            String outputField = cmdExecBuilder.getTransience(MessageOutputParser.MODEL_COMMAND_MSG_OUT_FIELD_NAME);
+            var outputField = cmdExecBuilder.getTransience(MessageOutputParser.MODEL_COMMAND_MSG_OUT_FIELD_NAME);
             model.put(VAR_RUN_METHOD_NAME, runMethodName);
             model.put(VAR_PARAMS, cmdModel.parameters);
             model.put(VAR_OPTS, cmdModel.options);
@@ -83,11 +83,11 @@ public class RunParser {
 
             cmdExecBuilder.putTransience(MODEL_COMMAND_EXECUTOR, model);
 
-            Template tempSetParam = builderContext.loadTemplate(TEMP_SET_PARAM);
-            Template tempSetOpt = builderContext.loadTemplate(TEMP_SET_OPT);
-            Template tempSetOptArg = builderContext.loadTemplate(TEMP_SET_OPT_ARG);
-            Template tempSetOutput = builderContext.loadTemplate(TEMP_SET_OUTPU);
-            Template tempExec = builderContext.loadTemplate(TEMP_EXECUTE);
+            var tempSetParam = builderContext.loadTemplate(TEMP_SET_PARAM);
+            var tempSetOpt = builderContext.loadTemplate(TEMP_SET_OPT);
+            var tempSetOptArg = builderContext.loadTemplate(TEMP_SET_OPT_ARG);
+            var tempSetOutput = builderContext.loadTemplate(TEMP_SET_OUTPU);
+            var tempExec = builderContext.loadTemplate(TEMP_EXECUTE);
 
             // Generate newExecutor method
             cmdExecBuilder.addImplement(ICommandExecutor.class.getCanonicalName())

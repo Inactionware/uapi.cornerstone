@@ -41,9 +41,9 @@ class Configurator implements ISatisfyHook, IConfigTracer {
         if (! (serviceRef.getService() instanceof IConfigurable)) {
             return true;
         }
-        IConfigurable configurableSvc = (IConfigurable) serviceRef.getService();
-        String[] paths = configurableSvc.getPaths();
-        boolean isConfigured = true;
+        var configurableSvc = (IConfigurable) serviceRef.getService();
+        var paths = configurableSvc.getPaths();
+        var isConfigured = true;
         for (String path : paths) {
             if (! this._rootConfig.bindConfigurable(path, serviceRef)) {
                 isConfigured = false;

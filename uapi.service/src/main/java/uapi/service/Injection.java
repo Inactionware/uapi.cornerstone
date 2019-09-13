@@ -53,7 +53,7 @@ public class Injection {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         sb.append("Injection[")
                 .append("id=").append(this._id)
                 .append(",object=").append(this._object);

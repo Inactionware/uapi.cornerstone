@@ -54,11 +54,11 @@ public class ProfilesParser implements IConfigValueParser {
     @SuppressWarnings("unchecked")
     @Override
     public Map<String, Profile> parse(Object value) {
-        List<Map> profileList = (List<Map>) value;
-        Map<String, Profile> profiles = new HashMap<>();
+        var profileList = (List<Map>) value;
+        var profiles = new HashMap<String, Profile>();
         Looper.on(profileList)
                 .foreach(profileCfg -> {
-                    String name = profileCfg.get(NAME).toString();
+                    var name = profileCfg.get(NAME).toString();
                     if (profiles.containsKey(name)) {
                         throw AppException.builder()
                                 .errorCode(AppErrors.DUPLICATED_PROFILE)
@@ -66,17 +66,17 @@ public class ProfilesParser implements IConfigValueParser {
                                         .name(name))
                                 .build();
                     }
-                    Profile.Model model = Profile.Model.parse(profileCfg.get(MODEL).toString());
+                    var model = Profile.Model.parse(profileCfg.get(MODEL).toString());
                     Profile.Matching matching = Profile.Matching.parse(profileCfg.get(MATCHING).toString());
-                    Object tagsObj = profileCfg.get(TAGS);
+                    var tagsObj = profileCfg.get(TAGS);
                     if (! (tagsObj instanceof List)) {
                         throw AppException.builder()
                                 .errorCode(AppErrors.TAG_CONFIG_IS_NOT_LIST)
                                 .build();
                     }
-                    List<String> tagList = (List<String>) tagsObj;
-                    String[] tags = tagList.toArray(new String[tagList.size()]);
-                    Profile profile = new Profile(name, model, matching, tags);
+                    var tagList = (List<String>) tagsObj;
+                    var tags = tagList.toArray(new String[0]);
+                    var profile = new Profile(name, model, matching, tags);
                     profiles.put(name, profile);
                 });
         return profiles;

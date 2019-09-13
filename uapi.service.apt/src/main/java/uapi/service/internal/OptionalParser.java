@@ -46,7 +46,7 @@ class OptionalParser {
             builderCtx.checkModifiers(element, uapi.service.annotation.Optional.class,
                     Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
             builderCtx.checkAnnotations(element, uapi.service.annotation.Inject.class);
-            Element classElemt = element.getEnclosingElement();
+            var classElemt = element.getEnclosingElement();
             builderCtx.checkModifiers(classElemt, uapi.service.annotation.Optional.class,
                     Modifier.PRIVATE, Modifier.FINAL);
 
@@ -58,13 +58,13 @@ class OptionalParser {
             }
 
             if (element.getKind() == ElementKind.FIELD) {
-                String fieldName = element.getSimpleName().toString();
+                var fieldName = element.getSimpleName().toString();
 
-                ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
+                var clsBuilder = builderCtx.findClassBuilder(classElemt);
                 setOptionalDependency(clsBuilder, fieldName);
             } else if (element.getKind() == ElementKind.METHOD) {
-                String methodName = element.getSimpleName().toString();
-                ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
+                var methodName = element.getSimpleName().toString();
+                var clsBuilder = builderCtx.findClassBuilder(classElemt);
                 List<InjectParser.InjectMethod> injectMethods = clsBuilder.getTransience(InjectParser.INJECT_METHODS);
                 List<InjectParser.InjectMethod> matchedMethods = Looper.on(injectMethods)
                         .filter(method -> methodName.equals(method.methodName()))
@@ -73,18 +73,18 @@ class OptionalParser {
                 if (matchedMethods.size() == 1) {
                     matchedMethod = matchedMethods.get(0);
                 } else {
-                    ExecutableElement methodElemt = (ExecutableElement) element;
-                    List paramElements = methodElemt.getParameters();
+                    var methodElemt = (ExecutableElement) element;
+                    var paramElements = methodElemt.getParameters();
                     if (paramElements.size() != 1) {
                         throw new GeneralException(
                                 "Expect the injected method [{}] has only 1 parameter, but found - {}",
                                 methodName, paramElements.size()
                         );
                     }
-                    VariableElement paramElem = (VariableElement) paramElements.get(0);
-                    String rawParamType = paramElem.asType().toString();
+                    var paramElem = (VariableElement) paramElements.get(0);
+                    var rawParamType = paramElem.asType().toString();
                     // Remove generic type
-                    String paramType = rawParamType.contains("<") ?
+                    var paramType = rawParamType.contains("<") ?
                             rawParamType.substring(0, rawParamType.indexOf("<")) : rawParamType;
                     matchedMethods = Looper.on(matchedMethods)
                             .filter(method -> paramType.equals(method.injectType()))
@@ -107,7 +107,7 @@ class OptionalParser {
 
 
         builderCtx.getBuilders().forEach(classBuilder -> {
-            final Template temp = builderCtx.loadTemplate(TEMPLATE_IS_OPTIONAL);
+            final var temp = builderCtx.loadTemplate(TEMPLATE_IS_OPTIONAL);
             // builderCtx.getLogger().info("Generate isOptional for {}", classBuilder.getClassName());
             implementOptional(classBuilder, temp);
         });
@@ -120,7 +120,7 @@ class OptionalParser {
         String paramType        = Type.STRING;
 
         final List<String> optionals = new ArrayList<>();
-        List<MethodMeta.Builder> setters = classBuilder.findSetterBuilders();
+        var setters = classBuilder.findSetterBuilders();
         Looper.on(setters)
                 .map(setter -> (SetterMeta.Builder) setter)
                 .filter(SetterMeta.Builder::getIsOptional)
@@ -138,7 +138,7 @@ class OptionalParser {
             return;
         }
 
-        final Map<String, List<String>> tempModel = new HashMap<>();
+        final var tempModel = new HashMap<String, List<String>>();
         tempModel.put(MODEL_IS_OPTIONAL, optionals);
 
         classBuilder.addMethodBuilder(MethodMeta.builder()

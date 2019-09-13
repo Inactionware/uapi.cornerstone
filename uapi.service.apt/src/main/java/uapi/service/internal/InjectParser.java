@@ -51,19 +51,19 @@ class InjectParser {
             final Set<? extends Element> elements
     ) throws GeneralException {
         elements.forEach(annotatedElement -> {
-            ElementKind elementKind = annotatedElement.getKind();
+            var elementKind = annotatedElement.getKind();
             if (elementKind != ElementKind.FIELD && elementKind != ElementKind.METHOD) {
                 throw new GeneralException(
                         "The Inject annotation only can be applied on field or method",
                         annotatedElement.getSimpleName().toString());
             }
             builderCtx.checkModifiers(annotatedElement, Inject.class, Modifier.PRIVATE, Modifier.STATIC);
-            Element classElemt = annotatedElement.getEnclosingElement();
+            var classElemt = annotatedElement.getEnclosingElement();
             builderCtx.checkModifiers(classElemt, Inject.class, Modifier.PRIVATE, Modifier.FINAL);
 
-            Inject inject = annotatedElement.getAnnotation(Inject.class);
-            String injectId = inject.value();
-            String injectFrom = inject.from();
+            var inject = annotatedElement.getAnnotation(Inject.class);
+            var injectId = inject.value();
+            var injectFrom = inject.from();
             if (StringHelper.isNullOrEmpty(injectFrom)) {
                 throw new GeneralException(
                         "The inject service from [{}.{}] must be specified",
@@ -72,14 +72,14 @@ class InjectParser {
             }
 
             if (elementKind == ElementKind.FIELD) {
-                String fieldName = annotatedElement.getSimpleName().toString();
-                String fieldTypeName = annotatedElement.asType().toString();
-                boolean isCollection = isCollection(annotatedElement, builderCtx);
-                boolean isMap = isMap(annotatedElement, builderCtx);
-                String setterName = ClassHelper.makeSetterName(fieldName, isCollection, isMap);
+                var fieldName = annotatedElement.getSimpleName().toString();
+                var fieldTypeName = annotatedElement.asType().toString();
+                var isCollection = isCollection(annotatedElement, builderCtx);
+                var isMap = isMap(annotatedElement, builderCtx);
+                var setterName = ClassHelper.makeSetterName(fieldName, isCollection, isMap);
                 String idType = null;
                 if (isCollection) {
-                    List<TypeMirror> typeArgs = getTypeArguments(annotatedElement);
+                    var typeArgs = getTypeArguments(annotatedElement);
                     if (typeArgs.size() != 1) {
                         throw new GeneralException(
                                 "The collection field [{}.{}] must be define only ONE type argument",
@@ -88,7 +88,7 @@ class InjectParser {
                     }
                     fieldTypeName = typeArgs.get(0).toString();
                 } else if (isMap) {
-                    List<TypeMirror> typeArgs = getTypeArguments(annotatedElement);
+                    var typeArgs = getTypeArguments(annotatedElement);
                     if (typeArgs.size() != 2) {
                         throw new GeneralException(
                                 "The map field [{}.{}] must be define only TWO type arguments",
@@ -96,10 +96,10 @@ class InjectParser {
                                 annotatedElement.getSimpleName().toString());
                     }
                     idType = typeArgs.get(0).toString();
-                    Types typeUtils = builderCtx.getTypeUtils();
-                    Elements elemtUtils = builderCtx.getElementUtils();
-                    TypeElement identifiableElemt = elemtUtils.getTypeElement(IIdentifiable.class.getCanonicalName());
-                    DeclaredType identifiableType = typeUtils.getDeclaredType(identifiableElemt);
+                    var typeUtils = builderCtx.getTypeUtils();
+                    var elemtUtils = builderCtx.getElementUtils();
+                    var identifiableElemt = elemtUtils.getTypeElement(IIdentifiable.class.getCanonicalName());
+                    var identifiableType = typeUtils.getDeclaredType(identifiableElemt);
                     if (!typeUtils.isAssignable(typeArgs.get(1), identifiableType)) {
                         throw new GeneralException(
                                 "The value type of the field [{}.{}] must be implement IIdentifiable interface",
@@ -116,27 +116,27 @@ class InjectParser {
                     injectId = fieldTypeName;
                 }
 
-                ClassMeta.Builder clsBuilder = builderCtx.findClassBuilder(classElemt);
+                var clsBuilder = builderCtx.findClassBuilder(classElemt);
                 addSetter(clsBuilder, fieldName, fieldTypeName, injectId, injectFrom, setterName, isCollection, isMap, idType, false);
             } else if (elementKind == ElementKind.METHOD) {
-                String methodName = annotatedElement.getSimpleName().toString();
-                ExecutableElement methodElemt = (ExecutableElement) annotatedElement;
-                String returnType = methodElemt.getReturnType().toString();
+                var methodName = annotatedElement.getSimpleName().toString();
+                var methodElemt = (ExecutableElement) annotatedElement;
+                var returnType = methodElemt.getReturnType().toString();
                 if (! Type.VOID.equals(returnType)) {
                     throw new GeneralException(
                             "Expect the injected method [{}] return void, but it return - {}",
                             methodName, returnType
                     );
                 }
-                List paramElements = methodElemt.getParameters();
+                var paramElements = methodElemt.getParameters();
                 if (paramElements.size() != 1) {
                     throw new GeneralException(
                             "Expect the injected method [{}] is only allowed 1 parameter, but found - {} parameters",
                             methodName, paramElements.size()
                     );
                 }
-                VariableElement paramElem = (VariableElement) paramElements.get(0);
-                String paramType = paramElem.asType().toString();
+                var paramElem = (VariableElement) paramElements.get(0);
+                var paramType = paramElem.asType().toString();
                 // Remove generic type
                 if (paramType.contains("<")) {
                     paramType = paramType.substring(0, paramType.indexOf("<"));
@@ -156,8 +156,8 @@ class InjectParser {
             }
         });
 
-        Template tempInject = builderCtx.loadTemplate(TEMPLATE_INJECT);
-        Template tempGetDependencies = builderCtx.loadTemplate(TEMPLATE_GET_DEPENDENCIES);
+        var tempInject = builderCtx.loadTemplate(TEMPLATE_INJECT);
+        var tempGetDependencies = builderCtx.loadTemplate(TEMPLATE_GET_DEPENDENCIES);
         builderCtx.getBuilders().forEach(classBuilder -> {
             implementInjectObjectForClass(classBuilder, tempInject);
             implementGetDependenciesForClass(classBuilder, tempGetDependencies);
@@ -186,7 +186,7 @@ class InjectParser {
 
         if (needGenerateField) {
             // Generate field
-            FieldMeta.Builder fieldMeta = classBuilder.findFieldBuilder(fieldName, fieldType);
+            var fieldMeta = classBuilder.findFieldBuilder(fieldName, fieldType);
             if (fieldMeta == null) {
                 classBuilder.addFieldBuilder(FieldMeta.builder()
                         .addModifier(Modifier.PRIVATE)
@@ -197,7 +197,7 @@ class InjectParser {
             }
         }
 
-        String paramName = SETTER_PARAM_NAME;
+        var paramName = SETTER_PARAM_NAME;
         String code;
         if (isCollection) {
             code = StringHelper.makeString("{}.add({});", fieldName, paramName);
@@ -229,12 +229,12 @@ class InjectParser {
     private boolean isCollection(
             final Element fieldElement,
             final IBuilderContext builderCtx) {
-        Elements elemtUtils = builderCtx.getElementUtils();
-        Types typeUtils = builderCtx.getTypeUtils();
-        WildcardType wildcardType = typeUtils.getWildcardType(null, null);
-        TypeElement collectionTypeElemt = elemtUtils.getTypeElement(
+        var elemtUtils = builderCtx.getElementUtils();
+        var typeUtils = builderCtx.getTypeUtils();
+        var wildcardType = typeUtils.getWildcardType(null, null);
+        var collectionTypeElemt = elemtUtils.getTypeElement(
                 Collection.class.getCanonicalName());
-        DeclaredType collectionType = typeUtils.getDeclaredType(
+        var collectionType = typeUtils.getDeclaredType(
                 collectionTypeElemt, wildcardType);
         return typeUtils.isAssignable(fieldElement.asType(), collectionType);
     }
@@ -242,19 +242,19 @@ class InjectParser {
     private boolean isMap(
             final Element fieldElement,
             final IBuilderContext builderCtx) {
-        Elements elemtUtils = builderCtx.getElementUtils();
-        Types typeUtils = builderCtx.getTypeUtils();
-        WildcardType wildcardType = typeUtils.getWildcardType(null, null);
-        TypeElement collectionTypeElemt = elemtUtils.getTypeElement(
+        var elemtUtils = builderCtx.getElementUtils();
+        var typeUtils = builderCtx.getTypeUtils();
+        var wildcardType = typeUtils.getWildcardType(null, null);
+        var collectionTypeElemt = elemtUtils.getTypeElement(
                 Map.class.getCanonicalName());
-        DeclaredType mapType = typeUtils.getDeclaredType(
+        var mapType = typeUtils.getDeclaredType(
                 collectionTypeElemt, wildcardType, wildcardType);
         return typeUtils.isAssignable(fieldElement.asType(), mapType);
     }
 
     private List<TypeMirror> getTypeArguments(Element fieldElement) {
         final List<TypeMirror> typeArgs = new ArrayList<>();
-        DeclaredType declaredType = (DeclaredType) fieldElement.asType();
+        var declaredType = (DeclaredType) fieldElement.asType();
         declaredType.getTypeArguments().forEach(
                 typeMirror -> typeArgs.add(typeMirror));
         return typeArgs;
@@ -299,7 +299,7 @@ class InjectParser {
             return;
         }
 
-        Map<String, Object> tempModelDependencies = new HashMap<>();
+        var tempModelDependencies = new HashMap<String, Object>();
         tempModelDependencies.put("dependencies", dependencies);
         classBuilder
                 .addImplement(IInjectable.class.getCanonicalName())
@@ -315,11 +315,11 @@ class InjectParser {
     }
 
     private void implementInjectObjectForClass(ClassMeta.Builder classBuilder, Template temp) {
-        String methodName = "injectObject";
-        String paramName = "injection";
-        String paramType = Injection.class.getName();
+        var methodName = "injectObject";
+        var paramName = "injection";
+        var paramType = Injection.class.getName();
 
-        final List<SetterModel> setterModels = new ArrayList<>();
+        final var setterModels = new ArrayList<SetterModel>();
         classBuilder.findSetterBuilders().forEach(methodBuilder -> {
             SetterMeta.Builder setterBuilder = (SetterMeta.Builder) methodBuilder;
             setterModels.add(new SetterModel(
@@ -341,7 +341,7 @@ class InjectParser {
             return;
         }
 
-        Map<String, Object> tempModel = new HashMap<>();
+        var tempModel = new HashMap<String, Object>();
         tempModel.put("setters", setterModels);
         classBuilder
                 .addImplement(IInjectable.class.getCanonicalName())
@@ -373,10 +373,10 @@ class InjectParser {
                 final boolean isCollection,
                 final boolean isMap,
                 final String mapKeyType) {
-            String setterName = ClassHelper.makeSetterName(fieldName, isCollection, isMap);
+            var setterName = ClassHelper.makeSetterName(fieldName, isCollection, isMap);
             InjectParser.this.addSetter(classBuilder, fieldName, fieldType, injectId, injectFrom, setterName, isCollection, isMap, mapKeyType, true);
-            Template tempInjectObject = builderContext.loadTemplate(TEMPLATE_INJECT);
-            Template tempGetDependencies = builderContext.loadTemplate(TEMPLATE_GET_DEPENDENCIES);
+            var tempInjectObject = builderContext.loadTemplate(TEMPLATE_INJECT);
+            var tempGetDependencies = builderContext.loadTemplate(TEMPLATE_GET_DEPENDENCIES);
             implementInjectObjectForClass(classBuilder, tempInjectObject);
             implementGetDependenciesForClass(classBuilder, tempGetDependencies);
         }

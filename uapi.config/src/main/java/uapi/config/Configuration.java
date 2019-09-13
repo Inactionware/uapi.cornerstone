@@ -100,8 +100,8 @@ public class Configuration {
 
     public Object getValue(final String path) {
         ArgumentChecker.notEmpty(path, "path");
-        String[] steps = path.split(PATH_SEPARATOR_PATTERN);
-        Configuration config = this;
+        var steps = path.split(PATH_SEPARATOR_PATTERN);
+        var config = this;
         for (String step : steps) {
             if (config == null) {
                 return null;
@@ -157,14 +157,14 @@ public class Configuration {
     public boolean bindConfigurable(final IServiceReference serviceRef) {
         ArgumentChecker.notNull(serviceRef, "serviceRef");
 
-        String path = getFullPath();
+        var path = getFullPath();
         if (this._configurableSvcs.containsKey(serviceRef.getQualifiedId())) {
             if (this._value != null) {
                 return true;
             }
             return ((IConfigurable) serviceRef.getService()).isOptionalConfig(path);
         }
-        IConfigurable cfg = ((IConfigurable) serviceRef.getService());
+        var cfg = ((IConfigurable) serviceRef.getService());
         this._configurableSvcs.put(serviceRef.getQualifiedId(), new WeakReference<>(serviceRef));
         if (this._value != null) {
             cfg.config(path, this._value);
@@ -193,7 +193,7 @@ public class Configuration {
         ArgumentChecker.notEmpty(path, "path");
         ArgumentChecker.notNull(serviceRef, "serviceRef");
 
-        Configuration config = getOrCreateChild(path);
+        var config = getOrCreateChild(path);
         return config.bindConfigurable(serviceRef);
     }
 
@@ -211,7 +211,7 @@ public class Configuration {
         if (this._children == null) {
             throw new GeneralException("The configuration[{}] can't attach child", this._key);
         }
-        Configuration child = new Configuration(this, key, value, null);
+        var child = new Configuration(this, key, value, null);
         this._children.put(key, child);
         return child;
     }
@@ -221,15 +221,15 @@ public class Configuration {
         if (this._children == null) {
             throw new GeneralException("The configuration[{}] can't attach child", this._key);
         }
-        Configuration child = new Configuration(this, key);
+        var child = new Configuration(this, key);
         this._children.put(key, child);
         return child;
     }
 
     public String getFullPath() {
-        StringBuilder buffer = new StringBuilder();
-        boolean isRoot = isRoot();
-        Configuration cfg = this;
+        var buffer = new StringBuilder();
+        var isRoot = isRoot();
+        var cfg = this;
         while (! isRoot) {
             buffer.insert(0, cfg._key).insert(0, PATH_SEPARATOR);
             cfg = cfg._parent;
@@ -244,8 +244,8 @@ public class Configuration {
 
     private Configuration getOrCreateChild(final String path) {
         ArgumentChecker.notEmpty(path, "path");
-        String[] steps = path.split(PATH_SEPARATOR_PATTERN);
-        Configuration config = this;
+        var steps = path.split(PATH_SEPARATOR_PATTERN);
+        var config = this;
         for (String step : steps) {
             Configuration child = config.getChild(step);
             if (child == null) {
@@ -258,12 +258,13 @@ public class Configuration {
     }
 
     private void cleanNullReference() {
-        Iterator<Map.Entry<QualifiedServiceId, WeakReference<IServiceReference>>> it = this._configurableSvcs.entrySet().iterator();
-        while (it.hasNext()) {
-            if (it.next().getValue().get() == null) {
-                it.remove();
-            }
-        }
+//        var it = this._configurableSvcs.entrySet().iterator();
+//        while (it.hasNext()) {
+//            if (it.next().getValue().get() == null) {
+//                it.remove();
+//            }
+//        }
+        this._configurableSvcs.entrySet().removeIf(svcRefEntry -> svcRefEntry.getValue().get() == null);
     }
 
     /**
@@ -279,7 +280,7 @@ public class Configuration {
             return null;
         }
 
-        Map<String, Object> mapValue = new HashMap<>();
+        var mapValue = new HashMap<String, Object>();
         Looper.on(value.entrySet())
                 .foreach(entry -> {
                     if (entry.getValue()._children.size() > 0) {

@@ -91,7 +91,7 @@ public final class Command implements ICommand {
     }
 
     void addSubCommand(Command command) {
-        Command duplicatedCmd = Looper.on(this._subCmds)
+        var duplicatedCmd = Looper.on(this._subCmds)
                 .filter(subCmd -> subCmd.name().equals(command.name()))
                 .first(null);
         if (duplicatedCmd != null) {
@@ -106,7 +106,7 @@ public final class Command implements ICommand {
     }
 
     void removeSubCommand(String commandName) {
-        Command command = findSubCommand(commandName);
+        var command = findSubCommand(commandName);
         this._subCmds.remove(command);
     }
 

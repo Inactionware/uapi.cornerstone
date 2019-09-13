@@ -91,27 +91,27 @@ public final class ServiceHandler extends AnnotationsHandler {
             }
             builderCtx.checkModifiers(fieldElement, Attribute.class, Modifier.PRIVATE, Modifier.FINAL);
 
-            Element classElement = fieldElement.getEnclosingElement();
+            var classElement = fieldElement.getEnclosingElement();
             builderCtx.checkModifiers(classElement, Service.class, Modifier.PRIVATE, Modifier.FINAL);
-            Service annoSvc = classElement.getAnnotation(Service.class);
+            var annoSvc = classElement.getAnnotation(Service.class);
             if (annoSvc.type() != ServiceType.Prototype) {
                 throw new GeneralException(
                         "Attribute annotation is only support declare in prototype service - {}",
                         classElement.getSimpleName().toString());
             }
 
-            Attribute annoAttr = fieldElement.getAnnotation(Attribute.class);
-            String attrName = annoAttr.value();
-            String attrField = fieldElement.getSimpleName().toString();
-            String attrFieldType = Type.toQType(fieldElement.asType().toString());
-            ClassMeta.Builder instClassBuilder = builderCtx.findClassBuilder(classElement);
-            Map<String, Object> modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
-            List<AttributeMode> requiredAttrs = (List<AttributeMode>) modelReqAttrs.get(VAR_ATTRS);
+            var annoAttr = fieldElement.getAnnotation(Attribute.class);
+            var attrName = annoAttr.value();
+            var attrField = fieldElement.getSimpleName().toString();
+            var attrFieldType = Type.toQType(fieldElement.asType().toString());
+            var instClassBuilder = builderCtx.findClassBuilder(classElement);
+            var modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
+            var requiredAttrs = (List<AttributeMode>) modelReqAttrs.get(VAR_ATTRS);
             if (requiredAttrs == null) {
                 requiredAttrs = new ArrayList<>();
                 modelReqAttrs.put(VAR_ATTRS, requiredAttrs);
             }
-            AttributeMode attrInfo = new AttributeMode(attrName, attrField, attrFieldType);
+            var attrInfo = new AttributeMode(attrName, attrField, attrFieldType);
             requiredAttrs.add(attrInfo);
         });
     }
@@ -131,15 +131,15 @@ public final class ServiceHandler extends AnnotationsHandler {
 //            builderCtx.getLogger().info("Start handle annotation {} for class {}",
 //                    annotationType, classElement.getSimpleName().toString());
             // Receive service id array
-            ClassMeta.Builder classBuilder = builderCtx.findClassBuilder(classElement);
-            AnnotationMirror svcAnnoMirror = MoreElements.getAnnotationMirror(classElement, Service.class).get();
-            String pkgName = builderCtx.getElementUtils().getPackageOf(classElement).getQualifiedName().toString();
-            Service service = classElement.getAnnotation(Service.class);
-            boolean autoActive = service.autoActive();
-            ServiceType svcType = service.type();
-            String[] serviceIds = mergeId(getTypesInAnnotation(svcAnnoMirror, "value"), service.ids());
+            var classBuilder = builderCtx.findClassBuilder(classElement);
+            var svcAnnoMirror = MoreElements.getAnnotationMirror(classElement, Service.class).get();
+            var pkgName = builderCtx.getElementUtils().getPackageOf(classElement).getQualifiedName().toString();
+            var service = classElement.getAnnotation(Service.class);
+            var autoActive = service.autoActive();
+            var svcType = service.type();
+            var serviceIds = mergeId(getTypesInAnnotation(svcAnnoMirror, "value"), service.ids());
             if (serviceIds.length == 0) {
-                final StringBuilder svcId = new StringBuilder();
+                final var svcId = new StringBuilder();
                 // Check service factory type argument first
                 Looper.on(((TypeElement) classElement).getInterfaces())
                         .filter(declareType -> declareType.toString().startsWith(IServiceFactory.class.getName()))
@@ -182,10 +182,10 @@ public final class ServiceHandler extends AnnotationsHandler {
             final String prototypeId,
             final String userClassName
     ) {
-        Template tempReqAttrs = builderContext.loadTemplate(TEMPLATE_REQ_ATTRS);
-        Template tempInstCons = builderContext.loadTemplate(TEMPLATE_INST_CONSTRUCTOR);
-        Template tempAttrs = builderContext.loadTemplate(TEMPLATE_ATTRS);
-        Map<String, Object> modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
+        var tempReqAttrs = builderContext.loadTemplate(TEMPLATE_REQ_ATTRS);
+        var tempInstCons = builderContext.loadTemplate(TEMPLATE_INST_CONSTRUCTOR);
+        var tempAttrs = builderContext.loadTemplate(TEMPLATE_ATTRS);
+        var modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
 
         // instance service
         instClassBuilder
@@ -229,11 +229,11 @@ public final class ServiceHandler extends AnnotationsHandler {
                                 .setModel(modelReqAttrs)));
 
         // Prototype service
-        Template tempGetIds = builderContext.loadTemplate(TEMPLATE_GET_IDS);
-        Map<String, Object> tempGetIdsModel = new HashMap<>();
+        var tempGetIds = builderContext.loadTemplate(TEMPLATE_GET_IDS);
+        var tempGetIdsModel = new HashMap<>();
         tempGetIdsModel.put(VAR_SVC_IDS, new String[] { prototypeId });
-        String[] idArr = (String[]) tempGetIdsModel.get(VAR_SVC_IDS);
-        ClassMeta.Builder prototypeBuilder = builderContext.newClassBuilder(packageName, userClassName + "_Prototype_Generated");
+        var idArr = (String[]) tempGetIdsModel.get(VAR_SVC_IDS);
+        var prototypeBuilder = builderContext.newClassBuilder(packageName, userClassName + "_Prototype_Generated");
         prototypeBuilder
                 .addAnnotationBuilder(AnnotationMeta.builder()
                         .setName(AutoService.class.getCanonicalName())
@@ -287,7 +287,7 @@ public final class ServiceHandler extends AnnotationsHandler {
             final ClassMeta.Builder classBuilder,
             final boolean autoActive
     ) {
-        Template tempGetIds = builderCtx.loadTemplate(TEMPLATE_GET_IDS);
+        var tempGetIds = builderCtx.loadTemplate(TEMPLATE_GET_IDS);
 //        this._helper.addServiceId(classBuilder, serviceIds);
 
         // Build class builder
@@ -364,15 +364,15 @@ public final class ServiceHandler extends AnnotationsHandler {
         public void addServiceId(ClassMeta.Builder classBuilder, String... serviceIds) {
             ArgumentChecker.required(serviceIds, "serviceIds");
 
-            Map<String, Object> tempGetIdsModel = classBuilder.createTransienceIfAbsent(MODEL_GET_IDS, HashMap::new);
-            String[] idArr = (String[]) tempGetIdsModel.get(VAR_SVC_IDS);
+            var tempGetIdsModel = classBuilder.createTransienceIfAbsent(MODEL_GET_IDS, HashMap::new);
+            var idArr = (String[]) tempGetIdsModel.get(VAR_SVC_IDS);
             if (idArr == null) {
                 idArr = serviceIds;
             } else {
                 List<String> idList = new ArrayList<>();
                 Looper.on(idArr).foreach(idList::add);
                 Looper.on(serviceIds).filter(id -> ! idList.contains(id)).foreach(idList::add);
-                idArr = idList.toArray(new String[idList.size()]);
+                idArr = idList.toArray(new String[0]);
             }
             tempGetIdsModel.put(VAR_SVC_IDS, idArr);
         }

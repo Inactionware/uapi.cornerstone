@@ -20,7 +20,7 @@ import uapi.service.annotation.Tag;
  */
 @Service(IConfigValueParser.class)
 @Tag(Tags.CONFIG)
-public class LongValueParser implements IConfigValueParser {
+public class LongValueParser implements IConfigValueParser<Long> {
 
     private static final String[] supportTypesIn = new String[] {
             Long.class.getCanonicalName(), String.class.getCanonicalName() };

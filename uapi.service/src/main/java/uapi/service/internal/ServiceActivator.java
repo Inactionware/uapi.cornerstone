@@ -74,19 +74,19 @@ public class ServiceActivator {
         }
 
         // Make out unactivated dependency service tree, need check out cycle dependency case
-        List<UnactivatedService> svcList = new LinkedList<>();
+        var svcList = new LinkedList<UnactivatedService>();
         constructServiceStack(new UnactivatedService(null, serviceHolder), svcList);
 
-        ServiceActiveTask task = new ServiceActiveTask(svcList);
+        var task = new ServiceActiveTask(svcList);
         Watcher.on(() -> {
             // Check unactivated service again when the watch is notified by other thread
-            List<UnactivatedService> newSvcList =
+            var newSvcList =
                     Looper.on(svcList).filter(unactivatedSvc -> !unactivatedSvc.isActivated()).toList();
 
             return Guarder.by(this._lock).runForResult(() -> {
                 // Check whether the service which in the tree is in existing service active task
                 // if it is, then the service active should be wait until the existing active task finish
-                UnactivatedService handlingSvc = Looper.on(this._tasks.iterator())
+                var handlingSvc = Looper.on(this._tasks.iterator())
                         .map(handlingTask -> handlingTask.isInHandling(newSvcList))
                         .first(null);
                 if (handlingSvc != null) {
@@ -153,7 +153,7 @@ public class ServiceActivator {
             return;
         }
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(new ServiceDeactivateTask(serviceHolder));
+        var future = CompletableFuture.runAsync(new ServiceDeactivateTask(serviceHolder));
         try {
             future.get(timeout.milliseconds(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException ex) {
@@ -174,7 +174,7 @@ public class ServiceActivator {
             // External service should not have dependencies
             return;
         }
-        List<UnactivatedService> unactivatedSvcs = service.getUnactivatedDependencies();
+        var unactivatedSvcs = service.getUnactivatedDependencies();
         if (unactivatedSvcs.size() == 0) {
             return;
         }
@@ -212,7 +212,7 @@ public class ServiceActivator {
                     unactivatedSvc = this._svcList.get(position);
                     if (unactivatedSvc.isExternalService()) {
                         // load external service
-                        ServiceHolder svcHolder =
+                        var svcHolder =
                                 ServiceActivator.this._extSvcLoader.loadService(unactivatedSvc.dependency());
                         if (svcHolder != null) {
                             unactivatedSvc.activate(svcHolder);
@@ -242,7 +242,7 @@ public class ServiceActivator {
                     return new ActivateServiceResult<>(new UapiException(exception));
                 }
             } else if (unactivatedSvc == null) {
-                ServiceException ex = ServiceException.builder()
+                var ex = ServiceException.builder()
                         .errorCode(ServiceErrors.SERVICE_ACTIVATION_FAILED)
                         .variables(new ServiceErrors.ServiceActivationFailed()
                                 .serviceId(unactivatedSvc.serviceId()))
@@ -254,7 +254,7 @@ public class ServiceActivator {
         }
 
         private UnactivatedService isInHandling(List<UnactivatedService> unactivatedServices) {
-            int foundIdx = Looper.on(unactivatedServices)
+            var foundIdx = Looper.on(unactivatedServices)
                     .map(this._svcList::indexOf)
                     .filter(idx -> idx >= 0)
                     .filter(idx -> ! this._svcList.get(idx).isActivated())

@@ -145,7 +145,7 @@ class ActionHolder {
     ActionHolder findNext(final Object data) throws BehaviorException {
         List<ActionHolder> matchedActions;
         if (data instanceof IAttributed) {
-            IAttributed attributed = (IAttributed) data;
+            var attributed = (IAttributed) data;
             matchedActions = Looper.on(this._nextActions)
                     .filter(actionHolder -> actionHolder._evaluator != ALWAYS_MATCHED)
                     .filter(actionHolder -> actionHolder._evaluator.accept(attributed))
@@ -203,12 +203,12 @@ class ActionHolder {
         }
 
         Looper.on(this._action.inputMetas()).foreachWithIndex((idx, inputMeta) -> {
-            Object input = this._inputs[idx];
+            var input = this._inputs[idx];
             if (input instanceof IOutputReference) {
-                IOutputReference outRef = (IOutputReference) input;
-                String refAction = outRef.actionLabel();
-                boolean foundPrevious = false;
-                ActionHolder previous = this._previousAction;
+                var outRef = (IOutputReference) input;
+                var refAction = outRef.actionLabel();
+                var foundPrevious = false;
+                var previous = this._previousAction;
                 // Check does referenced action exist or not
                 while (previous != null) {
                     if (refAction.equals(previous.label())) {
@@ -228,11 +228,11 @@ class ActionHolder {
                 // Check the referenced action has specific output
                 ActionOutputMeta matchedOutMeta = null;
                 if (outRef instanceof Behavior.NamedOutput) {
-                    String refName = ((Behavior.NamedOutput) outRef).outputName();
+                    var refName = ((Behavior.NamedOutput) outRef).outputName();
                     matchedOutMeta = Looper.on(previous._action.outputMetas())
                             .filter(meta -> meta.name().equals(refName)).first(null);
                 } else if (outRef instanceof Behavior.IndexedOutput) {
-                    int refIdx = ((Behavior.IndexedOutput) outRef).outputIndex();
+                    var refIdx = ((Behavior.IndexedOutput) outRef).outputIndex();
                     if (refIdx < previous._action.outputMetas().length) {
                         matchedOutMeta = previous._action.outputMetas()[refIdx];
                     }

@@ -46,7 +46,7 @@ public class Application {
     @OnActivate
     public void activate() {
         // Build responsible and related behavior for application launching
-        IResponsible responsible = this._responsibleReg.register(RESPONSIBLE_NAME);
+        var responsible = this._responsibleReg.register(RESPONSIBLE_NAME);
         responsible.newBehavior(BEHAVIOR_STARTUP, SystemStartingUpEvent.class, SystemStartingUpEvent.TOPIC)
                 .then(StartupApplication.actionId)
                 .onSuccess((input, execCtx) -> {
@@ -88,7 +88,7 @@ public class Application {
         @ActionDo
         public void startup(SystemStartingUpEvent event) {
             this._logger.info("Application is going to startup...");
-            ProfileManager profileMgr = this._registry.findService(ProfileManager.class);
+            var profileMgr = this._registry.findService(ProfileManager.class);
             if (profileMgr == null) {
                 throw AppException.builder()
                         .errorCode(AppErrors.SPECIFIC_SERVICE_NOT_FOUND)
@@ -96,9 +96,9 @@ public class Application {
                                 .serviceType(ProfileManager.class.getCanonicalName()))
                         .build();
             }
-            IProfile profile = profileMgr.getActiveProfile();
+            var profile = profileMgr.getActiveProfile();
 
-            List<String> autoActiveSvcIds = new ArrayList<>();
+            var autoActiveSvcIds = new ArrayList<String>();
 
             // Register other service
             Looper.on(event.applicationServices())

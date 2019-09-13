@@ -11,8 +11,11 @@ package uapi.config;
 
 /**
  * A parser used to parse configured value to specified type
+ *
+ * @param   <T>
+ *          The parser output type
  */
-public interface IConfigValueParser {
+public interface IConfigValueParser<T> {
 
     /**
      * Test the specified type is supported or not
@@ -37,9 +40,7 @@ public interface IConfigValueParser {
      *
      * @param   value
      *          Configured value
-     * @param   <T>
-     *          The parser output type
      * @return  Output value
      */
-    <T> T parse(Object value);
+    T parse(Object value);
 }

@@ -36,7 +36,7 @@ public class ActionIdentify implements IPartibleIdentify<String> {
 
     public static ActionIdentify toActionId(Class<?> actionType) {
         ArgumentChecker.required(actionType, "actionType");
-        String className = actionType.getCanonicalName();
+        var className = actionType.getCanonicalName();
         className = className.replace('$', (char) 0);
         if (IBehavior.class.isAssignableFrom(actionType)) {
             return new ActionIdentify(className, ActionType.BEHAVIOR);

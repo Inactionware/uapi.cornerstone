@@ -67,7 +67,7 @@ public class FileBasedConfigProvider implements IConfigurable, IConfigProvider {
         this._configPath = configObject.toString();
 
         this._logger.info("Config update {} -> {}", path, configObject);
-        File cfgFile = new File(configObject.toString());
+        var cfgFile = new File(configObject.toString());
         if (! cfgFile.exists()) {
             throw new GeneralException("The config file {} does not exist.", configObject);
         }
@@ -78,19 +78,19 @@ public class FileBasedConfigProvider implements IConfigurable, IConfigProvider {
             throw new GeneralException("The config file {} can't be read.", configObject);
         }
 
-        String fileName = cfgFile.getName();
-        int posDot = fileName.lastIndexOf('.');
+        var fileName = cfgFile.getName();
+        var posDot = fileName.lastIndexOf('.');
         if (posDot <= 0) {
             throw new GeneralException("The config file {} must contains a extension name.", configObject);
         }
-        String extName = cfgFile.getName().substring(posDot + 1);
-        Optional<IConfigFileParser> parser = this._parsers.stream()
+        var extName = cfgFile.getName().substring(posDot + 1);
+        var parser = this._parsers.stream()
                 .filter(cfgParser -> cfgParser.isSupport(extName))
                 .findFirst();
-        if (! parser.isPresent()) {
+        if (parser.isEmpty()) {
             throw new GeneralException("No parser associate with extension name {} on config file {}.", extName, fileName);
         }
-        Map<String, Object> config = parser.get().parse(cfgFile);
+        var config = parser.get().parse(cfgFile);
         if (config == null) {
             this._logger.warn("No any configuration in the config file {}", cfgFile);
             return;

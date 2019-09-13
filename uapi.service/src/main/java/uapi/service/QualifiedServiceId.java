@@ -44,7 +44,7 @@ public class QualifiedServiceId extends Pair<String, String> {
     public static QualifiedServiceId splitTo(String combined, String separator) {
         ArgumentChecker.notEmpty(combined, "combined");
         ArgumentChecker.notEmpty(separator, "separator");
-        String[] split = combined.split(separator);
+        var split = combined.split(separator);
         if (split.length == 2) {
             ArgumentChecker.required(split[0], "id");
             ArgumentChecker.required(split[1], "from");

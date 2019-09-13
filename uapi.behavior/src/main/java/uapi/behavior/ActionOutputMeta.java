@@ -71,7 +71,7 @@ public final class ActionOutputMeta {
         if (! (other instanceof ActionOutputMeta)) {
             return false;
         }
-        ActionOutputMeta otherMeta = (ActionOutputMeta) other;
+        var otherMeta = (ActionOutputMeta) other;
         return this._name.equals(otherMeta._name) && this._type.equals(otherMeta._type);
     }
 

@@ -118,12 +118,12 @@ public class ExecutionContext implements IExecutionContext {
     }
 
     Object getOutput(final IOutputReference ref) {
-        String actionLabel = ref.actionLabel();
+        var actionLabel = ref.actionLabel();
         if (ref instanceof Behavior.NamedOutput) {
-            Behavior.NamedOutput namedOut = (Behavior.NamedOutput) ref;
+            var namedOut = (Behavior.NamedOutput) ref;
             return this._outputs.get(actionLabel).getData(namedOut.outputName());
         } else if (ref instanceof Behavior.IndexedOutput) {
-            Behavior.IndexedOutput idxOut = (Behavior.IndexedOutput) ref;
+            var idxOut = (Behavior.IndexedOutput) ref;
             return this._outputs.get(actionLabel).getData(idxOut.outputIndex());
         } else {
             throw BehaviorException.builder()

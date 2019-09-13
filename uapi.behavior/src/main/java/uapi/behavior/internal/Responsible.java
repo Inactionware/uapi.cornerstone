@@ -71,8 +71,8 @@ public class Responsible implements IResponsible {
             final String eventTopic
     ) throws BehaviorException {
         ArgumentChecker.required(eventTopic, "eventTopic");
-        Behavior behavior = createBehavior(name, eventType);
-        BehaviorHolder bHolder = this._behaviors.putIfAbsent(behavior.getId(), new BehaviorHolder(behavior, eventTopic));
+        var behavior = createBehavior(name, eventType);
+        var bHolder = this._behaviors.putIfAbsent(behavior.getId(), new BehaviorHolder(behavior, eventTopic));
         if (bHolder != null) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.BEHAVIOR_ID_IS_USED)
@@ -88,8 +88,8 @@ public class Responsible implements IResponsible {
             final String name,
             final Class<?>... types
     ) throws BehaviorException {
-        Behavior behavior = createBehavior(name, types);
-        BehaviorHolder bHolder = this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior));
+        var behavior = createBehavior(name, types);
+        var bHolder = this._behaviors.put(behavior.getId(), new BehaviorHolder(behavior));
         if (bHolder != null) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.BEHAVIOR_ID_IS_USED)
@@ -106,7 +106,7 @@ public class Responsible implements IResponsible {
     ) throws BehaviorException {
         ArgumentChecker.required(name, "name");
         ArgumentChecker.required(types, "types");
-        ActionInputMeta[] inputMetas = new ActionInputMeta[types.length];
+        var inputMetas = new ActionInputMeta[types.length];
         Looper.on(types).foreachWithIndex((idx, type) -> inputMetas[idx] = new ActionInputMeta(type));
         return new Behavior(this, this._actionRepo, name, inputMetas);
     }
@@ -127,8 +127,8 @@ public class Responsible implements IResponsible {
 
     void publish(final Behavior behavior) throws BehaviorException {
         ArgumentChecker.required(behavior, "behavior");
-        ActionIdentify behaviorId = behavior.getId();
-        BehaviorHolder behaviorHolder = this._behaviors.get(behaviorId);
+        var behaviorId = behavior.getId();
+        var behaviorHolder = this._behaviors.get(behaviorId);
         if (behaviorHolder == null) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.PUBLISH_UNREG_BEHAVIOR)
@@ -145,7 +145,7 @@ public class Responsible implements IResponsible {
                             .responsibleName(this._name))
                     .build();
         }
-        String topic = behaviorHolder.topic();
+        var topic = behaviorHolder.topic();
         if (ArgumentChecker.isEmpty(topic)) {
             this._actionRepo.put(behavior);
         } else {

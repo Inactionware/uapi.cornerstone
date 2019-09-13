@@ -60,7 +60,7 @@ public class UnactivatedService implements IAwaiting {
     }
 
     public void checkCycleDependency() {
-        UnactivatedService refSvc = this._refBy;
+        var refSvc = this._refBy;
         while (refSvc != null) {
             if (this.equals(refSvc)) {
                 throw ServiceException.builder()
@@ -105,11 +105,6 @@ public class UnactivatedService implements IAwaiting {
     public void activate() {
         if (this._svcHolder == null) {
             return;
-//            throw ServiceException.builder()
-//                    .errorCode(ServiceErrors.NO_SERVICE_TO_ACTIVATE)
-//                    .variables(new ServiceErrors.NoServiceToActivate()
-//                        .serviceId(this._dependency.getServiceId()))
-//                    .build();
         }
         this._svcHolder.activate();
         this._lock.lock();

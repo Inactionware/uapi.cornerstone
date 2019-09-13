@@ -80,7 +80,7 @@ public class Dependency {
         if (! (obj instanceof Dependency)) {
             return false;
         }
-        Dependency other = (Dependency) obj;
+        var other = (Dependency) obj;
         return getServiceId().equals(other.getServiceId());
     }
 

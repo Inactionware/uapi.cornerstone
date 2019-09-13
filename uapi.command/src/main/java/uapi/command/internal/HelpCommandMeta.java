@@ -75,7 +75,7 @@ public class HelpCommandMeta implements ICommandMeta {
 
         @Override
         public CommandResult execute() {
-            ICommand command = HelpCommandMeta.this._cmd;
+            var command = HelpCommandMeta.this._cmd;
             if (! command.namespace().equals(ICommandMeta.DEFAULT_NAMESPACE)) {
                 output(StringHelper.makeString("Namespace: {}\n", command.namespace()));
             }
@@ -159,7 +159,7 @@ public class HelpCommandMeta implements ICommandMeta {
 
             output("\n");
 
-            ICommand[] subCmds = command.availableSubCommands();
+            var subCmds = command.availableSubCommands();
             if (subCmds.length != 0) {
                 Looper.on(HelpCommandMeta.this._cmd).foreach(cmd -> {
                     if (cmd.name().length() <= WIDTH_NAME_COLUMN) {

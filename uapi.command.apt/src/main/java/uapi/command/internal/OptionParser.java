@@ -31,17 +31,17 @@ public class OptionParser {
                         "The element {} must be a field element", fieldElement.getSimpleName().toString());
             }
 
-            Element classElement = fieldElement.getEnclosingElement();
+            var classElement = fieldElement.getEnclosingElement();
             builderContext.checkAnnotations(classElement, Service.class, Command.class);
             builderContext.checkModifiers(fieldElement, Option.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
-            Option option = fieldElement.getAnnotation(Option.class);
-            String optName = option.name();
-            char optSName = option.shortName();
-            String optArg = option.argument();
-            String optDesc = option.description();
-            String optField = fieldElement.getSimpleName().toString();
-            String optFieldType = fieldElement.asType().toString();
+            var option = fieldElement.getAnnotation(Option.class);
+            var optName = option.name();
+            var optSName = option.shortName();
+            var optArg = option.argument();
+            var optDesc = option.description();
+            var optField = fieldElement.getSimpleName().toString();
+            var optFieldType = fieldElement.asType().toString();
             OptionType optType;
             if (StringHelper.isNullOrEmpty(optArg)) {
                 if (! Type.BOOLEAN.equals(optFieldType) && ! Type.Q_BOOLEAN.equals(optFieldType)) {
@@ -60,24 +60,24 @@ public class OptionParser {
             }
 
             // Init user command class builder
-            ClassMeta.Builder userCmdBuilder = builderContext.findClassBuilder(classElement);
+            var userCmdBuilder = builderContext.findClassBuilder(classElement);
             PropertyMeta.Builder propBuilder = PropertyMeta.builder()
                     .setFieldName(optField)
                     .setFieldType(optFieldType)
                     .setGenerateSetter(true);
-            String setterName = propBuilder.setterName();
+            var setterName = propBuilder.setterName();
             userCmdBuilder.addPropertyBuilder(propBuilder);
 
             // Set up model
-            ClassMeta.Builder cmdMetaClassBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
+            var cmdMetaClassBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
             CommandModel cmdModel = cmdMetaClassBuilder.getTransience(CommandHandler.CMD_MODEL);
-            List<OptionModel> optModels = cmdModel.options;
+            var optModels = cmdModel.options;
             optModels.add(new OptionModel(optName, optSName, optArg, optDesc, optType, optField, setterName, CommandParser.FIELD_USER_CMD));
-            Map<String, List<OptionModel>> tmpModel = new HashMap<>();
+            var tmpModel = new HashMap<String, List<OptionModel>>();
             tmpModel.put("options", optModels);
 
             // Set up template
-            Template tempOptionMetas = builderContext.loadTemplate(TEMP_OPTION_METAS);
+            var tempOptionMetas = builderContext.loadTemplate(TEMP_OPTION_METAS);
 
             // Construct method
             cmdMetaClassBuilder.addMethodBuilder(MethodMeta.builder()

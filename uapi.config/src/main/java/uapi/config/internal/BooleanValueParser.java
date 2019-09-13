@@ -21,7 +21,7 @@ import uapi.service.annotation.Tag;
  */
 @Service({ IConfigValueParser.class })
 @Tag(Tags.CONFIG)
-public class BooleanValueParser implements IConfigValueParser {
+public class BooleanValueParser implements IConfigValueParser<Boolean> {
 
     private static final String[] supportTypesIn  = new String[] {
             Type.Q_STRING, Type.BOOLEAN, Type.Q_BOOLEAN };

@@ -32,14 +32,14 @@ public class MessageOutputParser {
             builderContext.checkModifiers(fieldElement, MessageOutput.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
             // Set up model
-            ClassMeta.Builder classBuilder = builderContext.findClassBuilder(classElement);
-            String msgOutFieldName = classBuilder.getTransience(MODEL_COMMAND_MSG_OUT_FIELD_NAME);
+            var classBuilder = builderContext.findClassBuilder(classElement);
+            var msgOutFieldName = classBuilder.getTransience(MODEL_COMMAND_MSG_OUT_FIELD_NAME);
             if (msgOutFieldName != null) {
                 throw new GeneralException(
                         "The MessageOutput annotation is allowed declare only once in a class - {}",
                         classElement.getSimpleName().toString());
             }
-            String fieldName = fieldElement.getSimpleName().toString();
+            var fieldName = fieldElement.getSimpleName().toString();
             classBuilder.putTransience(MODEL_COMMAND_MSG_OUT_FIELD_NAME, fieldName);
         });
     }

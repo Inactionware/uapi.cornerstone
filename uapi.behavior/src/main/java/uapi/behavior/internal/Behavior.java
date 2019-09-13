@@ -160,7 +160,7 @@ public class Behavior
     ) throws BehaviorException {
         ensureNotBuilt();
         ArgumentChecker.required(id, "id");
-        IAction action = this._actionRepo.get(id);
+        var action = this._actionRepo.get(id);
         if (action == null) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
@@ -268,7 +268,7 @@ public class Behavior
                     .build();
         }
         // Check all leaf action's output type, they must be a same type
-        List<ActionHolder> leafActions = Looper.on(this._navigator._actions)
+        var leafActions = Looper.on(this._navigator._actions)
                 .filter(actionHolder -> ! actionHolder.hasNext())
                 .toList();
         if (leafActions.size() == 0) {
@@ -285,10 +285,10 @@ public class Behavior
                 if (idx == 0) {
                     return;
                 }
-                IAction leafAction1 = leafActions.get(idx - 1).action();
-                IAction leafAction2 = leafActions.get(idx).action();
-                ActionOutputMeta[] outMetas1 = leafAction1.outputMetas();
-                ActionOutputMeta[] outMetas2 = leafAction2.outputMetas();
+                var leafAction1 = leafActions.get(idx - 1).action();
+                var leafAction2 = leafActions.get(idx).action();
+                var outMetas1 = leafAction1.outputMetas();
+                var outMetas2 = leafAction2.outputMetas();
                 if (outMetas1.length != outMetas2.length) {
                     throw BehaviorException.builder()
                             .errorCode(BehaviorErrors.INCONSISTENT_LEAF_ACTIONS)
@@ -404,7 +404,7 @@ public class Behavior
 
         @Override
         public void process(Object[] inputs, ActionOutput[] outputs, IExecutionContext context) {
-            Object[] behaviorInputs = context.behaviorInputs();
+            var behaviorInputs = context.behaviorInputs();
             Looper.on(behaviorInputs).foreachWithIndex((idx, input) -> outputs[idx].set(input));
         }
     }
@@ -478,7 +478,7 @@ public class Behavior
         @Override
         public IBehaviorBuilder moveTo(final String label) {
             ArgumentChecker.required(label, "label");
-            ActionHolder matched = this._labeledActions.get(label);
+            var matched = this._labeledActions.get(label);
             if (matched == null) {
                 throw BehaviorException.builder()
                         .errorCode(BehaviorErrors.NO_ACTION_WITH_LABEL)
@@ -496,10 +496,10 @@ public class Behavior
                 final String label,
                 final Object... inputs
         ) throws BehaviorException {
-            String actionLabel = label;
+            var actionLabel = label;
             if (StringHelper.isNullOrEmpty(label)) {
                 // Generate action label if no label is specified
-                String actionId = action.getId().getName();
+                var actionId = action.getId().getName();
                 actionLabel = actionId;
                 int idx = 1;
                 while (this._labeledActions.containsKey(actionLabel)) {
@@ -527,10 +527,10 @@ public class Behavior
             }
 
             // Auto wire to last action outputs if new action is not specified inputs
-            Object[] actionInputs = inputs;
+            var actionInputs = inputs;
             if (actionInputs.length == 0 && action.inputMetas().length > 0 && this._current.outputMetas().length > 0) {
-                ActionInputMeta[] inMetas = action.inputMetas();
-                ActionOutputMeta[] outMetas = this._current.outputMetas();
+                var inMetas = action.inputMetas();
+                var outMetas = this._current.outputMetas();
                 if (action.inputMetas().length != this._current.outputMetas().length) {
                     throw BehaviorException.builder()
                             .errorCode(BehaviorErrors.AUTO_WIRE_IO_NOT_MATCH)
@@ -543,7 +543,6 @@ public class Behavior
                 }
                 Looper.on(inMetas).foreachWithIndex((idx, inMeta) -> {
                     if (! Type.isAssignable(outMetas[idx].type(), inMeta.type())) {
-//                    if (! inMeta.type().equals(outMetas[idx].type())) {
                         throw BehaviorException.builder()
                                 .errorCode(BehaviorErrors.AUTO_WIRE_IO_NOT_MATCH)
                                 .variables(new BehaviorErrors.AutoWireIONotMatch()
@@ -554,7 +553,7 @@ public class Behavior
                                 .build();
                     }
                 });
-                Numeric.MutableInteger idx = Numeric.mutableInteger(0);
+                var idx = Numeric.mutableInteger(0);
                 actionInputs = Looper.on(outMetas)
                         .map(outMeta -> Behavior.this.wired().toOutput(this._current.label(), idx.getAndIncrease()))
                         .toArray();
@@ -597,11 +596,11 @@ public class Behavior
         ) {
             ArgumentChecker.required(label, "label");
             ArgumentChecker.required(name, "name");
-            ActionHolder currentAction = Behavior.this._navigator._current;
-            boolean found = false;
+            var currentAction = Behavior.this._navigator._current;
+            var found = false;
             while (currentAction != null) {
                 if (currentAction.label().equals(label)) {
-                    ActionOutputMeta meta = Looper.on(currentAction.outputMetas())
+                    var meta = Looper.on(currentAction.outputMetas())
                             .filter(outMeta -> outMeta.name().equals(name))
                             .first();
                     if (meta != null) {
@@ -650,8 +649,8 @@ public class Behavior
         ) {
             ArgumentChecker.required(label, "label");
             ArgumentChecker.checkInt(index, "index", 0, Integer.MAX_VALUE);
-            ActionHolder currentAction = Behavior.this._navigator._current;
-            boolean found = false;
+            var currentAction = Behavior.this._navigator._current;
+            var found = false;
             while (currentAction != null) {
                 if (currentAction.label().equals(label)) {
                     if (index < currentAction.outputMetas().length) {

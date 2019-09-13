@@ -74,20 +74,20 @@ public class ActionHandler extends AnnotationsHandler {
                         "The element {} must be a class element", classElement.getSimpleName().toString());
             }
             builderContext.checkAnnotations(classElement, Service.class);
-            Action action = classElement.getAnnotation(Action.class);
-            String actionName = action.value();
+            var action = classElement.getAnnotation(Action.class);
+            var actionName = action.value();
             if (Strings.isNullOrEmpty(actionName)) {
                 actionName = classElement.asType().toString();
             }
 
-            IActionHandlerHelper.ActionMethodMeta actionMeta = this._helper.parseActionMethod(builderContext, classElement);
-            ClassMeta.Builder clsBuilder = builderContext.findClassBuilder(classElement);
+            var actionMeta = this._helper.parseActionMethod(builderContext, classElement);
+            var clsBuilder = builderContext.findClassBuilder(classElement);
 
-            Template tempGetId = builderContext.loadTemplate(TEMPLATE_GET_ID);
-            Template tempInputMetas = builderContext.loadTemplate(TEMPLATE_INPUT_METAS);
-            Template tempOutputMetas = builderContext.loadTemplate(TEMPLATE_OUTPUT_METAS);
-            Template tempProcess = builderContext.loadTemplate(TEMPLATE_PROCESS);
-            Map<String, Object> model = new HashMap<>();
+            var tempGetId = builderContext.loadTemplate(TEMPLATE_GET_ID);
+            var tempInputMetas = builderContext.loadTemplate(TEMPLATE_INPUT_METAS);
+            var tempOutputMetas = builderContext.loadTemplate(TEMPLATE_OUTPUT_METAS);
+            var tempProcess = builderContext.loadTemplate(TEMPLATE_PROCESS);
+            var model = new HashMap<String, Object>();
             model.put("actionName", actionName);
             model.put("actionMethodName", actionMeta.methodName());
             model.put("actionParameterMetas", actionMeta.parameterMetas());
@@ -145,7 +145,7 @@ public class ActionHandler extends AnnotationsHandler {
                 final Element classElement
         ) {
             // Check process method
-            List actionDoElements = Looper.on(classElement.getEnclosedElements())
+            var actionDoElements = Looper.on(classElement.getEnclosedElements())
                     .filter(element -> element.getKind() == ElementKind.METHOD)
                     .filter(element -> element.getAnnotation(ActionDo.class) != null)
                     .toList();
@@ -159,21 +159,21 @@ public class ActionHandler extends AnnotationsHandler {
                         "The action class {} define more methods which is annotated with ActionDo annotation",
                         classElement.getSimpleName().toString());
             }
-            ExecutableElement actionDoElement = (ExecutableElement) actionDoElements.get(0);
-            String actionMethodName = actionDoElement.getSimpleName().toString();
-            List<? extends VariableElement> paramElements = actionDoElement.getParameters();
-            ParameterMeta[] paramMetas = new ParameterMeta[paramElements.size()];
-            Numeric.MutableInteger idxIn = Numeric.mutableInteger();
-            Numeric.MutableInteger idxOut = Numeric.mutableInteger();
+            var actionDoElement = (ExecutableElement) actionDoElements.get(0);
+            var actionMethodName = actionDoElement.getSimpleName().toString();
+            var paramElements = actionDoElement.getParameters();
+            var paramMetas = new ParameterMeta[paramElements.size()];
+            var idxIn = Numeric.mutableInteger();
+            var idxOut = Numeric.mutableInteger();
             Looper.on(paramElements).foreachWithIndex((idx, paramElement) -> {
-                String className = paramElement.asType().toString();
+                var className = paramElement.asType().toString();
                 ParameterMeta paramMeta;
                 if (IExecutionContext.class.getCanonicalName().equals(className)) {
                     // Check context parameter
                     paramMeta = ParameterMeta.newContextMeta();
                 } else if (className.indexOf(ActionOutput.class.getCanonicalName()) == 0) {
                     // Check output parameter
-                    List<? extends TypeMirror> genericTypes = builderContext.getGenericTypes(paramElement);
+                    var genericTypes = builderContext.getGenericTypes(paramElement);
                     if (genericTypes.size() != 1) {
                         throw new GeneralException(
                                 "The action output parameter type must define generic type - Action: {}, Method: {}, Parameter: {}",

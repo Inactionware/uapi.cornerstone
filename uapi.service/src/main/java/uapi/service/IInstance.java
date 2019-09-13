@@ -24,7 +24,7 @@ public interface IInstance extends IService {
 
     @Override
     default String[] getIds() {
-        StringBuilder buffer = new StringBuilder();
+        var buffer = new StringBuilder();
         Looper.on(attributes().entrySet())
                 .map(Map.Entry::getValue)
                 .map(Object::toString)

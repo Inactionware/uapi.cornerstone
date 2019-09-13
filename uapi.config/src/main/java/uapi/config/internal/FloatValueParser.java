@@ -20,7 +20,7 @@ import uapi.service.annotation.Tag;
  */
 @Service(IConfigValueParser.class)
 @Tag(Tags.CONFIG)
-public class FloatValueParser implements IConfigValueParser {
+public class FloatValueParser implements IConfigValueParser<Float> {
 
     private static final String[] supportTypesIn = new String[] {
             Float.class.getCanonicalName(), String.class.getCanonicalName() };

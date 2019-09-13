@@ -89,15 +89,15 @@ public class EventBus implements IEventBus, IServiceLifecycle {
     ) {
         ArgumentChecker.required(event, "event");
 
-        List<IEventHandler> handlers = findHandlers(event);
+        var handlers = findHandlers(event);
         if (handlers.size() == 0) {
             this._logger.warn("There are no event handler for event topic - {}", event.topic());
             return;
         }
 
-        HandleEventAction action = new HandleEventAction(handlers, event, syncable);
+        var action = new HandleEventAction(handlers, event, syncable);
         if (syncable) {
-            ForkJoinTask<Void> task = this._fjPoll.submit(action);
+            var task = this._fjPoll.submit(action);
             try {
                 task.get();
             } catch (InterruptedException | ExecutionException ex) {
@@ -116,13 +116,13 @@ public class EventBus implements IEventBus, IServiceLifecycle {
         ArgumentChecker.required(event, "event");
         ArgumentChecker.required(callback, "callback");
 
-        List<IEventHandler> handlers = findHandlers(event);
+        var handlers = findHandlers(event);
         if (handlers.size() == 0) {
             this._logger.warn("There are no event handler for event topic - {}", event.topic());
             return;
         }
 
-        HandleEventAction action = new HandleEventAction(handlers, event, callback);
+        var action = new HandleEventAction(handlers, event, callback);
         this._fjPoll.submit(action);
     }
 
@@ -135,15 +135,15 @@ public class EventBus implements IEventBus, IServiceLifecycle {
         ArgumentChecker.required(event, "event");
         ArgumentChecker.required(callback, "callback");
 
-        List<IEventHandler> handlers = findHandlers(event);
+        var handlers = findHandlers(event);
         if (handlers.size() == 0) {
             this._logger.warn("There are no event handler for event topic - {}", event.topic());
             return;
         }
 
-        HandleEventAction action = new HandleEventAction(handlers, event, callback);
+        var action = new HandleEventAction(handlers, event, callback);
         if (sync) {
-            ForkJoinTask<Void> task = this._fjPoll.submit(action);
+            var task = this._fjPoll.submit(action);
             try {
                 task.get();
             } catch (InterruptedException | ExecutionException ex) {
@@ -167,12 +167,12 @@ public class EventBus implements IEventBus, IServiceLifecycle {
     }
 
     private List<IEventHandler> findHandlers(IEvent event) {
-        String topic = event.topic();
-        List<IEventHandler> handlers = Looper.on(this._eventHandlers)
+        var topic = event.topic();
+        var handlers = Looper.on(this._eventHandlers)
                 .filter(handler -> handler.topic().equals(topic))
                 .toList();
         if (event instanceof IAttributed) {
-            final IAttributed attributed = (IAttributed) event;
+            final var attributed = (IAttributed) event;
             handlers = Looper.on(handlers)
                     .filter(handler -> (handler instanceof IAttributedEventHandler))
                     .map(handler -> (IAttributedEventHandler) handler)
@@ -251,7 +251,7 @@ public class EventBus implements IEventBus, IServiceLifecycle {
                         .map(handler -> new HandleEventAction(handler, this._event))
                         .foreach(action -> EventBus.this._fjPoll.submit(action));
             } else {
-                List<ForkJoinTask<Void>> tasks = Looper.on(this._handlers)
+                var tasks = Looper.on(this._handlers)
                         .map(handler -> new HandleEventAction(handler, this._event))
                         .map(action -> EventBus.this._fjPoll.submit(action))
                         .toList();

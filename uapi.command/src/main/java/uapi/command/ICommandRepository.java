@@ -28,14 +28,6 @@ public interface ICommandRepository {
      */
     void deregister(String commandId);
 
-//    /**
-//     * Find out the command by specified command id.
-//     *
-//     * @param   commandId The command id which is consist by command namespace and command name
-//     * @return  The command meta object or null if no command is matched the command id.
-//     */
-//    ICommandMeta find(String commandId);
-
     /**
      * Return the command runner object.
      *

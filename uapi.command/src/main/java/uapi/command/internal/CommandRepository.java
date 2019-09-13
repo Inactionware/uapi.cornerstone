@@ -69,9 +69,9 @@ public class CommandRepository implements ICommandRepository {
 
     @Override
     public void deregister(String commandId) {
-        String namespace = Command.getNamespace(commandId);
-        String[] path = Command.getPath(commandId);
-        Command parentCmd = Looper.on(this._rootCmds)
+        var namespace = Command.getNamespace(commandId);
+        var path = Command.getPath(commandId);
+        var parentCmd = Looper.on(this._rootCmds)
                 .filter(cmd -> cmd.namespace().equals(namespace))
                 .filter(cmd -> cmd.name().equals(path[0]))
                 .first(null);
@@ -113,8 +113,8 @@ public class CommandRepository implements ICommandRepository {
     }
 
     private void addSubCommand(ICommandMeta commandMeta) {
-        String[] ancestorNames = commandMeta.ancestors();
-        Command ancestor = Looper.on(this._rootCmds)
+        var ancestorNames = commandMeta.ancestors();
+        var ancestor = Looper.on(this._rootCmds)
                 .filter(cmd -> cmd.name().equals(ancestorNames[0]))
                 .first(null);
         if (ancestor == null) {
@@ -126,7 +126,7 @@ public class CommandRepository implements ICommandRepository {
                     .build();
         }
         for (int i = 1; i < ancestorNames.length; i++) {
-            String ancestorName = ancestorNames[i];
+            var ancestorName = ancestorNames[i];
             ancestor = ancestor.findSubCommand(ancestorName);
             if (ancestor == null) {
                 throw CommandException.builder()
@@ -137,7 +137,7 @@ public class CommandRepository implements ICommandRepository {
                         .build();
             }
         }
-        Command command = new Command(commandMeta, ancestor);
+        var command = new Command(commandMeta, ancestor);
         ancestor.addSubCommand(command);
 
         // Add help command
@@ -205,8 +205,8 @@ public class CommandRepository implements ICommandRepository {
                 final IMessageOutput output
         ) throws CommandException {
             ArgumentChecker.required(commandLine, "commandLine");
-            String[] cmdParamOpts = commandLine.split(" ");
-            int idxNs = cmdParamOpts[0].indexOf(ICommandMeta.PATH_SEPARATOR);
+            var cmdParamOpts = commandLine.split(" ");
+            var idxNs = cmdParamOpts[0].indexOf(ICommandMeta.PATH_SEPARATOR);
             String namespace;
             String cmdName;
             if (idxNs >= 0) {
@@ -218,7 +218,7 @@ public class CommandRepository implements ICommandRepository {
             }
 
             // Find out root command
-            Command command = Looper.on(CommandRepository.this._rootCmds)
+            var command = Looper.on(CommandRepository.this._rootCmds)
                     .filter(cmd -> cmd.namespace().equals(namespace))
                     .filter(cmd -> cmd.name().equals(cmdName))
                     .first(null);
@@ -250,10 +250,10 @@ public class CommandRepository implements ICommandRepository {
             Command cmd = cmdVar.get(0);
             Multivariate optParamVar = new Multivariate(2);  // 0 -> option name; 1 -> parameter index
             optParamVar.put(1, 0);
-            ICommandMeta cmdMeta = cmd.meta();
-            ICommandExecutor cmdExec = cmd.getExecutor();
-            IParameterMeta[] paramMetas = cmdMeta.parameterMetas();
-            IOptionMeta[] optMetas = cmdMeta.optionMetas();
+            var cmdMeta = cmd.meta();
+            var cmdExec = cmd.getExecutor();
+            var paramMetas = cmdMeta.parameterMetas();
+            var optMetas = cmdMeta.optionMetas();
             Looper.on(paramOpts).foreach(paramOpt -> {
                 if (paramOpt.indexOf(IOptionMeta.LONG_PREFIX) == 0) {
                     // Handle long option
@@ -265,14 +265,14 @@ public class CommandRepository implements ICommandRepository {
                                         .commandLine(commandLine))
                                 .build();
                     }
-                    String optName = paramOpt.substring(2);
+                    var optName = paramOpt.substring(2);
                     if (ArgumentChecker.isEmpty(optName)) {
                         throw CommandException.builder()
                                 .errorCode(CommandErrors.EMPTY_OPTION_NAME)
                                 .variables(new CommandErrors.EmptyOptionName().commandLine(commandLine))
                                 .build();
                     }
-                    IOptionMeta matchedOpt = Looper.on(optMetas).filter(opt -> opt.name().equals(optName)).first(null);
+                    var matchedOpt = Looper.on(optMetas).filter(opt -> opt.name().equals(optName)).first(null);
                     if (matchedOpt == null) {
                         throw CommandException.builder()
                                 .errorCode(CommandErrors.UNSUPPORTED_OPTION)
@@ -296,7 +296,7 @@ public class CommandRepository implements ICommandRepository {
                                         .commandLine(commandLine))
                                 .build();
                     }
-                    String optStr = paramOpt.substring(1);
+                    var optStr = paramOpt.substring(1);
                     if (ArgumentChecker.isEmpty(optStr)) {
                         throw CommandException.builder()
                                 .errorCode(CommandErrors.EMPTY_OPTION_NAME)
@@ -304,7 +304,7 @@ public class CommandRepository implements ICommandRepository {
                                 .build();
                     }
                     for (char opt : optStr.toCharArray()) {
-                        IOptionMeta matchedOpt = Looper.on(optMetas)
+                        var matchedOpt = Looper.on(optMetas)
                                 .filter(optMeta -> optMeta.shortName() == opt)
                                 .first(null);
                         if (matchedOpt == null) {
@@ -345,7 +345,7 @@ public class CommandRepository implements ICommandRepository {
                                         .commandLine(commandLine))
                                 .build();
                     }
-                    IParameterMeta paramMeta = paramMetas[paramIdx];
+                    var paramMeta = paramMetas[paramIdx];
                     cmdExec.setParameter(paramMeta.name(), paramOpt);
                     optParamVar.put(1, paramIdx + 1);
                 }

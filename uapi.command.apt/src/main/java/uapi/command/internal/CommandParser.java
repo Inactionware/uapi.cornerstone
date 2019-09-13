@@ -45,28 +45,28 @@ public class CommandParser {
                 );
             }
             builderContext.checkModifiers(classElement, Command.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
-            Command command = classElement.getAnnotation(Command.class);
-            String cmdNs = command.namespace();
-            String cmdName = command.name();
-            String cmdDesc = command.description();
-            String cmdParentPath = getParentCommandPath(cmdNs, classElement, true);
+            var command = classElement.getAnnotation(Command.class);
+            var cmdNs = command.namespace();
+            var cmdName = command.name();
+            var cmdDesc = command.description();
+            var cmdParentPath = getParentCommandPath(cmdNs, classElement, true);
 
             // Initial command meta class builder
-            ClassMeta.Builder metaBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
-            CommandModel cmdModel = new CommandModel();
+            var metaBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
+            var cmdModel = new CommandModel();
             metaBuilder.putTransience(CommandHandler.CMD_MODEL, cmdModel);
-            IServiceHandlerHelper svcHelper = (IServiceHandlerHelper) builderContext.getHelper(IServiceHandlerHelper.name);
+            var svcHelper = (IServiceHandlerHelper) builderContext.getHelper(IServiceHandlerHelper.name);
             svcHelper.addServiceId(metaBuilder, metaBuilder.getGeneratedClassName());
 
             // Initial user command class builder
-            ClassMeta.Builder cmdBuilder = builderContext.findClassBuilder(classElement);
+            var cmdBuilder = builderContext.findClassBuilder(classElement);
             cmdBuilder.putTransience(CommandHandler.CMD_MODEL, cmdModel);
 
             // Initial command executor class builder
-            Template tempCmdId = builderContext.loadTemplate(TEMP_CMD_ID);
-            Map<String, String> model = new HashMap<>();
+            var tempCmdId = builderContext.loadTemplate(TEMP_CMD_ID);
+            var model = new HashMap<String, String>();
             model.put(VAR_CMD_META_FIELD, CommandParser.FIELD_CMD_META);
-            ClassMeta.Builder cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(classElement, builderContext);
+            var cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(classElement, builderContext);
             cmdExecBuilder.putTransience(FIELD_CMD_META, "_cmdMeta");
             cmdExecBuilder
                     .addImplement(ICommandExecutor.class.getCanonicalName())
@@ -104,15 +104,15 @@ public class CommandParser {
             cmdModel.parentPath = cmdParentPath;
             cmdModel.userCommandClassName = cmdBuilder.getQualifiedClassName();
             cmdModel.executorClassName = cmdExecBuilder.getQualifiedClassName();
-            Map<String, Object> tmpModel = new HashMap<>();
+            var tmpModel = new HashMap<String, Object>();
             tmpModel.put("command", cmdModel);
 
             // Setup template
-            Template tmpName = builderContext.loadTemplate(TEMPLATE_NAME);
-            Template tmpNamespace = builderContext.loadTemplate(TEMPLATE_NAMESPACE);
-            Template tmpParentPath = builderContext.loadTemplate(TEMPLATE_PARENT_PATH);
-            Template tmpDesc = builderContext.loadTemplate(TEMPLATE_DESCRIPTION);
-            Template tmpNewExec = builderContext.loadTemplate(TEMPLATE_NEW_EXEC);
+            var tmpName = builderContext.loadTemplate(TEMPLATE_NAME);
+            var tmpNamespace = builderContext.loadTemplate(TEMPLATE_NAMESPACE);
+            var tmpParentPath = builderContext.loadTemplate(TEMPLATE_PARENT_PATH);
+            var tmpDesc = builderContext.loadTemplate(TEMPLATE_DESCRIPTION);
+            var tmpNewExec = builderContext.loadTemplate(TEMPLATE_NEW_EXEC);
 
             // Construct command meta class builder
             metaBuilder
@@ -174,9 +174,9 @@ public class CommandParser {
             final boolean isThisCommand
     ) {
         Command thisCommand = classElement.getAnnotation(Command.class);
-        String thisCmdName = thisCommand.name();
-        AnnotationMirror cmdMirror = MoreElements.getAnnotationMirror(classElement, Command.class).get();
-        Element parentType = Looper.on(cmdMirror.getElementValues().entrySet())
+        var thisCmdName = thisCommand.name();
+        var cmdMirror = MoreElements.getAnnotationMirror(classElement, Command.class).get();
+        var parentType = Looper.on(cmdMirror.getElementValues().entrySet())
                 .filter(entry -> "parent".equals(entry.getKey().getSimpleName().toString()))
                 .map(Map.Entry::getValue)
                 .map(annoValue -> (DeclaredType) annoValue.getValue())
@@ -185,16 +185,18 @@ public class CommandParser {
         if (parentType == null || void.class.getCanonicalName().equals(parentType.getSimpleName().toString())) {
             return ICommandMeta.ROOT_PATH;
         }
-        Command parentCommand = parentType.getAnnotation(Command.class);
+        var parentCommand = parentType.getAnnotation(Command.class);
         if (parentCommand == null) {
             throw new GeneralException(
-                    "No Command annotation was declared on class - {}", classElement.getSimpleName().toString());
+                    "No Command annotation was declared on class - {}",
+                    classElement.getSimpleName().toString());
         }
         if (! namespace.equals(parentCommand.namespace())) {
             throw new GeneralException(
-                    "The namespace of parent command does not equals to [{}] - {}", namespace, classElement.getSimpleName().toString());
+                    "The namespace of parent command does not equals to [{}] - {}",
+                    namespace, classElement.getSimpleName().toString());
         }
-        String parentPath = getParentCommandPath(namespace, parentType, false);
+        var parentPath = getParentCommandPath(namespace, parentType, false);
         if (isThisCommand) {
             return parentPath;
         }

@@ -216,30 +216,13 @@ public class ServiceHolder implements IServiceReference {
         return dep != null;
     }
 
-//    public boolean isDependencySet(
-//            final ServiceHolder svcHolder
-//    ) {
-//        ArgumentChecker.required(svcHolder, "svcHolder");
-//        if (svcHolder instanceof PrototypeServiceHolder) {
-//            QualifiedServiceId prototypeId = svcHolder.getQualifiedId();
-//            InstanceServiceHolder matchedSvc = Looper.on(this._dependencies.values())
-//                    .filter(svc -> svc instanceof InstanceServiceHolder)
-//                    .map(svc -> (InstanceServiceHolder) svc)
-//                    .filter(svc -> svc.prototypeId().equals(prototypeId))
-//                    .first(null);
-//            return matchedSvc != null;
-//        } else {
-//            return CollectionHelper.isStrictContains(this._injectedSvcs, svcHolder);
-//        }
-//    }
-
     public void setInstanceDependency(
             final InstanceServiceHolder instSvcHolder,
             final ServiceActivator serviceActivator
     ) {
         ArgumentChecker.required(instSvcHolder, "instSvcHolder");
 
-        Dependency dependency = findDependencies(instSvcHolder.prototypeId());
+        var dependency = findDependencies(instSvcHolder.prototypeId());
         if (dependency == null) {
             throw ServiceException.builder()
                     .errorCode(ServiceErrors.NOT_A_DEPENDENCY)
@@ -261,7 +244,7 @@ public class ServiceHolder implements IServiceReference {
         ArgumentChecker.notNull(service, "service");
 
         // remove null entry first
-        Dependency dependency = findDependencies(service.getQualifiedId());
+        var dependency = findDependencies(service.getQualifiedId());
         if (dependency == null) {
             throw ServiceException.builder()
                     .errorCode(ServiceErrors.NOT_A_DEPENDENCY)
@@ -273,20 +256,6 @@ public class ServiceHolder implements IServiceReference {
         this._dependencies.remove(dependency, null);
         this._dependencies.put(dependency, service);
 
-        // Note: we have to try activate if dependency notifiers are not empty
-        // Since the notifier means that some other service is wait for this service
-//        if (! isActivated() && this._depNotifiers.size() == 0) {
-//            return;
-//        }
-//
-//        if (service.isActivated()) {
-//            injectDependency(service);
-//        } else {
-//            service.addNotifier(new DependencyNotifier());
-//            if (serviceActivator.tryActivateService(service).isPresent()) {
-//                injectDependency(service);
-//            }
-//        }
         innerSetDependency(service, serviceActivator);
     }
 
@@ -349,7 +318,7 @@ public class ServiceHolder implements IServiceReference {
         }
 
         // Ensure unset dependencies is not required
-        Dependency requiredSvc = Looper.on(_dependencies.entries())
+        var requiredSvc = Looper.on(_dependencies.entries())
                 .filter(entry -> entry.getValue() == null)
                 .filter(entry -> !((IInjectable) _svc).isOptional(entry.getKey().getServiceId().getId()))
                 .map(Map.Entry::getKey)
@@ -364,7 +333,7 @@ public class ServiceHolder implements IServiceReference {
         }
 
         // Ensure all dependencies are activated
-        Dependency unresolvedSvc = Looper.on(this._dependencies.entries())
+        var unresolvedSvc = Looper.on(this._dependencies.entries())
                 .filter(entry -> entry.getValue() != null)
                 .filter(entry -> ! entry.getValue().isActivated())
                 .map(Map.Entry::getKey)
@@ -385,7 +354,7 @@ public class ServiceHolder implements IServiceReference {
         }
 
         // Ensure all dependencies are activated
-        Dependency uninjectedSvc = Looper.on(this._dependencies.entries())
+        var uninjectedSvc = Looper.on(this._dependencies.entries())
                 .filter(entry -> entry.getValue() != null)
                 .filter(entry -> ! entry.getValue().isActivated())
                 .map(Map.Entry::getKey)
@@ -411,7 +380,7 @@ public class ServiceHolder implements IServiceReference {
         }
 
         // Ensure all dependencies are satisfied
-        Dependency unsatisfiedSvc = Looper.on(this._dependencies.entries())
+        var unsatisfiedSvc = Looper.on(this._dependencies.entries())
                 .filter(entry -> entry.getValue() != null)
                 .filter(entry -> ! entry.getValue().isActivated())
                 .map(Map.Entry::getKey)
@@ -440,7 +409,7 @@ public class ServiceHolder implements IServiceReference {
         }
 
         // Ensure all dependencies are activated
-        Dependency unactivatedSvc = Looper.on(this._dependencies.entries())
+        var unactivatedSvc = Looper.on(this._dependencies.entries())
                 .filter(entry -> entry.getValue() != null)
                 .filter(entry -> ! entry.getValue().isActivated())
                 .map(Map.Entry::getKey)
@@ -482,7 +451,7 @@ public class ServiceHolder implements IServiceReference {
     protected void doInject(
             final ServiceHolder dependSvcHolder
     ) {
-        Object injectedSvc = dependSvcHolder.getService();
+        var injectedSvc = dependSvcHolder.getService();
         if (injectedSvc instanceof IServiceFactory) {
             // Create service from service factory
             injectedSvc = ((IServiceFactory) injectedSvc).createService(_svc);

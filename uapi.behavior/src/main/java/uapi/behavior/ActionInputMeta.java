@@ -43,7 +43,7 @@ public final class ActionInputMeta {
         if (! (obj instanceof ActionInputMeta)) {
             return false;
         }
-        ActionInputMeta other = (ActionInputMeta) obj;
+        var other = (ActionInputMeta) obj;
         return this._type.equals(other._type);
     }
 
