@@ -17,13 +17,14 @@ dependencies {
         coordinate(libs.auto_service),
 
         /* To fix the class path issue in IDEA */
-        files('../uapi.service.apt/src/main/resources'),
+        // files('../uapi.service.apt/src/main/resources'),
         // files('../uapi.command.apt/src/main/resources')
         /* End */
     )
 
     annotationProcessor (
         project(':uapi.service.apt'),
+        coordinate(baseProjects.codegen),
         coordinate(libs.auto_service)
     )
 

@@ -12,24 +12,37 @@ plugins {
 }
 
 dependencies {
-    compile project(':uapi.service.apt')
-    compile project(':uapi.service')
-    compile project(':uapi.config')
-    compile project(':uapi.event')
-    compile project(':uapi.behavior')
+    // compile project(':uapi.service.apt')
+    // compile project(':uapi.service')
+    // compile project(':uapi.config')
+    // compile project(':uapi.event')
+    // compile project(':uapi.behavior')
+
+    compileOnly (
+        project(':uapi.service.apt'),
+        coordinate(libs.auto_service)
+    )
+
+    annotationProcessor (
+        coordinate(libs.auto_service)
+        // coordinate(baseProjects.codegen)
+    )
 
     compile (
+        project(':uapi.service'),
+        project(':uapi.config'),
+        project(':uapi.event'),
+        project(':uapi.behavior'),
+
         coordinate(baseProjects.common),
         coordinate(baseProjects.exception),
         coordinate(baseProjects.codegen),
 
-        coordinate(libs.auto_service),
         coordinate(libs.freemarker)
     )
 
-    annotationProcessor (
-        coordinate(libs.auto_service),
-        coordinate(baseProjects.codegen)
+    testCompile (
+        project(':uapi.service.apt')
     )
 }
 

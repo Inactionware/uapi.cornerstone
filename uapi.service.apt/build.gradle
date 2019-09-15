@@ -18,7 +18,7 @@ dependencies {
     )
 
     annotationProcessor (
-        coordinate(baseProjects.codegen),
+        // coordinate(baseProjects.codegen),
 
         coordinate(libs.auto_service)
     )

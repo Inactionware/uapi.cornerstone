@@ -17,7 +17,7 @@ dependencies {
         coordinate(libs.auto_service),
 
         /* To fix the class path issue in IDEA */
-        files('../uapi.service.apt/src/main/resources'),
+        // files('../uapi.service.apt/src/main/resources'),
         /* End */
     )
 
