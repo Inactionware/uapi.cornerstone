@@ -26,6 +26,11 @@ dependencies {
         coordinate(libs.auto_service),
         coordinate(libs.freemarker)
     )
+
+    annotationProcessor (
+        coordinate(libs.auto_service),
+        coordinate(baseProjects.codegen)
+    )
 }
 
 publishing {

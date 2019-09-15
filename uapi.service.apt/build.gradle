@@ -12,11 +12,22 @@ plugins {
 }
 
 dependencies {
+    compileOnly (
+        coordinate(baseProjects.codegen),
+        coordinate(libs.auto_service)
+    )
+
+    annotationProcessor (
+        coordinate(baseProjects.codegen),
+
+        coordinate(libs.auto_service)
+    )
+
     compile (
         project (":uapi.service"),
 
-        coordinate(baseProjects.common),
-        coordinate(baseProjects.codegen)
+        coordinate(baseProjects.common)
+        
     )
 }
 

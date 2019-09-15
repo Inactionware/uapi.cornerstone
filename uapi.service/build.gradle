@@ -12,6 +12,16 @@ plugins {
 }
 
 dependencies {
+    compileOnly (
+        coordinate(baseProjects.codegen),
+        coordinate(libs.auto_service)
+    )
+
+    annotationProcessor (
+        coordinate(baseProjects.codegen),
+        coordinate(libs.auto_service)
+    )
+
     compile (
         coordinate(baseProjects.common),
         coordinate(baseProjects.exception),
@@ -19,7 +29,6 @@ dependencies {
         coordinate(baseProjects.codegen),
 
         coordinate(libs.guava),
-        coordinate(libs.auto_service),
         coordinate(libs.freemarker)
     )
 }

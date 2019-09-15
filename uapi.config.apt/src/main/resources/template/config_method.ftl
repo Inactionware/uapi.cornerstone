@@ -9,7 +9,7 @@ uapi.common.ArgumentChecker.notEmpty(path, "path");
             <#else>
             uapi.config.IConfigValueParser parser = parsers.findParser(configObject.getClass().getCanonicalName(), "${configInfo.fieldType}");
             </#if>
-            this.${configInfo.fieldName} = parser.parse(configObject);
+            this.${configInfo.fieldName} = (${configInfo.fieldType}) parser.parse(configObject);
             return;
         }
 </#list>
