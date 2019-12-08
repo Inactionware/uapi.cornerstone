@@ -14,11 +14,13 @@ plugins {
 dependencies {
     compileOnly (
         coordinate(baseProjects.codegen),
+        coordinate(baseProjects.annotation),
         coordinate(libs.auto_service)
     )
 
     annotationProcessor (
-        // coordinate(baseProjects.codegen),
+        coordinate(baseProjects.codegen),
+        coordinate(baseProjects.annotation),
         coordinate(libs.auto_service)
     )
 
