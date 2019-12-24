@@ -24,7 +24,7 @@ dependencies {
         coordinate(libs.auto_service)
     )
 
-    compile (
+    implementation (
         coordinate(baseProjects.common),
         coordinate(baseProjects.exception),
         coordinate(baseProjects.state),
