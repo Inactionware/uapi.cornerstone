@@ -12,12 +12,12 @@ package uapi.service;
 /**
  * The interface is used to fetch services from current module.
  */
-public interface IModuleServiceFetcher {
+public interface IModuleServiceLoader {
 
     /**
-     * Fetch all service from this module
+     * Load all service from this module
      *
      * @return  All services
      */
-    IService[] fetch();
+    IService[] loadServices();
 }

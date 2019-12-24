@@ -65,6 +65,11 @@ public final class ServiceHandler extends AnnotationsHandler {
     }
 
     @Override
+    public void init(IBuilderContext builderContext) throws GeneralException {
+
+    }
+
+    @Override
     protected void handleAnnotatedElements(
             final IBuilderContext builderCtx,
             final Class<? extends Annotation> annotationType,
