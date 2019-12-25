@@ -13,7 +13,7 @@ plugins {
 
 dependencies {
     compileOnly (
-        coordinate(baseProjects.codegen),
+
         coordinate(libs.auto_service)
     )
 
@@ -24,6 +24,7 @@ dependencies {
     )
 
     compile (
+        coordinate(baseProjects.codegen),
         project (":uapi.service"),
 
         coordinate(baseProjects.common)

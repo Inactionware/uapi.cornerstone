@@ -70,7 +70,7 @@ class OptionalParserTest extends Specification {
             getLogger() >> Mock(LogSupport)
             findClassBuilder(_) >> classBudr
             getBuilders() >> [classBudr]
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
             isAssignable(_, IServiceLifecycle.class) >> true
         }
         def element = Mock(Element) {
@@ -110,7 +110,7 @@ class OptionalParserTest extends Specification {
             getLogger() >> Mock(LogSupport)
             findClassBuilder(_) >> classBudr
             getBuilders() >> [classBudr]
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
             isAssignable(_, IServiceLifecycle.class) >> true
         }
         def element = Mock(Element) {
@@ -150,7 +150,7 @@ class OptionalParserTest extends Specification {
             getLogger() >> Mock(LogSupport)
             findClassBuilder(_) >> classBudr
             getBuilders() >> [classBudr]
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
             isAssignable(_, IServiceLifecycle.class) >> true
         }
         def element = Mock(Element) {
@@ -198,7 +198,7 @@ class OptionalParserTest extends Specification {
             getLogger() >> Mock(LogSupport)
             findClassBuilder(_) >> classBudr
             getBuilders() >> [classBudr]
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
             isAssignable(_, IServiceLifecycle.class) >> true
         }
         def element = Mock(ExecutableElement) {
@@ -251,7 +251,7 @@ class OptionalParserTest extends Specification {
             getLogger() >> Mock(LogSupport)
             findClassBuilder(_) >> classBudr
             getBuilders() >> [classBudr]
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
             isAssignable(_, IServiceLifecycle.class) >> true
         }
         def element = Mock(ExecutableElement) {
@@ -293,7 +293,7 @@ class OptionalParserTest extends Specification {
             getLogger() >> Mock(LogSupport)
             findClassBuilder(_) >> classBudr
             getBuilders() >> [classBudr]
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
         }
         def parser = new OptionalParser()
 

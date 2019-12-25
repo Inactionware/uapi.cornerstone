@@ -123,7 +123,7 @@ class OnDeactivateParserTest extends Specification {
         def builderCtx = Mock(IBuilderContext) {
             getLogger() >> logger
             1 * findClassBuilder(classElement) >> classBuilder
-            1 * loadTemplate(_) >> Mock(Template)
+            1 * loadTemplate(_, _) >> Mock(Template)
         }
         def element = Mock(ExecutableElement) {
             getKind() >> ElementKind.METHOD
@@ -170,7 +170,7 @@ class OnDeactivateParserTest extends Specification {
         def builderCtx = Mock(IBuilderContext) {
             getLogger() >> logger
             1 * findClassBuilder(classElement) >> classBuilder
-            1 * loadTemplate(_) >> Mock(Template)
+            1 * loadTemplate(_, _) >> Mock(Template)
         }
         def element = Mock(ExecutableElement) {
             getKind() >> ElementKind.METHOD
@@ -211,7 +211,7 @@ class OnDeactivateParserTest extends Specification {
         def builderCtx = Mock(IBuilderContext) {
             getLogger() >> logger
             1 * findClassBuilder(classElement) >> classBuilder
-            0 * loadTemplate(_) >> Mock(Template)
+            0 * loadTemplate(_, _) >> Mock(Template)
         }
         def element = Mock(ExecutableElement) {
             getKind() >> ElementKind.METHOD

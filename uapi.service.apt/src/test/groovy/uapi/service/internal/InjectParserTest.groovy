@@ -144,7 +144,7 @@ class InjectParserTest extends Specification {
             }
             findClassBuilder(_) >> classBuilder
             getBuilders() >> [classBuilder]
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
         }
         def fieldElement = Mock(Element) {
             getKind() >> ElementKind.FIELD
@@ -263,7 +263,7 @@ class InjectParserTest extends Specification {
             }
             findClassBuilder(_) >> classBuilder
             getBuilders() >> [classBuilder]
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
         }
         def fieldElement = Mock(Element) {
             getKind() >> ElementKind.FIELD
@@ -337,7 +337,7 @@ class InjectParserTest extends Specification {
             }
             findClassBuilder(_) >> classBuilder
             getBuilders() >> [classBuilder]
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
         }
         def fieldElement = Mock(Element) {
             getKind() >> ElementKind.FIELD
@@ -446,7 +446,7 @@ class InjectParserTest extends Specification {
         def builderCtx = Mock(IBuilderContext) {
             findClassBuilder(_) >> classBuilder
             getBuilders() >> [classBuilder]
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
         }
         def methodElemnt = Mock(ExecutableElement) {
             getKind() >> ElementKind.METHOD
@@ -495,7 +495,7 @@ class InjectParserTest extends Specification {
             loadTemplate() >> Mock(Template)
             findClassBuilder(_) >> classBuilder
             getBuilders() >> [classBuilder]
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
         }
         def parser = new InjectParser()
         def helper = parser.getHelper()

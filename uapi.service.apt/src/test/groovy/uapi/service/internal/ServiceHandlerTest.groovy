@@ -147,7 +147,7 @@ class ServiceHandlerTest extends Specification {
 
         def budrCtx = Mock(IBuilderContext) {
             findClassBuilder(classElem) >> classBudr
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
             getLogger() >> Mock(LogSupport)
             getElementUtils() >> Mock(Elements) {
                 getPackageOf(classElem) >> Mock(PackageElement) {
@@ -259,7 +259,7 @@ class ServiceHandlerTest extends Specification {
         1 * protoClsBudr.addImplement(_) >> protoClsBudr
         4 * protoClsBudr.addMethodBuilder(_) >> protoClsBudr
         def budrCtx = Mock(IBuilderContext) {
-            4 * loadTemplate(_) >> Mock(Template)
+            4 * loadTemplate(_, _) >> Mock(Template)
             findClassBuilder(clsElemt) >> instClsBudr
             1 * newClassBuilder(_, _) >> protoClsBudr
             getLogger() >> Mock(LogSupport)

@@ -1,5 +1,6 @@
 module uapi.service {
     requires auto.service.annotations;
+    requires com.google.common;
     requires freemarker;
     requires uapi.common;
     requires uapi.codegen;

@@ -141,9 +141,9 @@ class ConfigHandlerTest extends Specification {
         def budrCtx = Mock(IBuilderContext) {
             findFieldWith(classElemt, IRegistry.class, Inject.class) >> injectRegElemt
             findClassBuilder(classElemt) >> classBudr
-            loadTemplate(ConfigHandler.TEMPLATE_GET_PATHS) >> Mock(Template)
-            loadTemplate(ConfigHandler.TEMPLATE_IS_OPTIONAL_CONFIG) >> Mock(Template)
-            loadTemplate(ConfigHandler.TEMPLATE_CONFIG) >> Mock(Template)
+            loadTemplate(_, ConfigHandler.TEMPLATE_GET_PATHS) >> Mock(Template)
+            loadTemplate(_, ConfigHandler.TEMPLATE_IS_OPTIONAL_CONFIG) >> Mock(Template)
+            loadTemplate(_, ConfigHandler.TEMPLATE_CONFIG) >> Mock(Template)
             getBuilders() >> [classBudr]
             getHelper(IInjectableHandlerHelper.name) >> Mock(IInjectableHandlerHelper)
         }
@@ -180,7 +180,7 @@ class ConfigHandlerTest extends Specification {
         }
 
         @Override
-        def <T> T parse(Object value) {
+        Object parse(Object value) {
             return null
         }
     }

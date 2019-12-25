@@ -71,7 +71,7 @@ class TagHandlerTest extends Specification {
         }
         def builderCtx = Mock(IBuilderContext) {
             1 * checkModifiers(_ as Element, Tag.class, Modifier.PRIVATE, Modifier.FINAL)
-            loadTemplate(_ as String) >> Mock(Template)
+            loadTemplate(_, _ as String) >> Mock(Template)
             findClassBuilder(element) >> classBuilder
         }
         def handler = new TagHandlerTester()

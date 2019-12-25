@@ -133,7 +133,7 @@ class OnInjectParserTest extends Specification {
                 1 * info(_ as String)
             }
             findClassBuilder(classElement) >> classBuilder
-            1 * loadTemplate(_) >> Mock(Template)
+            1 * loadTemplate(_, _) >> Mock(Template)
         }
         def element = Mock(ExecutableElement) {
             getSimpleName() >> Mock(Name) {
@@ -196,7 +196,7 @@ class OnInjectParserTest extends Specification {
                 1 * info(_ as String)
             }
             findClassBuilder(classElement) >> classBuilder
-            0 * loadTemplate(_) >> Mock(Template)
+            0 * loadTemplate(_, _) >> Mock(Template)
         }
         def element = Mock(ExecutableElement) {
             getSimpleName() >> Mock(Name) {
@@ -260,7 +260,7 @@ class OnInjectParserTest extends Specification {
                 0 * info(_ as String)
             }
             findClassBuilder(classElement) >> classBuilder
-            0 * loadTemplate(_) >> Mock(Template)
+            0 * loadTemplate(_, _) >> Mock(Template)
         }
         def element = Mock(ExecutableElement) {
             getSimpleName() >> Mock(Name) {
