@@ -55,7 +55,7 @@ public class TagHandler extends AnnotationsHandler {
             }
             builderContext.checkModifiers(classElement, Tag.class, Modifier.PRIVATE, Modifier.FINAL);
 
-            var tempGetIds = builderContext.loadTemplate(TEMPLATE_GET_TAGS);
+            var tempGetIds = builderContext.loadTemplate(Module.name, TEMPLATE_GET_TAGS);
             var tag = classElement.getAnnotation(Tag.class);
             var modelGetTags = new HashMap<String, String[]>();
             modelGetTags.put(VAR_TAGS, tag.value());

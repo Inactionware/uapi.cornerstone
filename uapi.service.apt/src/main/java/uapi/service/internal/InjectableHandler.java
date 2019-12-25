@@ -13,7 +13,7 @@ import com.google.auto.service.AutoService;
 import uapi.GeneralException;
 import uapi.codegen.*;
 import uapi.common.ArgumentChecker;
-import uapi.service.IInjectableHandlerHelper;
+import uapi.service.annotation.handler.IInjectableHandlerHelper;
 import uapi.service.annotation.Inject;
 import uapi.service.annotation.Optional;
 

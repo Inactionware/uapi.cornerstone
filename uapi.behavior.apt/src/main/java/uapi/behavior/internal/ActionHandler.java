@@ -11,24 +11,21 @@ package uapi.behavior.internal;
 
 import com.google.auto.service.AutoService;
 import com.google.common.base.Strings;
-import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.Type;
 import uapi.behavior.*;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
+import uapi.behavior.annotation.handler.IActionHandlerHelper;
 import uapi.codegen.*;
 import uapi.common.Numeric;
 import uapi.rx.Looper;
-import uapi.service.IServiceHandlerHelper;
+import uapi.service.annotation.handler.IServiceHandlerHelper;
 import uapi.service.annotation.Service;
 
 import javax.lang.model.element.*;
-import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -83,10 +80,10 @@ public class ActionHandler extends AnnotationsHandler {
             var actionMeta = this._helper.parseActionMethod(builderContext, classElement);
             var clsBuilder = builderContext.findClassBuilder(classElement);
 
-            var tempGetId = builderContext.loadTemplate(TEMPLATE_GET_ID);
-            var tempInputMetas = builderContext.loadTemplate(TEMPLATE_INPUT_METAS);
-            var tempOutputMetas = builderContext.loadTemplate(TEMPLATE_OUTPUT_METAS);
-            var tempProcess = builderContext.loadTemplate(TEMPLATE_PROCESS);
+            var tempGetId = builderContext.loadTemplate(Module.name, TEMPLATE_GET_ID);
+            var tempInputMetas = builderContext.loadTemplate(Module.name, TEMPLATE_INPUT_METAS);
+            var tempOutputMetas = builderContext.loadTemplate(Module.name, TEMPLATE_OUTPUT_METAS);
+            var tempProcess = builderContext.loadTemplate(Module.name, TEMPLATE_PROCESS);
             var model = new HashMap<String, Object>();
             model.put("actionName", actionName);
             model.put("actionMethodName", actionMeta.methodName());

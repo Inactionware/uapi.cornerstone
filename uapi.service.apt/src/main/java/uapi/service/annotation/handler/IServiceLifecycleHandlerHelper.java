@@ -1,4 +1,4 @@
-package uapi.service;
+package uapi.service.annotation.handler;
 
 import uapi.codegen.ClassMeta;
 import uapi.codegen.IBuilderContext;

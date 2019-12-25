@@ -1,4 +1,4 @@
-package uapi.command.internal;
+package uapi.command;
 
 import uapi.command.IParameterMeta;
 

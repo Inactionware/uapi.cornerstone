@@ -13,6 +13,7 @@ plugins {
 
 dependencies {
     compileOnly (
+        coordinate(baseProjects.codegen),
         project(':uapi.service.apt'),
         coordinate(libs.auto_service),
 

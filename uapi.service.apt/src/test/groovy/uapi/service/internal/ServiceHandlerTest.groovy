@@ -15,8 +15,8 @@ import uapi.GeneralException
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.LogSupport
-import uapi.service.IServiceHandlerHelper
-import uapi.service.ServiceType
+import uapi.service.annotation.handler.IServiceHandlerHelper
+import uapi.service.annotation.handler.ServiceType
 import uapi.service.annotation.Attribute
 import uapi.service.annotation.Service
 
@@ -24,7 +24,6 @@ import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
-import java.lang.annotation.ElementType
 
 /**
  * Unit test for ServiceHandler

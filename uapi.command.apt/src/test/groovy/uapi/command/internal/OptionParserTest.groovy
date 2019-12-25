@@ -162,7 +162,7 @@ class OptionParserTest extends Specification {
                 }
             }
             findClassBuilder(pkgName, _, false) >> cmdMetaClsBuilder
-            1 * loadTemplate(OptionParser.TEMP_OPTION_METAS) >> Mock(Template)
+            1 * loadTemplate(_, OptionParser.TEMP_OPTION_METAS) >> Mock(Template)
         }
 
         when:

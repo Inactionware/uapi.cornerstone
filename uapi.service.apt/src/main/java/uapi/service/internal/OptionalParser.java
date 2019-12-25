@@ -107,7 +107,7 @@ class OptionalParser {
 
 
         builderCtx.getBuilders().forEach(classBuilder -> {
-            final var temp = builderCtx.loadTemplate(TEMPLATE_IS_OPTIONAL);
+            final var temp = builderCtx.loadTemplate(Module.name, TEMPLATE_IS_OPTIONAL);
             // builderCtx.getLogger().info("Generate isOptional for {}", classBuilder.getClassName());
             implementOptional(classBuilder, temp);
         });
@@ -166,7 +166,7 @@ class OptionalParser {
 
         void setOptional(IBuilderContext builderContext, ClassMeta.Builder classBuilder, String fieldName) {
             setOptionalDependency(classBuilder, fieldName);
-            final Template temp = builderContext.loadTemplate(TEMPLATE_IS_OPTIONAL);
+            final Template temp = builderContext.loadTemplate(Module.name, TEMPLATE_IS_OPTIONAL);
             implementOptional(classBuilder, temp);
         }
     }

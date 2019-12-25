@@ -216,7 +216,7 @@ class RunParserTest extends Specification {
                 }
             }
             findClassBuilder(pkgName, _, false) >>> [cmdMetaClsBuilder, cmdExecClsBuilder]
-            5 * loadTemplate(_ as String) >> Mock(Template)
+            5 * loadTemplate(_, _ as String) >> Mock(Template)
         }
         def parser = new RunParser()
 

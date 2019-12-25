@@ -147,7 +147,7 @@ public class OnInjectParser {
                 }
             }
 
-            var tempOnInject = builderContext.loadTemplate(TEMP_ON_INJECT);
+            var tempOnInject = builderContext.loadTemplate(Module.name, TEMP_ON_INJECT);
             classBuilder
                     .addImplement(IServiceLifecycle.class.getCanonicalName())
                     .addMethodBuilder(MethodMeta.builder()

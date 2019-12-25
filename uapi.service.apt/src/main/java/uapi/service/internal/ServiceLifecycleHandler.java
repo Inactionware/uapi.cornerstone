@@ -4,7 +4,7 @@ import com.google.auto.service.AutoService;
 import uapi.GeneralException;
 import uapi.codegen.*;
 import uapi.common.ArgumentChecker;
-import uapi.service.IServiceLifecycleHandlerHelper;
+import uapi.service.annotation.handler.IServiceLifecycleHandlerHelper;
 import uapi.service.annotation.OnActivate;
 import uapi.service.annotation.OnInject;
 

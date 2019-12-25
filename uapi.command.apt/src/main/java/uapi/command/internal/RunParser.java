@@ -83,11 +83,11 @@ public class RunParser {
 
             cmdExecBuilder.putTransience(MODEL_COMMAND_EXECUTOR, model);
 
-            var tempSetParam = builderContext.loadTemplate(TEMP_SET_PARAM);
-            var tempSetOpt = builderContext.loadTemplate(TEMP_SET_OPT);
-            var tempSetOptArg = builderContext.loadTemplate(TEMP_SET_OPT_ARG);
-            var tempSetOutput = builderContext.loadTemplate(TEMP_SET_OUTPU);
-            var tempExec = builderContext.loadTemplate(TEMP_EXECUTE);
+            var tempSetParam = builderContext.loadTemplate(Module.name, TEMP_SET_PARAM);
+            var tempSetOpt = builderContext.loadTemplate(Module.name, TEMP_SET_OPT);
+            var tempSetOptArg = builderContext.loadTemplate(Module.name, TEMP_SET_OPT_ARG);
+            var tempSetOutput = builderContext.loadTemplate(Module.name, TEMP_SET_OUTPU);
+            var tempExec = builderContext.loadTemplate(Module.name, TEMP_EXECUTE);
 
             // Generate newExecutor method
             cmdExecBuilder.addImplement(ICommandExecutor.class.getCanonicalName())

@@ -1,4 +1,4 @@
-package uapi.behavior;
+package uapi.behavior.annotation.handler;
 
 import uapi.codegen.IBuilderContext;
 import uapi.codegen.IHandlerHelper;

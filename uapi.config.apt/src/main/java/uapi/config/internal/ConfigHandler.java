@@ -11,7 +11,6 @@ package uapi.config.internal;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.service.AutoService;
-import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.Type;
 import uapi.codegen.*;
@@ -20,13 +19,12 @@ import uapi.config.IConfigValueParser;
 import uapi.config.IConfigurable;
 import uapi.config.annotation.Config;
 import uapi.rx.Looper;
-import uapi.service.IInjectableHandlerHelper;
+import uapi.service.annotation.handler.IInjectableHandlerHelper;
 import uapi.service.IRegistry;
 import uapi.service.QualifiedServiceId;
 import uapi.service.annotation.Inject;
 import uapi.service.annotation.Service;
 
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -106,9 +104,9 @@ public class ConfigHandler extends AnnotationsHandler {
             cfgInfos.add(cfgInfo);
         });
 
-        var tempGetPaths = builderContext.loadTemplate(TEMPLATE_GET_PATHS);
-        var tempIsOptionalConfig = builderContext.loadTemplate(TEMPLATE_IS_OPTIONAL_CONFIG);
-        var tempConfig = builderContext.loadTemplate(TEMPLATE_CONFIG);
+        var tempGetPaths = builderContext.loadTemplate(Module.name, TEMPLATE_GET_PATHS);
+        var tempIsOptionalConfig = builderContext.loadTemplate(Module.name, TEMPLATE_IS_OPTIONAL_CONFIG);
+        var tempConfig = builderContext.loadTemplate(Module.name, TEMPLATE_CONFIG);
 
         Looper.on(builderContext.getBuilders()).foreach(classBuilder -> {
             List<ConfigInfo> configInfos = classBuilder.getTransience(CONFIG_INFOS);

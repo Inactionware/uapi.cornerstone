@@ -1,5 +1,6 @@
 package uapi.command.internal;
 
+import uapi.command.OptionMeta;
 import uapi.command.OptionType;
 
 public class OptionModel extends OptionMeta {

@@ -11,7 +11,6 @@ package uapi.service.internal;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.service.AutoService;
-import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.Type;
 import uapi.codegen.*;
@@ -21,6 +20,8 @@ import uapi.rx.Looper;
 import uapi.service.*;
 import uapi.service.annotation.Attribute;
 import uapi.service.annotation.Service;
+import uapi.service.annotation.handler.IServiceHandlerHelper;
+import uapi.service.annotation.handler.ServiceType;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
@@ -187,9 +188,9 @@ public final class ServiceHandler extends AnnotationsHandler {
             final String prototypeId,
             final String userClassName
     ) {
-        var tempReqAttrs = builderContext.loadTemplate(TEMPLATE_REQ_ATTRS);
-        var tempInstCons = builderContext.loadTemplate(TEMPLATE_INST_CONSTRUCTOR);
-        var tempAttrs = builderContext.loadTemplate(TEMPLATE_ATTRS);
+        var tempReqAttrs = builderContext.loadTemplate(Module.name, TEMPLATE_REQ_ATTRS);
+        var tempInstCons = builderContext.loadTemplate(Module.name, TEMPLATE_INST_CONSTRUCTOR);
+        var tempAttrs = builderContext.loadTemplate(Module.name, TEMPLATE_ATTRS);
         var modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
 
         // instance service
@@ -234,7 +235,7 @@ public final class ServiceHandler extends AnnotationsHandler {
                                 .setModel(modelReqAttrs)));
 
         // Prototype service
-        var tempGetIds = builderContext.loadTemplate(TEMPLATE_GET_IDS);
+        var tempGetIds = builderContext.loadTemplate(Module.name, TEMPLATE_GET_IDS);
         var tempGetIdsModel = new HashMap<>();
         tempGetIdsModel.put(VAR_SVC_IDS, new String[] { prototypeId });
         var idArr = (String[]) tempGetIdsModel.get(VAR_SVC_IDS);
@@ -292,7 +293,7 @@ public final class ServiceHandler extends AnnotationsHandler {
             final ClassMeta.Builder classBuilder,
             final boolean autoActive
     ) {
-        var tempGetIds = builderCtx.loadTemplate(TEMPLATE_GET_IDS);
+        var tempGetIds = builderCtx.loadTemplate(Module.name, TEMPLATE_GET_IDS);
 //        this._helper.addServiceId(classBuilder, serviceIds);
 
         // Build class builder

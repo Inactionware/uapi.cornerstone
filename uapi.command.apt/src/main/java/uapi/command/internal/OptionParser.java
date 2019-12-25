@@ -1,6 +1,5 @@
 package uapi.command.internal;
 
-import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.Type;
 import uapi.codegen.*;
@@ -77,7 +76,7 @@ public class OptionParser {
             tmpModel.put("options", optModels);
 
             // Set up template
-            var tempOptionMetas = builderContext.loadTemplate(TEMP_OPTION_METAS);
+            var tempOptionMetas = builderContext.loadTemplate(Module.name, TEMP_OPTION_METAS);
 
             // Construct method
             cmdMetaClassBuilder.addMethodBuilder(MethodMeta.builder()

@@ -4,7 +4,7 @@ import spock.lang.Specification
 import uapi.GeneralException
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
-import uapi.service.IServiceLifecycleHandlerHelper
+import uapi.service.annotation.handler.IServiceLifecycleHandlerHelper
 import uapi.service.annotation.OnActivate
 import uapi.service.annotation.OnDeactivate
 import uapi.service.annotation.OnInject

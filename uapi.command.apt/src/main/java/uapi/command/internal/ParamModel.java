@@ -1,5 +1,7 @@
 package uapi.command.internal;
 
+import uapi.command.ParameterMeta;
+
 public class ParamModel extends ParameterMeta {
 
     private final String _userCmdField;

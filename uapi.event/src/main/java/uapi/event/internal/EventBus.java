@@ -15,7 +15,6 @@ import uapi.common.ArgumentChecker;
 import uapi.common.IAttributed;
 import uapi.common.IntervalTime;
 import uapi.config.annotation.Config;
-import uapi.config.internal.IntervalTimeParser;
 import uapi.event.*;
 import uapi.log.ILogger;
 import uapi.rx.Looper;
@@ -35,7 +34,7 @@ public class EventBus implements IEventBus, IServiceLifecycle {
 
     private static final IntervalTime DEFAULT_AWAIT_TIME = IntervalTime.parse("100s");
 
-    @Config(path="event.await-time", parser=IntervalTimeParser.class, optional=true)
+    @Config(path="event.await-time", optional=true)
     IntervalTime _awaitTime;
 
     @Inject

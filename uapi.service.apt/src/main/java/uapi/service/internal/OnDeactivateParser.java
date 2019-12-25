@@ -118,7 +118,7 @@ public class OnDeactivateParser {
                 }
             }
 
-            var tempOnActivate = builderContext.loadTemplate(TEMP_ON_DEACTIVATE);
+            var tempOnActivate = builderContext.loadTemplate(Module.name, TEMP_ON_DEACTIVATE);
             classBuilder
                     .addImplement(IServiceLifecycle.class.getCanonicalName())
                     .addMethodBuilder(MethodMeta.builder()

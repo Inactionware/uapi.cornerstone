@@ -5,7 +5,7 @@ import spock.lang.Specification
 import uapi.GeneralException
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
-import uapi.service.IServiceHandlerHelper
+import uapi.service.annotation.handler.IServiceHandlerHelper
 
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
@@ -190,7 +190,7 @@ class CommandParserTest extends Specification {
             getHelper(IServiceHandlerHelper.name) >> Mock(IServiceHandlerHelper) {
                 1 * addServiceId(_, _)
             }
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
         }
         def annoMap = new HashMap()
         def annoMirror = Mock(AnnotationMirror) {

@@ -65,7 +65,7 @@ public class ParameterParser {
             tmpModel.put("parameters", paramModels);
 
             // Set up template
-            var tempParamMetas = builderContext.loadTemplate(TEMP_PARAM_METAS);
+            var tempParamMetas = builderContext.loadTemplate(Module.name, TEMP_PARAM_METAS);
 
             // Construct method
             cmdMetaBuilder.addMethodBuilder(MethodMeta.builder()

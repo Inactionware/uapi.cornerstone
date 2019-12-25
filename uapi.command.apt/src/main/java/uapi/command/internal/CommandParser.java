@@ -2,7 +2,6 @@ package uapi.command.internal;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.service.AutoService;
-import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.Type;
 import uapi.codegen.*;
@@ -12,7 +11,7 @@ import uapi.command.ICommandMeta;
 import uapi.command.annotation.Command;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
-import uapi.service.IServiceHandlerHelper;
+import uapi.service.annotation.handler.IServiceHandlerHelper;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
@@ -63,7 +62,7 @@ public class CommandParser {
             cmdBuilder.putTransience(CommandHandler.CMD_MODEL, cmdModel);
 
             // Initial command executor class builder
-            var tempCmdId = builderContext.loadTemplate(TEMP_CMD_ID);
+            var tempCmdId = builderContext.loadTemplate(Module.name, TEMP_CMD_ID);
             var model = new HashMap<String, String>();
             model.put(VAR_CMD_META_FIELD, CommandParser.FIELD_CMD_META);
             var cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(classElement, builderContext);
@@ -108,11 +107,11 @@ public class CommandParser {
             tmpModel.put("command", cmdModel);
 
             // Setup template
-            var tmpName = builderContext.loadTemplate(TEMPLATE_NAME);
-            var tmpNamespace = builderContext.loadTemplate(TEMPLATE_NAMESPACE);
-            var tmpParentPath = builderContext.loadTemplate(TEMPLATE_PARENT_PATH);
-            var tmpDesc = builderContext.loadTemplate(TEMPLATE_DESCRIPTION);
-            var tmpNewExec = builderContext.loadTemplate(TEMPLATE_NEW_EXEC);
+            var tmpName = builderContext.loadTemplate(Module.name, TEMPLATE_NAME);
+            var tmpNamespace = builderContext.loadTemplate(Module.name, TEMPLATE_NAMESPACE);
+            var tmpParentPath = builderContext.loadTemplate(Module.name, TEMPLATE_PARENT_PATH);
+            var tmpDesc = builderContext.loadTemplate(Module.name, TEMPLATE_DESCRIPTION);
+            var tmpNewExec = builderContext.loadTemplate(Module.name, TEMPLATE_NEW_EXEC);
 
             // Construct command meta class builder
             metaBuilder

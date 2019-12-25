@@ -33,7 +33,8 @@ dependencies {
         project(':uapi.service'),
         project(':uapi.config'),
 
-        coordinate(baseProjects.common)
+        coordinate(baseProjects.common),
+        coordinate(baseProjects.exception)
     )
 }
 

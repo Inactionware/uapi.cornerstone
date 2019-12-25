@@ -19,7 +19,7 @@ import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.MethodMeta
 import uapi.rx.Looper
-import uapi.service.IServiceHandlerHelper
+import uapi.service.annotation.handler.IServiceHandlerHelper
 import uapi.service.annotation.Inject
 import uapi.service.annotation.Service
 
@@ -193,7 +193,7 @@ class ActionHandlerTest extends Specification {
         def clsBuilder = Mock(ClassMeta.Builder)
         def builderCtx = Mock(IBuilderContext) {
             checkAnnotations(element, Service.class as Class[]) >> true
-            loadTemplate(_) >> Mock(Template)
+            loadTemplate(_, _) >> Mock(Template)
             findClassBuilder(element) >> clsBuilder
             1 * getHelper(IServiceHandlerHelper.name) >> Mock(IServiceHandlerHelper) {
                 1 * addServiceId(_, _)

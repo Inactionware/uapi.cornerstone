@@ -125,7 +125,7 @@ class ParameterParserTest extends Specification {
                 }
             }
             findClassBuilder(pkgName, _, false) >> cmdMetaClsBuilder
-            loadTemplate(ParameterParser.TEMP_PARAM_METAS) >> Mock(Template)
+            loadTemplate(_, ParameterParser.TEMP_PARAM_METAS) >> Mock(Template)
         }
         def parser = new ParameterParser()
 

@@ -16,7 +16,7 @@ import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.config.IConfigValueParser
 import uapi.config.annotation.Config
-import uapi.service.IInjectableHandlerHelper
+import uapi.service.annotation.handler.IInjectableHandlerHelper
 import uapi.service.IRegistry
 import uapi.service.annotation.Inject
 import uapi.service.annotation.Service

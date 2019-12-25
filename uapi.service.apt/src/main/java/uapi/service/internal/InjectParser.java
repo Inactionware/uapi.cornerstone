@@ -156,8 +156,8 @@ class InjectParser {
             }
         });
 
-        var tempInject = builderCtx.loadTemplate(TEMPLATE_INJECT);
-        var tempGetDependencies = builderCtx.loadTemplate(TEMPLATE_GET_DEPENDENCIES);
+        var tempInject = builderCtx.loadTemplate(Module.name, TEMPLATE_INJECT);
+        var tempGetDependencies = builderCtx.loadTemplate(Module.name, TEMPLATE_GET_DEPENDENCIES);
         builderCtx.getBuilders().forEach(classBuilder -> {
             implementInjectObjectForClass(classBuilder, tempInject);
             implementGetDependenciesForClass(classBuilder, tempGetDependencies);
@@ -375,8 +375,8 @@ class InjectParser {
                 final String mapKeyType) {
             var setterName = ClassHelper.makeSetterName(fieldName, isCollection, isMap);
             InjectParser.this.addSetter(classBuilder, fieldName, fieldType, injectId, injectFrom, setterName, isCollection, isMap, mapKeyType, true);
-            var tempInjectObject = builderContext.loadTemplate(TEMPLATE_INJECT);
-            var tempGetDependencies = builderContext.loadTemplate(TEMPLATE_GET_DEPENDENCIES);
+            var tempInjectObject = builderContext.loadTemplate(Module.name, TEMPLATE_INJECT);
+            var tempGetDependencies = builderContext.loadTemplate(Module.name, TEMPLATE_GET_DEPENDENCIES);
             implementInjectObjectForClass(classBuilder, tempInjectObject);
             implementGetDependenciesForClass(classBuilder, tempGetDependencies);
         }
