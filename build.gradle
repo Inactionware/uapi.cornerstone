@@ -20,60 +20,6 @@ apply plugin: 'jacoco'
 
 apply from: '.config/uapi/sub.config.gradle'
 
-//subprojects {
-//    apply plugin: 'java'
-//    apply plugin: 'groovy'
-//    apply plugin: 'jacoco'
-//    apply plugin: 'maven'
-//    apply plugin: 'maven-publish'
-//
-//    group = "${allCfg.group}"
-//    version = getBuildVersion(project.name)
-//    sourceCompatibility = 11
-//    targetCompatibility = 11
-//
-//    configurations {
-//        codacy
-//    }
-//
-//    dependencies {
-//        testCompile coordinate(libs.spock)
-//
-//        testRuntime (
-//                coordinate(libs.cglib),      // allows mocking of classes (in addition to interfaces)
-//                coordinate(libs.objenesis)   // allows mocking of classes without default constructor (together with CGLIB)
-//        )
-//    }
-//
-//    jar {
-//        manifest.attributes
-//        exclude('**/*.java')
-//    }
-//
-//    task sourcesJar(type: Jar, dependsOn: classes) {
-//        classifier = 'sources'
-//        from sourceSets.main.allSource
-//    }
-//
-//    artifacts {
-//        archives sourcesJar
-//    }
-//
-//    def generatedSources = ['**/*_Generated.*']
-//
-//    test {
-//        jacoco {
-//            excludes = generatedSources
-//        }
-//    }
-//
-//    jacoco {
-//        toolVersion = libs.jacoco.version
-//    }
-//
-//    build.dependsOn jacocoTestReport
-//}
-
 def publishedProjects = subprojects.findAll { it.path != ':uapi.example' }
 
 task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
