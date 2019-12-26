@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
 /**
  * Config annotation which is declared as
  */
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.FIELD)
 public @interface Config {
 

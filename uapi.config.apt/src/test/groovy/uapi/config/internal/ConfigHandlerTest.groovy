@@ -20,6 +20,7 @@ import uapi.service.annotation.handler.IInjectableHandlerHelper
 import uapi.service.IRegistry
 import uapi.service.annotation.Inject
 import uapi.service.annotation.Service
+import uapi.service.annotation.handler.ServiceType
 
 import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType
@@ -81,7 +82,12 @@ class ConfigHandlerTest extends Specification {
         }
         def classElemt = Mock(Element) {
             getModifiers() >> [Modifier.PUBLIC]
-            getAnnotation(Service.class) >> ConfigTest.class.getAnnotation(Service.class)
+            getAnnotation(Service.class) >> Mock(Service) {
+                value() >> new Class[0]
+                ids() >> new String[0]
+                autoActive() >> false
+                type() >> ServiceType.Singleton
+            }
         }
         def annoKey = Mock(ExecutableElement) {
             getSimpleName() >> Mock(Name) {
@@ -120,8 +126,10 @@ class ConfigHandlerTest extends Specification {
                 toString() >> elemtType
             }
             getEnclosingElement() >> classElemt
-            getAnnotation(Config.class) >> {
-                return ConfigTest.class.getField('_field').getAnnotation(Config.class)
+            getAnnotation(Config.class) >> Mock(Config) {
+                path() >> 'a.b'
+                parser() >> ConfigParser.class
+                optional() >> false
             }
             getAnnotationMirrors() >> [annoMirror]
         }
@@ -158,13 +166,6 @@ class ConfigHandlerTest extends Specification {
         where:
         elemtName   | elemtType | injectRegElemtName
         'Test'      | 'String'  | '_injectReg'
-    }
-
-    @Service
-    class ConfigTest {
-
-        @Config(path='a.b', parser=ConfigParser.class)
-        public String _field;
     }
 
     class ConfigParser implements IConfigValueParser {

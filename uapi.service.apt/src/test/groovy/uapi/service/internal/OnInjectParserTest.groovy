@@ -5,6 +5,7 @@ import spock.lang.Specification
 import uapi.GeneralException
 import uapi.Type
 import uapi.codegen.*
+import uapi.common.StringHelper
 import uapi.service.IServiceLifecycle
 import uapi.service.annotation.OnInject
 
@@ -149,7 +150,9 @@ class OnInjectParserTest extends Specification {
                     toString() >> paramType
                 }
             }]
-            1 * getAnnotation(_) >> Test.getMethod('test', String.class).getAnnotation(OnInject.class)
+            1 * getAnnotation(_) >> Mock(OnInject) {
+                value() >> StringHelper.EMPTY
+            }
         }
         def parser = new OnInjectParser()
 
@@ -212,7 +215,9 @@ class OnInjectParserTest extends Specification {
                     toString() >> paramType
                 }
             }]
-            1 * getAnnotation(_) >> Test.getMethod('test', String.class).getAnnotation(OnInject.class)
+            1 * getAnnotation(_) >> Mock(OnInject) {
+                value() >> StringHelper.EMPTY
+            }
         }
         def parser = new OnInjectParser()
 
@@ -276,7 +281,9 @@ class OnInjectParserTest extends Specification {
                     toString() >> paramType
                 }
             }]
-            0 * getAnnotation(_) >> Test.getMethod('test', String.class).getAnnotation(OnInject.class)
+            0 * getAnnotation(_) >> Mock(OnInject) {
+                value() >> StringHelper.EMPTY
+            }
         }
         def parser = new OnInjectParser()
 
@@ -292,11 +299,5 @@ class OnInjectParserTest extends Specification {
         where:
         paramType       | placeholder
         'String'        | null
-    }
-
-    class Test {
-
-        @OnInject
-        void test(String str) {}
     }
 }

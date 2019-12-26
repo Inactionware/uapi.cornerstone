@@ -9,13 +9,15 @@
 
 package uapi.command.annotation;
 
+import uapi.common.StringHelper;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Option {
 
     /**
@@ -37,7 +39,7 @@ public @interface Option {
      *
      * @return  The option argument or empty string
      */
-    String argument() default "";
+    String argument() default StringHelper.EMPTY;
 
     /**
      * The option description

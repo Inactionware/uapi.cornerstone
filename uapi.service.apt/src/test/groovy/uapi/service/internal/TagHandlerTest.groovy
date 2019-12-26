@@ -37,10 +37,10 @@ class TagHandlerTest extends Specification {
         }
         def elements = new HashSet<>()
         elements.add(element)
-        def handler = new TagHandlerTester()
+        def handler = new TagHandler()
 
         when:
-        handler.handle(builderCtx, Tag.class, elements)
+        handler.handleAnnotatedElements(builderCtx, Tag.class, elements)
 
         then:
         thrown(ex)
@@ -62,7 +62,9 @@ class TagHandlerTest extends Specification {
         def element = Mock(Element) {
             getKind() >> ElementKind.CLASS
             getSimpleName() >> Mock(Name)
-            getAnnotation(_ as Class) >> (Tag) TagHandlerTester.class.getAnnotation(Tag.class)
+            getAnnotation(Tag.class) >> Mock(Tag) {
+                value() >> { def strs = new String[1]; strs[0] = 'a'; return strs }
+            }
         }
         def elements = new HashSet<>()
         elements.add(element)
@@ -74,25 +76,13 @@ class TagHandlerTest extends Specification {
             loadTemplate(_, _ as String) >> Mock(Template)
             findClassBuilder(element) >> classBuilder
         }
-        def handler = new TagHandlerTester()
+        def handler = new TagHandler()
 
         when:
-        handler.handle(builderCtx, Tag.class, elements)
+        handler.handleAnnotatedElements(builderCtx, Tag.class, elements)
 
         then:
         noExceptionThrown()
         1 * classBuilder.addImplement(ITagged.class.getCanonicalName()) >> classBuilder
-    }
-
-    @Tag('a')
-    final class TagHandlerTester extends TagHandler {
-
-        private void handle(
-                final IBuilderContext builderContext,
-                final Class<? extends Annotation> annotationType,
-                final Set<? extends Element> elements
-        ) throws GeneralException {
-            super.handleAnnotatedElements(builderContext, annotationType, elements);
-        }
     }
 }

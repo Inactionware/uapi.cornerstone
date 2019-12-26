@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
  * The annotation indicate the plain java class is a behavior action
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Action {
 
     /**

@@ -11,5 +11,5 @@ import java.lang.annotation.Target;
  * services has been injected..
  */
 @Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface OnActivate { }

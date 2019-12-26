@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
  * The method(setter) must be contains one parameter only and return void
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Inject {
 
     /**

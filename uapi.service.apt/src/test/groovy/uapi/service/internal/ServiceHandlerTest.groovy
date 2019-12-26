@@ -122,7 +122,12 @@ class ServiceHandlerTest extends Specification {
             getSimpleName() >> Mock(Name) {
                 toString() >> elemName
             }
-            getAnnotation(Service.class) >> TestService.getAnnotation(Service.class)
+            getAnnotation(Service.class) >> Mock(Service) {
+                value() >> new Class[0]
+                ids() >> { def str = new String[1]; str[0] = "TestService"; return str }
+                autoActive() >> false
+                type() >> ServiceType.Singleton
+            }
             getInterfaces() >> []
             getAnnotationMirrors() >> [Mock(AnnotationMirror) {
                 getAnnotationType() >> Mock(DeclaredType) {
@@ -198,7 +203,12 @@ class ServiceHandlerTest extends Specification {
         given:
         def attrMap = new HashMap<String, Object>()
         def clsElemt = Mock(Element) {
-            getAnnotation(Service.class) >> TestService.getAnnotation(Service.class)
+            getAnnotation(Service.class) >> Mock(Service) {
+                value() >> new Class[0]
+                ids() >> { def str = new String[1]; str[0] = "TestService"; return str }
+                autoActive() >> false
+                type() >> ServiceType.Singleton
+            }
             getSimpleName() >> Mock(Name) {
                 toString() >> 'className'
             }
@@ -228,7 +238,12 @@ class ServiceHandlerTest extends Specification {
         given:
         def attrMap = new HashMap<String, Object>()
         def clsElemt = Mock(TypeElement) {
-            getAnnotation(Service.class) >> PrototypeService.getAnnotation(Service.class)
+            getAnnotation(Service.class) >> Mock(Service) {
+                value() >> new Class[0]
+                ids() >> { def str = new String[1]; str[0] = "PrototypeService"; return str }
+                autoActive() >> false
+                type() >> ServiceType.Prototype
+            }
             getSimpleName() >> Mock(Name) {
                 toString() >> 'className'
             }
@@ -288,7 +303,12 @@ class ServiceHandlerTest extends Specification {
         given:
         def attrMap = new HashMap<String, Object>()
         def clsElemt = Mock(Element) {
-            getAnnotation(Service.class) >> PrototypeService.getAnnotation(Service.class)
+            getAnnotation(Service.class) >> Mock(Service) {
+                value() >> new Class[0]
+                ids() >> { def str = new String[1]; str[0] = "PrototypeService"; return str }
+                autoActive() >> false
+                type() >> ServiceType.Prototype
+            }
             getSimpleName() >> Mock(Name) {
                 toString() >> 'className'
             }
@@ -298,7 +318,9 @@ class ServiceHandlerTest extends Specification {
             getSimpleName() >> Mock(Name) {
                 toString() >> elemName
             }
-            getAnnotation(Attribute.class) >> PrototypeService.getField('name').getAnnotation(Attribute.class)
+            getAnnotation(Attribute.class) >> Mock(Attribute) {
+                value() >> "attrName"
+            }
             asType() >> Mock(TypeMirror) {
                 toString() >> 'java.lang.String'
             }
@@ -321,19 +343,5 @@ class ServiceHandlerTest extends Specification {
         where:
         elemKind                | elemName
         ElementKind.FIELD       | 'name'
-    }
-
-    @Service
-    static class TestService {
-
-        @Attribute('attrName')
-        public String name
-    }
-
-    @Service(type=ServiceType.Prototype)
-    class PrototypeService {
-
-        @Attribute('attrName')
-        public static name
     }
 }

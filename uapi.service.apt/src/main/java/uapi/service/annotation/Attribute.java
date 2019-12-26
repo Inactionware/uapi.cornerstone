@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
  * Any prototype service can create new instance service by specific attributes.
  */
 @Target(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Attribute {
 
     /**

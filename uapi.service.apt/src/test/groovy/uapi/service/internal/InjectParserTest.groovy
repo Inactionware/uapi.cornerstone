@@ -15,6 +15,7 @@ import uapi.GeneralException
 import uapi.Type
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
+import uapi.service.QualifiedServiceId
 import uapi.service.SetterMeta
 import uapi.service.annotation.Inject
 
@@ -98,7 +99,10 @@ class InjectParserTest extends Specification {
                 getTypeArguments() >> [Mock(TypeMirror), Mock(TypeMirror)]
             }
             getAnnotation(_) >> {
-                return Test.class.getField('t').getAnnotation(Inject.class)
+                return Mock(Inject) {
+                    value() >> 'iid'
+                    from() >> QualifiedServiceId.FROM_ANY
+                }
             }
         }
         def parser = new InjectParser()
@@ -163,7 +167,10 @@ class InjectParserTest extends Specification {
                 }]
             }
             getAnnotation(_) >> {
-                return Test.class.getField('t').getAnnotation(Inject.class)
+                return Mock(Inject) {
+                    value() >> 'iid'
+                    from() >> QualifiedServiceId.FROM_ANY
+                }
             }
         }
         def parser = new InjectParser()
@@ -217,7 +224,10 @@ class InjectParserTest extends Specification {
                 getTypeArguments() >> [Mock(TypeMirror)]
             }
             getAnnotation(_) >> {
-                return Test.class.getField('t').getAnnotation(Inject.class)
+                return Mock(Inject) {
+                    value() >> 'iid'
+                    from() >> QualifiedServiceId.FROM_ANY
+                }
             }
         }
         def parser = new InjectParser()
@@ -284,7 +294,10 @@ class InjectParserTest extends Specification {
                 }]
             }
             getAnnotation(_) >> {
-                return Test.class.getField('t').getAnnotation(Inject.class)
+                return Mock(Inject) {
+                    value() >> 'iid'
+                    from() >> QualifiedServiceId.FROM_ANY
+                }
             }
         }
         def parser = new InjectParser()
@@ -354,7 +367,10 @@ class InjectParserTest extends Specification {
                 getTypeArguments() >> [keyType, valueType]
             }
             getAnnotation(_) >> {
-                return Test.class.getField('t').getAnnotation(Inject.class)
+                return Mock(Inject) {
+                    value() >> 'iid'
+                    from() >> QualifiedServiceId.FROM_ANY
+                }
             }
         }
         def parser = new InjectParser()
@@ -376,7 +392,10 @@ class InjectParserTest extends Specification {
         def methodElemnt = Mock(ExecutableElement) {
             getKind() >> ElementKind.METHOD
             getAnnotation(_) >> {
-                return Test.class.getField('t').getAnnotation(Inject.class)
+                return Mock(Inject) {
+                    value() >> 'iid'
+                    from() >> QualifiedServiceId.FROM_ANY
+                }
             }
             getSimpleName() >> Mock(Name) {
                 toString() >> 'methodName'
@@ -405,7 +424,10 @@ class InjectParserTest extends Specification {
         def methodElemnt = Mock(ExecutableElement) {
             getKind() >> ElementKind.METHOD
             getAnnotation(_) >> {
-                return Test.class.getField('t').getAnnotation(Inject.class)
+                return Mock(Inject) {
+                    value() >> 'iid'
+                    from() >> QualifiedServiceId.FROM_ANY
+                }
             }
             getSimpleName() >> Mock(Name) {
                 toString() >> 'methodName'
@@ -451,7 +473,10 @@ class InjectParserTest extends Specification {
         def methodElemnt = Mock(ExecutableElement) {
             getKind() >> ElementKind.METHOD
             getAnnotation(_) >> {
-                return Test.class.getField('t').getAnnotation(Inject.class)
+                return Mock(Inject) {
+                    value() >> 'iid'
+                    from() >> QualifiedServiceId.FROM_ANY
+                }
             }
             getSimpleName() >> Mock(Name) {
                 toString() >> 'methodName'
@@ -512,11 +537,5 @@ class InjectParserTest extends Specification {
         where:
         fieldName   | fieldType | injectId  | injectFrom    | isCollection  | isMap | mapKeyType
         'name'      | 'String'  | 'id'      | 'Local'       | true          | false | 'Int'
-    }
-
-    class Test {
-
-        @Inject('iid')
-        public String t;
     }
 }

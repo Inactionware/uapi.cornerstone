@@ -66,7 +66,11 @@ class ParameterParserTest extends Specification {
             }
             getKind() >> ElementKind.FIELD
             getEnclosingElement() >> classElement
-            getAnnotation(Parameter.class) >> Test.getDeclaredField('field').getAnnotation(Parameter.class)
+            getAnnotation(Parameter.class) >> Mock(Parameter) {
+                name() >> 'param'
+                index() >> 0
+                description() >> 'desc'
+            }
             asType() >> Mock(TypeMirror) {
                 toString() >> fieldType
             }
@@ -102,7 +106,11 @@ class ParameterParserTest extends Specification {
             }
             getKind() >> ElementKind.FIELD
             getEnclosingElement() >> classElement
-            getAnnotation(Parameter.class) >> Test.getDeclaredField('field').getAnnotation(Parameter.class)
+            getAnnotation(Parameter.class) >> Mock(Parameter) {
+                name() >> 'param'
+                index() >> 0
+                description() >> 'desc'
+            }
             asType() >> Mock(TypeMirror) {
                 toString() >> 'String'
             }
@@ -138,11 +146,5 @@ class ParameterParserTest extends Specification {
         where:
         elementName | className     | pkgName
         'Test'      | 'ClassName'   | 'uapi'
-    }
-
-    class Test {
-
-        @Parameter(index = 0, name = 'param', description = 'desc')
-        boolean field
     }
 }

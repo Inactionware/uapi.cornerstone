@@ -67,7 +67,11 @@ class OptionParserTest extends Specification {
             }
             getKind() >> ElementKind.FIELD
             getEnclosingElement() >> classElement
-            getAnnotation(Option.class) >> Test.getDeclaredField('field').getAnnotation(Option.class)
+            getAnnotation(Option.class) >> Mock(Option) {
+                name() >> 'optName'
+                argument() >> StringHelper.EMPTY
+                description() >> StringHelper.EMPTY
+            }
             asType() >> Mock(TypeMirror) {
                 toString() >> fieldType
             }
@@ -103,7 +107,11 @@ class OptionParserTest extends Specification {
             }
             getKind() >> ElementKind.FIELD
             getEnclosingElement() >> classElement
-            getAnnotation(Option.class) >> Test1.getDeclaredField('field').getAnnotation(Option.class)
+            getAnnotation(Option.class) >> Mock(Option) {
+                name() >> 'optName'
+                argument() >> 'arg'
+                description() >> 'desc'
+            }
             asType() >> Mock(TypeMirror) {
                 toString() >> fieldType
             }
@@ -139,7 +147,11 @@ class OptionParserTest extends Specification {
             }
             getKind() >> ElementKind.FIELD
             getEnclosingElement() >> classElement
-            getAnnotation(Option.class) >> Test1.getDeclaredField('field').getAnnotation(Option.class)
+            getAnnotation(Option.class) >> Mock(Option) {
+                name() >> 'optName'
+                argument() >> 'arg'
+                description() >> 'desc'
+            }
             asType() >> Mock(TypeMirror) {
                 toString() >> fieldType
             }
@@ -174,17 +186,5 @@ class OptionParserTest extends Specification {
         where:
         className   | elementName | fieldType   | pkgName
         'ClassName' | 'Test'      | 'String'    | 'uapi'
-    }
-
-    class Test {
-
-        @Option(name = 'optName', description = "")
-        boolean field
-    }
-
-    class Test1 {
-
-        @Option(name = 'optName', argument = 'arg', description = "desc")
-        boolean field
     }
 }

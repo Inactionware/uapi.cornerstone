@@ -18,6 +18,6 @@ import java.lang.annotation.Target;
  * Indicate a method contains codes for action execution
  */
 @Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface ActionDo {
 }

@@ -1,10 +1,12 @@
 package uapi.command.internal
 
 import freemarker.template.Template
+import spock.lang.Ignore
 import spock.lang.Specification
 import uapi.GeneralException
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
+import uapi.command.ICommandMeta
 import uapi.service.annotation.handler.IServiceHandlerHelper
 
 import javax.lang.model.element.AnnotationMirror
@@ -52,6 +54,7 @@ class CommandParserTest extends Specification {
         ElementKind.ENUM    | 'TestClass'
     }
 
+    @Ignore
     def 'Test parse on element with parent command is not annotated with Command'() {
         given:
         def parser = new CommandParser()
@@ -66,6 +69,12 @@ class CommandParserTest extends Specification {
                 asElement() >> Mock(Element) {
                     getSimpleName() >> Mock(Name) {
                         toString() >> parentClassName
+                    }
+                    getAnnotation(uapi.command.annotation.Command.class) >> Mock(uapi.command.annotation.Command) {
+                        parent() >> void.class
+                        namespace() >> ICommandMeta.DEFAULT_NAMESPACE
+                        name() >> 'testCommandParent'
+                        description() >> ''
                     }
                 }
             }
@@ -89,7 +98,12 @@ class CommandParserTest extends Specification {
             getSimpleName() >> Mock(Name) {
                 toString() >> clsName
             }
-            getAnnotation(uapi.command.annotation.Command.class) >> TestCommand.class.getAnnotation(uapi.command.annotation.Command.class)
+            getAnnotation(uapi.command.annotation.Command.class) >> Mock(uapi.command.annotation.Command) {
+                parent() >> void.class
+                namespace() >> ICommandMeta.DEFAULT_NAMESPACE
+                name() >> 'testCommand'
+                description() >> ''
+            }
             getAnnotationMirrors() >> [annoMirror]
         }
 
@@ -120,7 +134,12 @@ class CommandParserTest extends Specification {
                     getSimpleName() >> Mock(Name) {
                         toString() >> parentClassName
                     }
-                    getAnnotation(uapi.command.annotation.Command.class) >> ParentCommand1.getAnnotation(uapi.command.annotation.Command.class)
+                    getAnnotation(uapi.command.annotation.Command.class) >> Mock(uapi.command.annotation.Command) {
+                        parent() >> void.class
+                        namespace() >> 'ns'
+                        name() >> 'testCommandParent'
+                        description() >> ''
+                    }
                 }
             }
         }
@@ -143,7 +162,12 @@ class CommandParserTest extends Specification {
             getSimpleName() >> Mock(Name) {
                 toString() >> clsName
             }
-            getAnnotation(uapi.command.annotation.Command.class) >> TestCommand.class.getAnnotation(uapi.command.annotation.Command.class)
+            getAnnotation(uapi.command.annotation.Command.class) >> Mock(uapi.command.annotation.Command) {
+                parent() >> ParentCommand.class
+                namespace() >> ICommandMeta.DEFAULT_NAMESPACE
+                name() >> 'testCommand'
+                description() >> ''
+            }
             getAnnotationMirrors() >> [annoMirror]
         }
 
@@ -210,7 +234,12 @@ class CommandParserTest extends Specification {
             getSimpleName() >> Mock(Name) {
                 toString() >> clsName
             }
-            getAnnotation(uapi.command.annotation.Command.class) >> TestCommand1.class.getAnnotation(uapi.command.annotation.Command.class)
+            getAnnotation(uapi.command.annotation.Command.class) >> Mock(uapi.command.annotation.Command) {
+                parent() >> void.class
+                namespace() >> ICommandMeta.DEFAULT_NAMESPACE
+                name() >> 'testCommand'
+                description() >> ''
+            }
             getAnnotationMirrors() >> [annoMirror]
         }
 

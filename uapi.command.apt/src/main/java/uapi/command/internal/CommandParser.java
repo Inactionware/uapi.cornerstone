@@ -188,7 +188,7 @@ public class CommandParser {
         if (parentCommand == null) {
             throw new GeneralException(
                     "No Command annotation was declared on class - {}",
-                    classElement.getSimpleName().toString());
+                    parentType.getSimpleName().toString());
         }
         if (! namespace.equals(parentCommand.namespace())) {
             throw new GeneralException(

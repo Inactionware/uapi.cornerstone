@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * The annotation indicate that new service is injected through this method when service is activated
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface OnInject {
 
     /**

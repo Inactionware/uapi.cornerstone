@@ -18,6 +18,7 @@ import uapi.behavior.annotation.ActionDo
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.MethodMeta
+import uapi.common.StringHelper
 import uapi.rx.Looper
 import uapi.service.annotation.handler.IServiceHandlerHelper
 import uapi.service.annotation.Inject
@@ -35,13 +36,7 @@ class ActionHandlerTest extends Specification {
     def actionDoAnno;
 
     def setup() {
-        actionDoAnno = Looper.on(TestClass.methods)
-                .filter({method -> method.name == 'test'})
-                .map({method -> method.getAnnotation(ActionDo.class)})
-                .first()
-        if (actionDoAnno == null) {
-            throw new GeneralException("Can't find method which annotated with ActionDo annotation");
-        }
+        actionDoAnno = Mock(ActionDo)
     }
 
     def 'Test create instance'() {
@@ -104,7 +99,9 @@ class ActionHandlerTest extends Specification {
             asType() >> Mock(TypeMirror) {
                 toString() >> 'TestClass'
             }
-            getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
+            getAnnotation(Action.class) >> Mock(Action) {
+                value() >> StringHelper.EMPTY
+            }
             getEnclosedElements() >> []
         }
         def builderCtx = Mock(IBuilderContext) {
@@ -128,7 +125,9 @@ class ActionHandlerTest extends Specification {
             asType() >> Mock(TypeMirror) {
                 toString() >> 'TestClass'
             }
-            getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
+            getAnnotation(Action.class) >> Mock(Action) {
+                value() >> StringHelper.EMPTY
+            }
             getEnclosedElements() >> [Mock(Element) {
                 getKind() >> ElementKind.METHOD
                 getAnnotation(ActionDo.class) >> actionDoAnno
@@ -157,7 +156,9 @@ class ActionHandlerTest extends Specification {
             asType() >> Mock(TypeMirror) {
                 toString() >> 'TestClass'
             }
-            getAnnotation(Action.class) >> TestClass.getAnnotation(Action.class)
+            getAnnotation(Action.class) >> Mock(Action) {
+                value() >> StringHelper.EMPTY
+            }
             getEnclosedElements() >> [Mock(ExecutableElement) {
                 getKind() >> ElementKind.METHOD
                 getAnnotation(ActionDo.class) >> actionDoAnno
