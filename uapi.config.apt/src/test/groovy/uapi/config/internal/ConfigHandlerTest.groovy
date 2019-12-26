@@ -16,11 +16,11 @@ import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.config.IConfigValueParser
 import uapi.config.annotation.Config
-import uapi.service.annotation.handler.IInjectableHandlerHelper
+import uapi.service.annotation.helper.IInjectableHandlerHelper
 import uapi.service.IRegistry
 import uapi.service.annotation.Inject
 import uapi.service.annotation.Service
-import uapi.service.annotation.handler.ServiceType
+import uapi.service.annotation.helper.ServiceType
 
 import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType

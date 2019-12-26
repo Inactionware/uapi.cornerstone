@@ -19,8 +19,7 @@ import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.MethodMeta
 import uapi.common.StringHelper
-import uapi.rx.Looper
-import uapi.service.annotation.handler.IServiceHandlerHelper
+import uapi.service.annotation.helper.IServiceHandlerHelper
 import uapi.service.annotation.Inject
 import uapi.service.annotation.Service
 

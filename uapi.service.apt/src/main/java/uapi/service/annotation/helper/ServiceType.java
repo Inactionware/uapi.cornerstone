@@ -7,7 +7,7 @@
  * use the project into a commercial product
  */
 
-package uapi.service.annotation.handler;
+package uapi.service.annotation.helper;
 
 /**
  * Service type

@@ -8,5 +8,5 @@ module uapi.service.apt {
     requires uapi.service;
 
     exports uapi.service.annotation;
-    exports uapi.service.annotation.handler;
+    exports uapi.service.annotation.helper;
 }

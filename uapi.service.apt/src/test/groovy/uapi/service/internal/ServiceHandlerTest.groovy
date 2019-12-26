@@ -15,8 +15,8 @@ import uapi.GeneralException
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.LogSupport
-import uapi.service.annotation.handler.IServiceHandlerHelper
-import uapi.service.annotation.handler.ServiceType
+import uapi.service.annotation.helper.IServiceHandlerHelper
+import uapi.service.annotation.helper.ServiceType
 import uapi.service.annotation.Attribute
 import uapi.service.annotation.Service
 

@@ -7,7 +7,7 @@ import uapi.GeneralException
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
 import uapi.command.ICommandMeta
-import uapi.service.annotation.handler.IServiceHandlerHelper
+import uapi.service.annotation.helper.IServiceHandlerHelper
 
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue

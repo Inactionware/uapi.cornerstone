@@ -19,7 +19,7 @@ import uapi.config.IConfigValueParser;
 import uapi.config.IConfigurable;
 import uapi.config.annotation.Config;
 import uapi.rx.Looper;
-import uapi.service.annotation.handler.IInjectableHandlerHelper;
+import uapi.service.annotation.helper.IInjectableHandlerHelper;
 import uapi.service.IRegistry;
 import uapi.service.QualifiedServiceId;
 import uapi.service.annotation.Inject;

@@ -20,8 +20,8 @@ import uapi.rx.Looper;
 import uapi.service.*;
 import uapi.service.annotation.Attribute;
 import uapi.service.annotation.Service;
-import uapi.service.annotation.handler.IServiceHandlerHelper;
-import uapi.service.annotation.handler.ServiceType;
+import uapi.service.annotation.helper.IServiceHandlerHelper;
+import uapi.service.annotation.helper.ServiceType;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;

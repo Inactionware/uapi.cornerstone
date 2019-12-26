@@ -11,5 +11,5 @@ module uapi.behavior.apt {
     requires uapi.behavior;
 
     exports uapi.behavior.annotation;
-    exports uapi.behavior.annotation.handler;
+    exports uapi.behavior.annotation.helper;
 }

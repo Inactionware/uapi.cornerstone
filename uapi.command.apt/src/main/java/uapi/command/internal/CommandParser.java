@@ -11,7 +11,7 @@ import uapi.command.ICommandMeta;
 import uapi.command.annotation.Command;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
-import uapi.service.annotation.handler.IServiceHandlerHelper;
+import uapi.service.annotation.helper.IServiceHandlerHelper;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;

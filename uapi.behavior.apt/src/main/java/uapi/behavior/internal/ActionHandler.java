@@ -16,11 +16,11 @@ import uapi.Type;
 import uapi.behavior.*;
 import uapi.behavior.annotation.Action;
 import uapi.behavior.annotation.ActionDo;
-import uapi.behavior.annotation.handler.IActionHandlerHelper;
+import uapi.behavior.annotation.helper.IActionHandlerHelper;
 import uapi.codegen.*;
 import uapi.common.Numeric;
 import uapi.rx.Looper;
-import uapi.service.annotation.handler.IServiceHandlerHelper;
+import uapi.service.annotation.helper.IServiceHandlerHelper;
 import uapi.service.annotation.Service;
 
 import javax.lang.model.element.*;
