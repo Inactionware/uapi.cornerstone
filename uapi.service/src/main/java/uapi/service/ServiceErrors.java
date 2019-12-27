@@ -47,6 +47,10 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
     public static final int SERVICE_DEACTIVATION_TASK_TIMED_OUT = 20;
     public static final int NOT_A_PROTOTYPE_SERVICE             = 21;
     public static final int INSTANCE_SERVICE_REGISTER_FAILED    = 22;
+    public static final int LOAD_MODULE_SERVICE_FILE_FAILED     = 23;
+    public static final int NO_DEFAULT_CONSTRUCTOR_IN_SERVICE   = 24;
+    public static final int CREATE_SERVICE_FAILED               = 25;
+    public static final int SERVICE_IS_NOT_ISERVICE_TYPE        = 26;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -74,6 +78,10 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         keyCodeMapping.put(SERVICE_DEACTIVATION_TASK_TIMED_OUT, ServiceDeactivationTaskTimedOut.KEY);
         keyCodeMapping.put(NOT_A_PROTOTYPE_SERVICE, NotAPrototypeService.KEY);
         keyCodeMapping.put(INSTANCE_SERVICE_REGISTER_FAILED, InstanceServiceRegisterFailed.KEY);
+        keyCodeMapping.put(LOAD_MODULE_SERVICE_FILE_FAILED, LoadModuleServiceFileFailed.KEY);
+        keyCodeMapping.put(NO_DEFAULT_CONSTRUCTOR_IN_SERVICE, NoDefaultConstructorInService.KEY);
+        keyCodeMapping.put(CREATE_SERVICE_FAILED, CreateServiceFailed.KEY);
+        keyCodeMapping.put(SERVICE_IS_NOT_ISERVICE_TYPE, ServiceIsNotIServiceType.KEY);
     }
 
     @Override
@@ -582,6 +590,108 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         @Override
         public Object[] get() {
             return new Object[] { this._instSvcId, this._prototypeSvcId };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Load services from data file failed, module - {}
+     */
+    public static final class LoadModuleServiceFileFailed extends IndexedParameters<LoadModuleServiceFileFailed> {
+
+        private static final String KEY = "LoadModuleServiceFileFailed";
+
+        private String _moduleName;
+
+        public LoadModuleServiceFileFailed moduleName(String name) {
+            this._moduleName = name;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._moduleName };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The service has no default constructor defined - {}, module - {}
+     */
+    public static final class NoDefaultConstructorInService extends IndexedParameters<NoDefaultConstructorInService> {
+
+        private static final String KEY = "NoDefaultConstructorInService";
+
+        private String _svcName;
+        private String _moduleName;
+
+        public NoDefaultConstructorInService serviceName(final String name) {
+            this._svcName = name;
+            return this;
+        }
+
+        public NoDefaultConstructorInService moduleName(final String name) {
+            this._moduleName = name;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._svcName, this._moduleName };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      Create instance of service failed - {}, module - {}
+     */
+    public static final class CreateServiceFailed extends IndexedParameters<CreateServiceFailed> {
+
+        private static final String KEY = "CreateServiceFailed";
+
+        private String _svcName;
+        private String _moduleName;
+
+        public CreateServiceFailed serviceName(final String name) {
+            this._svcName = name;
+            return this;
+        }
+
+        public CreateServiceFailed moduleName(final String name) {
+            this._moduleName = name;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._svcName, this._moduleName };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The service {} is not instance of IService, module - {}
+     */
+    public static final class ServiceIsNotIServiceType extends IndexedParameters<ServiceIsNotIServiceType> {
+
+        private static final String KEY = "ServiceIsNotIServiceType";
+
+        private String _svcName;
+        private String _moduleName;
+
+        public ServiceIsNotIServiceType serviceName(final String name) {
+            this._svcName = name;
+            return this;
+        }
+
+        public ServiceIsNotIServiceType moduleName(final String name) {
+            this._moduleName = name;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._svcName, this._moduleName };
         }
     }
 }

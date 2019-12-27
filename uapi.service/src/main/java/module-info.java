@@ -1,3 +1,8 @@
+import uapi.IModulePortal;
+import uapi.annotation.Module;
+import uapi.service.internal.ServiceModulePortal;
+
+@Module
 module uapi.service {
     requires auto.service.annotations;
     requires com.google.common;
@@ -10,4 +15,6 @@ module uapi.service {
 
     exports uapi.service;
     exports uapi.log;
+
+    provides IModulePortal with ServiceModulePortal;
 }
