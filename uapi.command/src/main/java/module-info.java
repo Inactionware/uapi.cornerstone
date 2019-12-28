@@ -1,10 +1,11 @@
 module uapi.command {
-    requires auto.service.annotations;
+    requires static auto.service.annotations;
+    requires static uapi.service.apt;
+
     requires uapi.common;
     requires uapi.exception;
     requires uapi.codegen;
     requires uapi.service;
-    requires uapi.service.apt;
 
     exports uapi.command;
 }

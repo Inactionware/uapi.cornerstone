@@ -21,7 +21,6 @@ import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.Name
-import java.lang.annotation.Annotation
 
 /**
  * Unit test for TagHandler

@@ -25,6 +25,7 @@ import uapi.service.annotation.helper.ServiceType;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
+import javax.tools.StandardLocation;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
@@ -55,6 +56,8 @@ public final class ServiceHandler extends AnnotationsHandler {
 
     private final ServiceHandlerHelper _helper = new ServiceHandlerHelper();
 
+    private IResourceFile _svcResFile;
+
     @Override
     protected Class<? extends Annotation>[] getOrderedAnnotations() {
         return orderedAnnotations;
@@ -67,6 +70,8 @@ public final class ServiceHandler extends AnnotationsHandler {
 
     @Override
     public void init(IBuilderContext builderContext) throws GeneralException {
+        this._svcResFile = builderContext.newResourceFile(
+                StandardLocation.CLASS_OUTPUT, IServiceModulePortal.SERVICE_FILE_NAME);
 
     }
 
@@ -322,6 +327,9 @@ public final class ServiceHandler extends AnnotationsHandler {
                         .setReturnTypeName(IService.METHOD_AUTOACTIVE_RETURN_TYPE)
                         .addCodeBuilder(CodeMeta.builder()
                                 .addRawCode(StringHelper.makeString("return {};", autoActive))));
+
+        // Add service to service file
+        this._svcResFile.appendContent(classBuilder.getQualifiedClassName() + "\n");
     }
 
     public static final class AttributeMode {

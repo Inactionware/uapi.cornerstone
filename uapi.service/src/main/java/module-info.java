@@ -4,11 +4,12 @@ import uapi.service.internal.ServiceModulePortal;
 
 @Module
 module uapi.service {
-    requires auto.service.annotations;
+    requires static auto.service.annotations;
+    requires static uapi.codegen;
+
     requires com.google.common;
-    requires freemarker;
+//    requires freemarker;
     requires uapi.common;
-    requires uapi.codegen;
     requires uapi.annotation;
     requires uapi.exception;
     requires uapi.state;

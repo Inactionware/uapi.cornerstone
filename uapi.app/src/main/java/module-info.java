@@ -1,15 +1,17 @@
 module uapi.app {
-    requires auto.service.annotations;
+    requires static auto.service.annotations;
+    requires static uapi.codegen;
+    requires static uapi.service.apt;
+    requires static uapi.config.apt;
+    requires static uapi.behavior.apt;
+
     requires uapi.common;
-    requires uapi.codegen;
     requires uapi.exception;
     requires uapi.service;
-    requires uapi.service.apt;
     requires uapi.config;
-    requires uapi.config.apt;
     requires uapi.event;
     requires uapi.behavior;
-    requires uapi.behavior.apt;
+
 
     exports uapi.app;
 }

@@ -18,6 +18,10 @@ dependencies {
         coordinate(libs.auto_service)
     )
 
+    testCompile(
+            coordinate(baseProjects.codegen)
+    )
+
     annotationProcessor (
         coordinate(baseProjects.codegen),
         coordinate(baseProjects.annotation),
@@ -28,10 +32,8 @@ dependencies {
         coordinate(baseProjects.common),
         coordinate(baseProjects.exception),
         coordinate(baseProjects.state),
-        coordinate(baseProjects.codegen),
 
-        coordinate(libs.guava),
-        coordinate(libs.freemarker)
+        coordinate(libs.guava)
     )
 }
 

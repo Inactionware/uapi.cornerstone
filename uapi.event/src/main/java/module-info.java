@@ -1,12 +1,13 @@
 module uapi.event {
-    requires auto.service.annotations;
+    requires static auto.service.annotations;
+    requires static uapi.codegen;
+    requires static uapi.service.apt;
+    requires static uapi.config.apt;
+
     requires uapi.common;
     requires uapi.exception;
-    requires uapi.codegen;
     requires uapi.service;
-    requires uapi.service.apt;
     requires uapi.config;
-    requires uapi.config.apt;
 
     exports uapi.event;
 }

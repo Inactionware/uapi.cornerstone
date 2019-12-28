@@ -38,7 +38,11 @@ public interface IServiceModulePortal extends IModulePortal {
         }
         ArrayList<String> svcNames = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(SERVICE_FILE_NAME))) {
-            svcNames.add(br.readLine());
+            String line = br.readLine();
+            while (line != null) {
+                svcNames.add(br.readLine());
+                line = br.readLine();
+            }
         } catch (IOException ex) {
             throw ServiceException.builder()
                     .errorCode(ServiceErrors.LOAD_MODULE_SERVICE_FILE_FAILED)

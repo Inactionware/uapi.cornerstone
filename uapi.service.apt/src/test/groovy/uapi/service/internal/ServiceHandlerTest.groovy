@@ -14,6 +14,7 @@ import spock.lang.Specification
 import uapi.GeneralException
 import uapi.codegen.ClassMeta
 import uapi.codegen.IBuilderContext
+import uapi.codegen.IResourceFile
 import uapi.codegen.LogSupport
 import uapi.service.annotation.helper.IServiceHandlerHelper
 import uapi.service.annotation.helper.ServiceType
@@ -161,10 +162,14 @@ class ServiceHandlerTest extends Specification {
                     }
                 }
             }
+            newResourceFile(_, _) >> Mock(IResourceFile) {
+                1 * appendContent(_)
+            }
         }
         def svcHandler = new ServiceHandler()
 
         when:
+        svcHandler.init(budrCtx)
         svcHandler.handleAnnotatedElements(
                 budrCtx, Service.class, [classElem] as Set)
 
