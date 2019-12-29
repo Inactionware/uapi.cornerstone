@@ -1,11 +1,15 @@
+import uapi.IModulePortal;
+import uapi.command.CommandModulePortal;
+
 module uapi.command {
-    requires static auto.service.annotations;
     requires static uapi.service.apt;
 
     requires uapi.common;
     requires uapi.exception;
     requires uapi.codegen;
     requires uapi.service;
+
+    provides IModulePortal with CommandModulePortal;
 
     exports uapi.command;
 }

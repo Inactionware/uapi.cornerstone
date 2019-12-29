@@ -9,16 +9,15 @@
 
 package uapi.app.internal;
 
-import uapi.service.IService;
-
 import java.util.ServiceLoader;
 
 /**
- * The class used to load IService instance
+ * The class used to load IService instance.
+ * It is easy to mock it to get fake service in unit tests.
  */
 public class AppServiceLoader {
 
-    public Iterable<IService> loadServices() {
-        return ServiceLoader.load(IService.class);
+    public <T> Iterable<T> load(Class<T> type) {
+        return ServiceLoader.load(type);
     }
 }

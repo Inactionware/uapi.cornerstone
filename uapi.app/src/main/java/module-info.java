@@ -1,3 +1,6 @@
+import uapi.IModulePortal;
+import uapi.app.internal.AppModulePortal;
+
 module uapi.app {
     requires static auto.service.annotations;
     requires static uapi.codegen;
@@ -12,6 +15,9 @@ module uapi.app {
     requires uapi.event;
     requires uapi.behavior;
 
+    uses IModulePortal;
+
+    provides IModulePortal with AppModulePortal;
 
     exports uapi.app;
 }

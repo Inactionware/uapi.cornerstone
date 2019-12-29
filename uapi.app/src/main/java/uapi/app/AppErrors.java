@@ -9,6 +9,7 @@
 
 package uapi.app;
 
+import uapi.IModulePortal;
 import uapi.exception.FileBasedExceptionErrors;
 import uapi.exception.IndexedParameters;
 import uapi.service.IRegistry;
@@ -34,6 +35,7 @@ public class AppErrors extends FileBasedExceptionErrors<AppException> {
     public static final int TAG_CONFIG_IS_NOT_LIST              = 8;
     public static final int SPECIFIC_SERVICE_NOT_FOUND          = 9;
     public static final int UNSUPPORTED_RESPONSIBLE_BEHAVIOR    = 10;
+    public static final int UNSUPPORTED_MODULE_PORTAL           = 11;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -49,6 +51,7 @@ public class AppErrors extends FileBasedExceptionErrors<AppException> {
         keyCodeMapping.put(TAG_CONFIG_IS_NOT_LIST, TagConfigIsNotList.KEY);
         keyCodeMapping.put(SPECIFIC_SERVICE_NOT_FOUND, SpecificServiceNotFound.KEY);
         keyCodeMapping.put(UNSUPPORTED_RESPONSIBLE_BEHAVIOR, UnsupportedResponsibleBehavior.KEY);
+        keyCodeMapping.put(UNSUPPORTED_MODULE_PORTAL, UnsupportedModulePortal.KEY);
     }
 
     @Override
@@ -240,6 +243,27 @@ public class AppErrors extends FileBasedExceptionErrors<AppException> {
         @Override
         public Object[] get() {
             return new Object[] { this._behaviorName, this._respName };
+        }
+    }
+
+    /**
+     * Error template:
+     *      Unsupported module portal - {}, module - {}
+     */
+    public static final class UnsupportedModulePortal extends IndexedParameters<UnsupportedModulePortal> {
+
+        private static final String KEY = "UnsupportedModulePortal";
+
+        private IModulePortal _portal;
+
+        public UnsupportedModulePortal portal(final IModulePortal portal) {
+            this._portal = portal;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._portal.getClass().getCanonicalName(), this._portal.moduleName() };
         }
     }
 }

@@ -1,6 +1,8 @@
 package uapi.app
 
 import spock.lang.Specification
+import uapi.IModulePortal
+import uapi.service.IServiceModulePortal
 import uapi.service.Tags
 import uapi.app.internal.AppServiceLoader
 import uapi.app.internal.SystemShuttingDownEvent
@@ -18,7 +20,7 @@ class SystemBootstrapTest extends Specification {
     def 'Test boot with zero registry'() {
         given:
         Bootstrap.setSvcLoader(Mock(AppServiceLoader) {
-            loadServices() >> []
+            load(_) >> []
         })
         def bootstrap = new Bootstrap()
 
@@ -32,9 +34,13 @@ class SystemBootstrapTest extends Specification {
     def 'Test boot with more registry'() {
         given:
         def registry = Mock(IRegistryService)
+        def modulePortal = Mock(IServiceModulePortal) {
+            loadService() >> [registry, registry]
+        }
         Bootstrap.setSvcLoader(Mock(AppServiceLoader) {
-            loadServices() >> [registry, registry]
+            load(_) >> [modulePortal]
         })
+
         def bootstrap = new Bootstrap()
 
         when:
@@ -48,8 +54,11 @@ class SystemBootstrapTest extends Specification {
         given:
         def registry = Mock(IRegistryService)
         registry.findService(IRegistry.class) >> null
+        def modulePortal = Mock(IServiceModulePortal) {
+            loadService() >> [registry]
+        }
         Bootstrap.setSvcLoader(Mock(AppServiceLoader) {
-            loadServices() >> [registry]
+            load(_) >> [modulePortal]
         })
         def bootstrap = new Bootstrap()
 
@@ -68,8 +77,11 @@ class SystemBootstrapTest extends Specification {
             1 * fire(_ as SystemStartingUpEvent)
             0 * fire(_ as SystemShuttingDownEvent, true)
         }
+        def modulePortal = Mock(IServiceModulePortal) {
+            loadService() >> [registry]
+        }
         Bootstrap.setSvcLoader(Mock(AppServiceLoader) {
-            loadServices() >> [registry]
+            load(_) >> [modulePortal]
         })
         def bootstrap = new Bootstrap()
 
@@ -97,8 +109,11 @@ class SystemBootstrapTest extends Specification {
             1 * fire(_ as SystemStartingUpEvent)
             0 * fire(_ as SystemShuttingDownEvent, true)
         }
+        def modulePortal = Mock(IServiceModulePortal) {
+            loadService() >> [registry, taggedSvc, taggedSvc2]
+        }
         Bootstrap.setSvcLoader(Mock(AppServiceLoader) {
-            loadServices() >> [registry, taggedSvc, taggedSvc2]
+            load(_) >> [modulePortal]
         })
         def bootstrap = new Bootstrap()
 

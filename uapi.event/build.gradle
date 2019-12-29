@@ -14,19 +14,12 @@ plugins {
 dependencies {
     compileOnly (
         project(':uapi.service.apt'),
-        project(':uapi.config.apt'),
-        coordinate(libs.auto_service),
-
-        /* To fix the class path issue in IDEA */
-        // files('../uapi.service.apt/src/main/resources'),
-        // files('../uapi.config.apt/src/main/resources')
-        /* End */
+        project(':uapi.config.apt')
     )
 
     annotationProcessor (
         project(':uapi.service.apt'),
-        project(':uapi.config.apt'),
-        coordinate(libs.auto_service)
+        project(':uapi.config.apt')
     )
 
     compile (

@@ -9,7 +9,6 @@
 
 package uapi.service.internal;
 
-import com.google.auto.service.AutoService;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import uapi.GeneralException;
@@ -35,7 +34,6 @@ import java.util.stream.Stream;
 /**
  * Implementation of IRegistry
  */
-@AutoService(IService.class)
 public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
     private static final String[] tags = new String[] {Tags.REGISTRY };

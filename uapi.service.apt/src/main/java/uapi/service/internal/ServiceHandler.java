@@ -303,12 +303,12 @@ public final class ServiceHandler extends AnnotationsHandler {
 
         // Build class builder
         classBuilder
-                .addAnnotationBuilder(AnnotationMeta.builder()
-                        .setName(AutoService.class.getCanonicalName())
-                        .addArgument(ArgumentMeta.builder()
-                                .setName("value")
-                                .setIsString(false)
-                                .setValue(IService.class.getCanonicalName() + ".class")))
+//                .addAnnotationBuilder(AnnotationMeta.builder()
+//                        .setName(AutoService.class.getCanonicalName())
+//                        .addArgument(ArgumentMeta.builder()
+//                                .setName("value")
+//                                .setIsString(false)
+//                                .setValue(IService.class.getCanonicalName() + ".class")))
                 .addImplement(IService.class.getCanonicalName())
                 .addMethodBuilder(MethodMeta.builder()
                         .addAnnotationBuilder(AnnotationMeta.builder()

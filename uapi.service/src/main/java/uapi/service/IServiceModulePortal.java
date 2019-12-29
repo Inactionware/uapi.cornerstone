@@ -10,6 +10,7 @@
 package uapi.service;
 
 import uapi.IModulePortal;
+import uapi.common.StringHelper;
 import uapi.rx.Looper;
 
 import java.io.BufferedReader;
@@ -18,6 +19,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The interface is used to load services from current module.
@@ -31,15 +33,19 @@ public interface IServiceModulePortal extends IModulePortal {
      *
      * @return  All services
      */
-    default IService[] loadService() {
+    default Iterable<IService> loadService() {
+        List<IService> services = new ArrayList<>();
         File svcFile = new File(SERVICE_FILE_NAME);
         if (! svcFile.exists()) {
-            return new IService[0];
+            return services;
         }
         ArrayList<String> svcNames = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(SERVICE_FILE_NAME))) {
             String line = br.readLine();
             while (line != null) {
+                if (line.isBlank()) {
+                    continue;
+                }
                 svcNames.add(br.readLine());
                 line = br.readLine();
             }
@@ -51,7 +57,7 @@ public interface IServiceModulePortal extends IModulePortal {
                     .build();
         }
         if (svcNames.size() == 0) {
-            return new IService[0];
+            return services;
         }
         Module module = this.getClass().getModule();
         return Looper.on(svcNames).map(svcName -> {
@@ -86,6 +92,6 @@ public interface IServiceModulePortal extends IModulePortal {
                         .build();
             }
             return (IService) svcObj;
-        }).toArray(new IService[0]);
+        }).toList(services);
     }
 }

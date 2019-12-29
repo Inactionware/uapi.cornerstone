@@ -1,3 +1,6 @@
+import uapi.IModulePortal;
+import uapi.event.internal.EventModulePortal;
+
 module uapi.event {
     requires static auto.service.annotations;
     requires static uapi.codegen;
@@ -8,6 +11,8 @@ module uapi.event {
     requires uapi.exception;
     requires uapi.service;
     requires uapi.config;
+
+    provides IModulePortal with EventModulePortal;
 
     exports uapi.event;
 }

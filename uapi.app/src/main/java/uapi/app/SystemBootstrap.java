@@ -1,17 +1,16 @@
 package uapi.app;
 
-import uapi.service.Tags;
+import uapi.IModulePortal;
+import uapi.service.*;
 import uapi.app.internal.AppServiceLoader;
 import uapi.app.internal.SystemStartingUpEvent;
 import uapi.common.CollectionHelper;
 import uapi.event.IEventBus;
 import uapi.rx.Looper;
-import uapi.service.IRegistry;
-import uapi.service.IService;
-import uapi.service.ITagged;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceLoader;
 
 /**
  * Use to load service and activate system services
@@ -39,18 +38,30 @@ public abstract class SystemBootstrap {
     /**
      * Load all service and activate system services and return application service list
      *
-     * @return  Application service list
      * @throws  AppException
      *          When service registry can't be found or found more service registry instance
      */
     public void boot() throws AppException {
         long startTime = System.currentTimeMillis();
 
-        Iterable<IService> svcLoaders = appSvcLoader.loadServices();
+        Iterable<IModulePortal> modulePortals = appSvcLoader.load(IModulePortal.class);
+        List<IService> services = new ArrayList<>();
+        Looper.on(modulePortals).foreach(modulePortal -> {
+            if (modulePortal instanceof IServiceModulePortal) {
+                Looper.on(((IServiceModulePortal) modulePortal).loadService()).foreach(services::add);
+            } else {
+                throw AppException.builder()
+                        .errorCode(AppErrors.UNSUPPORTED_MODULE_PORTAL)
+                        .variables(new AppErrors.UnsupportedModulePortal().portal(modulePortal))
+                        .build();
+            }
+        });
+
+//        Iterable<IService> svcLoaders = appSvcLoader.loadServices();
         final var svcRegistries = new ArrayList<IRegistry>();
         final var sysSvcs = new ArrayList<IService>();
         final var appSvcs = new ArrayList<IService>();
-        Looper.on(svcLoaders)
+        Looper.on(services)
                 .foreach(svc -> {
                     if (svc instanceof IRegistry) {
                         svcRegistries.add((IRegistry) svc);

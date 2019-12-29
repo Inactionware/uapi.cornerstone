@@ -15,22 +15,14 @@ dependencies {
     compileOnly (
         project(':uapi.service.apt'),
         project(':uapi.config.apt'),
-        project(':uapi.behavior.apt'),
-        coordinate(libs.auto_service),
-
-        /* To fix the class path issue in IDEA */
-        // files('../uapi.service.apt/src/main/resources'),
-        // files('../uapi.config.apt/src/main/resources'),
-        // files('../uapi.behavior.apt/src/main/resources')
-        /* End */
+        project(':uapi.behavior.apt')
     )
 
     annotationProcessor (
         project(':uapi.service.apt'),
         project(':uapi.config.apt'),
         project(':uapi.behavior.apt'),
-        coordinate(baseProjects.codegen),
-        coordinate(libs.auto_service)
+        coordinate(baseProjects.codegen)
     )
 
     compile (
@@ -39,7 +31,6 @@ dependencies {
         project(':uapi.log'),
         project(':uapi.event'),
         project(':uapi.behavior'),
-
         coordinate(baseProjects.common),
         coordinate(baseProjects.exception)
     )

@@ -13,13 +13,11 @@ plugins {
 
 dependencies {
     compileOnly (
-        coordinate(libs.auto_service),
         coordinate(baseProjects.codegen),
         project(':uapi.service.apt')
     )
 
     annotationProcessor (
-        coordinate(libs.auto_service),
         coordinate(baseProjects.codegen),
         project(':uapi.service.apt')
     )
