@@ -1,7 +1,6 @@
 package uapi.command.internal;
 
 import com.google.auto.common.MoreElements;
-import com.google.auto.service.AutoService;
 import uapi.GeneralException;
 import uapi.Type;
 import uapi.codegen.*;
@@ -55,7 +54,8 @@ public class CommandParser {
             var cmdModel = new CommandModel();
             metaBuilder.putTransience(CommandHandler.CMD_MODEL, cmdModel);
             var svcHelper = (IServiceHandlerHelper) builderContext.getHelper(IServiceHandlerHelper.name);
-            svcHelper.addServiceId(metaBuilder, metaBuilder.getGeneratedClassName());
+            svcHelper.becomeService(builderContext, metaBuilder, ICommandMeta.class.getCanonicalName());
+//            svcHelper.addServiceId(metaBuilder, metaBuilder.getGeneratedClassName());
 
             // Initial user command class builder
             var cmdBuilder = builderContext.findClassBuilder(classElement);
@@ -116,12 +116,12 @@ public class CommandParser {
             // Construct command meta class builder
             metaBuilder
                     .addImplement(ICommandMeta.class.getCanonicalName())
-                    .addAnnotationBuilder(AnnotationMeta.builder()
-                            .setName(AutoService.class.getCanonicalName())
-                            .addArgument(ArgumentMeta.builder()
-                                    .setName("value")
-                                    .setValue(ICommandMeta.class.getCanonicalName() + ".class")
-                                    .setIsString(false)))
+//                    .addAnnotationBuilder(AnnotationMeta.builder()
+//                            .setName(AutoService.class.getCanonicalName())
+//                            .addArgument(ArgumentMeta.builder()
+//                                    .setName("value")
+//                                    .setValue(ICommandMeta.class.getCanonicalName() + ".class")
+//                                    .setIsString(false)))
                     .addMethodBuilder(MethodMeta.builder()
                             .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                             .addModifier(Modifier.PUBLIC)
@@ -162,8 +162,6 @@ public class CommandParser {
                             .addCodeBuilder(CodeMeta.builder()
                                     .setModel(tmpModel)
                                     .setTemplate(tmpNewExec)));
-
-
         });
     }
 

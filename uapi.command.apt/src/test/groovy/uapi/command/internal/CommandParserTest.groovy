@@ -212,7 +212,7 @@ class CommandParserTest extends Specification {
                 1 * putTransience(CommandHandler.CMD_MODEL, _)
             }
             getHelper(IServiceHandlerHelper.name) >> Mock(IServiceHandlerHelper) {
-                1 * addServiceId(_, _)
+                1 * becomeService(_, _, _)
             }
             loadTemplate(_, _) >> Mock(Template)
         }
