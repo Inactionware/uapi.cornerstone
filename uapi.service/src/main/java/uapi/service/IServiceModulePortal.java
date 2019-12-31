@@ -10,7 +10,6 @@
 package uapi.service;
 
 import uapi.IModulePortal;
-import uapi.common.StringHelper;
 import uapi.rx.Looper;
 
 import java.io.BufferedReader;

@@ -15,11 +15,10 @@ dependencies {
     compileOnly (
         coordinate(baseProjects.codegen),
         coordinate(baseProjects.annotation),
-        coordinate(libs.auto_service)
     )
 
     testCompile(
-            coordinate(baseProjects.codegen)
+        coordinate(baseProjects.codegen)
     )
 
     annotationProcessor (

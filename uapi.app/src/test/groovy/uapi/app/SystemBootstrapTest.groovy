@@ -1,11 +1,10 @@
 package uapi.app
 
 import spock.lang.Specification
-import uapi.IModulePortal
+import uapi.app.internal.SystemShuttingDownEvent
 import uapi.service.IServiceModulePortal
 import uapi.service.Tags
 import uapi.app.internal.AppServiceLoader
-import uapi.app.internal.SystemShuttingDownEvent
 import uapi.app.internal.SystemStartingUpEvent
 import uapi.event.IEventBus
 import uapi.service.IRegistry

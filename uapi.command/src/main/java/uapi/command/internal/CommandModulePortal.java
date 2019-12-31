@@ -7,7 +7,7 @@
  * use the project into a commercial product.
  */
 
-package uapi.command;
+package uapi.command.internal;
 
 import uapi.service.IServiceModulePortal;
 

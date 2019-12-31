@@ -2,7 +2,6 @@ import uapi.IModulePortal;
 import uapi.event.internal.EventModulePortal;
 
 module uapi.event {
-    requires static auto.service.annotations;
     requires static uapi.codegen;
     requires static uapi.service.apt;
     requires static uapi.config.apt;

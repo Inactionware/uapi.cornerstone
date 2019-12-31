@@ -1,5 +1,5 @@
 import uapi.IModulePortal;
-import uapi.command.CommandModulePortal;
+import uapi.command.internal.CommandModulePortal;
 
 module uapi.command {
     requires static uapi.service.apt;

@@ -2,7 +2,6 @@ import uapi.IModulePortal;
 import uapi.app.internal.AppModulePortal;
 
 module uapi.app {
-    requires static auto.service.annotations;
     requires static uapi.codegen;
     requires static uapi.service.apt;
     requires static uapi.config.apt;
