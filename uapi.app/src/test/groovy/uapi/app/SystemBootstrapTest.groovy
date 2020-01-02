@@ -1,7 +1,6 @@
 package uapi.app
 
 import spock.lang.Specification
-import uapi.app.internal.SystemShuttingDownEvent
 import uapi.service.IServiceModulePortal
 import uapi.service.Tags
 import uapi.app.internal.AppServiceLoader
