@@ -9,7 +9,19 @@
 
 package uapi.command.internal;
 
+import uapi.service.IService;
 import uapi.service.IServiceModulePortal;
 
+import java.lang.reflect.Constructor;
+
 public class CommandModulePortal implements IServiceModulePortal {
+
+//    @Override
+//    public IService loadService(String svcName) throws Exception {
+//        Module module = this.getClass().getModule();
+//        Class<?> svcType = module.getClassLoader().loadClass(svcName);
+//        Constructor<?> svcCons = svcType.getConstructor();
+//        Object svcObj = svcCons.newInstance();
+//        return (IService) svcObj;
+//    }
 }

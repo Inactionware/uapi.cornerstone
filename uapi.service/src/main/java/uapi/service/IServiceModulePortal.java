@@ -9,14 +9,13 @@
 
 package uapi.service;
 
+import uapi.GeneralException;
 import uapi.IModulePortal;
 import uapi.rx.Looper;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,18 +33,24 @@ public interface IServiceModulePortal extends IModulePortal {
      */
     default Iterable<IService> loadService() {
         List<IService> services = new ArrayList<>();
-        File svcFile = new File(SERVICE_FILE_NAME);
-        if (! svcFile.exists()) {
-            return services;
-        }
+        Module module = this.getClass().getModule();
+//        var path = module.getResourceAsStream(SERVICE_FILE_NAME);
+//        if (path == null) {
+//            throw new GeneralException(
+//                    "The path {} in module {} does not exist.", SERVICE_FILE_NAME, this.getClass().getModule().getName());
+//        }
+//        File svcFile = new File(path.getFile());
+//        if (! svcFile.exists()) {
+//            return services;
+//        }
         ArrayList<String> svcNames = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(SERVICE_FILE_NAME))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(module.getResourceAsStream(SERVICE_FILE_NAME)))) {
             String line = br.readLine();
             while (line != null) {
                 if (line.isBlank()) {
                     continue;
                 }
-                svcNames.add(br.readLine());
+                svcNames.add(line);
                 line = br.readLine();
             }
         } catch (IOException ex) {
@@ -58,13 +63,16 @@ public interface IServiceModulePortal extends IModulePortal {
         if (svcNames.size() == 0) {
             return services;
         }
-        Module module = this.getClass().getModule();
+
         return Looper.on(svcNames).map(svcName -> {
-            Class<?> svcType = Class.forName(module, svcName);
             Object svcObj;
             try {
-                Constructor<?> svcCons = svcType.getConstructor();
-                svcObj = svcCons.newInstance();
+//                Class<?> svcType = module.getClassLoader().loadClass(svcName);
+//                Constructor<?> svcCons = svcType.getConstructor();
+//                svcObj = svcCons.newInstance();
+                svcObj = loadService(svcName);
+            } catch (ClassNotFoundException ex) {
+                throw new GeneralException(ex);
             } catch (NoSuchMethodException ex) {
                 throw ServiceException.builder()
                         .cause(ex)
@@ -92,5 +100,13 @@ public interface IServiceModulePortal extends IModulePortal {
             }
             return (IService) svcObj;
         }).toList(services);
+    }
+
+    default IService loadService(String svcName) throws Exception {
+        Module module = this.getClass().getModule();
+        Class<?> svcType = module.getClassLoader().loadClass(svcName);
+        Constructor<?> svcCons = svcType.getConstructor();
+        Object svcObj = svcCons.newInstance();
+        return (IService) svcObj;
     }
 }

@@ -1,5 +1,6 @@
 import uapi.IModulePortal;
 import uapi.app.internal.AppModulePortal;
+import uapi.service.IService;
 
 module uapi.app {
     requires static uapi.codegen;
