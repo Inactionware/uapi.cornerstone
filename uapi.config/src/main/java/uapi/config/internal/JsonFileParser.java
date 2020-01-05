@@ -33,7 +33,7 @@ public class JsonFileParser implements IConfigFileParser {
     private static final String JSON_FILE_EXT   = "json";
 
     @Inject
-    ILogger _logger;
+    protected ILogger _logger;
 
     @Override
     public boolean isSupport(String fileExtension) {

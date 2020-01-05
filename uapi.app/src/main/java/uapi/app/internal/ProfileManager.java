@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @Service
 @Tag(Tags.PROFILE)
-class ProfileManager {
+public class ProfileManager {
 
     static final IProfile DEFAULT_PROFILE   = new IncludeAllProfile();
 

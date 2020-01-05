@@ -10,4 +10,6 @@ module uapi.log {
     requires uapi.service;
 
     provides IModulePortal with LogModulePortal;
+
+    exports uapi.log.generated to uapi.service;
 }

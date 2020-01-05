@@ -68,7 +68,7 @@ public class OptionParser {
             userCmdBuilder.addPropertyBuilder(propBuilder);
 
             // Set up model
-            var cmdMetaClassBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
+            var cmdMetaClassBuilder = CommandBuilderUtil.getCommandMetaBuilder(userCmdBuilder, classElement, builderContext);
             CommandModel cmdModel = cmdMetaClassBuilder.getTransience(CommandHandler.CMD_MODEL);
             var optModels = cmdModel.options;
             optModels.add(new OptionModel(optName, optSName, optArg, optDesc, optType, optField, setterName, CommandParser.FIELD_USER_CMD));

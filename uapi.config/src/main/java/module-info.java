@@ -13,4 +13,5 @@ module uapi.config {
     provides IModulePortal with ConfigModulePortal;
 
     exports uapi.config;
+    exports uapi.config.generated to uapi.service;
 }

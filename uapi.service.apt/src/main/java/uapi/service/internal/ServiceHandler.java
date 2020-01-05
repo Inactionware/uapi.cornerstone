@@ -35,6 +35,8 @@ import java.util.*;
 @AutoService(IAnnotationsHandler.class)
 public final class ServiceHandler extends AnnotationsHandler {
 
+    private static final String GEN_PKG_NAME    = "uapi.generated";
+
     @SuppressWarnings("unchecked")
     private static final Class<? extends Annotation>[] orderedAnnotations = new Class[] {
             Service.class, Attribute.class
@@ -144,7 +146,7 @@ public final class ServiceHandler extends AnnotationsHandler {
             // Receive service id array
             var classBuilder = builderCtx.findClassBuilder(classElement);
             var svcAnnoMirror = MoreElements.getAnnotationMirror(classElement, Service.class).get();
-            var pkgName = builderCtx.getElementUtils().getPackageOf(classElement).getQualifiedName().toString();
+//            var pkgName = builderCtx.getElementUtils().getPackageOf(classElement).getQualifiedName().toString();
             var service = classElement.getAnnotation(Service.class);
             var autoActive = service.autoActive();
             var svcType = service.type();
@@ -172,7 +174,7 @@ public final class ServiceHandler extends AnnotationsHandler {
 
             // Build class builder
             if (svcType == ServiceType.Prototype) {
-                constructPrototypeService(builderCtx, classBuilder, pkgName, serviceIds[0], classElement.getSimpleName().toString());
+                constructPrototypeService(builderCtx, classBuilder, serviceIds[0], classElement.getSimpleName().toString());
             } else {
                 constructService(builderCtx, classBuilder, autoActive);
             }
@@ -189,7 +191,7 @@ public final class ServiceHandler extends AnnotationsHandler {
     private void constructPrototypeService(
             final IBuilderContext builderContext,
             final ClassMeta.Builder instClassBuilder,
-            final String packageName,
+//            final String packageName,
             final String prototypeId,
             final String userClassName
     ) {
@@ -244,14 +246,15 @@ public final class ServiceHandler extends AnnotationsHandler {
         var tempGetIdsModel = new HashMap<>();
         tempGetIdsModel.put(VAR_SVC_IDS, new String[] { prototypeId });
         var idArr = (String[]) tempGetIdsModel.get(VAR_SVC_IDS);
-        var prototypeBuilder = builderContext.newClassBuilder(packageName, userClassName + "_Prototype_Generated");
+        var prototypeBuilder = builderContext.newClassBuilder(
+                instClassBuilder.getPackageName(), userClassName + "_Prototype_Generated");
         prototypeBuilder
-                .addAnnotationBuilder(AnnotationMeta.builder()
-                        .setName(AutoService.class.getCanonicalName())
-                        .addArgument(ArgumentMeta.builder()
-                                .setName("value")
-                                .setIsString(false)
-                                .setValue(IService.class.getCanonicalName() + ".class")))
+//                .addAnnotationBuilder(AnnotationMeta.builder()
+//                        .setName(AutoService.class.getCanonicalName())
+//                        .addArgument(ArgumentMeta.builder()
+//                                .setName("value")
+//                                .setIsString(false)
+//                                .setValue(IService.class.getCanonicalName() + ".class")))
                 .addImplement(IPrototype.class.getCanonicalName())
                 .addMethodBuilder(MethodMeta.builder()
                         .addAnnotationBuilder(AnnotationMeta.builder()
@@ -291,6 +294,9 @@ public final class ServiceHandler extends AnnotationsHandler {
 
         instClassBuilder.putTransience(VAR_IS_PROTOTYPE, true);
         instClassBuilder.putTransience(VAR_PROTOTYPE_CLASS_NAME, prototypeBuilder.getQualifiedClassName());
+
+        // Add service to service file
+        this._svcResFile.appendContent(prototypeBuilder.getQualifiedClassName() + "\n");
     }
 
     private void constructService(

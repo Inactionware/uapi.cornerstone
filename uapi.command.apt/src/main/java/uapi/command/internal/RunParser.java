@@ -46,6 +46,7 @@ public class RunParser {
                         "The element {} must be a method element", methodElement.getSimpleName().toString());
             }
             var classElement = methodElement.getEnclosingElement();
+            var cmdBuilder = builderContext.findClassBuilder(classElement);
             builderContext.checkAnnotations(classElement, Service.class, Command.class);
             builderContext.checkModifiers(methodElement, Run.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
@@ -63,10 +64,10 @@ public class RunParser {
                         "The method annotated with Run must return a boolean type - {}", runMethodName);
             }
 
-            var cmdMetaBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
+            var cmdMetaBuilder = CommandBuilderUtil.getCommandMetaBuilder(cmdBuilder, classElement, builderContext);
             CommandModel cmdModel = cmdMetaBuilder.getTransience(CommandHandler.CMD_MODEL);
 
-            var cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(classElement, builderContext);
+            var cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(cmdBuilder, classElement, builderContext);
             Map<String, Object> model = cmdExecBuilder.getTransience(MODEL_COMMAND_EXECUTOR);
             if (model != null) {
                 throw new GeneralException(

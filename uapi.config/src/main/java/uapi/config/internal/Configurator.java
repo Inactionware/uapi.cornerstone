@@ -27,11 +27,11 @@ import java.util.Map;
  */
 @Service({ ISatisfyHook.class, IConfigTracer.class })
 @Tag(Tags.CONFIG)
-class Configurator implements ISatisfyHook, IConfigTracer {
+public class Configurator implements ISatisfyHook, IConfigTracer {
 
     private final Configuration _rootConfig;
 
-    Configurator() {
+    protected Configurator() {
         this._rootConfig = Configuration.createRoot();
     }
 

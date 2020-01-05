@@ -35,7 +35,7 @@ public class EventBus implements IEventBus, IServiceLifecycle {
     private static final IntervalTime DEFAULT_AWAIT_TIME = IntervalTime.parse("100s");
 
     @Config(path="event.await-time", optional=true)
-    IntervalTime _awaitTime;
+    protected IntervalTime _awaitTime;
 
     @Inject
     @Optional

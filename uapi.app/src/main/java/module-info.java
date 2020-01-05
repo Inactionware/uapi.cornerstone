@@ -20,4 +20,5 @@ module uapi.app {
     provides IModulePortal with AppModulePortal;
 
     exports uapi.app;
+    exports uapi.app.generated to uapi.service;
 }

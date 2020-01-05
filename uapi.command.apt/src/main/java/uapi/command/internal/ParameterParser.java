@@ -1,6 +1,5 @@
 package uapi.command.internal;
 
-import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.Type;
 import uapi.codegen.*;
@@ -54,7 +53,7 @@ public class ParameterParser {
             var setterName = propBuilder.setterName();
             userCmdBuilder.addPropertyBuilder(propBuilder);
 
-            var cmdMetaBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
+            var cmdMetaBuilder = CommandBuilderUtil.getCommandMetaBuilder(userCmdBuilder, classElement, builderContext);
 
             // Set up model
             CommandModel cmdModel = cmdMetaBuilder.getTransience(CommandHandler.CMD_MODEL);

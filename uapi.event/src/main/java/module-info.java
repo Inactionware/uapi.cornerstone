@@ -14,4 +14,5 @@ module uapi.event {
     provides IModulePortal with EventModulePortal;
 
     exports uapi.event;
+    exports uapi.event.generated to uapi.service;
 }

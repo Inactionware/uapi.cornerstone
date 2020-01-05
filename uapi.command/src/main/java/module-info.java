@@ -12,4 +12,5 @@ module uapi.command {
     provides IModulePortal with CommandModulePortal;
 
     exports uapi.command;
+    exports uapi.command.generated to uapi.service;
 }

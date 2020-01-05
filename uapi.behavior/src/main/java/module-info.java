@@ -15,4 +15,5 @@ module uapi.behavior {
     provides IModulePortal with BehaviorModulePortal;
 
     exports uapi.behavior;
+    exports uapi.behavior.generated to uapi.service;
 }

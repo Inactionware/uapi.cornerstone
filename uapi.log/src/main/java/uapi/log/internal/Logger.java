@@ -26,7 +26,7 @@ public class Logger implements ILogger {
     org.slf4j.Logger _slfLogger;
 
     @Attribute(GenericAttributes.SERVE_FOR)
-    String _serveFor;
+    protected String _serveFor;
 
     private org.slf4j.Logger getLogger() {
         if (this._slfLogger == null) {

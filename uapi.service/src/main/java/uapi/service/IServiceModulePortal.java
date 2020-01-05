@@ -67,10 +67,9 @@ public interface IServiceModulePortal extends IModulePortal {
         return Looper.on(svcNames).map(svcName -> {
             Object svcObj;
             try {
-//                Class<?> svcType = module.getClassLoader().loadClass(svcName);
-//                Constructor<?> svcCons = svcType.getConstructor();
-//                svcObj = svcCons.newInstance();
-                svcObj = loadService(svcName);
+                Class<?> svcType = module.getClassLoader().loadClass(svcName);
+                Constructor<?> svcCons = svcType.getConstructor();
+                svcObj = svcCons.newInstance();
             } catch (ClassNotFoundException ex) {
                 throw new GeneralException(ex);
             } catch (NoSuchMethodException ex) {
@@ -100,13 +99,5 @@ public interface IServiceModulePortal extends IModulePortal {
             }
             return (IService) svcObj;
         }).toList(services);
-    }
-
-    default IService loadService(String svcName) throws Exception {
-        Module module = this.getClass().getModule();
-        Class<?> svcType = module.getClassLoader().loadClass(svcName);
-        Constructor<?> svcCons = svcType.getConstructor();
-        Object svcObj = svcCons.newInstance();
-        return (IService) svcObj;
     }
 }

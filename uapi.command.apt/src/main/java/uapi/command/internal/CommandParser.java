@@ -49,23 +49,23 @@ public class CommandParser {
             var cmdDesc = command.description();
             var cmdParentPath = getParentCommandPath(cmdNs, classElement, true);
 
-            // Initial command meta class builder
-            var metaBuilder = CommandBuilderUtil.getCommandMetaBuilder(classElement, builderContext);
             var cmdModel = new CommandModel();
+            // Initial user command class builder
+            var cmdBuilder = builderContext.findClassBuilder(classElement);
+            cmdBuilder.putTransience(CommandHandler.CMD_MODEL, cmdModel);
+
+            // Initial command meta class builder
+            var metaBuilder = CommandBuilderUtil.getCommandMetaBuilder(cmdBuilder, classElement, builderContext);
             metaBuilder.putTransience(CommandHandler.CMD_MODEL, cmdModel);
             var svcHelper = (IServiceHandlerHelper) builderContext.getHelper(IServiceHandlerHelper.name);
             svcHelper.becomeService(builderContext, metaBuilder, ICommandMeta.class.getCanonicalName());
 //            svcHelper.addServiceId(metaBuilder, metaBuilder.getGeneratedClassName());
 
-            // Initial user command class builder
-            var cmdBuilder = builderContext.findClassBuilder(classElement);
-            cmdBuilder.putTransience(CommandHandler.CMD_MODEL, cmdModel);
-
             // Initial command executor class builder
             var tempCmdId = builderContext.loadTemplate(Module.name, TEMP_CMD_ID);
             var model = new HashMap<String, String>();
             model.put(VAR_CMD_META_FIELD, CommandParser.FIELD_CMD_META);
-            var cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(classElement, builderContext);
+            var cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(cmdBuilder, classElement, builderContext);
             cmdExecBuilder.putTransience(FIELD_CMD_META, "_cmdMeta");
             cmdExecBuilder
                     .addImplement(ICommandExecutor.class.getCanonicalName())
@@ -73,7 +73,7 @@ public class CommandParser {
                         .addModifier(Modifier.PRIVATE)
                         .setName(FIELD_USER_CMD)
                         .setTypeName(cmdBuilder.getQualifiedClassName())
-                        .setValue(StringHelper.makeString("new {}();", cmdBuilder.getQualifiedClassName())))
+                        .setValue(StringHelper.makeString("new {}()", cmdBuilder.getQualifiedClassName())))
                     .addFieldBuilder(FieldMeta.builder()
                         .addModifier(Modifier.PRIVATE)
                         .setName(FIELD_CMD_META)

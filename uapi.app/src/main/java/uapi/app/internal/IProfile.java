@@ -14,7 +14,7 @@ import uapi.service.IService;
 /**
  * A profile to control which service is allowed to load into application
  */
-interface IProfile {
+public interface IProfile {
 
     /**
      * Check specified service can be loaded to application
