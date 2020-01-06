@@ -160,8 +160,7 @@ public final class ServiceHandler extends AnnotationsHandler {
                         .foreach(svcId::append);
                 if (svcId.length() == 0) {
                     // If the service is not a factory, using service class type
-                    svcId.append(StringHelper.makeString("{}.{}",
-                            classBuilder.getPackageName(), classElement.getSimpleName().toString()));
+                    svcId.append(classBuilder.getParentClassName());
                 }
                 serviceIds = new String[] { svcId.toString() };
             }
