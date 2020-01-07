@@ -290,8 +290,12 @@ class ServiceHandlerTest extends Specification {
                     }
                 }
             }
+            newResourceFile(_, _) >> Mock(IResourceFile) {
+                1 * appendContent(_)
+            }
         }
         def svcHandler = new ServiceHandler()
+        svcHandler.init(budrCtx)
 
         when:
         svcHandler.handleAnnotatedElements(budrCtx, Service.class, [clsElemt] as Set)

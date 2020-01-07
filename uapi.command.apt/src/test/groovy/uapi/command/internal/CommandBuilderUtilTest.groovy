@@ -19,20 +19,15 @@ class CommandBuilderUtilTest extends Specification {
                 toString() >> cmdClassName
             }
         }
+        def cmdBuilder = Mock(ClassMeta.Builder) {
+            1 * getPackageName() >> pkgName
+        }
         def builderCtx = Mock(IBuilderContext) {
-            getElementUtils() >> Mock(Elements) {
-                getPackageOf(clsElement) >> Mock(PackageElement) {
-                    getQualifiedName() >> Mock(Name) {
-                        toString() >> cmdClassPkg
-                    }
-                }
-            }
-            findClassBuilder(cmdClassPkg, _, false) >> null
-            newClassBuilder(cmdClassPkg, _) >> mockCmdMetaBuilder
+            newClassBuilder(pkgName, _) >> mockCmdMetaBuilder
         }
 
         when:
-        def cmdMetaBuilder = CommandBuilderUtil.getCommandMetaBuilder(clsElement, builderCtx)
+        def cmdMetaBuilder = CommandBuilderUtil.getCommandMetaBuilder(cmdBuilder, clsElement, builderCtx)
 
         then:
         noExceptionThrown()
@@ -40,8 +35,8 @@ class CommandBuilderUtilTest extends Specification {
         cmdMetaBuilder == mockCmdMetaBuilder
 
         where:
-        cmdClassPkg     | cmdClassName
-        'com'           | 'Command'
+        cmdClassPkg     | cmdClassName  | pkgName
+        'com'           | 'Command'     | 'pkgName'
     }
 
     def 'Test get command executor builder'() {
@@ -52,20 +47,15 @@ class CommandBuilderUtilTest extends Specification {
                 toString() >> cmdClassName
             }
         }
+        def cmdBuilder = Mock(ClassMeta.Builder) {
+            1 * getPackageName() >> pkgName
+        }
         def builderCtx = Mock(IBuilderContext) {
-            getElementUtils() >> Mock(Elements) {
-                getPackageOf(clsElement) >> Mock(PackageElement) {
-                    getQualifiedName() >> Mock(Name) {
-                        toString() >> cmdClassPkg
-                    }
-                }
-            }
-            findClassBuilder(cmdClassPkg, _, false) >> null
-            newClassBuilder(cmdClassPkg, _) >> mockCmdExecBuiler
+            newClassBuilder(pkgName, _) >> mockCmdExecBuiler
         }
 
         when:
-        def cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(clsElement, builderCtx)
+        def cmdExecBuilder = CommandBuilderUtil.getCommandExecutorBuilder(cmdBuilder, clsElement, builderCtx)
 
         then:
         noExceptionThrown()
@@ -73,7 +63,7 @@ class CommandBuilderUtilTest extends Specification {
         cmdExecBuilder == mockCmdExecBuiler
 
         where:
-        cmdClassPkg     | cmdClassName
-        'org'           | 'MyTest'
+        cmdClassPkg     | cmdClassName  | pkgName
+        'org'           | 'MyTest'      | 'pkgName'
     }
 }

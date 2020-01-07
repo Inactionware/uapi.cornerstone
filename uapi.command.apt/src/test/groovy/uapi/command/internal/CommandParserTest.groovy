@@ -210,6 +210,7 @@ class CommandParserTest extends Specification {
             findClassBuilder(pkgName, _, false) >>> [metaBuilder, execBuilder]
             findClassBuilder(_ as Element) >> Mock(ClassMeta.Builder) {
                 1 * putTransience(CommandHandler.CMD_MODEL, _)
+                getPackageName() >> pkgName
             }
             getHelper(IServiceHandlerHelper.name) >> Mock(IServiceHandlerHelper) {
                 1 * becomeService(_, _, _)

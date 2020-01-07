@@ -1,6 +1,5 @@
 package uapi.command.internal;
 
-import freemarker.template.Template;
 import uapi.GeneralException;
 import uapi.Type;
 import uapi.codegen.*;

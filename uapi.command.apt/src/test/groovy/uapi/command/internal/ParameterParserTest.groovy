@@ -124,6 +124,7 @@ class ParameterParserTest extends Specification {
             1 * checkModifiers(element, Parameter.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             findClassBuilder(classElement) >> Mock(ClassMeta.Builder) {
                 1 * addPropertyBuilder(_ as PropertyMeta.Builder)
+                getPackageName() >> pkgName
             }
             getElementUtils() >> Mock(Elements) {
                 getPackageOf(classElement) >> Mock(PackageElement) {
@@ -132,7 +133,7 @@ class ParameterParserTest extends Specification {
                     }
                 }
             }
-            findClassBuilder(pkgName, _, false) >> cmdMetaClsBuilder
+            findClassBuilder(pkgName, _ as String, false) >> cmdMetaClsBuilder
             loadTemplate(_, ParameterParser.TEMP_PARAM_METAS) >> Mock(Template)
         }
         def parser = new ParameterParser()

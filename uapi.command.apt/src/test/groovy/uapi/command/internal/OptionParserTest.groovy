@@ -165,6 +165,7 @@ class OptionParserTest extends Specification {
             1 * checkModifiers(element, Option.class, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
             findClassBuilder(classElement) >> Mock(ClassMeta.Builder) {
                 1 * addPropertyBuilder(_)
+                1 * getPackageName() >> pkgName
             }
             getElementUtils() >> Mock(Elements) {
                 getPackageOf(classElement) >> Mock(PackageElement) {
