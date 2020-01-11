@@ -275,7 +275,6 @@ class ServiceHandlerTest extends Specification {
         4 * instClsBudr.addMethodBuilder(_) >> instClsBudr
         2 * instClsBudr.putTransience(_, _)
         def protoClsBudr = Mock(ClassMeta.Builder)
-        1 * protoClsBudr.addAnnotationBuilder(_) >> protoClsBudr
         1 * protoClsBudr.addImplement(_) >> protoClsBudr
         4 * protoClsBudr.addMethodBuilder(_) >> protoClsBudr
         def budrCtx = Mock(IBuilderContext) {
