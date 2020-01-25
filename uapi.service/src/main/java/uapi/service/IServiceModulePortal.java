@@ -15,7 +15,6 @@ import uapi.rx.Looper;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,24 +33,22 @@ public interface IServiceModulePortal extends IModulePortal {
     default Iterable<IService> loadService() {
         List<IService> services = new ArrayList<>();
         Module module = this.getClass().getModule();
-//        var path = module.getResourceAsStream(SERVICE_FILE_NAME);
-//        if (path == null) {
-//            throw new GeneralException(
-//                    "The path {} in module {} does not exist.", SERVICE_FILE_NAME, this.getClass().getModule().getName());
-//        }
-//        File svcFile = new File(path.getFile());
-//        if (! svcFile.exists()) {
-//            return services;
-//        }
+
         ArrayList<String> svcNames = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(module.getResourceAsStream(SERVICE_FILE_NAME)))) {
-            String line = br.readLine();
-            while (line != null) {
-                if (line.isBlank()) {
-                    continue;
+        try (var is = module.getResourceAsStream(SERVICE_FILE_NAME)) {
+            if (is == null) {
+                // The module has no service defined
+                return services;
+            }
+            try (var br = new BufferedReader(new InputStreamReader(is))) {
+                String line = br.readLine();
+                while (line != null) {
+                    if (line.isBlank()) {
+                        continue;
+                    }
+                    svcNames.add(line);
+                    line = br.readLine();
                 }
-                svcNames.add(line);
-                line = br.readLine();
             }
         } catch (IOException ex) {
             throw ServiceException.builder()
