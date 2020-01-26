@@ -18,14 +18,20 @@ public interface IActionHandlerHelper extends IHandlerHelper {
 
     final class ActionMethodMeta {
 
+        private final boolean _isHandyOutput;
+        private final ParameterMeta _handyOutputMeta;
         private final String _methodName;
         private final ParameterMeta[] _paramMetas;
 
         public ActionMethodMeta(
                 final String methodName,
+                final boolean isHandyOutput,
+                final ParameterMeta handyOutputMeta,
                 final ParameterMeta[] parameterMetas
         ) {
             this._methodName = methodName;
+            this._isHandyOutput = isHandyOutput;
+            this._handyOutputMeta = handyOutputMeta;
             this._paramMetas = parameterMetas;
         }
 
@@ -35,6 +41,14 @@ public interface IActionHandlerHelper extends IHandlerHelper {
 
         public ParameterMeta[] parameterMetas() {
             return this._paramMetas;
+        }
+
+        public boolean isHandyOutput() {
+            return this._isHandyOutput;
+        }
+
+        public ParameterMeta handyOutputMeta() {
+            return this._handyOutputMeta;
         }
     }
 
@@ -50,6 +64,12 @@ public interface IActionHandlerHelper extends IHandlerHelper {
                 final String className
         ) {
             return new ParameterMeta(ParameterType.INPUT, index, className, null);
+        }
+
+        public static ParameterMeta newOutputMeta(
+                final String className
+        ) {
+            return new ParameterMeta(ParameterType.OUTPUT, 0, className, null);
         }
 
         public static ParameterMeta newOutputMeta(

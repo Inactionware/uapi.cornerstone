@@ -35,8 +35,8 @@ import java.util.Set;
 public class ActionHandler extends AnnotationsHandler {
 
     private static final String TEMPLATE_GET_ID         = "template/getId_method.ftl";
-    private static final String TEMPLATE_INPUT_METAS = "template/inputMetas_method.ftl";
-    private static final String TEMPLATE_OUTPUT_METAS = "template/outputMetas_method.ftl";
+    private static final String TEMPLATE_INPUT_METAS    = "template/inputMetas_method.ftl";
+    private static final String TEMPLATE_OUTPUT_METAS   = "template/outputMetas_method.ftl";
     private static final String TEMPLATE_PROCESS        = "template/process_method.ftl";
 
     private final ActionHandlerHelper _helper = new ActionHandlerHelper();
@@ -88,6 +88,8 @@ public class ActionHandler extends AnnotationsHandler {
             model.put("actionName", actionName);
             model.put("actionMethodName", actionMeta.methodName());
             model.put("actionParameterMetas", actionMeta.parameterMetas());
+            model.put("isHandyOutput", actionMeta.isHandyOutput());
+            model.put("handyOutputMeta", actionMeta.handyOutputMeta());
 
             clsBuilder
                     .addImplement(IAction.class.getCanonicalName())
@@ -188,7 +190,14 @@ public class ActionHandler extends AnnotationsHandler {
 
                 paramMetas[idx] = paramMeta;
             });
-            return new ActionMethodMeta(actionMethodName, paramMetas);
+            var isHandyOutput = false;
+            ParameterMeta handyOutputMeta = null;
+            var returnType = actionDoElement.getReturnType().toString();
+            if (idxOut.value() == 0 && ! Type.VOID.equals(returnType)) {
+                isHandyOutput = true;
+                handyOutputMeta = ParameterMeta.newOutputMeta(returnType);
+            }
+            return new ActionMethodMeta(actionMethodName, isHandyOutput, handyOutputMeta, paramMetas);
         }
     }
 }
