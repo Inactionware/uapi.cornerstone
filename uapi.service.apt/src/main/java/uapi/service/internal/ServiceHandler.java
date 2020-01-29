@@ -198,6 +198,9 @@ public final class ServiceHandler extends AnnotationsHandler {
         var tempInstCons = builderContext.loadTemplate(Module.name, TEMPLATE_INST_CONSTRUCTOR);
         var tempAttrs = builderContext.loadTemplate(Module.name, TEMPLATE_ATTRS);
         var modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
+        if (! modelReqAttrs.containsKey(VAR_ATTRS)) {
+            modelReqAttrs.put(VAR_ATTRS, new ArrayList<>());
+        }
 
         // instance service
         instClassBuilder
