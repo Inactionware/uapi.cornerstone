@@ -80,6 +80,23 @@ public interface IExecutionContext {
     }
 
     /**
+     * Get last action output, if last action has more then one output, then <code>BehaviorException</code> will be
+     * thrown.
+     *
+     * @param   <T>
+     *          The last action output type
+     * @return  The last action output or null
+     */
+    <T> T lastActionOutput();
+
+    /**
+     * Get last action outputs
+     *
+     * @return  Tha last action output
+     */
+    Object[] lastActionOutputs();
+
+    /**
      * Fire event by synchronized way
      *
      * @param   event

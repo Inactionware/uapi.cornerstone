@@ -60,6 +60,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
     public static final int INDEXED_OUTPUT_REF_INVALID              = 43;
     public static final int AUTO_WIRE_IO_NOT_MATCH                  = 44;
     public static final int UNSUPPORTED_OUTPUT_REF                  = 45;
+    public static final int LAST_ACTION_OUTPUT_NOT_ALONE            = 46;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -101,6 +102,7 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         keyCodeMapping.put(INDEXED_OUTPUT_REF_INVALID, IndexedOutputRefInvalid.KEY);
         keyCodeMapping.put(AUTO_WIRE_IO_NOT_MATCH, AutoWireIONotMatch.KEY);
         keyCodeMapping.put(UNSUPPORTED_OUTPUT_REF, UnsupportedOutputRef.KEY);
+        keyCodeMapping.put(LAST_ACTION_OUTPUT_NOT_ALONE, LastActionOutputNotAlone.KEY);
     }
 
     public BehaviorErrors() {
@@ -1104,6 +1106,27 @@ public class BehaviorErrors extends FileBasedExceptionErrors<BehaviorException> 
         @Override
         public Object[] get() {
             return new Object[] { this._refType.getCanonicalName() };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The last action output is not only one, it has {} outputs
+     */
+    public static final class LastActionOutputNotAlone extends IndexedParameters<LastActionOutputNotAlone> {
+
+        public static final String KEY = "LastActionOutputNotAlone";
+
+        private int _count;
+
+        public LastActionOutputNotAlone outputCount(final int count) {
+            this._count = count;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._count };
         }
     }
 }

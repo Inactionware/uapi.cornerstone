@@ -28,6 +28,8 @@ public class ExecutionContext implements IExecutionContext {
     private final Map<String, ActionOutputHolder> _outputs;
     private final IEventBus _eventBus;
 
+    private ActionOutputHolder _lastOutput;
+
     public ExecutionContext(final IEventBus eventBus) {
         ArgumentChecker.required(eventBus, "eventBus");
         this._globalData = new ConcurrentHashMap<>();
@@ -111,10 +113,31 @@ public class ExecutionContext implements IExecutionContext {
         this._eventBus.fire(event, callback, sync);
     }
 
+    @Override
+    public <T> T lastActionOutput() {
+        Object[] data = lastActionOutputs();
+        if (data.length != 1) {
+            throw BehaviorException.builder()
+                    .errorCode(BehaviorErrors.LAST_ACTION_OUTPUT_NOT_ALONE)
+                    .variables(new BehaviorErrors.LastActionOutputNotAlone().outputCount(data.length))
+                    .build();
+        }
+        return (T) data[0];
+    }
+
+    @Override
+    public Object[] lastActionOutputs() {
+        if (this._lastOutput == null) {
+            return behaviorInputs();
+        }
+        return this._lastOutput.getData();
+    }
+
     void setOutputs(final String actionLabel, final ActionOutputHolder outputHolder) {
         ArgumentChecker.required(actionLabel, "actionLabel");
         ArgumentChecker.required(outputHolder, "outputHolder");
         this._outputs.put(actionLabel, outputHolder);
+        this._lastOutput = outputHolder;
     }
 
     Object getOutput(final IOutputReference ref) {

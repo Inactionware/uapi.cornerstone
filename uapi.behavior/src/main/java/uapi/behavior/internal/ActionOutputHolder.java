@@ -38,6 +38,10 @@ class ActionOutputHolder {
         });
     }
 
+    Object[] getData() {
+        return this._outData;
+    }
+
     Object getData(final String name) {
         return this._namedDatas.get(name);
     }
