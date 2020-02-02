@@ -19,15 +19,16 @@ public class AttributedEvent extends PlainEvent implements IAttributed {
         this._attributes = new HashMap<>();
     }
 
-    public Object set(Object key, Object attribute) {
+    @Override
+    public <T> T set(Object key, Object attribute) {
         ArgumentChecker.required(key, "key");
-        return this._attributes.put(key, attribute);
+        return (T) this._attributes.put(key, attribute);
     }
 
     @Override
-    public Object get(Object key) {
+    public <T> T get(Object key) {
         ArgumentChecker.required(key, "key");
-        return this._attributes.get(key);
+        return (T) this._attributes.get(key);
     }
 
     @Override
