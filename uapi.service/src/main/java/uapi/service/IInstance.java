@@ -9,11 +9,12 @@
 
 package uapi.service;
 
+import uapi.common.IAttributed;
 import uapi.rx.Looper;
 
 import java.util.Map;
 
-public interface IInstance extends IService {
+public interface IInstance extends IService, IAttributed {
 
     String METHOD_PROTOTYPE_ID  = "prototypeId";
     String METHOD_ATTRIBUTES    = "attributes";

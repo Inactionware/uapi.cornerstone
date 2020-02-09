@@ -28,4 +28,11 @@ public @interface Attribute {
      * @return  Attribute name
      */
     String value();
+
+    /**
+     * Is the attribute optional.
+     *
+     * @return  Is the attribute optional
+     */
+    boolean optional() default true;
 }

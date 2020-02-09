@@ -46,6 +46,8 @@ public final class ServiceHandler extends AnnotationsHandler {
     private static final String TEMPLATE_REQ_ATTRS          = "template/requiredAttributes_method.ftl";
     private static final String TEMPLATE_INST_CONSTRUCTOR   = "template/instance_constructor.ftl";
     private static final String TEMPLATE_ATTRS              = "template/attributes_method.ftl";
+    private static final String TEMPLATE_SET                = "template/set_method.ftl";
+    private static final String TEMPLATE_GET                = "template/get_method.ftl";
 
     private static final String MODEL_GET_IDS               = "ModelGetId";
     private static final String MODEL_REQ_ATTRS             = "ModelRequiredAttributes";
@@ -115,17 +117,20 @@ public final class ServiceHandler extends AnnotationsHandler {
 
             var annoAttr = fieldElement.getAnnotation(Attribute.class);
             var attrName = annoAttr.value();
+            var isAttrOptional = annoAttr.optional();
             var attrField = fieldElement.getSimpleName().toString();
             var attrFieldType = Type.toQType(fieldElement.asType().toString());
             var instClassBuilder = builderCtx.findClassBuilder(classElement);
-            var modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
-            var requiredAttrs = (List<AttributeMode>) modelReqAttrs.get(VAR_ATTRS);
-            if (requiredAttrs == null) {
-                requiredAttrs = new ArrayList<>();
-                modelReqAttrs.put(VAR_ATTRS, requiredAttrs);
+            if (! isAttrOptional) {
+                var modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
+                var requiredAttrs = (List<AttributeMode>) modelReqAttrs.get(VAR_ATTRS);
+                if (requiredAttrs == null) {
+                    requiredAttrs = new ArrayList<>();
+                    modelReqAttrs.put(VAR_ATTRS, requiredAttrs);
+                }
+                var attrInfo = new AttributeMode(attrName, attrField, attrFieldType, isAttrOptional);
+                requiredAttrs.add(attrInfo);
             }
-            var attrInfo = new AttributeMode(attrName, attrField, attrFieldType);
-            requiredAttrs.add(attrInfo);
         });
     }
 
@@ -197,6 +202,8 @@ public final class ServiceHandler extends AnnotationsHandler {
         var tempReqAttrs = builderContext.loadTemplate(Module.name, TEMPLATE_REQ_ATTRS);
         var tempInstCons = builderContext.loadTemplate(Module.name, TEMPLATE_INST_CONSTRUCTOR);
         var tempAttrs = builderContext.loadTemplate(Module.name, TEMPLATE_ATTRS);
+        var tempSet = builderContext.loadTemplate(Module.name, TEMPLATE_SET);
+        var tempGet = builderContext.loadTemplate(Module.name, TEMPLATE_GET);
         var modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
         if (! modelReqAttrs.containsKey(VAR_ATTRS)) {
             modelReqAttrs.put(VAR_ATTRS, new ArrayList<>());
@@ -221,6 +228,63 @@ public final class ServiceHandler extends AnnotationsHandler {
                         .addCodeBuilder(CodeMeta.builder()
                                 .setModel(modelReqAttrs)
                                 .setTemplate(tempInstCons)))
+                .addMethodBuilder(MethodMeta.builder()
+                        .setName("set")
+                        .addModifier(Modifier.PUBLIC)
+                        .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
+                        .setGenericTypeName(Type.GENERIC_T)
+                        .setReturnTypeName(Type.GENERIC_T)
+                        .addParameterBuilder(ParameterMeta.builder()
+                                .setName("key")
+                                .setType(Type.Q_OBJECT))
+                        .addParameterBuilder(ParameterMeta.builder()
+                                .setName("attribute")
+                                .setType(Type.Q_OBJECT))
+                        .addCodeBuilder(CodeMeta.builder()
+                                .setTemplate(tempSet)
+                                .setModel(emptyModel)))
+                .addMethodBuilder(MethodMeta.builder()
+                        .setName("get")
+                        .addModifier(Modifier.PUBLIC)
+                        .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
+                        .setGenericTypeName(Type.GENERIC_T)
+                        .setReturnTypeName(Type.GENERIC_T)
+                        .addParameterBuilder(ParameterMeta.builder()
+                                .setName("key")
+                                .setType(Type.Q_OBJECT))
+                        .addCodeBuilder(CodeMeta.builder()
+                                .setTemplate(tempGet)
+                                .setModel(emptyModel)))
+                .addMethodBuilder(MethodMeta.builder()
+                        .setName("contains")
+                        .addModifier(Modifier.PUBLIC)
+                        .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
+                        .setReturnTypeName(Type.BOOLEAN)
+                        .addParameterBuilder(ParameterMeta.builder()
+                                .setName("key")
+                                .setType(Type.Q_OBJECT))
+                        .addParameterBuilder(ParameterMeta.builder()
+                                .setName("value")
+                                .setType(Type.Q_OBJECT))
+                        .addCodeBuilder(CodeMeta.builder()
+                                .addRawCode("return uapi.common.Attributed.contains(key, value, this._attributes);")))
+                .addMethodBuilder(MethodMeta.builder()
+                        .setName("contains")
+                        .addModifier(Modifier.PUBLIC)
+                        .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
+                        .setReturnTypeName(Type.BOOLEAN)
+                        .addParameterBuilder(ParameterMeta.builder()
+                                .setName("attributes")
+                                .setType("java.util.Map<Object, Object>"))
+                        .addCodeBuilder(CodeMeta.builder()
+                                .addRawCode("return uapi.common.Attributed.contains(attributes, this._attributes);")))
+                .addMethodBuilder(MethodMeta.builder()
+                        .setName("count")
+                        .addModifier(Modifier.PUBLIC)
+                        .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
+                        .setReturnTypeName(Type.INTEGER)
+                        .addCodeBuilder(CodeMeta.builder()
+                                .addRawCode("return this._attributes.size();")))
                 .addMethodBuilder(MethodMeta.builder()
                         .setName(IInstance.METHOD_ATTRIBUTES)
                         .setReturnTypeName("java.util.Map<String, ?>")
@@ -345,15 +409,18 @@ public final class ServiceHandler extends AnnotationsHandler {
         private String _name;
         private String _field;
         private String _type;
+        private boolean _optional;
 
         private AttributeMode(
                 final String name,
                 final String field,
-                final String type
+                final String type,
+                final boolean optional
         ) {
             this._name = name;
             this._field = field;
             this._type = type;
+            this._optional = optional;
         }
 
         public String getName() {
@@ -368,8 +435,14 @@ public final class ServiceHandler extends AnnotationsHandler {
             return this._type;
         }
 
+        public boolean isOptional() {
+            return this._optional;
+        }
+
         public String toString() {
-            return StringHelper.makeString("name={}, field={}, type={}", getName(), this._field, this._type);
+            return StringHelper.makeString(
+                    "name={}, field={}, type={}, optional={}",
+                    getName(), this._field, this._type, this._optional);
         }
     }
 

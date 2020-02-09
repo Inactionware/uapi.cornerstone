@@ -1,3 +1,4 @@
 1.1.0
     - Support Java module.
     - Collect uapi module service information at compiling time to help generate uapi meta file.
+    - Make IInstance interface extends IAttributed interface and make ServiceHandler generate code to implement all IAttributed defined methods.
