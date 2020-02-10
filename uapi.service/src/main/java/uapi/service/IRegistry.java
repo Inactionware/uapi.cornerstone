@@ -140,7 +140,7 @@ public interface IRegistry {
      */
     <T> T findService(
             final String serviceId,
-            final Map<String, ?> attributes
+            final Map<Object, Object> attributes
     ) throws ServiceException;
 
     /**
@@ -158,7 +158,7 @@ public interface IRegistry {
      */
     <T> T findService(
             final Class serviceType,
-            final Map<String, ?> attributes
+            final Map<Object, Object> attributes
     ) throws ServiceException;
 
     /**

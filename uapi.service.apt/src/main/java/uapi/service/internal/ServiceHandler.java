@@ -216,15 +216,15 @@ public final class ServiceHandler extends AnnotationsHandler {
                         .setName("_attributes")
                         .addModifier(Modifier.PRIVATE)
                         .setIsMap(true)
-                        .setKeyTypeName(Type.STRING)
-                        .setTypeName("?"))
+                        .setKeyTypeName(Type.OBJECT)
+                        .setTypeName(Type.OBJECT))
                 // Constructor
                 .addMethodBuilder(MethodMeta.builder()
                         .setName(instClassBuilder.getGeneratedClassName())
                         .addModifier(Modifier.PUBLIC)
                         .addParameterBuilder(ParameterMeta.builder()
                                 .setName("attributes")
-                                .setType("java.util.Map<String, ?>"))
+                                .setType("java.util.Map<Object, Object>"))
                         .addCodeBuilder(CodeMeta.builder()
                                 .setModel(modelReqAttrs)
                                 .setTemplate(tempInstCons)))
@@ -287,7 +287,7 @@ public final class ServiceHandler extends AnnotationsHandler {
                                 .addRawCode("return this._attributes.size();")))
                 .addMethodBuilder(MethodMeta.builder()
                         .setName(IInstance.METHOD_ATTRIBUTES)
-                        .setReturnTypeName("java.util.Map<String, ?>")
+                        .setReturnTypeName("java.util.Map<Object, Object>")
                         .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
                         .addModifier(Modifier.PUBLIC)
                         .addCodeBuilder(CodeMeta.builder()
@@ -315,12 +315,6 @@ public final class ServiceHandler extends AnnotationsHandler {
         var prototypeBuilder = builderContext.newClassBuilder(
                 instClassBuilder.getPackageName(), userClassName + "_Prototype_Generated");
         prototypeBuilder
-//                .addAnnotationBuilder(AnnotationMeta.builder()
-//                        .setName(AutoService.class.getCanonicalName())
-//                        .addArgument(ArgumentMeta.builder()
-//                                .setName("value")
-//                                .setIsString(false)
-//                                .setValue(IService.class.getCanonicalName() + ".class")))
                 .addImplement(IPrototype.class.getCanonicalName())
                 .addMethodBuilder(MethodMeta.builder()
                         .addAnnotationBuilder(AnnotationMeta.builder()
@@ -354,7 +348,7 @@ public final class ServiceHandler extends AnnotationsHandler {
                         .setReturnTypeName(IInstance.class.getCanonicalName())
                         .addParameterBuilder(ParameterMeta.builder()
                                 .setName("attributes")
-                                .setType("java.util.Map<String, ?>"))
+                                .setType("java.util.Map<Object, Object>"))
                         .addCodeBuilder(CodeMeta.builder()
                                 .addRawCode("return new {}(attributes);", instClassBuilder.getGeneratedClassName())));
 
@@ -375,12 +369,6 @@ public final class ServiceHandler extends AnnotationsHandler {
 
         // Build class builder
         classBuilder
-//                .addAnnotationBuilder(AnnotationMeta.builder()
-//                        .setName(AutoService.class.getCanonicalName())
-//                        .addArgument(ArgumentMeta.builder()
-//                                .setName("value")
-//                                .setIsString(false)
-//                                .setValue(IService.class.getCanonicalName() + ".class")))
                 .addImplement(IService.class.getCanonicalName())
                 .addMethodBuilder(MethodMeta.builder()
                         .addAnnotationBuilder(AnnotationMeta.builder()

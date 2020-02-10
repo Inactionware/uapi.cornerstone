@@ -28,13 +28,38 @@ class IInstanceTest extends Specification {
     private static class TestInstance implements IInstance {
 
         @Override
-        Map<String, ?> attributes() {
+        Map<Object, Object> attributes() {
             return ['a': 'b', 'c': 'd']
         }
 
         @Override
         String prototypeId() {
             return 'prototypeId'
+        }
+
+        @Override
+        def <T> T get(Object key) {
+            return null
+        }
+
+        @Override
+        def <T> T set(Object key, Object value) {
+            return null
+        }
+
+        @Override
+        boolean contains(Object key, Object value) {
+            return false
+        }
+
+        @Override
+        boolean contains(Map<Object, Object> attributes) {
+            return false
+        }
+
+        @Override
+        int count() {
+            return 0
         }
     }
 }

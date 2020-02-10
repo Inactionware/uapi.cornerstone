@@ -19,7 +19,7 @@ public interface IInstance extends IService, IAttributed {
     String METHOD_PROTOTYPE_ID  = "prototypeId";
     String METHOD_ATTRIBUTES    = "attributes";
 
-    Map<String, ?> attributes();
+    Map<Object, Object> attributes();
 
     String prototypeId();
 

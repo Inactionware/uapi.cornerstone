@@ -26,7 +26,7 @@ public class PrototypeServiceHolder extends ServiceHolder {
     }
 
     IInstance newInstance(
-            final Map<String, ?> attributes
+            final Map<Object, Object> attributes
     ) {
         ArgumentChecker.required(attributes, "attributes");
 

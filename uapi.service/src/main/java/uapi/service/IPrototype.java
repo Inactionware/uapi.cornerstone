@@ -30,5 +30,5 @@ public interface IPrototype extends IService {
      *          The attribute which is used in new instance
      * @return  The created instance
      */
-    IInstance newInstance(Map<String, ?> attributes);
+    IInstance newInstance(Map<Object, Object> attributes);
 }

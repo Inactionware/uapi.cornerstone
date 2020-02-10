@@ -192,7 +192,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     @Override
     public <T> T findService(
             final Class serviceType,
-            final Map<String, ?> attributes
+            final Map<Object, Object> attributes
     ) throws ServiceException {
         return findService(serviceType.getName(), attributes);
     }
@@ -200,7 +200,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     @Override
     public <T> T findService(
             final String serviceId,
-            final Map<String, ?> attributes
+            final Map<Object, Object> attributes
     ) throws ServiceException {
         ArgumentChecker.required(serviceId, "serviceId");
         ArgumentChecker.required(attributes, "attributes");
@@ -440,8 +440,8 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                 });
     }
 
-    private Map<String, ?> initInstanceAttributes(ServiceHolder refSvcHolder) {
-        Map<String, Object> attributes = new HashMap<>();
+    private Map<Object, Object> initInstanceAttributes(ServiceHolder refSvcHolder) {
+        Map<Object, Object> attributes = new HashMap<>();
 
         var refId = refSvcHolder.getId();
         var refBy = refSvcHolder.getId();
@@ -462,7 +462,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     private void setDependency(
             final ServiceHolder hostSvc,
             final ServiceHolder dependencySvc,
-            final Map<String, ?> attributes
+            final Map<Object, Object> attributes
     ) {
         if (dependencySvc instanceof PrototypeServiceHolder) {
             // Get service instance and register it then set instance service holder

@@ -272,13 +272,13 @@ class ServiceHandlerTest extends Specification {
         }
         1 * instClsBudr.addImplement(_) >> instClsBudr
         1 * instClsBudr.addFieldBuilder(_) >> instClsBudr
-        4 * instClsBudr.addMethodBuilder(_) >> instClsBudr
+        9 * instClsBudr.addMethodBuilder(_) >> instClsBudr
         2 * instClsBudr.putTransience(_, _)
         def protoClsBudr = Mock(ClassMeta.Builder)
         1 * protoClsBudr.addImplement(_) >> protoClsBudr
         4 * protoClsBudr.addMethodBuilder(_) >> protoClsBudr
         def budrCtx = Mock(IBuilderContext) {
-            4 * loadTemplate(_, _) >> Mock(Template)
+            6 * loadTemplate(_, _) >> Mock(Template)
             findClassBuilder(clsElemt) >> instClsBudr
             1 * newClassBuilder(_, _) >> protoClsBudr
             getLogger() >> Mock(LogSupport)
