@@ -12,7 +12,7 @@ public class BehaviorSuccess {
         this._outputs = outputs;
     }
 
-    public Object inputs() {
+    public Object[] inputs() {
         return this._inputs;
     }
 
