@@ -10,7 +10,7 @@ import uapi.rx.Looper;
 /**
  * The class represent a execution of one behavior
  */
-public class Execution implements IIdentifiable<ExecutionIdentify> {
+public class Execution implements IIdentifiable<IIdentifiable> {
 
     private final ExecutionIdentify _id;
     private final boolean _traceable;

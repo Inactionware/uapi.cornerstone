@@ -42,7 +42,7 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
 
     private final Lock _lock;
 
-    private final Map<String, IResponsible> _responsibles;
+    private final Map<String, Responsible> _responsibles;
 
     public ResponsibleRegistry() {
         this._actionRepo = new Repository<>();
