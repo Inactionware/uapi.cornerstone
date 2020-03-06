@@ -1,1 +1,2 @@
+- Add code to activate prototype service before it is used for creating instance service.
 - Support Java module.
