@@ -21,7 +21,7 @@ public interface IPrototype extends IService {
      *
      * @return  The attribute list
      */
-    String[] attributes();
+    Object[] attributes();
 
     /**
      * Create new instance from the prototype

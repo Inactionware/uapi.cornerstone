@@ -191,7 +191,7 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
 
     @Override
     public <T> T findService(
-            final Class serviceType,
+            final Class<?> serviceType,
             final Map<Object, Object> attributes
     ) throws ServiceException {
         return findService(serviceType.getName(), attributes);
@@ -217,7 +217,17 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                     .variables(new ServiceErrors.NotAPrototypeService().serviceId(serviceId))
                     .build();
         }
-        var instance = ((PrototypeServiceHolder) svcHolder).newInstance(attributes);
+
+        var protoSvcHolder = (PrototypeServiceHolder) svcHolder;
+        var protoSvc = this._svcActivator.activateService(protoSvcHolder);
+        if (protoSvc == null) {
+            throw ServiceException.builder()
+                    .errorCode(ServiceErrors.PROTOTYPE_SERVICE_NOT_ACTIVATED)
+                    .variables(new ServiceErrors.PrototypeServiceNotActivated().serviceId(protoSvcHolder.getId()))
+                    .build();
+
+        }
+        var instance = (protoSvcHolder).newInstance(attributes);
         register(instance);
         var instanceHolder = findServiceHolder(instance.getIds()[0]);
         if (instanceHolder == null) {

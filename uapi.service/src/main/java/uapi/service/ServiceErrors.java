@@ -51,6 +51,7 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
     public static final int NO_DEFAULT_CONSTRUCTOR_IN_SERVICE   = 24;
     public static final int CREATE_SERVICE_FAILED               = 25;
     public static final int SERVICE_IS_NOT_ISERVICE_TYPE        = 26;
+    public static final int PROTOTYPE_SERVICE_NOT_ACTIVATED     = 27;
 
     private static final Map<Integer, String> keyCodeMapping;
 
@@ -82,6 +83,7 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         keyCodeMapping.put(NO_DEFAULT_CONSTRUCTOR_IN_SERVICE, NoDefaultConstructorInService.KEY);
         keyCodeMapping.put(CREATE_SERVICE_FAILED, CreateServiceFailed.KEY);
         keyCodeMapping.put(SERVICE_IS_NOT_ISERVICE_TYPE, ServiceIsNotIServiceType.KEY);
+        keyCodeMapping.put(PROTOTYPE_SERVICE_NOT_ACTIVATED, PrototypeServiceNotActivated.KEY);
     }
 
     @Override
@@ -692,6 +694,27 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
         @Override
         public Object[] get() {
             return new Object[] { this._svcName, this._moduleName };
+        }
+    }
+
+    /**
+     * Error string template:
+     *      The prototype service can't be activated - {}
+     */
+    public static final class PrototypeServiceNotActivated extends IndexedParameters<PrototypeServiceNotActivated> {
+
+        private static final String KEY = "PrototypeServiceNotActivated";
+
+        private String _svcId;
+
+        public PrototypeServiceNotActivated serviceId(final String id) {
+            this._svcId = id;
+            return this;
+        }
+
+        @Override
+        public Object[] get() {
+            return new Object[] { this._svcId };
         }
     }
 }

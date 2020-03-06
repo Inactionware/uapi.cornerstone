@@ -157,7 +157,7 @@ public interface IRegistry {
      *          The prototype service can't be found or creating instance service failed
      */
     <T> T findService(
-            final Class serviceType,
+            final Class<?> serviceType,
             final Map<Object, Object> attributes
     ) throws ServiceException;
 
