@@ -2,6 +2,8 @@ package uapi.behavior;
 
 import uapi.common.Functionals;
 
+import java.util.Map;
+
 /**
  * A builder for behavior creation
  */
@@ -81,6 +83,28 @@ public interface IBehaviorBuilder {
      *          No action in the repository, see {@link BehaviorErrors.ActionNotFound}
      */
     IBehaviorBuilder then(Class<?> actionType, String label, Object... inputs) throws BehaviorException;
+
+    /**
+     * Set attribute for current action.
+     *
+     * @param   attrs
+     *          The attribute for current action
+     * @return  This behavior build instance
+     * @throws  BehaviorException
+     *          Current action does not support attribute
+     */
+    IBehaviorBuilder attributes(Map<Object, Object> attrs) throws BehaviorException;
+
+    /**
+     * Set input for current action
+     *
+     * @param   inputs
+     *          The inputs for current action
+     * @return  This behavior builder instance
+     * @throws  BehaviorException
+     *          Current action does not support inputs
+     */
+    IBehaviorBuilder inputs(Object... inputs) throws BehaviorException;
 
     /**
      * Set next an anonymous action which return nothing when current branch condition is satisfied.

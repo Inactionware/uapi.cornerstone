@@ -156,135 +156,223 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         ArgumentChecker.notNull(service, "service");
         registerService(serviceFrom, service, serviceIds, new Dependency[0]);
     }
+//
+//    @Override
+//    public <T> T findService(
+//            final Class<T> serviceType
+//    ) throws ServiceException {
+//        ArgumentChecker.notNull(serviceType, "serviceType");
+//        return findService(serviceType.getName());
+//    }
 
-    @Override
-    public <T> T findService(
-            final Class<T> serviceType
-    ) throws ServiceException {
-        ArgumentChecker.notNull(serviceType, "serviceType");
-        return findService(serviceType.getName());
-    }
+//    @Override
+//    @SuppressWarnings("unchecked")
+//    public <T> T findService(
+//            final String serviceId
+//    ) throws ServiceException {
+//        ArgumentChecker.notEmpty(serviceId, "serviceId");
+//        var svcs = findServices(serviceId);
+//        if (svcs.size() == 1) {
+//            return (T) svcs.get(0);
+//        }
+//        if (svcs.size() == 0) {
+//            throw ServiceException.builder()
+//                    .errorCode(ServiceErrors.NO_SERVICE_FOUND)
+//                    .variables(new ServiceErrors.NoServiceFound()
+//                            .serviceId(serviceId))
+//                    .build();
+//        }
+//        throw ServiceException.builder()
+//                .errorCode(ServiceErrors.MULTIPLE_SERVICE_FOUND)
+//                .variables(new ServiceErrors.MultipleServiceFound()
+//                    .serviceId(serviceId))
+//                .build();
+//    }
+
+//    @Override
+//    public <T> T findService(
+//            final Class<?> serviceType,
+//            final Map<Object, Object> attributes
+//    ) throws ServiceException {
+//        return findService(serviceType.getName(), attributes);
+//    }
+//
+//    @Override
+//    public <T> T findService(
+//            final String serviceId,
+//            final Map<Object, Object> attributes
+//    ) throws ServiceException {
+//        return findService(serviceId, QualifiedServiceId.FROM_LOCAL, new HashMap<>());
+//    }
+
+//    @Override
+//    public <T> T findService(
+//            final String serviceId,
+//            final String serviceFrom
+//    ) throws ServiceException {
+//        ArgumentChecker.required(serviceId, "serviceId");
+//        ArgumentChecker.required(serviceFrom, "serviceFrom");
+//        ServiceHolder svcHolder = findServiceHolder(serviceId, serviceFrom);
+//        if (svcHolder == null) {
+//            return null;
+//        }
+//        T svc = getService(svcHolder);
+//        if (svc == null) {
+//            throw ServiceException.builder()
+//                    .errorCode(ServiceErrors.NO_SERVICE_FOUND)
+//                    .variables(new ServiceErrors.NoServiceFound()
+//                            .serviceId(serviceId))
+//                    .build();
+//        }
+//        return svc;
+//    }
+
+//    @Override
+//    public <T> T findService(
+//            final String serviceId,
+//            final String serviceFrom,
+//            final Map<Object, Object> attributes
+//    ) throws ServiceException {
+//        ArgumentChecker.required(serviceId, "serviceId");
+//        ArgumentChecker.required(serviceFrom, "serviceFrom");
+//        ArgumentChecker.required(attributes, "attributes");
+//        var svcHolder = findServiceHolder(serviceId, serviceFrom);
+//        if (svcHolder == null) {
+//            throw ServiceException.builder()
+//                    .errorCode(ServiceErrors.NO_SERVICE_FOUND)
+//                    .variables(new ServiceErrors.NoServiceFound().serviceId(serviceId))
+//                    .build();
+//        }
+//
+//        T svc = getService(svcHolder, attributes);
+//        if (svc == null) {
+//            throw ServiceException.builder()
+//                    .errorCode(ServiceErrors.NO_SERVICE_FOUND)
+//                    .variables(new ServiceErrors.NoServiceFound().serviceId(serviceId))
+//                    .build();
+//        }
+//        return svc;
+
+//        if (! (svcHolder instanceof PrototypeServiceHolder)) {
+//            throw ServiceException.builder()
+//                    .errorCode(ServiceErrors.NOT_A_PROTOTYPE_SERVICE)
+//                    .variables(new ServiceErrors.NotAPrototypeService().serviceId(serviceId))
+//                    .build();
+//        }
+//
+//        var protoSvcHolder = (PrototypeServiceHolder) svcHolder;
+////        IPrototype protoSvc = this._svcActivator.activateService(protoSvcHolder);
+//        IPrototype protoSvc = getService(svcHolder, null);
+//        if (protoSvc == null) {
+//            throw ServiceException.builder()
+//                    .errorCode(ServiceErrors.PROTOTYPE_SERVICE_NOT_ACTIVATED)
+//                    .variables(new ServiceErrors.PrototypeServiceNotActivated().serviceId(protoSvcHolder.getId()))
+//                    .build();
+//
+//        }
+//        var instance = protoSvc.newInstance(attributes);
+//        register(instance);
+//        var instanceHolder = findServiceHolder(instance.getIds()[0]);
+//        if (instanceHolder == null) {
+//            throw ServiceException.builder()
+//                    .errorCode(ServiceErrors.INSTANCE_SERVICE_REGISTER_FAILED)
+//                    .variables(new ServiceErrors.InstanceServiceRegisterFailed()
+//                            .instanceServiceId(instance.getIds()[0])
+//                            .prototypeServiceId(svcHolder.getId()))
+//                    .build();
+//        }
+////        return this._svcActivator.activateService(instanceHolder);
+//        return getService(instanceHolder);
+//    }
+
+//    @Override
+//    public <T> List<T> findServices(
+//            final Class<T> serviceType
+//    ) {
+//        ArgumentChecker.notNull(serviceType, "serviceType");
+//        return findServices(serviceType.getName());
+//    }
+
+//    @Override
+//    @SuppressWarnings("unchecked")
+//    public <T> List<T> findServices(
+//            final String serviceId
+//    ) {
+//        ArgumentChecker.notEmpty(serviceId, "serviceId");
+//        var svcHolders = findServiceHolders(serviceId);
+//        if (svcHolders == null || svcHolders.size() == 0) {
+//            return Collections.emptyList();
+//        }
+//        return (List<T>) Looper.on(svcHolders)
+////                .map(this._svcActivator::activateService)
+//                .map(this::getService)
+//                .filter(Objects::nonNull)
+//                .toList();
+//    }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T findService(
-            final String serviceId
-    ) throws ServiceException {
-        ArgumentChecker.notEmpty(serviceId, "serviceId");
-        var svcs = findServices(serviceId);
-        if (svcs.size() == 1) {
-            return (T) svcs.get(0);
-        }
-        if (svcs.size() == 0) {
-            throw ServiceException.builder()
-                    .errorCode(ServiceErrors.NO_SERVICE_FOUND)
-                    .variables(new ServiceErrors.NoServiceFound()
-                            .serviceId(serviceId))
-                    .build();
-        }
-        throw ServiceException.builder()
-                .errorCode(ServiceErrors.MULTIPLE_SERVICE_FOUND)
-                .variables(new ServiceErrors.MultipleServiceFound()
-                    .serviceId(serviceId))
-                .build();
-    }
-
-    @Override
-    public <T> T findService(
-            final Class<?> serviceType,
-            final Map<Object, Object> attributes
-    ) throws ServiceException {
-        return findService(serviceType.getName(), attributes);
-    }
-
-    @Override
-    public <T> T findService(
+    public <T> List<T> findServices(
             final String serviceId,
+            final String serviceFrom,
             final Map<Object, Object> attributes
-    ) throws ServiceException {
+    ) {
         ArgumentChecker.required(serviceId, "serviceId");
-        ArgumentChecker.required(attributes, "attributes");
-        var svcHolder = findServiceHolder(serviceId, QualifiedServiceId.FROM_LOCAL);
-        if (svcHolder == null) {
-            throw ServiceException.builder()
-                    .errorCode(ServiceErrors.NO_SERVICE_FOUND)
-                    .variables(new ServiceErrors.NoServiceFound().serviceId(serviceId))
-                    .build();
-        }
-        if (! (svcHolder instanceof PrototypeServiceHolder)) {
-            throw ServiceException.builder()
-                    .errorCode(ServiceErrors.NOT_A_PROTOTYPE_SERVICE)
-                    .variables(new ServiceErrors.NotAPrototypeService().serviceId(serviceId))
-                    .build();
-        }
-
-        var protoSvcHolder = (PrototypeServiceHolder) svcHolder;
-        var protoSvc = this._svcActivator.activateService(protoSvcHolder);
-        if (protoSvc == null) {
-            throw ServiceException.builder()
-                    .errorCode(ServiceErrors.PROTOTYPE_SERVICE_NOT_ACTIVATED)
-                    .variables(new ServiceErrors.PrototypeServiceNotActivated().serviceId(protoSvcHolder.getId()))
-                    .build();
-
-        }
-        var instance = (protoSvcHolder).newInstance(attributes);
-        register(instance);
-        var instanceHolder = findServiceHolder(instance.getIds()[0]);
-        if (instanceHolder == null) {
-            throw ServiceException.builder()
-                    .errorCode(ServiceErrors.INSTANCE_SERVICE_REGISTER_FAILED)
-                    .variables(new ServiceErrors.InstanceServiceRegisterFailed()
-                            .instanceServiceId(instance.getIds()[0])
-                            .prototypeServiceId(svcHolder.getId()))
-                    .build();
-        }
-        return this._svcActivator.activateService(instanceHolder);
-    }
-
-    @Override
-    public <T> List<T> findServices(
-            final Class<T> serviceType
-    ) {
-        ArgumentChecker.notNull(serviceType, "serviceType");
-        return findServices(serviceType.getName());
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> List<T> findServices(
-            final String serviceId
-    ) {
-        ArgumentChecker.notEmpty(serviceId, "serviceId");
-        var svcHolders = findServiceHolders(serviceId);
+        ArgumentChecker.required(serviceFrom, "serviceFrom");
+        var svcHolders = findServiceHolders(serviceId, serviceFrom);
         if (svcHolders == null || svcHolders.size() == 0) {
             return Collections.emptyList();
         }
         return (List<T>) Looper.on(svcHolders)
-                .map(this._svcActivator::activateService)
-                .filter(svc -> svc != null)
+                .map(svcHolder -> getService(svcHolder, attributes == null ? Collections.emptyMap() : attributes))
+                .filter(Objects::nonNull)
                 .toList();
     }
 
-    @Override
-    public <T> T findService(
-            final String serviceId,
-            final String serviceFrom
-    ) throws ServiceException {
-        ArgumentChecker.required(serviceId, "serviceId");
-        ArgumentChecker.required(serviceFrom, "serviceFrom");
-        ServiceHolder svcHolder = findServiceHolder(serviceId, serviceFrom);
+    private <T> T getService(
+            final ServiceHolder svcHolder
+    ) {
+        return getService(svcHolder, Collections.emptyMap());
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T getService(
+            final ServiceHolder svcHolder,
+            Map<Object, Object> attrs
+    ) {
         if (svcHolder == null) {
             return null;
         }
-        T svc = this._svcActivator.activateService(svcHolder);
+        Object svc = this._svcActivator.activateService(svcHolder);
         if (svc == null) {
-            throw ServiceException.builder()
-                    .errorCode(ServiceErrors.NO_SERVICE_FOUND)
-                    .variables(new ServiceErrors.NoServiceFound()
-                            .serviceId(serviceId))
-                    .build();
+            this._logger.warn("Can't activate service - {}", svcHolder.getId());
+            return null;
         }
-        return svc;
+        if (svc instanceof IPrototype) {
+            if (attrs == null) {
+                attrs = Collections.emptyMap();
+            }
+            IInstance instance;
+            try {
+                instance = ((IPrototype) svc).newInstance(attrs);
+            } catch (Exception ex) {
+                this._logger.error(
+                        ex, "Got an exception when create a new instance of a prototype - {}", svcHolder.getId());
+                return null;
+            }
+            register(instance);
+            var instanceHolder = findServiceHolder(instance.getIds()[0]);
+            if (instanceHolder == null) {
+                this._logger.error("Register instance failed - {}", svcHolder.getId());
+                return null;
+            }
+            return this._svcActivator.activateService(instanceHolder);
+        } else {
+            if (attrs != null && attrs.size() > 0) {
+                this._logger.warn("Provided attribute but the service is not a prototype - {}", svcHolder.getId());
+            }
+            return (T) svc;
+        }
     }
 
     @Override
@@ -300,7 +388,8 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
         if (svcHolders.size() == 0) {
             return;
         }
-        Looper.on(svcHolders).foreach(this._svcActivator::activateService);
+//        Looper.on(svcHolders).foreach(this._svcActivator::activateService);
+        Looper.on(svcHolders).foreach(this::getService);
     }
 
     @Override
@@ -336,11 +425,19 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
     private List<ServiceHolder> findServiceHolders(
             final String serviceId
     ) {
+        return findServiceHolders(serviceId, QualifiedServiceId.FROM_LOCAL);
+    }
+
+    private List<ServiceHolder> findServiceHolders(
+            final String serviceId,
+            final String serviceFrom
+    ) {
         List<ServiceHolder> svcHolders;
         try {
             svcHolders = Guarder.by(this._svcRepoLock.readLock()).runForResult(() ->
                 Looper.on(this._svcRepo.values())
                     .filter(svcHolder -> svcHolder.getId().equals(serviceId))
+                    .filter(svcHolder -> svcHolder.getFrom().equals(serviceFrom))
                     .toList()
             );
         } catch (Exception ex) {
@@ -523,7 +620,12 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
                         "The injected object {} can't be converted to {}",
                         injection.getObject(), IServiceLoader.class.getName());
             }
+            // Check service loader id which can't use reserved names
             var svcLoader = (IServiceLoader) injection.getObject();
+            var svcLoaderId = svcLoader.getId();
+            if (QualifiedServiceId.FROM_ANY.equals(svcLoader.getId()) || QualifiedServiceId.FROM_LOCAL.equals(svcLoader.getId())) {
+                throw new InvalidArgumentException("The id of service loader is reserved by system - {}", svcLoaderId);
+            }
             this._svcLoaders.put(svcLoader.getId(), svcLoader);
             this._orderedSvcLoaders.add(svcLoader);
             svcLoader.register(this._svcReadyListener);

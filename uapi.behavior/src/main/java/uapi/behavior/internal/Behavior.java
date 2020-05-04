@@ -38,7 +38,8 @@ public class Behavior
     private boolean _traceable;
 
     private final Responsible _responsible;
-    private final Repository<ActionIdentify, IAction> _actionRepo;
+//    private final Repository<ActionIdentify, IAction> _actionRepo;
+    private final ActionRepository _actionRepo;
     private final ActionHolder _headAction;
     private final Navigator _navigator;
     private final IWired _wired;
@@ -51,7 +52,8 @@ public class Behavior
 
     Behavior(
             final Responsible responsible,
-            final Repository<ActionIdentify, IAction> actionRepository,
+//            final Repository<ActionIdentify, IAction> actionRepository,
+            final ActionRepository actionRepository,
             final String name,
             final ActionInputMeta[] inputMetas
     ) {
@@ -207,6 +209,21 @@ public class Behavior
         this._navigator.newNextAction(aAction, this._lastEvaluator, label);
         this._lastEvaluator = null;
         return this;
+    }
+
+    @Override
+    public IBehaviorBuilder attributes(
+            final Map<Object, Object> attrs
+    ) throws BehaviorException {
+        ensureNotBuilt();
+        ArgumentChecker.required(attrs, "attrs");
+
+        return null;
+    }
+
+    @Override
+    public IBehaviorBuilder inputs(Object... inputs) throws BehaviorException {
+        return null;
     }
 
     @Override
@@ -409,49 +426,49 @@ public class Behavior
         }
     }
 
-    private class TailAction implements IAction {
-
-        private final ActionIdentify _id;
-        private final ActionInputMeta[] _inMetas;
-        private final ActionOutputMeta[] _outMetas;
-
-        private TailAction(final ActionOutputMeta[] leafActionOutputMetas) {
-            ArgumentChecker.required(leafActionOutputMetas, "leafActionOutputMetas");
-
-            this._id = ActionIdentify.toActionId(TailAction.class);
-            this._inMetas = new ActionInputMeta[leafActionOutputMetas.length];
-            this._outMetas = new ActionOutputMeta[leafActionOutputMetas.length];
-            Looper.on(leafActionOutputMetas).foreachWithIndex((idx, outMeta) -> {
-                this._inMetas[idx] = new ActionInputMeta(leafActionOutputMetas[idx].type());
-                this._outMetas[idx] = new ActionOutputMeta(leafActionOutputMetas[idx].type());
-            });
-        }
-
-        @Override
-        public ActionIdentify getId() {
-            return this._id;
-        }
-
-        @Override
-        public ActionInputMeta[] inputMetas() {
-            return this._inMetas;
-        }
-
-        @Override
-        public ActionOutputMeta[] outputMetas() {
-            return this._outMetas;
-        }
-
-        @Override
-        public boolean isAnonymous() {
-            return false;
-        }
-
-        @Override
-        public void process(Object[] inputs, ActionOutput[] outputs, IExecutionContext context) {
-            Looper.on(inputs).foreachWithIndex((idx, input) -> outputs[idx].set(input));
-        }
-    }
+//    private class TailAction implements IAction {
+//
+//        private final ActionIdentify _id;
+//        private final ActionInputMeta[] _inMetas;
+//        private final ActionOutputMeta[] _outMetas;
+//
+//        private TailAction(final ActionOutputMeta[] leafActionOutputMetas) {
+//            ArgumentChecker.required(leafActionOutputMetas, "leafActionOutputMetas");
+//
+//            this._id = ActionIdentify.toActionId(TailAction.class);
+//            this._inMetas = new ActionInputMeta[leafActionOutputMetas.length];
+//            this._outMetas = new ActionOutputMeta[leafActionOutputMetas.length];
+//            Looper.on(leafActionOutputMetas).foreachWithIndex((idx, outMeta) -> {
+//                this._inMetas[idx] = new ActionInputMeta(leafActionOutputMetas[idx].type());
+//                this._outMetas[idx] = new ActionOutputMeta(leafActionOutputMetas[idx].type());
+//            });
+//        }
+//
+//        @Override
+//        public ActionIdentify getId() {
+//            return this._id;
+//        }
+//
+//        @Override
+//        public ActionInputMeta[] inputMetas() {
+//            return this._inMetas;
+//        }
+//
+//        @Override
+//        public ActionOutputMeta[] outputMetas() {
+//            return this._outMetas;
+//        }
+//
+//        @Override
+//        public boolean isAnonymous() {
+//            return false;
+//        }
+//
+//        @Override
+//        public void process(Object[] inputs, ActionOutput[] outputs, IExecutionContext context) {
+//            Looper.on(inputs).foreachWithIndex((idx, input) -> outputs[idx].set(input));
+//        }
+//    }
 
     private final class Navigator implements INavigator {
 

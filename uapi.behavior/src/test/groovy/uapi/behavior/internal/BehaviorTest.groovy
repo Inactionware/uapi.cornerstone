@@ -33,7 +33,7 @@ class BehaviorTest extends Specification {
         when:
         ActionInputMeta[] inMetas = new ActionInputMeta[1]
         inMetas[0] = new ActionInputMeta(String.class)
-        new Behavior(Mock(Responsible), Mock(Repository), 'aaa', inMetas)
+        new Behavior(Mock(Responsible), Mock(ActionRepository), 'aaa', inMetas)
 
         then:
         noExceptionThrown()
@@ -46,7 +46,7 @@ class BehaviorTest extends Specification {
         inMetas[0] = new ActionInputMeta(actionInputType)
         ActionOutputMeta[] outMetas = new ActionOutputMeta[1]
         outMetas[0] = new ActionOutputMeta(actionOutputType)
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(actionId) >> Mock(IAction) {
                 getId() >> actionId
                 inputMetas() >> inMetas
@@ -80,7 +80,7 @@ class BehaviorTest extends Specification {
         inMetas[0] = new ActionInputMeta(actionInputType)
         ActionOutputMeta[] outMetas = new ActionOutputMeta[1]
         outMetas[0] = new ActionOutputMeta(actionOutputType)
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(actionId) >> Mock(IAction) {
                 getId() >> actionId
                 inputMetas() >> inMetas
@@ -106,7 +106,7 @@ class BehaviorTest extends Specification {
         when:
         def bInMetas = new ActionInputMeta[1]
         bInMetas[0] = new ActionInputMeta(behaviorInputType)
-        def behavior = new Behavior(Mock(Responsible), Mock(Repository), behaviorName, bInMetas)
+        def behavior = new Behavior(Mock(Responsible), Mock(ActionRepository), behaviorName, bInMetas)
         behavior.when({data -> true}).build()
 
         then:
@@ -129,7 +129,7 @@ class BehaviorTest extends Specification {
         a2InMetas[0] = new ActionInputMeta(a2IType)
         def a2OutMetas = new ActionOutputMeta[1]
         a2OutMetas[0] = new ActionOutputMeta(a2OType)
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(a1) >> Mock(IAction) {
                 getId() >> a1
                 inputMetas() >> a1InMetas
@@ -169,7 +169,7 @@ class BehaviorTest extends Specification {
         def depInMetas = new ActionInputMeta[1]
         depInMetas[0] = new ActionInputMeta(depIType)
         def depOutMetas = new ActionOutputMeta[0]
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(actionId) >> Mock(IInterceptedAction) {
                 getId() >> actionId
                 inputMetas() >> a1InMetas
@@ -209,7 +209,7 @@ class BehaviorTest extends Specification {
         a1OutMetas[0] = new ActionOutputMeta(a1OType)
         def depInMetas = new ActionInputMeta[1]
         depInMetas[0] = new ActionInputMeta(depIType)
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(actionId) >> Mock(IInterceptedAction) {
                 getId() >> actionId
                 inputMetas() >> a1InMetas
@@ -245,7 +245,7 @@ class BehaviorTest extends Specification {
         def depInMetas = new ActionInputMeta[1]
         depInMetas[0] = new ActionInputMeta(depIType)
         def depOutMetas = new ActionOutputMeta[0]
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(actionId) >> Mock(IInterceptedAction) {
                 getId() >> actionId
                 inputMetas() >> a1InMetas
@@ -286,7 +286,7 @@ class BehaviorTest extends Specification {
         def outputs = new ActionOutput[1]
         outputs[0] = new ActionOutput(aId, outMetas[0])
         def exCtx = new ExecutionContext(Mock(IEventBus))
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(aId) >> Mock(IAction) {
                 getId() >> aId
                 inputMetas() >> inMetas
@@ -313,7 +313,7 @@ class BehaviorTest extends Specification {
         when:
         def bInMetas = new ActionInputMeta[1]
         bInMetas[0] = new ActionInputMeta(behaviorInputType)
-        def behavior = new Behavior(Mock(Responsible), Mock(Repository), behaviorName, bInMetas)
+        def behavior = new Behavior(Mock(Responsible), Mock(ActionRepository), behaviorName, bInMetas)
         behavior.when({data -> true}).when({data -> true})
 
         then:
@@ -329,7 +329,7 @@ class BehaviorTest extends Specification {
         when:
         def bInMetas = new ActionInputMeta[1]
         bInMetas[0] = new ActionInputMeta(biType)
-        def behavior = new Behavior(Mock(Responsible), Mock(Repository), bName, bInMetas)
+        def behavior = new Behavior(Mock(Responsible), Mock(ActionRepository), bName, bInMetas)
         behavior.then(new ActionIdentify(aName, ActionType.ACTION))
 
         then:
@@ -353,7 +353,7 @@ class BehaviorTest extends Specification {
         def a3InMetas = [ new ActionInputMeta(a3IType) ] as ActionInputMeta[]
         def a3OutMetas = [ new ActionOutputMeta(a3OType) ] as ActionOutputMeta[]
         def dataShift = Mock(IAttributed)
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(a1) >> Mock(IAction) {
                 getId() >> a1
                 inputMetas() >> a1InMetas
@@ -400,7 +400,7 @@ class BehaviorTest extends Specification {
         def a2 = new ActionIdentify('a2', ActionType.ACTION)
         def a2InMetas = [ new ActionInputMeta(a2IType) ] as ActionInputMeta[]
         def a2OutMetas = [ new ActionOutputMeta(a2OType) ] as ActionOutputMeta[]
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(a1) >> Mock(IAction) {
                 getId() >> a1
                 inputMetas() >> a1InMetas
@@ -437,7 +437,7 @@ class BehaviorTest extends Specification {
         def a2 = new ActionIdentify('a2', ActionType.ACTION)
         def a2InMetas = [ new ActionInputMeta(a2IType) ] as ActionInputMeta[]
         def a2OutMetas = [ new ActionOutputMeta(a2OType) ] as ActionOutputMeta[]
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(a1) >> Mock(IAction) {
                 getId() >> a1
                 inputMetas() >> a1InMetas
@@ -468,7 +468,7 @@ class BehaviorTest extends Specification {
 
     def 'Test anonymous action'() {
         given:
-        def repo = Mock(Repository)
+        def repo = Mock(ActionRepository)
         def bInMetas = [ new ActionInputMeta(String.class) ] as ActionInputMeta[]
 
         when:
@@ -481,7 +481,7 @@ class BehaviorTest extends Specification {
 
     def 'Test anonymous call'() {
         given:
-        def repo = Mock(Repository)
+        def repo = Mock(ActionRepository)
         def bInMetas = [ new ActionInputMeta(String.class) ] as ActionInputMeta[]
 
         when:

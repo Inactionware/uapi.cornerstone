@@ -16,12 +16,14 @@ import uapi.behavior.IExecutionContext
 import uapi.behavior.annotation.Action
 import uapi.behavior.annotation.ActionDo
 import uapi.codegen.ClassMeta
+import uapi.codegen.FieldMeta
 import uapi.codegen.IBuilderContext
 import uapi.codegen.MethodMeta
 import uapi.common.StringHelper
 import uapi.service.annotation.helper.IServiceHandlerHelper
 import uapi.service.annotation.Inject
 import uapi.service.annotation.Service
+import uapi.service.annotation.helper.ServiceType
 
 import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType
@@ -101,6 +103,9 @@ class ActionHandlerTest extends Specification {
             getAnnotation(Action.class) >> Mock(Action) {
                 value() >> StringHelper.EMPTY
             }
+            getAnnotation(Service.class) >> Mock(Service.class) {
+                type() >> ServiceType.Singleton
+            }
             getEnclosedElements() >> []
         }
         def builderCtx = Mock(IBuilderContext) {
@@ -126,6 +131,9 @@ class ActionHandlerTest extends Specification {
             }
             getAnnotation(Action.class) >> Mock(Action) {
                 value() >> StringHelper.EMPTY
+            }
+            getAnnotation(Service.class) >> Mock(Service.class) {
+                type() >> ServiceType.Singleton
             }
             getEnclosedElements() >> [Mock(Element) {
                 getKind() >> ElementKind.METHOD
@@ -157,6 +165,12 @@ class ActionHandlerTest extends Specification {
             }
             getAnnotation(Action.class) >> Mock(Action) {
                 value() >> StringHelper.EMPTY
+            }
+            getAnnotation(Service.class) >> Mock(Service.class) {
+                type() >> ServiceType.Singleton
+            }
+            getAnnotation(Service.class) >> Mock(Service.class) {
+                type() >> ServiceType.Singleton
             }
             getEnclosedElements() >> [Mock(ExecutableElement) {
                 getKind() >> ElementKind.METHOD
@@ -191,16 +205,21 @@ class ActionHandlerTest extends Specification {
             }]
         }
         def clsBuilder = Mock(ClassMeta.Builder)
+        def metaBuilder = Mock(ClassMeta.Builder)
         def builderCtx = Mock(IBuilderContext) {
             checkAnnotations(element, Service.class as Class[]) >> true
             loadTemplate(_, _) >> Mock(Template)
             findClassBuilder(element) >> clsBuilder
             1 * getHelper(IServiceHandlerHelper.name) >> Mock(IServiceHandlerHelper) {
-                1 * addServiceId(_, _)
+                2 * addServiceId(_, _)
             }
+            1 * newClassBuilder(_, _) >> metaBuilder
         }
         1 * clsBuilder.addImplement(_ as String) >> clsBuilder
         5 * clsBuilder.addMethodBuilder(_ as MethodMeta.Builder) >> clsBuilder
+        1 * metaBuilder.addImplement(_ as Class) >> metaBuilder
+        1 * metaBuilder.addFieldBuilder(_ as FieldMeta.Builder) >> metaBuilder
+        2 * metaBuilder.addMethodBuilder(_ as MethodMeta.Builder) >> metaBuilder
         handler.handleAnnotatedElements(builderCtx, Action.class, [ element ] as Set)
 
         then:

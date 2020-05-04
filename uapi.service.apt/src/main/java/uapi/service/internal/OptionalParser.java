@@ -51,11 +51,11 @@ class OptionalParser {
                     Modifier.PRIVATE, Modifier.FINAL);
 
             // Ensure the class must implements IServiceLifecycle interface
-            if (! builderCtx.isAssignable(classElemt, IServiceLifecycle.class)) {
-                throw new GeneralException(
-                        "The service dependency is optional, the service must implements IServiceLifecycle interface - {}::{}",
-                        classElemt.getSimpleName().toString(), element.getSimpleName().toString());
-            }
+//            if (! builderCtx.isAssignable(classElemt, IServiceLifecycle.class)) {
+//                throw new GeneralException(
+//                        "The service dependency ({}) is optional, the service must implements IServiceLifecycle interface - {}",
+//                        element.getSimpleName().toString(), classElemt.getSimpleName().toString());
+//            }
 
             if (element.getKind() == ElementKind.FIELD) {
                 var fieldName = element.getSimpleName().toString();

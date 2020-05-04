@@ -337,7 +337,7 @@ public final class ServiceHandler extends AnnotationsHandler {
                         .setName("attributes")
                         .addModifier(Modifier.PUBLIC)
                         .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
-                        .setReturnTypeName(Type.Q_STRING_ARRAY)
+                        .setReturnTypeName(Type.toArrayType(Object.class))
                         .addCodeBuilder(CodeMeta.builder()
                                 .setTemplate(tempAttrs)
                                 .setModel(modelReqAttrs)))

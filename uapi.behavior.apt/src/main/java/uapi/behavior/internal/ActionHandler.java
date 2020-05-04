@@ -19,9 +19,11 @@ import uapi.behavior.annotation.ActionDo;
 import uapi.behavior.annotation.helper.IActionHandlerHelper;
 import uapi.codegen.*;
 import uapi.common.Numeric;
+import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.annotation.helper.IServiceHandlerHelper;
 import uapi.service.annotation.Service;
+import uapi.service.annotation.helper.ServiceType;
 
 import javax.lang.model.element.*;
 import java.lang.annotation.Annotation;
@@ -76,6 +78,8 @@ public class ActionHandler extends AnnotationsHandler {
             if (Strings.isNullOrEmpty(actionName)) {
                 actionName = classElement.asType().toString();
             }
+            var service = classElement.getAnnotation(Service.class);
+            ServiceType svcType = service.type();
 
             var actionMeta = this._helper.parseActionMethod(builderContext, classElement);
             var clsBuilder = builderContext.findClassBuilder(classElement);
@@ -91,6 +95,7 @@ public class ActionHandler extends AnnotationsHandler {
             model.put("isHandyOutput", actionMeta.isHandyOutput());
             model.put("handyOutputMeta", actionMeta.handyOutputMeta());
 
+            // Generate IAction class
             clsBuilder
                     .addImplement(IAction.class.getCanonicalName())
                     .addMethodBuilder(MethodMeta.builder()
@@ -130,9 +135,33 @@ public class ActionHandler extends AnnotationsHandler {
                                     .setName("context").setType(IExecutionContext.class.getCanonicalName()))
                             .addCodeBuilder(CodeMeta.builder().setTemplate(tempProcess).setModel(model)));
 
-            // Add IAction as this service's id
+            // Generate ActionMeta class
+            var metaClassName = classElement.getSimpleName().toString() + "Meta_Generated";
+            var metaClassBuilder = builderContext.newClassBuilder(clsBuilder.getPackageName(), metaClassName);
+            metaClassBuilder
+                    .addImplement(IActionMeta.class)
+                    .addFieldBuilder(FieldMeta.builder()
+                            .addModifier(Modifier.PRIVATE)
+                            .setName("_actionId")
+                            .setValue(StringHelper.makeString("new uapi.behavior.ActionIdentify(\"{}\", uapi.behavior.ActionType.ACTION)", actionName))
+                            .setTypeName(ActionIdentify.class.getCanonicalName()))
+                    .addMethodBuilder(MethodMeta.builder()
+                            .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
+                            .addModifier(Modifier.PUBLIC)
+                            .setName("actionId")
+                            .setReturnTypeName(ActionIdentify.class.getCanonicalName())
+                            .addCodeBuilder(CodeMeta.builder().addRawCode(StringHelper.makeString("return this._actionId;"))))
+                    .addMethodBuilder(MethodMeta.builder()
+                            .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))
+                            .addModifier(Modifier.PUBLIC)
+                            .setName("serviceType")
+                            .setReturnTypeName(ServiceType.class.getCanonicalName())
+                            .addCodeBuilder(CodeMeta.builder().addRawCode(StringHelper.makeString(
+                                    "return {}.{};", ServiceType.class.getCanonicalName(), svcType))));
+
             IServiceHandlerHelper svcHelper = builderContext.getHelper(IServiceHandlerHelper.name);
-            svcHelper.addServiceId(clsBuilder, IAction.class.getCanonicalName());
+            svcHelper.addServiceId(clsBuilder, actionName);
+            svcHelper.addServiceId(metaClassBuilder, IActionMeta.class.getCanonicalName());
         });
     }
 

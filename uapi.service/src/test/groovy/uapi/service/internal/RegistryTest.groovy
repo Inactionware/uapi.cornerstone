@@ -200,29 +200,29 @@ class RegistryTest extends Specification {
         thrown(ServiceException)
     }
 
-    def 'Test find instance service by it is not prototype service'() {
-        given:
-        def attrs = [] as Map
-        def svc1 = Mock(IService) {
-            getIds() >> ["1", "2"]
-        }
-        ISatisfyHook hook = Mock(ISatisfyHook) {
-            isSatisfied(_) >> true
-        }
-        Injection injection = Mock(Injection) {
-            getId() >> ISatisfyHook.canonicalName
-            getObject() >> hook
-        }
-        registry.injectObject(injection)
-
-        when:
-        registry.register(svc1)
-        registry.findService('1', attrs)
-
-        then:
-        ServiceException ex = thrown()
-        ex.errorCode() == ServiceErrors.NOT_A_PROTOTYPE_SERVICE
-    }
+//    def 'Test find instance service by it is not prototype service'() {
+//        given:
+//        def attrs = [] as Map
+//        def svc1 = Mock(IService) {
+//            getIds() >> ["1", "2"]
+//        }
+//        ISatisfyHook hook = Mock(ISatisfyHook) {
+//            isSatisfied(_) >> true
+//        }
+//        Injection injection = Mock(Injection) {
+//            getId() >> ISatisfyHook.canonicalName
+//            getObject() >> hook
+//        }
+//        registry.injectObject(injection)
+//
+//        when:
+//        registry.register(svc1)
+//        registry.findService('1', attrs)
+//
+//        then:
+//        ServiceException ex = thrown()
+//        ex.errorCode() == ServiceErrors.NOT_A_PROTOTYPE_SERVICE
+//    }
 
     def 'Test find instance service'() {
         given:
@@ -497,7 +497,7 @@ class RegistryTest extends Specification {
 
         then:
         noExceptionThrown()
-        registry.findService('2') != null
+        registry.findService('2', 'Remote') != null
     }
 
     def 'Test find service by specific external service loader but no such service loader'() {
@@ -593,7 +593,7 @@ class RegistryTest extends Specification {
 
         then:
         noExceptionThrown()
-        registry.findService('2') != null
+        registry.findService('2', 'Any') != null
     }
 
     def 'Test find service form more external service loader'() {
@@ -614,30 +614,41 @@ class RegistryTest extends Specification {
         def logger = Mock(ILogger)
         registry._logger = logger
         registry.register(svc)
-        def svcLoader1 = new IServiceLoader() {
-            public String getId() { return 'Test' }
-            public int getPriority() { return 1 }
-            public <Object> Object load(String serviceId, Class<?> serviceType) { return null }
-            public void register(IServiceLoader.IServiceReadyListener listener) {}
-        }
+//        def svcLoader1 = new IServiceLoader() {
+//            public String getId() { return 'Test' }
+//            public int getPriority() { return 1 }
+//            public <Object> Object load(String serviceId, Class<?> serviceType) { return null }
+//            public void register(IServiceLoader.IServiceReadyListener listener) {}
+//        }
         def svcLoaderInjection1 = Mock(Injection) {
             getId() >> IServiceLoader.name
-            getObject() >> svcLoader1
+//            getObject() >> svcLoader1
+            getObject() >> Mock(IServiceLoader) {
+                getId() >> 'Test'
+                getPriority() >> 1
+                compareTo(_) >> -1
+            }
         }
         def mocksvcHolder = Mock(ServiceHolder) {
             isActivated() >> true
         }
-        def svcLoader2 = new IServiceLoader() {
-            public String getId() { return 'Remote' }
-            public int getPriority() { return 2 }
-            public <ServiceHolder> ServiceHolder load(String serviceId, Class<?> serviceType) {
-                return mocksvcHolder
-            }
-            public void register(IServiceLoader.IServiceReadyListener listener) {}
-        }
+//        def svcLoader2 = new IServiceLoader() {
+//            public String getId() { return 'Remote' }
+//            public int getPriority() { return 2 }
+//            public <ServiceHolder> ServiceHolder load(String serviceId, Class<?> serviceType) {
+//                return mocksvcHolder
+//            }
+//            public void register(IServiceLoader.IServiceReadyListener listener) {}
+//        }
         def svcLoaderInjection2 = Mock(Injection) {
             getId() >> IServiceLoader.name
-            getObject() >> svcLoader2
+//            getObject() >> svcLoader2
+            getObject() >> Mock(IServiceLoader) {
+                getId() >> 'Remote'
+                getPriority() >> 2
+                load(_, _) >> mocksvcHolder
+                compareTo(_) >> 1
+            }
         }
 
         registry.injectObject(svcLoaderInjection1)
@@ -648,7 +659,7 @@ class RegistryTest extends Specification {
 
         then:
         noExceptionThrown()
-        registry.findService('2') != null
+        registry.findService('2', 'Any') != null
     }
 
     def 'Test find service but no any external service loader can load it'() {
@@ -669,22 +680,30 @@ class RegistryTest extends Specification {
         def logger = Mock(ILogger)
         registry._logger = logger
         registry.register(svc)
-        def svcLoader1 = new IServiceLoader() {
-            public String getId() { return 'Test' }
-            public int getPriority() { return 1 }
-            public <Object> Object load(String serviceId, Class<?> serviceType) { return null }
-            public void register(IServiceLoader.IServiceReadyListener listener) {}
+        def svcLoader1 = Mock(IServiceLoader) {
+            getId() >> 'Test'
+            getProperty() >> 1
         }
+//        def svcLoader1 = new IServiceLoader() {
+//            public String getId() { return 'Test' }
+//            public int getPriority() { return 1 }
+//            public <Object> Object load(String serviceId, Class<?> serviceType) { return null }
+//            public void register(IServiceLoader.IServiceReadyListener listener) {}
+//        }
         def svcLoaderInjection1 = Mock(Injection) {
             getId() >> IServiceLoader.name
             getObject() >> svcLoader1
         }
-        def svcLoader2 = new IServiceLoader() {
-            public String getId() { return 'Remote' }
-            public int getPriority() { return 2 }
-            public <Object> Object load(String serviceId, Class<?> serviceType) { return null }
-            public void register(IServiceLoader.IServiceReadyListener listener) {}
+        def svcLoader2 = Mock(IServiceLoader) {
+            getId() >> 'Remote'
+            getProperty() >> 2
         }
+//        def svcLoader2 = new IServiceLoader() {
+//            public String getId() { return 'Remote' }
+//            public int getPriority() { return 2 }
+//            public <Object> Object load(String serviceId, Class<?> serviceType) { return null }
+//            public void register(IServiceLoader.IServiceReadyListener listener) {}
+//        }
         def svcLoaderInjection2 = Mock(Injection) {
             getId() >> IServiceLoader.name
             getObject() >> svcLoader2

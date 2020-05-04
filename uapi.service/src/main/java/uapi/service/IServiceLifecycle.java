@@ -9,6 +9,8 @@
 
 package uapi.service;
 
+import uapi.GeneralException;
+
 /**
  * A lifecycle management for service
  */
@@ -37,5 +39,7 @@ public interface IServiceLifecycle {
      * @param   service
      *          The injected service
      */
-    void onDependencyInject(String serviceId, Object service);
+    default void onDependencyInject(String serviceId, Object service) {
+        throw new GeneralException("The service does not implement IServiceLifecycle::onDependencyInject method - {}", this.getClass().getCanonicalName());
+    }
 }

@@ -38,54 +38,54 @@ public class ResponsibleRegistry implements IResponsibleRegistry, IServiceLifecy
     @Inject
     protected IEventBus _eventBus;
 
-    private final Repository<ActionIdentify, IAction> _actionRepo;
+    @Inject
+    protected ActionRepository _actionRepo;
 
     private final Lock _lock;
 
     private final Map<String, Responsible> _responsibles;
 
     public ResponsibleRegistry() {
-        this._actionRepo = new Repository<>();
         this._lock = new ReentrantLock();
         this._responsibles = new HashMap<>();
     }
 
-    @Inject
-    @Optional
-    public void addAction(IAction action) {
-        ArgumentChecker.required(action, "action");
-        if (action instanceof IInterceptor && action instanceof IIntercepted) {
-            throw BehaviorException.builder()
-                    .errorCode(BehaviorErrors.UNSUPPORTED_INTERCEPTIVE_INTERCEPTOR)
-                    .variables(new BehaviorErrors.UnsupportedInterceptiveInterceptor()
-                            .interceptorId(action.getId()))
-                    .build();
-        }
-        // Check duplicated Action output
-        var metas = action.outputMetas();
-        for (int i = 0; i < metas.length; i++) {
-            for (int j = i + 1; j < metas.length; j++) {
-                if (metas[i].name().equals(metas[j].name())) {
-                    throw BehaviorException.builder()
-                            .errorCode(BehaviorErrors.DUPLICATED_ACTION_OUTPUT)
-                            .variables(new BehaviorErrors.DuplicatedActionOutput()
-                                    .outputName(metas[i].name())
-                                    .actionId(action.getId()))
-                            .build();
-                }
-            }
-        }
+//    @Inject
+//    @Optional
+//    public void addAction(IAction action) {
+//        ArgumentChecker.required(action, "action");
+//        if (action instanceof IInterceptor && action instanceof IIntercepted) {
+//            throw BehaviorException.builder()
+//                    .errorCode(BehaviorErrors.UNSUPPORTED_INTERCEPTIVE_INTERCEPTOR)
+//                    .variables(new BehaviorErrors.UnsupportedInterceptiveInterceptor()
+//                            .interceptorId(action.getId()))
+//                    .build();
+//        }
+//        // Check duplicated Action output
+//        var metas = action.outputMetas();
+//        for (int i = 0; i < metas.length; i++) {
+//            for (int j = i + 1; j < metas.length; j++) {
+//                if (metas[i].name().equals(metas[j].name())) {
+//                    throw BehaviorException.builder()
+//                            .errorCode(BehaviorErrors.DUPLICATED_ACTION_OUTPUT)
+//                            .variables(new BehaviorErrors.DuplicatedActionOutput()
+//                                    .outputName(metas[i].name())
+//                                    .actionId(action.getId()))
+//                            .build();
+//                }
+//            }
+//        }
+//
+//        var existing = this._actionRepo.put(action);
+//        if (existing != null) {
+//            this._logger.warn("The existing action {} was overridden by new action {}", existing, action);
+//        }
+//    }
 
-        var existing = this._actionRepo.put(action);
-        if (existing != null) {
-            this._logger.warn("The existing action {} was overridden by new action {}", existing, action);
-        }
-    }
-
-    @OnInject
-    public void injectNewAction(IAction action) {
-        addAction(action);
-    }
+//    @OnInject
+//    public void injectNewAction(IAction action) {
+//        addAction(action);
+//    }
 
     @Override
     public IResponsible register(String name) throws BehaviorException {

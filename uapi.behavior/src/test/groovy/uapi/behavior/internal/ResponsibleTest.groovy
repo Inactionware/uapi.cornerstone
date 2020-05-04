@@ -35,7 +35,7 @@ class ResponsibleTest extends Specification {
 
     def 'Test create instance'() {
         when:
-        def responsible = new Responsible('name', Mock(IEventBus), Mock(Repository))
+        def responsible = new Responsible('name', Mock(IEventBus), Mock(ActionRepository))
 
         then:
         noExceptionThrown()
@@ -44,7 +44,7 @@ class ResponsibleTest extends Specification {
 
     def 'Test create new behavior by topic'() {
         when:
-        def responsible = new Responsible('name', Mock(IEventBus), Mock(Repository))
+        def responsible = new Responsible('name', Mock(IEventBus), Mock(ActionRepository))
         def bBuilder = responsible.newBehavior('bName', BehaviorEvent.class, 'topic')
 
         then:
@@ -54,7 +54,7 @@ class ResponsibleTest extends Specification {
 
     def 'Test create duplicated name behavior by topic'() {
         when:
-        def responsible = new Responsible('name', Mock(IEventBus), Mock(Repository))
+        def responsible = new Responsible('name', Mock(IEventBus), Mock(ActionRepository))
         responsible.newBehavior('bName', BehaviorEvent.class, 'topic')
         responsible.newBehavior('bName', BehaviorEvent.class, 'topic2')
 
@@ -64,7 +64,7 @@ class ResponsibleTest extends Specification {
 
     def 'Test create new behavior by type'() {
         when:
-        def responsible = new Responsible('name', Mock(IEventBus), Mock(Repository))
+        def responsible = new Responsible('name', Mock(IEventBus), Mock(ActionRepository))
         def bBuilder = responsible.newBehavior('bName', String.class)
 
         then:
@@ -74,7 +74,7 @@ class ResponsibleTest extends Specification {
 
     def 'Test create duplicated name behavior by type'() {
         when:
-        def responsible = new Responsible('name', Mock(IEventBus), Mock(Repository))
+        def responsible = new Responsible('name', Mock(IEventBus), Mock(ActionRepository))
         responsible.newBehavior('bName', String.class)
         responsible.newBehavior('bName', Integer.class)
 
@@ -90,7 +90,7 @@ class ResponsibleTest extends Specification {
         }
         action.inputMetas() >> ([new ActionInputMeta(String.class)] as ActionInputMeta[])
         action.outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(actionId) >> action
             1 * put(_)
         }
@@ -115,7 +115,7 @@ class ResponsibleTest extends Specification {
             inputMetas() >> ([new ActionInputMeta(BehaviorEvent.class)] as ActionInputMeta[])
             outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         }
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(actionId) >> action
             0 * put(_)
         }
@@ -134,7 +134,7 @@ class ResponsibleTest extends Specification {
 
     def 'Test publish un-registered behavior'() {
         when:
-        def responsible = new Responsible('name', Mock(IEventBus), Mock(Repository))
+        def responsible = new Responsible('name', Mock(IEventBus), Mock(ActionRepository))
         responsible.publish(Mock(Behavior) {
             getId() >> new ActionIdentify('bName', ActionType.BEHAVIOR)
         })
@@ -151,7 +151,7 @@ class ResponsibleTest extends Specification {
             inputMetas() >> ([new ActionInputMeta(String.class)] as ActionInputMeta[])
             outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         }
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(actionId) >> action
             1 * put(_)
         }
@@ -178,7 +178,7 @@ class ResponsibleTest extends Specification {
         def finHandler = Mock(BehaviorFinishedEventHandler)
 
         when:
-        def responsible = new Responsible('name', eventBus, Mock(Repository))
+        def responsible = new Responsible('name', eventBus, Mock(ActionRepository))
         responsible.on(exeHandler)
         responsible.on(finHandler)
 
@@ -195,7 +195,7 @@ class ResponsibleTest extends Specification {
         }
 
         when:
-        def responsible = new Responsible('name', eventBus, Mock(Repository))
+        def responsible = new Responsible('name', eventBus, Mock(ActionRepository))
         responsible.on(exeHandler)
         eventBus.invokeHandler(exeEvent)
 
@@ -213,7 +213,7 @@ class ResponsibleTest extends Specification {
         }
 
         when:
-        def responsible = new Responsible('name', eventBus, Mock(Repository))
+        def responsible = new Responsible('name', eventBus, Mock(ActionRepository))
         responsible.on(finHandler)
         eventBus.invokeHandler(finEvent)
 
@@ -230,7 +230,7 @@ class ResponsibleTest extends Specification {
         }
 
         when:
-        def responsible = new Responsible('name', eventBus, Mock(Repository))
+        def responsible = new Responsible('name', eventBus, Mock(ActionRepository))
         responsible.on(Mock(BehaviorExecutingEventHandler))
         eventBus.invokeHandler(event)
 
@@ -246,7 +246,7 @@ class ResponsibleTest extends Specification {
             inputMetas() >> ([new ActionInputMeta(String.class)] as ActionInputMeta[])
             outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         }
-        def repo = Mock(Repository) {
+        def repo = Mock(ActionRepository) {
             get(actionId) >> action
             1 * put(_)
         }

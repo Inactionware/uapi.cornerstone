@@ -17,6 +17,7 @@ import uapi.rx.Looper;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A ActionHolder holder action and reference its previously action and subsequent actions to construct an actions DGA.
@@ -27,12 +28,15 @@ class ActionHolder {
 
     private final Functionals.Evaluator _evaluator;
     private final Behavior _behavior;
-    private final IAction _action;
     private final String _label;
     private final List<ActionHolder> _nextActions;
     private final ActionHolder _previousAction;
     private final Object[] _inputs;
+//    private final IActionMeta _actionMeta;
     private boolean _hasDefaultNext = false;
+
+    private IAction _action;
+    private Map<Object, Object> _attrs;
 
     ActionHolder(
             final IAction action,
@@ -50,6 +54,7 @@ class ActionHolder {
             final Functionals.Evaluator evaluator,
             final Object... inputs
     ) {
+//        ArgumentChecker.required(actionMeta, "actionMeta");
         ArgumentChecker.required(action, "action");
         ArgumentChecker.required(action.getId(), "action.id");
         ArgumentChecker.required(action.inputMetas(), "action.inputMetas");

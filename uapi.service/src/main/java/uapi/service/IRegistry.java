@@ -11,6 +11,7 @@ package uapi.service;
 
 import uapi.InvalidArgumentException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -79,21 +80,6 @@ public interface IRegistry {
     ) throws InvalidArgumentException;
 
     /**
-     * Find service by specified service id
-     *
-     * @param   serviceId
-     *          The specified service id
-     * @param   <T>
-     *          The service type
-     * @return  The service instance
-     * @throws  ServiceException
-     *          The service can't be found
-     */
-    <T> T findService(
-            final String serviceId
-    ) throws ServiceException;
-
-    /**
      * Find service by specific service type
      *
      * @param   serviceType
@@ -104,9 +90,35 @@ public interface IRegistry {
      * @throws  ServiceException
      *          The service can't be found
      */
-    <T> T findService(
+    default <T> T findService(
             final Class<T> serviceType
-    ) throws ServiceException;
+    ) throws ServiceException {
+        return findService(serviceType.getCanonicalName(), QualifiedServiceId.FROM_LOCAL, Collections.emptyMap());
+    }
+
+    default <T> T findService(
+            final Class<T> serviceType,
+            final String serviceFrom
+    ) {
+        return findService(serviceType.getCanonicalName(), serviceFrom, Collections.emptyMap());
+    }
+
+    /**
+     * Find service by specified service id
+     *
+     * @param   serviceId
+     *          The specified service id
+     * @param   <T>
+     *          The service type
+     * @return  The service instance
+     * @throws  ServiceException
+     *          The service can't be found
+     */
+    default <T> T findService(
+            final String serviceId
+    ) throws ServiceException {
+        return findService(serviceId, QualifiedServiceId.FROM_LOCAL, Collections.emptyMap());
+    }
 
     /**
      * Find service from specified location
@@ -120,28 +132,12 @@ public interface IRegistry {
      * @throws  ServiceException
      *          The service can't be found
      */
-    <T> T findService(
+    default <T> T findService(
             final String serviceId,
             final String serviceFrom
-    ) throws ServiceException;
-
-    /**
-     * Find instance service by service id and specific attributes
-     *
-     * @param   serviceId
-     *          The prototype service id
-     * @param   attributes
-     *          The attributes which used for creating instance service
-     * @param   <T>
-     *          The service type
-     * @return  The instance service
-     * @throws  ServiceException
-     *          The prototype service can't be found or creating instance service failed
-     */
-    <T> T findService(
-            final String serviceId,
-            final Map<Object, Object> attributes
-    ) throws ServiceException;
+    ) throws ServiceException {
+        return findService(serviceId, serviceFrom, Collections.emptyMap());
+    }
 
     /**
      * Find instance service by service type and specific attributes
@@ -156,21 +152,73 @@ public interface IRegistry {
      * @throws  ServiceException
      *          The prototype service can't be found or creating instance service failed
      */
-    <T> T findService(
+    default <T> T findService(
             final Class<?> serviceType,
             final Map<Object, Object> attributes
-    ) throws ServiceException;
+    ) throws ServiceException {
+        return findService(serviceType.getCanonicalName(), QualifiedServiceId.FROM_LOCAL, attributes);
+    }
 
     /**
-     * Find multiple service by specific service id
+     * Find instance service by service id and specific attributes
      *
      * @param   serviceId
-     *          The service id which used for service finding
+     *          The prototype service id
+     * @param   attributes
+     *          The attributes which used for creating instance service
      * @param   <T>
      *          The service type
-     * @return  The service list
+     * @return  The instance service
+     * @throws  ServiceException
+     *          The prototype service can't be found or creating instance service failed
      */
-    <T> List<T> findServices(final String serviceId);
+    default <T> T findService(
+            final String serviceId,
+            final Map<Object, Object> attributes
+    ) throws ServiceException {
+        return findService(serviceId, QualifiedServiceId.FROM_LOCAL, attributes);
+    }
+
+    /**
+     * Find service by service id and attribute from specific service location
+     *
+     * @param   serviceId
+     *          The service id which is used for service finding
+     * @param   serviceFrom
+     *          The location we try to find the service
+     * @param   attributes
+     *          The instance attributes if the service is a prototype service
+     * @param   <T>
+     *          The service type
+     * @return  The service
+     * @throws  ServiceException
+     *          The service can't be found
+     */
+    default <T> T findService(
+            final String serviceId,
+            final String serviceFrom,
+            final Map<Object, Object> attributes
+    ) throws ServiceException {
+        List<T> svcs = findServices(serviceId, serviceFrom, attributes);
+        switch (svcs.size()) {
+            case 1:
+                return svcs.get(0);
+            case 0:
+                throw ServiceException.builder()
+                        .errorCode(ServiceErrors.NO_SERVICE_FOUND)
+                        .variables(new ServiceErrors.NoServiceFound()
+                                .serviceId(serviceId)
+                                .serviceFrom(serviceFrom)
+                                .serviceAttributes(attributes))
+                        .build();
+            default:
+                throw ServiceException.builder()
+                    .errorCode(ServiceErrors.MULTIPLE_SERVICE_FOUND)
+                    .variables(new ServiceErrors.MultipleServiceFound()
+                        .serviceId(serviceId))
+                    .build();
+        }
+    }
 
     /**
      * Find multiple services by specific service type
@@ -181,7 +229,66 @@ public interface IRegistry {
      *          The service type
      * @return  The service list
      */
-    <T> List<T> findServices(final Class<T> serviceType);
+    default <T> List<T> findServices(final Class<T> serviceType) {
+        return findServices(serviceType.getCanonicalName(), QualifiedServiceId.FROM_LOCAL, Collections.emptyMap());
+    }
+
+    default <T> List<T> findServices(
+            final Class<T> serviceType,
+            final String serviceFrom
+    ) {
+        return findService(serviceType.getCanonicalName(), serviceFrom, Collections.emptyMap());
+    }
+
+    /**
+     * Find multiple service by specific service id
+     *
+     * @param   serviceId
+     *          The service id which used for service finding
+     * @param   <T>
+     *          The service type
+     * @return  The service list
+     */
+    default <T> List<T> findServices(final String serviceId) {
+        return findServices(serviceId, QualifiedServiceId.FROM_LOCAL, Collections.emptyMap());
+    }
+
+    /**
+     * Find out multiple service by specific service id from specific location.
+     *
+     * @param   serviceId
+     *          The service id which used for service finding
+     * @param   serviceFrom
+     *          The location we try to find service
+     * @param   <T>
+     *          The service type
+     * @return  The service list
+     */
+    default <T> List<T> findServices(
+            final String serviceId,
+            final String serviceFrom
+    ) {
+        return findServices(serviceId, serviceFrom, Collections.emptyMap());
+    }
+
+    /**
+     * Find out multiple service by specific service id and attributes from specific location.
+     *
+     * @param   serviceId
+     *          The service id which used for service finding
+     * @param   serviceFrom
+     *          The location we try to find service
+     * @param   attributes
+     *          The service attributes if the service is prototype service
+     * @param   <T>
+     *          The service type
+     * @return  The service list
+     */
+    <T> List<T> findServices(
+            final String serviceId,
+            final String serviceFrom,
+            final Map<Object, Object> attributes
+    );
 
     /**
      * Activate service(s) by specific tag

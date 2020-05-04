@@ -529,22 +529,34 @@ public class ServiceErrors extends FileBasedExceptionErrors<ServiceException> {
     }
 
     /**
-     * Found 0 service by service id - {}
+     * Found 0 service by service id - {}, from - {}, attributes - {}
      */
     public static final class NoServiceFound extends IndexedParameters<NoServiceFound> {
 
         private static final String KEY = "NoServiceFound";
 
         private String _svcId;
+        private String _svcFrom;
+        private Map<Object, Object> _svcAttrs;
 
         public NoServiceFound serviceId(String serviceId) {
             this._svcId = serviceId;
             return this;
         }
 
+        public NoServiceFound serviceFrom(String serviceFrom) {
+            this._svcFrom = serviceFrom;
+            return this;
+        }
+
+        public NoServiceFound serviceAttributes(Map<Object, Object> serviceAttributes) {
+            this._svcAttrs = serviceAttributes;
+            return this;
+        }
+
         @Override
         public Object[] get() {
-            return new Object[] { this._svcId };
+            return new Object[] { this._svcId, this._svcFrom, this._svcAttrs };
         }
     }
 
