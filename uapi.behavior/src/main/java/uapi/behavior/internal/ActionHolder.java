@@ -31,11 +31,10 @@ class ActionHolder {
     private final String _label;
     private final List<ActionHolder> _nextActions;
     private final ActionHolder _previousAction;
-    private final Object[] _inputs;
-//    private final IActionMeta _actionMeta;
     private boolean _hasDefaultNext = false;
 
     private IAction _action;
+    private Object[] _inputs = CollectionHelper.emptyArray();
     private Map<Object, Object> _attrs;
 
     ActionHolder(
@@ -54,7 +53,6 @@ class ActionHolder {
             final Functionals.Evaluator evaluator,
             final Object... inputs
     ) {
-//        ArgumentChecker.required(actionMeta, "actionMeta");
         ArgumentChecker.required(action, "action");
         ArgumentChecker.required(action.getId(), "action.id");
         ArgumentChecker.required(action.inputMetas(), "action.inputMetas");
@@ -74,7 +72,6 @@ class ActionHolder {
             this._previousAction.next(this);
         }
         this._inputs = inputs;
-        verify();
     }
 
     ActionOutputMeta[] outputMetas() {
@@ -87,6 +84,18 @@ class ActionHolder {
 
     Object[] inputs() {
         return this._inputs;
+    }
+
+    void inputs(Object[] inputs) {
+        this._inputs = inputs;
+    }
+
+    Map<Object, Object> attributes() {
+        return this._attrs;
+    }
+
+    void attributes(final Map<Object, Object> attributes) {
+        this._attrs = attributes;
     }
 
     /**

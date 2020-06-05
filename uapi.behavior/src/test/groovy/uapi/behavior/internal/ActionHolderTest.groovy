@@ -57,7 +57,7 @@ class ActionHolderTest extends Specification {
 
     def 'Test set next action by unmatched input type'() {
         given:
-        def action = Mock(IAction) {
+        def action1 = Mock(IAction) {
             getId() >> Mock(ActionIdentify)
             inputMetas() >> new ActionInputMeta[0]
             outputMetas() >> new ActionOutputMeta[0]
@@ -70,12 +70,13 @@ class ActionHolderTest extends Specification {
         }
 
         when:
-        def instance = new ActionHolder(action, 'label', Mock(Behavior))
-        instance.next(new ActionHolder(action2, 'label', Mock(Behavior)))
+        def instance1 = new ActionHolder(action1, 'label', Mock(Behavior))
+        def instance2 = new ActionHolder(action2, 'label', instance1, Mock(Behavior), null)
+        instance2.verify()
 
         then:
-        thrown(BehaviorException)
-        ! instance.hasNext()
+        def ex = thrown(BehaviorException)
+        ex.errorCode() == BehaviorErrors.INPUT_OUTPUT_COUNT_MISMATCH
     }
 
     def 'Test set next action'() {
@@ -276,10 +277,12 @@ class ActionHolderTest extends Specification {
             inputMetas() >> inMetas
             outputMetas() >> new ActionOutputMeta[0]
         }
-        new ActionHolder(nextAction1, 'label1', instance, behavior, null, Mock(Behavior.NamedOutput) {
+        def outRef = Mock(Behavior.NamedOutput) {
             actionLabel() >> 'aaa'
             outputName() >> 'name'
-        })
+        }
+        def instance2 = new ActionHolder(nextAction1, 'label1', instance, behavior, null, outRef)
+        instance2.verify()
 
         then:
         def ex = thrown(BehaviorException)
@@ -307,10 +310,11 @@ class ActionHolderTest extends Specification {
             inputMetas() >> inMetas
             outputMetas() >> new ActionOutputMeta[0]
         }
-        new ActionHolder(nextAction1, 'label1', instance, behavior, null, Mock(Behavior.NamedOutput) {
+        def instance2 = new ActionHolder(nextAction1, 'label1', instance, behavior, null, Mock(Behavior.NamedOutput) {
             actionLabel() >> 'label'
             outputName() >> 'aaa'
         })
+        instance2.verify()
 
         then:
         def ex = thrown(BehaviorException)
@@ -363,10 +367,11 @@ class ActionHolderTest extends Specification {
             inputMetas() >> inMetas
             outputMetas() >> new ActionOutputMeta[0]
         }
-        new ActionHolder(nextAction1, 'label1', instance, behavior, null, Mock(Behavior.IndexedOutput) {
+        def instance2 = new ActionHolder(nextAction1, 'label1', instance, behavior, null, Mock(Behavior.IndexedOutput) {
             actionLabel() >> 'label'
             outputIndex() >> 1
         })
+        instance2.verify()
 
         then:
         def ex = thrown(BehaviorException)
@@ -394,10 +399,11 @@ class ActionHolderTest extends Specification {
             inputMetas() >> inMetas
             outputMetas() >> new ActionOutputMeta[0]
         }
-        new ActionHolder(nextAction1, 'label1', instance, behavior, null, Mock(Behavior.IndexedOutput) {
+        def instance2 = new ActionHolder(nextAction1, 'label1', instance, behavior, null, Mock(Behavior.IndexedOutput) {
             actionLabel() >> 'label'
             outputIndex() >> 0
         })
+        instance2.verify()
 
         then:
         def ex = thrown(BehaviorException)

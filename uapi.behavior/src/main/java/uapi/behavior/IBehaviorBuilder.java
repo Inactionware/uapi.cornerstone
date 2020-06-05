@@ -38,23 +38,25 @@ public interface IBehaviorBuilder {
      * @throws  BehaviorException
      *          No action has such id, see {@link BehaviorErrors.ActionNotFound}
      */
-    IBehaviorBuilder then(ActionIdentify id) throws BehaviorException;
+    default IBehaviorBuilder then(ActionIdentify id) throws BehaviorException {
+        return this.then(ActionInitializer.instance(id));
+    }
 
-    /**
-     * Set where is next action/behavior when current branch condition is satisfied and specify a label for it.
-     *
-     * @param   id
-     *          The id of next action/behavior
-     * @param   label
-     *          The action/behavior label which can be used to navigate to it later
-     * @param   inputs
-     *          Specified inputs for the action/behavior
-     *          If the input is IOutputReference then the input is a pointer which point to other action's output
-     * @return  The behavior builder self
-     * @throws  BehaviorException
-     *          No action has such id, see {@link BehaviorErrors.ActionNotFound}
-     */
-    IBehaviorBuilder then(ActionIdentify id, String label, Object... inputs) throws BehaviorException;
+//    /**
+//     * Set where is next action/behavior when current branch condition is satisfied and specify a label for it.
+//     *
+//     * @param   id
+//     *          The id of next action/behavior
+//     * @param   label
+//     *          The action/behavior label which can be used to navigate to it later
+//     * @param   inputs
+//     *          Specified inputs for the action/behavior
+//     *          If the input is IOutputReference then the input is a pointer which point to other action's output
+//     * @return  The behavior builder self
+//     * @throws  BehaviorException
+//     *          No action has such id, see {@link BehaviorErrors.ActionNotFound}
+//     */
+//    IBehaviorBuilder then(ActionIdentify id, String label, Object... inputs) throws BehaviorException;
 
     /**
      * Set where is next action/behavior when current branch condition is satisfied.
@@ -66,45 +68,49 @@ public interface IBehaviorBuilder {
      * @throws  BehaviorException
      *          No such action in the repository, see {@link BehaviorErrors.ActionNotFound}
      */
-    IBehaviorBuilder then(Class<?> actionType) throws BehaviorException;
+    default IBehaviorBuilder then(Class<?> actionType) throws BehaviorException {
+        return this.then(ActionIdentify.toActionId(actionType));
+    }
 
-    /**
-     * Set where is next action/behavior when current branch condition is satisfied and specify a label for it.
-     * The actionType will be converted to default action id which is used to find action in repository.
-     *
-     * @param   actionType
-     *          The action type of next action/behavior
-     * @param   label
-     *          The action/behavior label which can be used to navigate to it late
-     * @param   inputs
-     *          The inputs for the action/behavior
-     * @return  The behavior builder instance
-     * @throws  BehaviorException
-     *          No action in the repository, see {@link BehaviorErrors.ActionNotFound}
-     */
-    IBehaviorBuilder then(Class<?> actionType, String label, Object... inputs) throws BehaviorException;
+//    /**
+//     * Set where is next action/behavior when current branch condition is satisfied and specify a label for it.
+//     * The actionType will be converted to default action id which is used to find action in repository.
+//     *
+//     * @param   actionType
+//     *          The action type of next action/behavior
+//     * @param   label
+//     *          The action/behavior label which can be used to navigate to it late
+//     * @param   inputs
+//     *          The inputs for the action/behavior
+//     * @return  The behavior builder instance
+//     * @throws  BehaviorException
+//     *          No action in the repository, see {@link BehaviorErrors.ActionNotFound}
+//     */
+//    IBehaviorBuilder then(Class<?> actionType, String label, Object... inputs) throws BehaviorException;
 
-    /**
-     * Set attribute for current action.
-     *
-     * @param   attrs
-     *          The attribute for current action
-     * @return  This behavior build instance
-     * @throws  BehaviorException
-     *          Current action does not support attribute
-     */
-    IBehaviorBuilder attributes(Map<Object, Object> attrs) throws BehaviorException;
+    IBehaviorBuilder then(ActionInitializer actionInitializer) throws BehaviorException;
 
-    /**
-     * Set input for current action
-     *
-     * @param   inputs
-     *          The inputs for current action
-     * @return  This behavior builder instance
-     * @throws  BehaviorException
-     *          Current action does not support inputs
-     */
-    IBehaviorBuilder inputs(Object... inputs) throws BehaviorException;
+//    /**
+//     * Set attribute for current action.
+//     *
+//     * @param   attrs
+//     *          The attribute for current action
+//     * @return  This behavior build instance
+//     * @throws  BehaviorException
+//     *          Current action does not support attribute
+//     */
+//    IBehaviorBuilder attributes(Map<Object, Object> attrs) throws BehaviorException;
+//
+//    /**
+//     * Set input for current action
+//     *
+//     * @param   inputs
+//     *          The inputs for current action
+//     * @return  This behavior builder instance
+//     * @throws  BehaviorException
+//     *          Current action does not support inputs
+//     */
+//    IBehaviorBuilder inputs(Object... inputs) throws BehaviorException;
 
     /**
      * Set next an anonymous action which return nothing when current branch condition is satisfied.

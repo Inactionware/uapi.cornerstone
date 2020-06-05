@@ -35,6 +35,7 @@ public class InterceptedActionHolder extends ActionHolder {
             var interceptorIds = intercepted.by();
             this._interceptors = Looper.on(interceptorIds).map(interceptorId -> {
                 IAction interceptor;
+                // TODO: Does interceptor support attribute?
                 interceptor = actionRepo.get(interceptorId);
                 if (interceptor == null) {
                     throw BehaviorException.builder()

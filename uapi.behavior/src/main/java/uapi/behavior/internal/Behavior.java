@@ -147,48 +147,66 @@ public class Behavior
         return this;
     }
 
-    @Override
-    public IBehaviorBuilder then(
-            final ActionIdentify id
-    ) throws BehaviorException {
-        return then(id, null);
-    }
+//    @Override
+//    public IBehaviorBuilder then(
+//            final ActionIdentify id
+//    ) throws BehaviorException {
+//        return then(id, null);
+//    }
+//
+//    @Override
+//    public IBehaviorBuilder then(
+//            final ActionIdentify id,
+//            final String label,
+//            final Object... inputs
+//    ) throws BehaviorException {
+//        ensureNotBuilt();
+//        ArgumentChecker.required(id, "id");
+//        var action = this._actionRepo.get(id);
+//        if (action == null) {
+//            throw BehaviorException.builder()
+//                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
+//                    .variables(new BehaviorErrors.ActionNotFound()
+//                            .actionId(id))
+//                    .build();
+//        }
+//        this._navigator.newNextAction(action, this._lastEvaluator, label, inputs);
+//        this._lastEvaluator = null;
+//        return this;
+//    }
+
+//    @Override
+//    public IBehaviorBuilder then(
+//            final Class<?> actionType
+//    ) throws BehaviorException {
+//        return then(ActionIdentify.toActionId(actionType));
+//    }
+//
+//    @Override
+//    public IBehaviorBuilder then(
+//            final Class<?> actionType,
+//            final String label,
+//            final Object... inputs
+//    ) throws BehaviorException {
+//        return then(ActionIdentify.toActionId(actionType), label, inputs);
+//    }
 
     @Override
     public IBehaviorBuilder then(
-            final ActionIdentify id,
-            final String label,
-            final Object... inputs
+            final ActionInitializer actionInitializer
     ) throws BehaviorException {
-        ensureNotBuilt();
-        ArgumentChecker.required(id, "id");
-        var action = this._actionRepo.get(id);
+        ArgumentChecker.required(actionInitializer, "actionInitializer");
+        var action = this._actionRepo.get(actionInitializer.actionIdentify(), actionInitializer.attributes());
         if (action == null) {
             throw BehaviorException.builder()
                     .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
                     .variables(new BehaviorErrors.ActionNotFound()
-                            .actionId(id))
+                            .actionId(actionInitializer.actionIdentify()))
                     .build();
         }
-        this._navigator.newNextAction(action, this._lastEvaluator, label, inputs);
+        this._navigator.newNextAction(action, this._lastEvaluator, actionInitializer.label(), actionInitializer.inputs());
         this._lastEvaluator = null;
         return this;
-    }
-
-    @Override
-    public IBehaviorBuilder then(
-            final Class<?> actionType
-    ) throws BehaviorException {
-        return then(ActionIdentify.toActionId(actionType));
-    }
-
-    @Override
-    public IBehaviorBuilder then(
-            final Class<?> actionType,
-            final String label,
-            final Object... inputs
-    ) throws BehaviorException {
-        return then(ActionIdentify.toActionId(actionType), label, inputs);
     }
 
     @Override
@@ -209,21 +227,6 @@ public class Behavior
         this._navigator.newNextAction(aAction, this._lastEvaluator, label);
         this._lastEvaluator = null;
         return this;
-    }
-
-    @Override
-    public IBehaviorBuilder attributes(
-            final Map<Object, Object> attrs
-    ) throws BehaviorException {
-        ensureNotBuilt();
-        ArgumentChecker.required(attrs, "attrs");
-
-        return null;
-    }
-
-    @Override
-    public IBehaviorBuilder inputs(Object... inputs) throws BehaviorException {
-        return null;
     }
 
     @Override
@@ -284,6 +287,9 @@ public class Behavior
                     .errorCode(BehaviorErrors.EVALUATOR_NOT_USED)
                     .build();
         }
+        // All action must be validated
+        Looper.on(this._navigator._actions).foreach(ActionHolder::verify);
+
         // Check all leaf action's output type, they must be a same type
         var leafActions = Looper.on(this._navigator._actions)
                 .filter(actionHolder -> ! actionHolder.hasNext())
@@ -544,7 +550,7 @@ public class Behavior
             }
 
             // Auto wire to last action outputs if new action is not specified inputs
-            var actionInputs = inputs;
+            var actionInputs = inputs == null ? CollectionHelper.emptyArray() : inputs;
             if (actionInputs.length == 0 && action.inputMetas().length > 0 && this._current.outputMetas().length > 0) {
                 var inMetas = action.inputMetas();
                 var outMetas = this._current.outputMetas();

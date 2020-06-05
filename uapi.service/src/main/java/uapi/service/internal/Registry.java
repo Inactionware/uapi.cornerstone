@@ -626,8 +626,18 @@ public class Registry implements IRegistry, IService, ITagged, IInjectable {
             if (QualifiedServiceId.FROM_ANY.equals(svcLoader.getId()) || QualifiedServiceId.FROM_LOCAL.equals(svcLoader.getId())) {
                 throw new InvalidArgumentException("The id of service loader is reserved by system - {}", svcLoaderId);
             }
-            this._svcLoaders.put(svcLoader.getId(), svcLoader);
-            this._orderedSvcLoaders.add(svcLoader);
+            boolean duplicated = false;
+            if (this._svcLoaders.put(svcLoader.getId(), svcLoader) != null) {
+                duplicated = true;
+            }
+            if (! this._orderedSvcLoaders.add(svcLoader)) {
+                duplicated = true;
+            }
+            if (duplicated) {
+                if (this._logger != null) {
+                    this._logger.warn("The service loader is duplicated, the old one is overridden - {}", svcLoader);
+                }
+            }
             svcLoader.register(this._svcReadyListener);
             return;
         }

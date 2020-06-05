@@ -91,7 +91,7 @@ class ResponsibleTest extends Specification {
         action.inputMetas() >> ([new ActionInputMeta(String.class)] as ActionInputMeta[])
         action.outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         def repo = Mock(ActionRepository) {
-            get(actionId) >> action
+            get(actionId, null) >> action
             1 * put(_)
         }
         def eventBus = Mock(IEventBus) {
@@ -116,7 +116,7 @@ class ResponsibleTest extends Specification {
             outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         }
         def repo = Mock(ActionRepository) {
-            get(actionId) >> action
+            get(actionId, null) >> action
             0 * put(_)
         }
         def eventBus = Mock(IEventBus) {
@@ -152,7 +152,7 @@ class ResponsibleTest extends Specification {
             outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         }
         def repo = Mock(ActionRepository) {
-            get(actionId) >> action
+            get(actionId, null) >> action
             1 * put(_)
         }
         def eventBus = Mock(IEventBus) {
@@ -247,7 +247,7 @@ class ResponsibleTest extends Specification {
             outputMetas() >> ([new ActionOutputMeta(String.class)] as ActionOutputMeta[])
         }
         def repo = Mock(ActionRepository) {
-            get(actionId) >> action
+            get(actionId, null) >> action
             1 * put(_)
         }
         def eventBus = new MockEventBus()
