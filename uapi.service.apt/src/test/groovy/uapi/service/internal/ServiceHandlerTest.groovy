@@ -17,7 +17,7 @@ import uapi.codegen.IBuilderContext
 import uapi.codegen.IResourceFile
 import uapi.codegen.LogSupport
 import uapi.service.annotation.helper.IServiceHandlerHelper
-import uapi.service.annotation.helper.ServiceType
+import uapi.service.ServiceType
 import uapi.service.annotation.Attribute
 import uapi.service.annotation.Service
 

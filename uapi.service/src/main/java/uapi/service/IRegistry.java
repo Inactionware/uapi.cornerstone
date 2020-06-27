@@ -204,13 +204,14 @@ public interface IRegistry {
             case 1:
                 return svcs.get(0);
             case 0:
-                throw ServiceException.builder()
-                        .errorCode(ServiceErrors.NO_SERVICE_FOUND)
-                        .variables(new ServiceErrors.NoServiceFound()
-                                .serviceId(serviceId)
-                                .serviceFrom(serviceFrom)
-                                .serviceAttributes(attributes))
-                        .build();
+                return null;
+//                throw ServiceException.builder()
+//                        .errorCode(ServiceErrors.NO_SERVICE_FOUND)
+//                        .variables(new ServiceErrors.NoServiceFound()
+//                                .serviceId(serviceId)
+//                                .serviceFrom(serviceFrom)
+//                                .serviceAttributes(attributes))
+//                        .build();
             default:
                 throw ServiceException.builder()
                     .errorCode(ServiceErrors.MULTIPLE_SERVICE_FOUND)

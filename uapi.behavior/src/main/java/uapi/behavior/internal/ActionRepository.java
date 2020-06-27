@@ -17,9 +17,10 @@ import uapi.common.MapHelper;
 import uapi.common.Repository;
 import uapi.log.ILogger;
 import uapi.service.IRegistry;
+import uapi.service.QualifiedServiceId;
 import uapi.service.Tags;
 import uapi.service.annotation.*;
-import uapi.service.annotation.helper.ServiceType;
+import uapi.service.ServiceType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,7 +81,7 @@ public class ActionRepository extends Repository<ActionIdentify, IAction> {
             if (action != null) {
                 return action;
             }
-            return this._svcReg.findService(actionMeta.actionId().getId());
+            return this._svcReg.findService(actionMeta.actionId().getName(), QualifiedServiceId.FROM_LOCAL);
         }
     }
 }

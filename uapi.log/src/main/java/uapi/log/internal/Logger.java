@@ -14,7 +14,7 @@ import uapi.service.Tags;
 import uapi.common.StringHelper;
 import uapi.log.ILogger;
 import uapi.service.GenericAttributes;
-import uapi.service.annotation.helper.ServiceType;
+import uapi.service.ServiceType;
 import uapi.service.annotation.Attribute;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.Tag;

@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import uapi.GeneralException;
 import uapi.common.ArgumentChecker;
 import uapi.common.CollectionHelper;
+import uapi.common.StringHelper;
 import uapi.rx.Looper;
 import uapi.service.*;
 import uapi.state.IShifter;
@@ -296,6 +297,11 @@ public class ServiceHolder implements IServiceReference {
                 })
                 .map(entry -> new UnactivatedService(entry.getKey(), entry.getValue()))
                 .toList();
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.makeString("Hold for {}", this._qualifiedSvcId);
     }
 
     /////////////////////

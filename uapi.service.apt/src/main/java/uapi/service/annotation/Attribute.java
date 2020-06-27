@@ -34,5 +34,5 @@ public @interface Attribute {
      *
      * @return  Is the attribute optional
      */
-    boolean optional() default true;
+    boolean optional() default false;
 }

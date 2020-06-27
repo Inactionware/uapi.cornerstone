@@ -20,7 +20,7 @@ import uapi.service.annotation.helper.IInjectableHandlerHelper
 import uapi.service.IRegistry
 import uapi.service.annotation.Inject
 import uapi.service.annotation.Service
-import uapi.service.annotation.helper.ServiceType
+import uapi.service.ServiceType
 
 import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType

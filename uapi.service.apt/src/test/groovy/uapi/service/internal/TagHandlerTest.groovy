@@ -69,6 +69,7 @@ class TagHandlerTest extends Specification {
         elements.add(element)
         def classBuilder = Mock(ClassMeta.Builder) {
             getTransience(ServiceHandler.VAR_IS_PROTOTYPE, _) >> false
+            createTransienceIfAbsent(_, _) >> new HashMap()
         }
         def builderCtx = Mock(IBuilderContext) {
             1 * checkModifiers(_ as Element, Tag.class, Modifier.PRIVATE, Modifier.FINAL)

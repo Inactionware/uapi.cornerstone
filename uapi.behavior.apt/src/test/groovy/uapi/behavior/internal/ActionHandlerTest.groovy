@@ -18,12 +18,14 @@ import uapi.behavior.annotation.ActionDo
 import uapi.codegen.ClassMeta
 import uapi.codegen.FieldMeta
 import uapi.codegen.IBuilderContext
+import uapi.codegen.IHandlerHelper
 import uapi.codegen.MethodMeta
 import uapi.common.StringHelper
 import uapi.service.annotation.helper.IServiceHandlerHelper
 import uapi.service.annotation.Inject
 import uapi.service.annotation.Service
-import uapi.service.annotation.helper.ServiceType
+import uapi.service.ServiceType
+import uapi.service.annotation.helper.ITagHandlerHelper
 
 import javax.lang.model.element.*
 import javax.lang.model.type.DeclaredType
@@ -214,6 +216,10 @@ class ActionHandlerTest extends Specification {
                 2 * addServiceId(_, _)
             }
             1 * newClassBuilder(_, _) >> metaBuilder
+            1 * getHelper(ITagHandlerHelper.name) >> Mock(ITagHandlerHelper) {
+                1 * setTags(_, _, _)
+            }
+
         }
         1 * clsBuilder.addImplement(_ as String) >> clsBuilder
         5 * clsBuilder.addMethodBuilder(_ as MethodMeta.Builder) >> clsBuilder

@@ -21,7 +21,7 @@ import uapi.service.*;
 import uapi.service.annotation.Attribute;
 import uapi.service.annotation.Service;
 import uapi.service.annotation.helper.IServiceHandlerHelper;
-import uapi.service.annotation.helper.ServiceType;
+import uapi.service.ServiceType;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.DeclaredType;
@@ -121,16 +121,16 @@ public final class ServiceHandler extends AnnotationsHandler {
             var attrField = fieldElement.getSimpleName().toString();
             var attrFieldType = Type.toQType(fieldElement.asType().toString());
             var instClassBuilder = builderCtx.findClassBuilder(classElement);
-            if (! isAttrOptional) {
+//            if (! isAttrOptional) {
                 var modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
-                var requiredAttrs = (List<AttributeMode>) modelReqAttrs.get(VAR_ATTRS);
-                if (requiredAttrs == null) {
-                    requiredAttrs = new ArrayList<>();
-                    modelReqAttrs.put(VAR_ATTRS, requiredAttrs);
+                var attrs = (List<AttributeMode>) modelReqAttrs.get(VAR_ATTRS);
+                if (attrs == null) {
+                    attrs = new ArrayList<>();
+                    modelReqAttrs.put(VAR_ATTRS, attrs);
                 }
                 var attrInfo = new AttributeMode(attrName, attrField, attrFieldType, isAttrOptional);
-                requiredAttrs.add(attrInfo);
-            }
+                attrs.add(attrInfo);
+//            }
         });
     }
 
@@ -204,9 +204,9 @@ public final class ServiceHandler extends AnnotationsHandler {
         var tempAttrs = builderContext.loadTemplate(Module.name, TEMPLATE_ATTRS);
         var tempSet = builderContext.loadTemplate(Module.name, TEMPLATE_SET);
         var tempGet = builderContext.loadTemplate(Module.name, TEMPLATE_GET);
-        var modelReqAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
-        if (! modelReqAttrs.containsKey(VAR_ATTRS)) {
-            modelReqAttrs.put(VAR_ATTRS, new ArrayList<>());
+        var modelAttrs = instClassBuilder.createTransienceIfAbsent(MODEL_REQ_ATTRS, HashMap::new);
+        if (! modelAttrs.containsKey(VAR_ATTRS)) {
+            modelAttrs.put(VAR_ATTRS, new ArrayList<>());
         }
 
         // instance service
@@ -226,7 +226,7 @@ public final class ServiceHandler extends AnnotationsHandler {
                                 .setName("attributes")
                                 .setType("java.util.Map<Object, Object>"))
                         .addCodeBuilder(CodeMeta.builder()
-                                .setModel(modelReqAttrs)
+                                .setModel(modelAttrs)
                                 .setTemplate(tempInstCons)))
                 .addMethodBuilder(MethodMeta.builder()
                         .setName("set")
@@ -305,7 +305,7 @@ public final class ServiceHandler extends AnnotationsHandler {
                         .addModifier(Modifier.PRIVATE)
                         .addCodeBuilder(CodeMeta.builder()
                                 .setTemplate(tempReqAttrs)
-                                .setModel(modelReqAttrs)));
+                                .setModel(modelAttrs)));
 
         // Prototype service
         var tempGetIds = builderContext.loadTemplate(Module.name, TEMPLATE_GET_IDS);
@@ -340,7 +340,7 @@ public final class ServiceHandler extends AnnotationsHandler {
                         .setReturnTypeName(Type.toArrayType(Object.class))
                         .addCodeBuilder(CodeMeta.builder()
                                 .setTemplate(tempAttrs)
-                                .setModel(modelReqAttrs)))
+                                .setModel(modelAttrs)))
                 .addMethodBuilder(MethodMeta.builder()
                         .setName("newInstance")
                         .addAnnotationBuilder(AnnotationMeta.builder().setName(AnnotationMeta.OVERRIDE))

@@ -194,10 +194,12 @@ class RegistryTest extends Specification {
         def attrs = [] as Map
 
         when:
-        registry.findService(String.class, attrs)
+        def svc = registry.findService(String.class, attrs)
 
         then:
-        thrown(ServiceException)
+//        thrown(ServiceException)
+        noExceptionThrown()
+        svc == null
     }
 
 //    def 'Test find instance service by it is not prototype service'() {
@@ -285,7 +287,7 @@ class RegistryTest extends Specification {
         def svc = registry.findService(String.class)
 
         then:
-        thrown(ServiceException)
+        noExceptionThrown()
         svc == null
     }
 

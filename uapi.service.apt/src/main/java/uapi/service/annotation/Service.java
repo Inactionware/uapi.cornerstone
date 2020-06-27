@@ -9,7 +9,7 @@
 
 package uapi.service.annotation;
 
-import uapi.service.annotation.helper.ServiceType;
+import uapi.service.ServiceType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

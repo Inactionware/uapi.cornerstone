@@ -20,6 +20,10 @@ public class ActionInitializer {
     private Map<Object, Object> _attributes;
     private Object[] _inputs;
 
+    public static ActionInitializer instance(Class<?> actionType) {
+        return instance(ActionIdentify.toActionId(actionType));
+    }
+
     public static ActionInitializer instance(final ActionIdentify actionId) {
         return new ActionInitializer(actionId);
     }

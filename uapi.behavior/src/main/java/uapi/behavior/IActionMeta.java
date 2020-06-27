@@ -9,7 +9,7 @@
 
 package uapi.behavior;
 
-import uapi.service.annotation.helper.ServiceType;
+import uapi.service.ServiceType;
 
 /**
  * Hold meta data for Action

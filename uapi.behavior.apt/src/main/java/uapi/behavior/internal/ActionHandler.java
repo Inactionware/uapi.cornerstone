@@ -21,9 +21,11 @@ import uapi.codegen.*;
 import uapi.common.Numeric;
 import uapi.common.StringHelper;
 import uapi.rx.Looper;
+import uapi.service.annotation.Tag;
 import uapi.service.annotation.helper.IServiceHandlerHelper;
 import uapi.service.annotation.Service;
-import uapi.service.annotation.helper.ServiceType;
+import uapi.service.annotation.helper.ITagHandlerHelper;
+import uapi.service.ServiceType;
 
 import javax.lang.model.element.*;
 import java.lang.annotation.Annotation;
@@ -80,6 +82,9 @@ public class ActionHandler extends AnnotationsHandler {
             }
             var service = classElement.getAnnotation(Service.class);
             ServiceType svcType = service.type();
+
+            var tag = classElement.getAnnotation(Tag.class);
+            String[] tagNames = tag != null ? tag.value() : null;
 
             var actionMeta = this._helper.parseActionMethod(builderContext, classElement);
             var clsBuilder = builderContext.findClassBuilder(classElement);
@@ -161,7 +166,11 @@ public class ActionHandler extends AnnotationsHandler {
 
             IServiceHandlerHelper svcHelper = builderContext.getHelper(IServiceHandlerHelper.name);
             svcHelper.addServiceId(clsBuilder, actionName);
+            svcHelper.becomeService(builderContext, metaClassBuilder);
             svcHelper.addServiceId(metaClassBuilder, IActionMeta.class.getCanonicalName());
+
+            ITagHandlerHelper tagHelper = builderContext.getHelper(ITagHandlerHelper.name);
+            tagHelper.setTags(builderContext, metaClassBuilder, tagNames);
         });
     }
 
