@@ -147,50 +147,6 @@ public class Behavior
         return this;
     }
 
-//    @Override
-//    public IBehaviorBuilder then(
-//            final ActionIdentify id
-//    ) throws BehaviorException {
-//        return then(id, null);
-//    }
-//
-//    @Override
-//    public IBehaviorBuilder then(
-//            final ActionIdentify id,
-//            final String label,
-//            final Object... inputs
-//    ) throws BehaviorException {
-//        ensureNotBuilt();
-//        ArgumentChecker.required(id, "id");
-//        var action = this._actionRepo.get(id);
-//        if (action == null) {
-//            throw BehaviorException.builder()
-//                    .errorCode(BehaviorErrors.ACTION_NOT_FOUND)
-//                    .variables(new BehaviorErrors.ActionNotFound()
-//                            .actionId(id))
-//                    .build();
-//        }
-//        this._navigator.newNextAction(action, this._lastEvaluator, label, inputs);
-//        this._lastEvaluator = null;
-//        return this;
-//    }
-
-//    @Override
-//    public IBehaviorBuilder then(
-//            final Class<?> actionType
-//    ) throws BehaviorException {
-//        return then(ActionIdentify.toActionId(actionType));
-//    }
-//
-//    @Override
-//    public IBehaviorBuilder then(
-//            final Class<?> actionType,
-//            final String label,
-//            final Object... inputs
-//    ) throws BehaviorException {
-//        return then(ActionIdentify.toActionId(actionType), label, inputs);
-//    }
-
     @Override
     public IBehaviorBuilder then(
             final ActionInitializer actionInitializer

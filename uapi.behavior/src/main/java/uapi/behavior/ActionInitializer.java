@@ -10,6 +10,7 @@
 package uapi.behavior;
 
 import uapi.common.ArgumentChecker;
+import uapi.common.MapHelper;
 
 import java.util.Map;
 
@@ -60,6 +61,11 @@ public class ActionInitializer {
     public ActionInitializer attributes(final Map<Object, Object> attributes) {
         ArgumentChecker.required(attributes, "attributes");
         this._attributes = attributes;
+        return this;
+    }
+
+    public ActionInitializer attributes(final Object... attributes) {
+        this._attributes = MapHelper.newMap(attributes);
         return this;
     }
 

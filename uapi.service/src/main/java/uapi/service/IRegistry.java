@@ -205,13 +205,6 @@ public interface IRegistry {
                 return svcs.get(0);
             case 0:
                 return null;
-//                throw ServiceException.builder()
-//                        .errorCode(ServiceErrors.NO_SERVICE_FOUND)
-//                        .variables(new ServiceErrors.NoServiceFound()
-//                                .serviceId(serviceId)
-//                                .serviceFrom(serviceFrom)
-//                                .serviceAttributes(attributes))
-//                        .build();
             default:
                 throw ServiceException.builder()
                     .errorCode(ServiceErrors.MULTIPLE_SERVICE_FOUND)

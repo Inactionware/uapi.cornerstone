@@ -75,7 +75,7 @@ public class ActionRepository extends Repository<ActionIdentify, IAction> {
             } else {
                 attrs = attributes;
             }
-            return this._svcReg.findService(actionMeta.actionId().getId(), attrs);
+            return this._svcReg.findService(actionMeta.actionId().getName(), attrs);
         } else {
             IAction action = super.get(id);
             if (action != null) {
