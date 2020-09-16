@@ -106,6 +106,7 @@ public class Behavior
     ) {
         ensureBuilt();
         Execution execution = newExecution();
+        // TODO: Can't share the parent execution context here, since it will override parent behavior input
         execution.execute(inputs, outputs, (ExecutionContext) context);
     }
 

@@ -78,10 +78,22 @@ public class ActionRepository extends Repository<ActionIdentify, IAction> {
             return this._svcReg.findService(actionMeta.actionId().getName(), attrs);
         } else {
             IAction action = super.get(id);
-            if (action != null) {
-                return action;
+            if (action == null) {
+                action = this._svcReg.findService(actionMeta.actionId().getName(), QualifiedServiceId.FROM_LOCAL);
             }
-            return this._svcReg.findService(actionMeta.actionId().getName(), QualifiedServiceId.FROM_LOCAL);
+            if (action != null) {
+                // Cache action
+                super.put(action);
+            }
+            return action;
         }
+    }
+
+    public int actionCount() {
+        return this._actionMetas.size();
+    }
+
+    public int cachedActionCount() {
+        return super.count();
     }
 }
